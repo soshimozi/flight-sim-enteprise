@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d358ce08-7161-44b8-ba10-1d3822171d3c" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/fseconomy/util/Converters.java" afterPath="$PROJECT_DIR$/src/main/java/net/fseconomy/util/Converters.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/fseconomy/fixes/FixedCachedRowSetImpl.java" afterPath="$PROJECT_DIR$/src/main/java/net/fseconomy/fixes/FixedCachedRowSetImpl.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java" afterPath="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/edituser.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/edituser.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="FSEconomy.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -26,37 +27,132 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Converters.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/util/Converters.java">
+      <file leaf-file-name="edituser.jsp" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/webapp/edituser.jsp">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="2002" max-vertical-offset="3213">
-              <caret line="221" column="0" selection-start-line="221" selection-start-column="0" selection-end-line="221" selection-end-column="0" />
+            <state vertical-scroll-proportion="-14.384615" vertical-offset="0" max-vertical-offset="1496">
+              <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="signup.jsp" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/webapp/signup.jsp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-11.115385" vertical-offset="0" max-vertical-offset="1122">
+              <caret line="17" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="UserCtl.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.28714523" vertical-offset="17644" max-vertical-offset="29886">
+              <caret line="1055" column="0" selection-start-line="1055" selection-start-column="0" selection-end-line="1055" selection-end-column="0" />
               <folding>
-                <element signature="e#2859#2860#0" expanded="true" />
-                <element signature="e#2904#2905#0" expanded="true" />
-                <element signature="e#2943#2944#0" expanded="true" />
-                <element signature="e#2989#2990#0" expanded="true" />
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Formatters.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/util/Formatters.java">
+      <file leaf-file-name="UserBean.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/UserBean.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="272" max-vertical-offset="2108">
-              <caret line="31" column="31" selection-start-line="31" selection-start-column="31" selection-end-line="31" selection-end-column="31" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="6368" max-vertical-offset="7718">
+              <caret line="505" column="22" selection-start-line="505" selection-start-column="22" selection-end-line="505" selection-end-column="22" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FixedCachedRowSetImpl.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/fixes/FixedCachedRowSetImpl.java">
+      <file leaf-file-name="Data.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/Data.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.48247078" vertical-offset="0" max-vertical-offset="3706">
-              <caret line="33" column="57" selection-start-line="33" selection-start-column="57" selection-end-line="33" selection-end-column="57" />
-              <folding />
+            <state vertical-scroll-proportion="0.0" vertical-offset="10300" max-vertical-offset="153238">
+              <caret line="653" column="0" selection-start-line="653" selection-start-column="0" selection-end-line="653" selection-end-column="0" />
+              <folding>
+                <marker date="1413069278489" expanded="true" signature="16790:16866" placeholder="SELECT * FRO..accounts..." />
+                <marker date="1413069278489" expanded="true" signature="17488:17584" placeholder="SELECT * FRO..accounts..." />
+                <marker date="1413069278489" expanded="true" signature="62152:62246" placeholder="select f.id,..fbo..." />
+                <marker date="1413069278489" expanded="true" signature="62513:62617" placeholder="SELECT type,..goods..." />
+                <marker date="1413069278489" expanded="true" signature="63168:63292" placeholder="UPDATE fbo S..." />
+                <marker date="1413069278489" expanded="true" signature="63343:63436" placeholder="UPDATE fbofa..." />
+                <marker date="1413069278489" expanded="true" signature="63705:63814" placeholder="UPDATE fbo s..." />
+                <marker date="1413069278489" expanded="true" signature="63982:64025" placeholder="select id fr..fbofacilities..." />
+                <marker date="1413069278489" expanded="true" signature="64087:64150" placeholder="delete from ..." />
+                <marker date="1413069278489" expanded="true" signature="64315:64408" placeholder="update fbofa..." />
+                <marker date="1413069278489" expanded="true" signature="64515:64582" placeholder="update fbofa..." />
+                <marker date="1413069278489" expanded="true" signature="64678:64705" placeholder="delete from ..." />
+                <marker date="1413069278489" expanded="true" signature="64747:64800" placeholder="update log s..." />
+                <marker date="1413069278489" expanded="true" signature="64842:64900" placeholder="update payme..." />
+                <marker date="1413069278489" expanded="true" signature="78015:78090" placeholder="SELECT * FRO..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="135494:135598" placeholder="SELECT group..assignments..." />
+                <marker date="1413069278489" expanded="true" signature="136205:136404" placeholder="UPDATE assig..." />
+                <marker date="1413069278489" expanded="true" signature="137203:137312" placeholder="SELECT * FRO..assignments..." />
+                <marker date="1413069278489" expanded="true" signature="140430:140539" placeholder="SELECT * FRO..assignments..." />
+                <marker date="1413069278489" expanded="true" signature="143035:143142" placeholder="DELETE from ..." />
+                <marker date="1413069278489" expanded="true" signature="143382:143478" placeholder="UPDATE assig..." />
+                <marker date="1413069278489" expanded="true" signature="143733:143854" placeholder="SELECT count..assignments..." />
+                <marker date="1413069278489" expanded="true" signature="144328:144366" placeholder="SELECT * FRO..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="146426:146453" placeholder="SELECT * fro..log..." />
+                <marker date="1413069278489" expanded="true" signature="148474:148577" placeholder="SELECT * fro..flightops..." />
+                <marker date="1413069278489" expanded="true" signature="149125:149226" placeholder="SELECT * fro..flightops..." />
+                <marker date="1413069278489" expanded="true" signature="158151:158367" placeholder="SELECT price..landingfees..." />
+                <marker date="1413069278489" expanded="true" signature="158503:158554" placeholder="SELECT size ..." />
+                <marker date="1413069278489" expanded="true" signature="159577:159669" placeholder="SELECT * FRO..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="162920:162989" placeholder="SELECT * FRO..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="163641:163668" placeholder="SELECT * fro..log..." />
+                <marker date="1413069278489" expanded="true" signature="167195:167257" placeholder="SELECT * fro..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="170072:170152" placeholder="SELECT * fro..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="171156:171202" placeholder="UPDATE log S..." />
+                <marker date="1413069278489" expanded="true" signature="171412:171463" placeholder="UPDATE payme..." />
+                <marker date="1413069278489" expanded="true" signature="171691:171740" placeholder="UPDATE damag..." />
+                <marker date="1413069278489" expanded="true" signature="173038:173093" placeholder="SELECT * FRO..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="173624:173779" placeholder="SELECT * FRO..log..." />
+                <marker date="1413069278489" expanded="true" signature="174222:174327" placeholder="DELETE from ..." />
+                <marker date="1413069278489" expanded="true" signature="174868:174900" placeholder="SELECT * fro..models..." />
+                <marker date="1413069278489" expanded="true" signature="175661:175696" placeholder="SELECT * fro..templates..." />
+                <marker date="1413069278489" expanded="true" signature="179000:179037" placeholder="SELECT * fro..assignments..." />
+                <marker date="1413069278489" expanded="true" signature="183630:183706" placeholder="SELECT money..accounts..." />
+                <marker date="1413069278489" expanded="true" signature="184039:184152" placeholder="UPDATE assig..." />
+                <marker date="1413069278489" expanded="true" signature="184260:184365" placeholder="UPDATE assig..." />
+                <marker date="1413069278489" expanded="true" signature="184481:184591" placeholder="DELETE FROM ..." />
+                <marker date="1413069278489" expanded="true" signature="184692:184758" placeholder="UPDATE assig..." />
+                <marker date="1413069278489" expanded="true" signature="184863:184928" placeholder="UPDATE aircr..." />
+                <marker date="1413069278489" expanded="true" signature="185096:185159" placeholder="UPDATE aircr..." />
+                <marker date="1413069278489" expanded="true" signature="185243:185301" placeholder="UPDATE fbo S..." />
+                <marker date="1413069278489" expanded="true" signature="185383:185457" placeholder="update fbofa..." />
+                <marker date="1413069278489" expanded="true" signature="185981:186013" placeholder="DELETE FROM ..." />
+                <marker date="1413069278489" expanded="true" signature="186269:186313" placeholder="DELETE FROM ..." />
+                <marker date="1413069278489" expanded="true" signature="186383:186481" placeholder="UPDATE accou..." />
+                <marker date="1413069278489" expanded="true" signature="191280:191354" placeholder="SELECT * FRO..damage..." />
+                <marker date="1413069278489" expanded="true" signature="191506:191531" placeholder="SELECT * FRO..maintenance..." />
+                <marker date="1413069278489" expanded="true" signature="191660:191687" placeholder="SELECT * FRO..log..." />
+                <marker date="1413069278489" expanded="true" signature="192153:192233" placeholder="SELECT * FRO..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="193434:193648" placeholder="UPDATE log S..." />
+                <marker date="1413069278489" expanded="true" signature="194247:194345" placeholder="UPDATE damag..." />
+                <marker date="1413069278489" expanded="true" signature="195452:195479" placeholder="SELECT * FRO..log..." />
+                <marker date="1413069278489" expanded="true" signature="196044:196194" placeholder="UPDATE log S..." />
+                <marker date="1413069278489" expanded="true" signature="221328:221377" placeholder="SELECT amoun..goods..." />
+                <marker date="1413069278489" expanded="true" signature="221871:221909" placeholder="SELECT saleF..goods..." />
+                <marker date="1413069278489" expanded="true" signature="222636:222667" placeholder="SELECT amoun..goods..." />
+                <marker date="1413069278489" expanded="true" signature="223314:223358" placeholder="SELECT buyPr..goods..." />
+                <marker date="1413069278489" expanded="true" signature="223672:223708" placeholder="SELECT money..accounts..." />
+                <marker date="1413069278489" expanded="true" signature="235005:235034" placeholder="SELECT * FRO..fbo..." />
+                <marker date="1413069278489" expanded="true" signature="237519:237548" placeholder="SELECT * FRO..fbo..." />
+                <marker date="1413069278489" expanded="true" signature="240166:240208" placeholder="SELECT * FRO..fbofacilities..." />
+                <marker date="1413069278489" expanded="true" signature="241133:241242" placeholder="SELECT * FRO..goods..." />
+                <marker date="1413069278489" expanded="true" signature="256458:256538" placeholder="SELECT * fro..aircraft..." />
+                <marker date="1413069278489" expanded="true" signature="258379:258425" placeholder="UPDATE log S..." />
+                <marker date="1413069278489" expanded="true" signature="258635:258686" placeholder="UPDATE payme..." />
+                <marker date="1413069278489" expanded="true" signature="258914:258963" placeholder="UPDATE damag..." />
+                <marker date="1413069278489" expanded="true" signature="265212:265254" placeholder="select * fro..serviceproviders..." />
+                <marker date="1413069278489" expanded="true" signature="265806:265846" placeholder="SELECT * FRO..serviceproviders..." />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -86,9 +182,25 @@
             <ExternalSystemSettings>
               <option name="externalProjectPath" value="$PROJECT_DIR$" />
               <option name="externalSystemIdString" value="GRADLE" />
+              <option name="scriptParameters" value="" />
               <option name="taskNames">
                 <list>
-                  <option value="build" />
+                  <option value="war" />
+                </list>
+              </option>
+              <option name="vmOptions" value="" />
+            </ExternalSystemSettings>
+          </option>
+        </ExternalTaskExecutionInfo>
+        <ExternalTaskExecutionInfo>
+          <option name="executorId" value="Run" />
+          <option name="settings">
+            <ExternalSystemSettings>
+              <option name="externalProjectPath" value="$PROJECT_DIR$" />
+              <option name="externalSystemIdString" value="GRADLE" />
+              <option name="taskNames">
+                <list>
+                  <option value="check" />
                 </list>
               </option>
             </ExternalSystemSettings>
@@ -100,13 +212,11 @@
             <ExternalSystemSettings>
               <option name="externalProjectPath" value="$PROJECT_DIR$" />
               <option name="externalSystemIdString" value="GRADLE" />
-              <option name="scriptParameters" value="" />
               <option name="taskNames">
                 <list>
-                  <option value="war" />
+                  <option value="build" />
                 </list>
               </option>
-              <option name="vmOptions" value="" />
             </ExternalSystemSettings>
           </option>
         </ExternalTaskExecutionInfo>
@@ -147,20 +257,6 @@
               <option name="taskNames">
                 <list>
                   <option value="classes" />
-                </list>
-              </option>
-            </ExternalSystemSettings>
-          </option>
-        </ExternalTaskExecutionInfo>
-        <ExternalTaskExecutionInfo>
-          <option name="executorId" value="Run" />
-          <option name="settings">
-            <ExternalSystemSettings>
-              <option name="externalProjectPath" value="$PROJECT_DIR$" />
-              <option name="externalSystemIdString" value="GRADLE" />
-              <option name="taskNames">
-                <list>
-                  <option value="check" />
                 </list>
               </option>
             </ExternalSystemSettings>
@@ -436,7 +532,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/main/webapp/adminuser48hourtrend.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/aircraftmodels.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/airport.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/creategroup.jsp" />
@@ -476,7 +571,6 @@
         <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/src/main/webapp/invalidlogin.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/requestnewpassword.jsp" />
-        <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Autologon.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/SigServer.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/jsonServlet.java" />
@@ -487,12 +581,14 @@
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/util/Converters.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/fixes/FixedCachedRowSetImpl.java" />
+        <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java" />
+        <option value="$PROJECT_DIR$/src/main/webapp/edituser.jsp" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="121" />
-    <option name="y" value="4" />
+    <option name="x" value="148" />
+    <option name="y" value="8" />
     <option name="width" value="1616" />
     <option name="height" value="1058" />
   </component>
@@ -650,7 +746,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="data" />
+              <option name="myItemId" value="servlets" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -703,7 +799,7 @@
       <recent name="C:\FSEconomy\MyProjects\FSEconomy\src\main\webapp\scripts" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.FSEconomy [build]">
+  <component name="RunManager" selected="Gradle.FSEconomy [war]">
     <configuration default="false" name="FSEconomy [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -761,25 +857,6 @@
       <ConfigurationWrapper RunnerId="ExternalSystemTaskRunner" />
       <method />
     </configuration>
-    <configuration default="false" name="FSEconomy [classes]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="classes" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <RunnerSettings RunnerId="ExternalSystemTaskRunner" />
-      <ConfigurationWrapper RunnerId="ExternalSystemTaskRunner" />
-      <method />
-    </configuration>
     <configuration default="false" name="FSEconomy [buildDependents]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -791,6 +868,25 @@
         <option name="taskNames">
           <list>
             <option value="buildDependents" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <RunnerSettings RunnerId="ExternalSystemTaskRunner" />
+      <ConfigurationWrapper RunnerId="ExternalSystemTaskRunner" />
+      <method />
+    </configuration>
+    <configuration default="false" name="FSEconomy [check]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="check" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -1118,16 +1214,16 @@
       <item index="1" class="java.lang.String" itemvalue="Gradle.FSEconomy [build]" />
       <item index="2" class="java.lang.String" itemvalue="Gradle.FSEconomy [clean]" />
       <item index="3" class="java.lang.String" itemvalue="Gradle.FSEconomy [war]" />
-      <item index="4" class="java.lang.String" itemvalue="Gradle.FSEconomy [classes]" />
-      <item index="5" class="java.lang.String" itemvalue="Gradle.FSEconomy [buildDependents]" />
+      <item index="4" class="java.lang.String" itemvalue="Gradle.FSEconomy [buildDependents]" />
+      <item index="5" class="java.lang.String" itemvalue="Gradle.FSEconomy [check]" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Gradle.FSEconomy [build]" />
-        <item index="1" class="java.lang.String" itemvalue="Gradle.FSEconomy [war]" />
-        <item index="2" class="java.lang.String" itemvalue="Gradle.FSEconomy [clean]" />
-        <item index="3" class="java.lang.String" itemvalue="Gradle.FSEconomy [buildDependents]" />
-        <item index="4" class="java.lang.String" itemvalue="Gradle.FSEconomy [classes]" />
+        <item index="0" class="java.lang.String" itemvalue="Gradle.FSEconomy [war]" />
+        <item index="1" class="java.lang.String" itemvalue="Gradle.FSEconomy [check]" />
+        <item index="2" class="java.lang.String" itemvalue="Gradle.FSEconomy [build]" />
+        <item index="3" class="java.lang.String" itemvalue="Gradle.FSEconomy [clean]" />
+        <item index="4" class="java.lang.String" itemvalue="Gradle.FSEconomy [buildDependents]" />
       </list>
     </recent_temporary>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
@@ -1173,15 +1269,15 @@
       <workItem from="1413284995100" duration="711000" />
       <workItem from="1413298186044" duration="58000" />
       <workItem from="1413298256386" duration="960000" />
-      <workItem from="1413300241657" duration="6970000" />
+      <workItem from="1413300241657" duration="15182000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="131568000" />
+    <option name="totallyTimeSpent" value="139780000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="121" y="4" width="1616" height="1058" extended-state="0" />
+    <frame x="148" y="8" width="1616" height="1058" extended-state="0" />
     <editor active="false" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1189,7 +1285,7 @@
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32831" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3279396" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Java Enterprise" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -1201,14 +1297,14 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32901832" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21116817" sideWeight="0.50089765" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23170732" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23170732" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24967907" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32723358" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21116817" sideWeight="0.49910232" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31175837" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31175837" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1264,7 +1360,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="20" />
+      <option name="time" value="23" />
     </breakpoint-manager>
   </component>
   <component name="antWorkspaceConfiguration">
@@ -1272,34 +1368,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/gmapapikey.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.384615" vertical-offset="10" max-vertical-offset="595">
-          <caret line="18" column="18" selection-start-line="18" selection-start-column="18" selection-end-line="18" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/gmapdistance.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.4615383" vertical-offset="316" max-vertical-offset="2652">
-          <caret line="30" column="22" selection-start-line="30" selection-start-column="22" selection-end-line="30" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/gmapfbo.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-5.230769" vertical-offset="833" max-vertical-offset="3247">
-          <caret line="57" column="22" selection-start-line="57" selection-start-column="22" selection-end-line="57" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/gmapmarket.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.1923075" vertical-offset="952" max-vertical-offset="3638">
-          <caret line="67" column="22" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/webapp/gmapmarketfbo.jsp">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-7.1923075" vertical-offset="136" max-vertical-offset="2431">
@@ -1533,14 +1601,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/signup.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-17.0" vertical-offset="459" max-vertical-offset="1122">
-          <caret line="53" column="77" selection-start-line="53" selection-start-column="62" selection-end-line="53" selection-end-column="77" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/webapp/requestnewpassword.jsp">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.68356645" vertical-offset="357" max-vertical-offset="1003">
@@ -1594,7 +1654,7 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="7468" max-vertical-offset="9809">
           <caret line="470" column="18" selection-start-line="470" selection-start-column="18" selection-end-line="470" selection-end-column="18" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="imports" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1614,55 +1674,169 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="1025" max-vertical-offset="58871">
           <caret line="70" column="37" selection-start-line="70" selection-start-column="37" selection-end-line="70" selection-end-column="37" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#4905#4906#0" expanded="true" />
-            <element signature="e#4929#4930#0" expanded="true" />
-            <element signature="e#74376#74377#0" expanded="true" />
-            <element signature="e#74436#74437#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#4905#4906#0" expanded="false" />
+            <element signature="e#4929#4930#0" expanded="false" />
+            <element signature="e#74376#74377#0" expanded="false" />
+            <element signature="e#74436#74437#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/fixes/FixedCachedRowSetImpl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.64440733" vertical-offset="600" max-vertical-offset="29597">
-          <caret line="58" column="45" selection-start-line="58" selection-start-column="45" selection-end-line="58" selection-end-column="45" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#3806#3807#0" expanded="true" />
-            <element signature="e#3830#3831#0" expanded="true" />
-            <element signature="e#28008#28009#0" expanded="true" />
-            <element signature="e#28044#28045#0" expanded="true" />
-          </folding>
+        <state vertical-scroll-proportion="0.312187" vertical-offset="0" max-vertical-offset="3706">
+          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/util/Converters.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="2002" max-vertical-offset="3213">
+        <state vertical-scroll-proportion="1.7378964" vertical-offset="2002" max-vertical-offset="3213">
           <caret line="221" column="0" selection-start-line="221" selection-start-column="0" selection-end-line="221" selection-end-column="0" />
           <folding>
-            <element signature="e#2859#2860#0" expanded="true" />
-            <element signature="e#2904#2905#0" expanded="true" />
-            <element signature="e#2943#2944#0" expanded="true" />
-            <element signature="e#2989#2990#0" expanded="true" />
+            <element signature="e#2859#2860#0" expanded="false" />
+            <element signature="e#2904#2905#0" expanded="false" />
+            <element signature="e#2943#2944#0" expanded="false" />
+            <element signature="e#2989#2990#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/util/Formatters.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="272" max-vertical-offset="2108">
-          <caret line="31" column="31" selection-start-line="31" selection-start-column="31" selection-end-line="31" selection-end-column="31" />
+        <state vertical-scroll-proportion="0.7319933" vertical-offset="753" max-vertical-offset="2108">
+          <caret line="73" column="19" selection-start-line="73" selection-start-column="19" selection-end-line="73" selection-end-column="19" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/fixes/FixedCachedRowSetImpl.java">
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/fbo.jsp">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.48247078" vertical-offset="0" max-vertical-offset="3706">
-          <caret line="33" column="57" selection-start-line="33" selection-start-column="57" selection-end-line="33" selection-end-column="57" />
+        <state vertical-scroll-proportion="0.39605734" vertical-offset="0" max-vertical-offset="7191">
+          <caret line="13" column="47" selection-start-line="13" selection-start-column="22" selection-end-line="13" selection-end-column="47" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/Data.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="10300" max-vertical-offset="153238">
+          <caret line="653" column="0" selection-start-line="653" selection-start-column="0" selection-end-line="653" selection-end-column="0" />
+          <folding>
+            <marker date="1413069278489" expanded="true" signature="16790:16866" placeholder="SELECT * FRO..accounts..." />
+            <marker date="1413069278489" expanded="true" signature="17488:17584" placeholder="SELECT * FRO..accounts..." />
+            <marker date="1413069278489" expanded="true" signature="62152:62246" placeholder="select f.id,..fbo..." />
+            <marker date="1413069278489" expanded="true" signature="62513:62617" placeholder="SELECT type,..goods..." />
+            <marker date="1413069278489" expanded="true" signature="63168:63292" placeholder="UPDATE fbo S..." />
+            <marker date="1413069278489" expanded="true" signature="63343:63436" placeholder="UPDATE fbofa..." />
+            <marker date="1413069278489" expanded="true" signature="63705:63814" placeholder="UPDATE fbo s..." />
+            <marker date="1413069278489" expanded="true" signature="63982:64025" placeholder="select id fr..fbofacilities..." />
+            <marker date="1413069278489" expanded="true" signature="64087:64150" placeholder="delete from ..." />
+            <marker date="1413069278489" expanded="true" signature="64315:64408" placeholder="update fbofa..." />
+            <marker date="1413069278489" expanded="true" signature="64515:64582" placeholder="update fbofa..." />
+            <marker date="1413069278489" expanded="true" signature="64678:64705" placeholder="delete from ..." />
+            <marker date="1413069278489" expanded="true" signature="64747:64800" placeholder="update log s..." />
+            <marker date="1413069278489" expanded="true" signature="64842:64900" placeholder="update payme..." />
+            <marker date="1413069278489" expanded="true" signature="78015:78090" placeholder="SELECT * FRO..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="135494:135598" placeholder="SELECT group..assignments..." />
+            <marker date="1413069278489" expanded="true" signature="136205:136404" placeholder="UPDATE assig..." />
+            <marker date="1413069278489" expanded="true" signature="137203:137312" placeholder="SELECT * FRO..assignments..." />
+            <marker date="1413069278489" expanded="true" signature="140430:140539" placeholder="SELECT * FRO..assignments..." />
+            <marker date="1413069278489" expanded="true" signature="143035:143142" placeholder="DELETE from ..." />
+            <marker date="1413069278489" expanded="true" signature="143382:143478" placeholder="UPDATE assig..." />
+            <marker date="1413069278489" expanded="true" signature="143733:143854" placeholder="SELECT count..assignments..." />
+            <marker date="1413069278489" expanded="true" signature="144328:144366" placeholder="SELECT * FRO..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="146426:146453" placeholder="SELECT * fro..log..." />
+            <marker date="1413069278489" expanded="true" signature="148474:148577" placeholder="SELECT * fro..flightops..." />
+            <marker date="1413069278489" expanded="true" signature="149125:149226" placeholder="SELECT * fro..flightops..." />
+            <marker date="1413069278489" expanded="true" signature="158151:158367" placeholder="SELECT price..landingfees..." />
+            <marker date="1413069278489" expanded="true" signature="158503:158554" placeholder="SELECT size ..." />
+            <marker date="1413069278489" expanded="true" signature="159577:159669" placeholder="SELECT * FRO..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="162920:162989" placeholder="SELECT * FRO..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="163641:163668" placeholder="SELECT * fro..log..." />
+            <marker date="1413069278489" expanded="true" signature="167195:167257" placeholder="SELECT * fro..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="170072:170152" placeholder="SELECT * fro..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="171156:171202" placeholder="UPDATE log S..." />
+            <marker date="1413069278489" expanded="true" signature="171412:171463" placeholder="UPDATE payme..." />
+            <marker date="1413069278489" expanded="true" signature="171691:171740" placeholder="UPDATE damag..." />
+            <marker date="1413069278489" expanded="true" signature="173038:173093" placeholder="SELECT * FRO..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="173624:173779" placeholder="SELECT * FRO..log..." />
+            <marker date="1413069278489" expanded="true" signature="174222:174327" placeholder="DELETE from ..." />
+            <marker date="1413069278489" expanded="true" signature="174868:174900" placeholder="SELECT * fro..models..." />
+            <marker date="1413069278489" expanded="true" signature="175661:175696" placeholder="SELECT * fro..templates..." />
+            <marker date="1413069278489" expanded="true" signature="179000:179037" placeholder="SELECT * fro..assignments..." />
+            <marker date="1413069278489" expanded="true" signature="183630:183706" placeholder="SELECT money..accounts..." />
+            <marker date="1413069278489" expanded="true" signature="184039:184152" placeholder="UPDATE assig..." />
+            <marker date="1413069278489" expanded="true" signature="184260:184365" placeholder="UPDATE assig..." />
+            <marker date="1413069278489" expanded="true" signature="184481:184591" placeholder="DELETE FROM ..." />
+            <marker date="1413069278489" expanded="true" signature="184692:184758" placeholder="UPDATE assig..." />
+            <marker date="1413069278489" expanded="true" signature="184863:184928" placeholder="UPDATE aircr..." />
+            <marker date="1413069278489" expanded="true" signature="185096:185159" placeholder="UPDATE aircr..." />
+            <marker date="1413069278489" expanded="true" signature="185243:185301" placeholder="UPDATE fbo S..." />
+            <marker date="1413069278489" expanded="true" signature="185383:185457" placeholder="update fbofa..." />
+            <marker date="1413069278489" expanded="true" signature="185981:186013" placeholder="DELETE FROM ..." />
+            <marker date="1413069278489" expanded="true" signature="186269:186313" placeholder="DELETE FROM ..." />
+            <marker date="1413069278489" expanded="true" signature="186383:186481" placeholder="UPDATE accou..." />
+            <marker date="1413069278489" expanded="true" signature="191280:191354" placeholder="SELECT * FRO..damage..." />
+            <marker date="1413069278489" expanded="true" signature="191506:191531" placeholder="SELECT * FRO..maintenance..." />
+            <marker date="1413069278489" expanded="true" signature="191660:191687" placeholder="SELECT * FRO..log..." />
+            <marker date="1413069278489" expanded="true" signature="192153:192233" placeholder="SELECT * FRO..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="193434:193648" placeholder="UPDATE log S..." />
+            <marker date="1413069278489" expanded="true" signature="194247:194345" placeholder="UPDATE damag..." />
+            <marker date="1413069278489" expanded="true" signature="195452:195479" placeholder="SELECT * FRO..log..." />
+            <marker date="1413069278489" expanded="true" signature="196044:196194" placeholder="UPDATE log S..." />
+            <marker date="1413069278489" expanded="true" signature="221328:221377" placeholder="SELECT amoun..goods..." />
+            <marker date="1413069278489" expanded="true" signature="221871:221909" placeholder="SELECT saleF..goods..." />
+            <marker date="1413069278489" expanded="true" signature="222636:222667" placeholder="SELECT amoun..goods..." />
+            <marker date="1413069278489" expanded="true" signature="223314:223358" placeholder="SELECT buyPr..goods..." />
+            <marker date="1413069278489" expanded="true" signature="223672:223708" placeholder="SELECT money..accounts..." />
+            <marker date="1413069278489" expanded="true" signature="235005:235034" placeholder="SELECT * FRO..fbo..." />
+            <marker date="1413069278489" expanded="true" signature="237519:237548" placeholder="SELECT * FRO..fbo..." />
+            <marker date="1413069278489" expanded="true" signature="240166:240208" placeholder="SELECT * FRO..fbofacilities..." />
+            <marker date="1413069278489" expanded="true" signature="241133:241242" placeholder="SELECT * FRO..goods..." />
+            <marker date="1413069278489" expanded="true" signature="256458:256538" placeholder="SELECT * fro..aircraft..." />
+            <marker date="1413069278489" expanded="true" signature="258379:258425" placeholder="UPDATE log S..." />
+            <marker date="1413069278489" expanded="true" signature="258635:258686" placeholder="UPDATE payme..." />
+            <marker date="1413069278489" expanded="true" signature="258914:258963" placeholder="UPDATE damag..." />
+            <marker date="1413069278489" expanded="true" signature="265212:265254" placeholder="select * fro..serviceproviders..." />
+            <marker date="1413069278489" expanded="true" signature="265806:265846" placeholder="SELECT * FRO..serviceproviders..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/signup.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-11.115385" vertical-offset="0" max-vertical-offset="1122">
+          <caret line="17" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/UserBean.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="6368" max-vertical-offset="7718">
+          <caret line="505" column="22" selection-start-line="505" selection-start-column="22" selection-end-line="505" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/edituser.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-14.384615" vertical-offset="0" max-vertical-offset="1496">
+          <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.28714523" vertical-offset="17644" max-vertical-offset="29886">
+          <caret line="1055" column="0" selection-start-line="1055" selection-start-column="0" selection-end-line="1055" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

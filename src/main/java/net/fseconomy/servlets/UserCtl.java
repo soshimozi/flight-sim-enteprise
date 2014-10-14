@@ -166,7 +166,7 @@ public class UserCtl extends HttpServlet
                         req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
                     case "updateAcct":
-                        updateUser(req);
+                        updateAcct(req);
                         req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
                     case "password":
@@ -1044,8 +1044,32 @@ public class UserCtl extends HttpServlet
 		
 		req.setAttribute("message", "An account has been created.<br /><br /><strong>User:</strong> " + user + "<br /><strong>Email:</strong> " + email);	
 	}
-	
-	void updateUser(HttpServletRequest req) throws DataError
+
+    void updateAcct(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        String email = req.getParameter("email");
+        String showPaymentsToSelf = req.getParameter("showPaymentsToSelf");
+        String selectedTimeZone = req.getParameter("selectedTimeZone");
+        String banList = req.getParameter("banList");
+
+        if (user == null || email == null)
+        {
+            req.setAttribute("message", "Invalid user, or missing email");
+            return;
+        }
+
+        user.setEmail(email);
+        user.setDateFormat(selectedTimeZone.contains("1") ? 1 : 0);
+        user.setShowPaymentsToSelf(showPaymentsToSelf.contains("1") ? true : false);
+        user.setBanList(banList);
+
+        data.updateUser(user);
+
+        req.setAttribute("message", "Account (" + user.getName() + ") updated successfully");
+    }
+
+    void updateUser(HttpServletRequest req) throws DataError
 	{
 		String user = req.getParameter("user");
 		String newuser = req.getParameter("newuser");

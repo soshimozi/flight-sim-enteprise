@@ -6,24 +6,11 @@
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
 
 <%
-    String error = null;
-    if (request.getParameter("submit") != null)
-    {
-        try
-        {
-            //user.setExposedScore("true".equals(request.getParameter("exposedScore")));
+    String returnToPage = request.getRequestURI();
 
-            user.setEmail(request.getParameter("email"));
-            user.setDateFormat(Integer.parseInt(request.getParameter("dateformat")));
-            user.setShowPaymentsToSelf(Integer.parseInt(request.getParameter("paymentstoself")) == 1);
-            user.setBanList(request.getParameter("banList"));
-            data.updateUser(user);
-            error = "Changes saved.";
-        } catch (DataError e)
-        {
-            error = e.getMessage();
-        }
-    }
+    int offset = user.getTimeZone().getRawOffset();
+    String gmtOffset = String.format("%s%02d:%02d", offset >= 0 ? "+" : "", offset / 3600000, (offset / 60000) % 60);
+
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,57 +30,51 @@
 <div id="wrapper">
 <div class="content">
 <%
-    if (error != null)
+    String message = (String) request.getAttribute("message");
+    if (message != null)
     {
 %>
-	<div class="error"><%= error %></div>
+        <div class="error"><%= message %></div>
 <%
     }
 %>
 	<div class="form" style="width: 700px">
-	<form method="post" action="edituser.jsp">
-	<div>
-	<input type="hidden" name="submit" value="true"/>
-	<input type="hidden" name="id" value="<%= user.getId() %>"/>
-	<table>
-	<caption>Edit preferences</caption>
-	<tr>
-		<td>Email</td>
-		<td><input name="email" type="text" class="textarea" value="<%= user.getEmail() %>" size="30" maxlength="45" /></td>
-	</tr>
-	<tr>
-		<td>Payments to self in payment log</td>
-		<td>
-			<select class="formselect" name="paymentstoself">
-				<option value="0" <%= !user.getShowPaymentsToSelf() ? "selected" : "" %> >Hide</option>
-				<option value="1" <%= user.getShowPaymentsToSelf() ? "selected" : "" %> >Show</option>
-			</select>
-		</td>
-	</tr>
-	<tr>
-		<td>Show time in:</td>
-		<td>
-			<select class="formselect" name="dateformat">
-				<option value="0" <%= user.getUserTimezone() == 0 ? "selected" : "" %> >GMT</option>
-				<option value="1" <%= user.getUserTimezone() != 0   ? "selected" : "" %> >Local</option>
-			</select>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			Rental Ban List <br/>
-		</td>
-		<td colspan="5">
-			<input name="banList" type="text" class="textarea" value="<%= user.getBanList() %>" maxlength="255" size="80" /> <br/>
-			* names separated by a space
-		</td>
-	</tr>
-	</table>
-	<div class="formgroup">
-		<input type="submit" class="button" value="Update"/>
-	</div>
-	</div>
-	</form>
+	<form method="post" action="userctl">
+        <div>
+            <input type="hidden" name="event" value="updateAcct"/>
+            <input type="hidden" name="returnpage" value="<%=returnToPage%>"/>
+
+            <h3>Edit preferences</h3>
+            <div>
+                <label for="email">email: </label>
+                <input id="email" name="email" type="text" class="textarea" value="<%= user.getEmail()== null ? "" : user.getEmail() %>" size="30" maxlength="45" />
+            </div><br>
+            <div>
+                <div>
+                    Show payments to self in logs:<br>
+                    <input type="radio" name="showPaymentsToSelf" id="r1" value="1" <%= user.getShowPaymentsToSelf() ? "checked" : "" %> /><label for="r1">Show</label>
+                    <input type="radio" name="showPaymentsToSelf" id="r2" value="0" <%= !user.getShowPaymentsToSelf() ? "checked" : "" %>/><label for="r1">Hide</label>
+                </div>
+            </div><br>
+            <div>
+                <div>
+                    Show log times in:<br>
+                    <input type="radio" name="selectedTimeZone" id="r10" value="0" <%= user.getUserTimezone() == 0 ? "checked" : "" %> /><label for="r1">GMT</label>
+                    <input type="radio" name="selectedTimeZone" id="r20" value="1" <%= user.getUserTimezone() != 0 ? "checked" : "" %>/><label for="r1">Local (<%= gmtOffset %>)</label>
+                </div>
+            </div><br>
+            <div>
+                <div>
+                    Rental Ban List (*):
+                    <input name="banList" type="text" class="textarea" value="<%= user.getBanList() == null ? "" : user.getBanList() %>" maxlength="255" size="80" /> <br/>
+                    * names separated by a space
+                </div>
+            </div>
+            <div class="formgroup">
+                <input type="submit" class="button" value="Update"/>
+            </div>
+            </div>
+        </form>
 	</div>
 </div>
 </div>
