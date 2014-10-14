@@ -84,8 +84,7 @@ Database Maintenance status:<br/>
 
 	<ul><b>Service/Ip Utilities</b>
 		<li><a href="admindatafeedservices.jsp">Data Feed Service Providers</a></li>
-		<li><a href="adminipaccessdump.jsp">IP Access Log (Full dump)</a></li>
-		<li><a href="adminipaccessdump.jsp?last=500">IP Access Log (Last 500 hits)</a></li>
+        <br><br>
 		<li><input type="button" class="button" onclick="UpdateFilter()" value="Update Filter Parameters"/></li>
 	</ul>
 	</div>

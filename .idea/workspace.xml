@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d358ce08-7161-44b8-ba10-1d3822171d3c" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java" afterPath="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/edituser.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/edituser.jsp" />
+      <change type="DELETED" beforePath="C:\FSEconomy\MyProjects\FSEconomy\src\main\webapp\adminipaccessdump.jsp" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java" afterPath="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admin.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admin.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/datafeeds.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/datafeeds.jsp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="FSEconomy.iws" />
@@ -27,53 +29,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="edituser.jsp" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/webapp/edituser.jsp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-14.384615" vertical-offset="0" max-vertical-offset="1496">
-              <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="signup.jsp" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/webapp/signup.jsp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-11.115385" vertical-offset="0" max-vertical-offset="1122">
-              <caret line="17" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="UserCtl.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.28714523" vertical-offset="17644" max-vertical-offset="29886">
-              <caret line="1055" column="0" selection-start-line="1055" selection-start-column="0" selection-end-line="1055" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="UserBean.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/UserBean.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="6368" max-vertical-offset="7718">
-              <caret line="505" column="22" selection-start-line="505" selection-start-column="22" selection-end-line="505" selection-end-column="22" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Data.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/Data.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="10300" max-vertical-offset="153238">
-              <caret line="653" column="0" selection-start-line="653" selection-start-column="0" selection-end-line="653" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="1008" max-vertical-offset="153238">
+              <caret line="88" column="35" selection-start-line="88" selection-start-column="35" selection-end-line="88" selection-end-column="35" />
               <folding>
                 <marker date="1413069278489" expanded="true" signature="16790:16866" placeholder="SELECT * FRO..accounts..." />
                 <marker date="1413069278489" expanded="true" signature="17488:17584" placeholder="SELECT * FRO..accounts..." />
@@ -157,6 +117,26 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="Datafeed.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="38965" max-vertical-offset="58446">
+              <caret line="2325" column="9" selection-start-line="2325" selection-start-column="9" selection-end-line="2325" selection-end-column="9" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="admin.jsp" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/webapp/admin.jsp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.6701571" vertical-offset="1078" max-vertical-offset="1751">
+              <caret line="86" column="16" selection-start-line="86" selection-start-column="16" selection-end-line="86" selection-end-column="16" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
     </leaf>
   </component>
   <component name="FindManager">
@@ -200,7 +180,7 @@
               <option name="externalSystemIdString" value="GRADLE" />
               <option name="taskNames">
                 <list>
-                  <option value="check" />
+                  <option value="clean" />
                 </list>
               </option>
             </ExternalSystemSettings>
@@ -228,7 +208,7 @@
               <option name="externalSystemIdString" value="GRADLE" />
               <option name="taskNames">
                 <list>
-                  <option value="clean" />
+                  <option value="check" />
                 </list>
               </option>
             </ExternalSystemSettings>
@@ -532,10 +512,8 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/main/webapp/aircraftmodels.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/airport.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/creategroup.jsp" />
-        <option value="$PROJECT_DIR$/src/main/webapp/admin.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/fbofacility.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/gmap.jsp" />
         <option value="$PROJECT_DIR$/src/main/webapp/gmapac.jsp" />
@@ -578,11 +556,13 @@
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/FullFilter.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/FSagentFSX.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/FSagent.java" />
-        <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/util/Converters.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/fixes/FixedCachedRowSetImpl.java" />
         <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java" />
         <option value="$PROJECT_DIR$/src/main/webapp/edituser.jsp" />
+        <option value="$PROJECT_DIR$/src/main/webapp/datafeeds.jsp" />
+        <option value="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java" />
+        <option value="$PROJECT_DIR$/src/main/webapp/admin.jsp" />
       </list>
     </option>
   </component>
@@ -717,36 +697,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="fseconomy" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="FSEconomy" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="FSEconomy" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="fseconomy" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="servlets" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1220,9 +1170,9 @@
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Gradle.FSEconomy [war]" />
-        <item index="1" class="java.lang.String" itemvalue="Gradle.FSEconomy [check]" />
+        <item index="1" class="java.lang.String" itemvalue="Gradle.FSEconomy [clean]" />
         <item index="2" class="java.lang.String" itemvalue="Gradle.FSEconomy [build]" />
-        <item index="3" class="java.lang.String" itemvalue="Gradle.FSEconomy [clean]" />
+        <item index="3" class="java.lang.String" itemvalue="Gradle.FSEconomy [check]" />
         <item index="4" class="java.lang.String" itemvalue="Gradle.FSEconomy [buildDependents]" />
       </list>
     </recent_temporary>
@@ -1269,12 +1219,12 @@
       <workItem from="1413284995100" duration="711000" />
       <workItem from="1413298186044" duration="58000" />
       <workItem from="1413298256386" duration="960000" />
-      <workItem from="1413300241657" duration="15182000" />
+      <workItem from="1413300241657" duration="19705000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="139780000" />
+    <option name="totallyTimeSpent" value="144303000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="148" y="8" width="1616" height="1058" extended-state="0" />
@@ -1292,19 +1242,19 @@
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.399137" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31175837" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32901832" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21116817" sideWeight="0.50089765" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Gradle" active="true" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23170732" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24133505" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24967907" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32723358" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21116817" sideWeight="0.49910232" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31175837" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31175837" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1368,27 +1318,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/gmapmarketfbo.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-7.1923075" vertical-offset="136" max-vertical-offset="2431">
-          <caret line="19" column="22" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/groupassignments.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-9.846154" vertical-offset="9094" max-vertical-offset="9656">
-          <caret line="550" column="39" selection-start-line="550" selection-start-column="39" selection-end-line="550" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/index.jsp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.8461537" vertical-offset="5755" max-vertical-offset="6545">
-          <caret line="349" column="103" selection-start-line="349" selection-start-column="103" selection-end-line="349" selection-end-column="103" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/webapp/leaseac.jsp">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-7.3461537" vertical-offset="336" max-vertical-offset="1428">
@@ -1669,20 +1598,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1025" max-vertical-offset="58871">
-          <caret line="70" column="37" selection-start-line="70" selection-start-column="37" selection-end-line="70" selection-end-column="37" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#4905#4906#0" expanded="false" />
-            <element signature="e#4929#4930#0" expanded="false" />
-            <element signature="e#74376#74377#0" expanded="false" />
-            <element signature="e#74436#74437#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/fixes/FixedCachedRowSetImpl.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.312187" vertical-offset="0" max-vertical-offset="3706">
@@ -1720,10 +1635,52 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/signup.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-11.115385" vertical-offset="0" max-vertical-offset="1122">
+          <caret line="17" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/UserBean.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="6368" max-vertical-offset="7718">
+          <caret line="505" column="22" selection-start-line="505" selection-start-column="22" selection-end-line="505" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/edituser.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-14.384615" vertical-offset="0" max-vertical-offset="1496">
+          <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.28714523" vertical-offset="17644" max-vertical-offset="29886">
+          <caret line="1055" column="0" selection-start-line="1055" selection-start-column="0" selection-end-line="1055" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/datafeeds.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="11.769231" vertical-offset="0" max-vertical-offset="11203">
+          <caret line="369" column="2" selection-start-line="369" selection-start-column="2" selection-end-line="369" selection-end-column="2" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/Data.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="10300" max-vertical-offset="153238">
-          <caret line="653" column="0" selection-start-line="653" selection-start-column="0" selection-end-line="653" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="1008" max-vertical-offset="153238">
+          <caret line="88" column="35" selection-start-line="88" selection-start-column="35" selection-end-line="88" selection-end-column="35" />
           <folding>
             <marker date="1413069278489" expanded="true" signature="16790:16866" placeholder="SELECT * FRO..accounts..." />
             <marker date="1413069278489" expanded="true" signature="17488:17584" placeholder="SELECT * FRO..accounts..." />
@@ -1806,37 +1763,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/signup.jsp">
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/menu.jsp">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.115385" vertical-offset="0" max-vertical-offset="1122">
-          <caret line="17" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3077">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/data/UserBean.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="6368" max-vertical-offset="7718">
-          <caret line="505" column="22" selection-start-line="505" selection-start-column="22" selection-end-line="505" selection-end-column="22" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="38965" max-vertical-offset="58446">
+          <caret line="2325" column="9" selection-start-line="2325" selection-start-column="9" selection-end-line="2325" selection-end-column="9" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/edituser.jsp">
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/admin.jsp">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-14.384615" vertical-offset="0" max-vertical-offset="1496">
-          <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.6701571" vertical-offset="1078" max-vertical-offset="1751">
+          <caret line="86" column="16" selection-start-line="86" selection-start-column="16" selection-end-line="86" selection-end-column="16" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/UserCtl.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.28714523" vertical-offset="17644" max-vertical-offset="29886">
-          <caret line="1055" column="0" selection-start-line="1055" selection-start-column="0" selection-end-line="1055" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>

@@ -366,7 +366,7 @@
 	</div>
 <%
 	String base = Data.DataFeedUrl + "/data?" + (isServiceKey ? "servicekey" : "userkey") + "=" + requestorKey + "&format=" + format + "&";
-	String staticbase = Data.DataFeedUrl;
+	String staticbase = Data.DataFeedUrl + "/static";
 %>
 	<br/>
 	<div style="font-weight: bold;font-size: 10pt;color: blue;">Note: All timestamps are returned in GMT</div>

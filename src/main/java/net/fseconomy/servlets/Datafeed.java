@@ -607,7 +607,7 @@ public class Datafeed extends HttpServlet
 				csvoutput.appendHeaderItem("ExpireDateTime");		
 			}	
 			
-			AssignmentBean[] assignments = null;
+			AssignmentBean[] assignments;
 			assignments = data.getAssignmentsSQL("SELECT * FROM assignments WHERE aircraft is not null");
 
             for (AssignmentBean assignment : assignments)
@@ -1761,7 +1761,7 @@ public class Datafeed extends HttpServlet
 			{
 				xmloutput.append("<AircraftAliases>\n");
 				xmloutput.append("MakeModel", aircraft[c].model);	
-				xmloutput.append("Alias", aircraft[c].fsName);
+				xmloutput.append("Alias", Converters.XMLHelper.protectSpecialCharacters(aircraft[c].fsName));
 					
 				while( true ) //loop thru all the aliases for this model
 				{
@@ -2232,14 +2232,14 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_aircraftconfigs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_aircraftconfigs.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("AircraftAliases"))
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_aircraftaliases.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_aircraftaliases.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("AircraftForSale") ||
@@ -2251,28 +2251,28 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_aircraft.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_aircraft.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Assignments"))
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_assignments.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_assignments.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("Commodities"))
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_commodities.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_commodities.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("Facilities")) 
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_facilities.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_facilities.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Fbos") ||
@@ -2281,14 +2281,14 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_fbos.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_fbos.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("FboMonthlySummary"))
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_fbomonthlysummary.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_fbomonthlysummary.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("FlightLogsByMonthYear") ||
@@ -2296,7 +2296,7 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_FlightLogs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_FlightLogs.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("IcaoJobsTo") ||
@@ -2304,14 +2304,14 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_jobs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_jobs.xsd\"\n";
 		}
 			
 		if( query.equalsIgnoreCase("Members"))
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_members.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_members.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("PaymentsByMonthYear") ||
@@ -2319,14 +2319,14 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_payments.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_payments.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Statistics"))
 		{
 			return "\nxmlns=\""+ XSDURL + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/datafeed_statistics.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_statistics.xsd\"\n";
 		}
 
 		return "";
