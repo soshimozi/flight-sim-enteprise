@@ -112,28 +112,27 @@ public class Converters
 			header = new StringBuffer();
 			content = new StringBuffer();
 		}
+
 		public boolean isHeaderEmpty()
 		{
-			if(header.length() == 0)
-				return true;
-			else
-				return false;
+            return header.length() == 0;
 		}
+
 		public boolean isContentEmpty()
 		{
-			if(content.length() == 0)
-				return true;
-			else
-				return false;
+            return content.length() == 0;
 		}
+
 		public void newrow()
 		{
 			content.append("\r\n");
 		}
+
 		public void appendHeaderItem(String name)
 		{
-			header.append(name + ",");
+			header.append(name).append(",");
 		}
+
 		public void append(String value)
 		{
 			String s = value;
@@ -148,7 +147,7 @@ public class Converters
 				s = value.replaceAll("\"", "\"\"");
 				s = "\"" + s + "\"";
 			}
-			content.append(s + ",");
+			content.append(s).append(",");
 		}
 		public void append(boolean value)
 		{
@@ -156,19 +155,19 @@ public class Converters
 		}
 		public void append(double value)
 		{
-			content.append(value + ",");
+			content.append(value).append(",");
 		}
 		public void append(int value)
 		{
-			content.append(Formatters.nodecimals.format(value) + ",");
+			content.append(Formatters.nodecimals.format(value)).append(",");
 		}		
 		public void append(long value)
 		{
-			content.append(Formatters.nodecimals.format(value) + ",");
+			content.append(Formatters.nodecimals.format(value)).append(",");
 		}	
 		public void appendMoney(double value)
 		{
-			content.append(Formatters.twoDecimals.format(value) + ",");
+			content.append(Formatters.twoDecimals.format(value)).append(",");
 		}
 		public void append(Timestamp value)
 		{
@@ -190,17 +189,15 @@ public class Converters
 		 * @param originalUnprotectedString 
 		 *            original string which may contain characters either reserved in XML or with different representation 
 		 *            in different encodings (like 8859-1 and UFT-8) 
-		 * @return 
-		 */ 
+		 */
 		public static String protectSpecialCharacters(String originalUnprotectedString) 
 		{ 
 		    if (originalUnprotectedString == null) 
-		    { 
-		        return null; 
-		    } 
-		    boolean anyCharactersProtected = false; 
+		        return null;
+
+		    boolean anyCharactersProtected = false;
 		 
-		    StringBuffer stringBuffer = new StringBuffer(); 
+		    StringBuilder stringBuffer = new StringBuilder();
 		    for (int i = 0; i < originalUnprotectedString.length(); i++) 
 		    { 
 		        char ch = originalUnprotectedString.charAt(i); 
@@ -211,19 +208,18 @@ public class Converters
 		 
 		        if (characterWithSpecialMeaningInXML || unicodeButNotAscii || controlCharacter) 
 		        { 
-		            stringBuffer.append("&#" + (int) ch + ";"); 
+		            stringBuffer.append("&#").append((int) ch).append(";");
 		            anyCharactersProtected = true; 
 		        } 
 		        else 
 		        { 
 		            stringBuffer.append(ch); 
 		        } 
-		    } 
-		    if (anyCharactersProtected == false) 
-		    { 
-		        return originalUnprotectedString; 
-		    } 
-		 
+		    }
+
+		    if (!anyCharactersProtected)
+		        return originalUnprotectedString;
+
 		    return stringBuffer.toString(); 
 		} 		 
 	} 

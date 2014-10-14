@@ -17,7 +17,6 @@ import com.sun.rowset.CachedRowSetImpl;
 public class FixedCachedRowSetImpl extends CachedRowSetImpl {
 
     private static final long serialVersionUID = -9067504047398250113L;
-    private RowSetMetaDataImpl RowSetMD;
 
     public FixedCachedRowSetImpl() throws SQLException {
         super();
@@ -28,20 +27,18 @@ public class FixedCachedRowSetImpl extends CachedRowSetImpl {
     }
 
     private int getColIdxByName(String name) throws SQLException {
-        RowSetMD = (RowSetMetaDataImpl) this.getMetaData();
-        int cols = RowSetMD.getColumnCount();
+        RowSetMetaDataImpl rowSetMD = (RowSetMetaDataImpl) this.getMetaData();
+        int cols = rowSetMD.getColumnCount();
 
         for (int i = 1; i <= cols; ++i) {
-            String colLabel = RowSetMD.getColumnLabel(i);
-            String colName  = RowSetMD.getColumnName(i);
-            if (colName != null) if (name.equalsIgnoreCase(colName) || name.equalsIgnoreCase(RowSetMD.getTableName(i) + "." + colName)) {               
+            String colLabel = rowSetMD.getColumnLabel(i);
+            String colName  = rowSetMD.getColumnName(i);
+            if (colName != null) if (name.equalsIgnoreCase(colName) || name.equalsIgnoreCase(rowSetMD.getTableName(i) + "." + colName)) {
                 return (i);
             }
             else if (colLabel != null) if (name.equalsIgnoreCase(colLabel)) {
                 return (i);
             }
-            else
-                continue;
         }
         throw new SQLException(resBundle.handleGetObject("cachedrowsetimpl.invalcolnm").toString());
     }
