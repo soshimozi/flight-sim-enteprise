@@ -7,7 +7,7 @@
 
     FboBean[] fbos = data.getFboForSale();
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <!DOCTYPE html>
 <html lang="en">
 <head>

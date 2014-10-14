@@ -6,7 +6,7 @@
 <%
     Data data = (Data)application.getAttribute("data");
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <%
     Data.aircraftConfigs[] aircraft = data.getAircraftConfigs();
     NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();

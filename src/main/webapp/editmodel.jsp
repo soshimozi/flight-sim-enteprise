@@ -3,7 +3,7 @@
         import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 <%Data data = (Data)application.getAttribute("data");%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="model" class="net.fseconomy.data.ModelBean">
     <jsp:setProperty name="model" property="*"/>
 </jsp:useBean>

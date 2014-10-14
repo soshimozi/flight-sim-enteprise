@@ -5,7 +5,7 @@
 <%
     Data data = (Data)application.getAttribute("data");
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
     int modelId = (request.getParameter("modelId") == null || request.getParameter("modelId").equals("")) ? -1 : Integer.parseInt(request.getParameter("modelId"));

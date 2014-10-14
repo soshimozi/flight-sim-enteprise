@@ -4,9 +4,9 @@
 %>
 
 <%Data data = (Data)application.getAttribute("data");%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
-<jsp:useBean id="fbo" class="net.fseconomy.data.FboBean" scope="session"></jsp:useBean>
-<jsp:useBean id="dataError" class="net.fseconomy.data.DataError" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="fbo" class="net.fseconomy.data.FboBean" scope="session" />
+<jsp:useBean id="dataError" class="net.fseconomy.data.DataError" scope="session" />
 
 <%	
 	String returnPage = request.getParameter("returnpage");

@@ -3,7 +3,7 @@
 %>
 
 <%Data data = (Data)application.getAttribute("data");%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <%
 	//setup return page if action used
 	String returnPage = request.getHeader("referer");

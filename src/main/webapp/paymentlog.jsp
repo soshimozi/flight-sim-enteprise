@@ -3,8 +3,8 @@
         import="java.util.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 <%Data data = (Data)application.getAttribute("data");%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
-<jsp:useBean id="userMap" class="java.util.HashMap" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="userMap" class="java.util.HashMap" scope="session" />
 <%!
     String getUser(int id, Map<Integer, String> userMap, Data data)
     {

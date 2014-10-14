@@ -4,7 +4,7 @@
 <%@ page import="net.fseconomy.util.Formatters" %>
 
 <%Data data = (Data)application.getAttribute("data");%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="airport" class="net.fseconomy.data.AirportBean">
 	<jsp:setProperty name="airport" property="icao"/>
 </jsp:useBean>

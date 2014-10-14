@@ -5,7 +5,7 @@
 <%
     Data data = (Data)application.getAttribute("data");
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <!DOCTYPE html>
 <html xmlns="https://www.w3.org/1999/xhtml">

@@ -2,11 +2,98 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d358ce08-7161-44b8-ba10-1d3822171d3c" name="Default" comment="">
-      <change type="DELETED" beforePath="C:\FSEconomy\MyProjects\FSEconomy\src\main\webapp\adminipaccessdump.jsp" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java" afterPath="$PROJECT_DIR$/src/main/java/net/fseconomy/servlets/Datafeed.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admin.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admin.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/adminclientipchecklisting.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/adminclientipchecklisting.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/adminclientipchecks.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/adminclientipchecks.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/adminclientuseripduplicates.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/adminclientuseripduplicates.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admindatafeedserviceedit.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admindatafeedserviceedit.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admindatafeedservices.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admindatafeedservices.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admineditaccount.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admineditaccount.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admineditaircraft.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admineditaircraft.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admineditfbo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admineditfbo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admineditgoods.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admineditgoods.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admineditshippedaircraft.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admineditshippedaircraft.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/adminfuelexploitcheck.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/adminfuelexploitcheck.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/adminsignatures.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/adminsignatures.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/admintransferfbo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/admintransferfbo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/adminuser48hourtrend.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/adminuser48hourtrend.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/aircraft.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/aircraft.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/aircraftconfigs.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/aircraftconfigs.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/aircraftlog.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/aircraftlog.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/aircraftmodelaliasdata.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/aircraftmodelaliasdata.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/aircraftmodeldata.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/aircraftmodeldata.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/aircraftmodels.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/aircraftmodels.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/airport.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/airport.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/bank.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/bank.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/banksummary.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/banksummary.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/buyBulkFuel.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/buyBulkFuel.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/buyBulkFuelConfirm.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/buyBulkFuelConfirm.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/buygoods.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/buygoods.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/creategroup.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/creategroup.jsp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/datafeeds.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/datafeeds.jsp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/datafeedservicekeyrequest.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/datafeedservicekeyrequest.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/editaircraft.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/editaircraft.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/editassignment.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/editassignment.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/editfbo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/editfbo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/editfbofacility.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/editfbofacility.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/editfuelprices.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/editfuelprices.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/editgroup.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/editgroup.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/editmodel.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/editmodel.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/edittemplate.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/edittemplate.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/edituser.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/edituser.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/fbo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/fbo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/fboconstruct.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/fboconstruct.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/fbofacility.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/fbofacility.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/fbofacilityrent.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/fbofacilityrent.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/fbolog.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/fbolog.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/fbomap.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/fbomap.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/fbomgt.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/fbomgt.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/fsmappings.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/fsmappings.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/gmap.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/gmap.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/gmapac.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/gmapac.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/gmapdistance.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/gmapdistance.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/gmapfbo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/gmapfbo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/gmapmarket.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/gmapmarket.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/gmapmarketfbo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/gmapmarketfbo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/goods.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/goods.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/groupassignment-json-select.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/groupassignment-json-select.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/groupassignments.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/groupassignments.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/groups.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/groups.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/hours.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/hours.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/index.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/index.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/leaseac.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/leaseac.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/lockaccount.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/lockaccount.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/log.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/log.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/logviewer.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/logviewer.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/logyahoo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/logyahoo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/maintenance.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/maintenance.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/maintenancelog.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/maintenancelog.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/market.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/market.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/marketfbo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/marketfbo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/memberships.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/memberships.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/menu.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/menu.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/menumap.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/menumap.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/models.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/models.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/myflight.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/myflight.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/namelookup.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/namelookup.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/pay.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/pay.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/paymentlog.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/paymentlog.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/refuel.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/refuel.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/resetbanlist.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/resetbanlist.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/score.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/score.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/sellgoods.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/sellgoods.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/shipaircraft.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/shipaircraft.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/signup.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/signup.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/templates.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/templates.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/top.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/top.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/transferac.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/transferac.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/transferfbo.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/transferfbo.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/transfergoods.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/transfergoods.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/unlockaccount.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/unlockaccount.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/updatebg.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/updatebg.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/updatesignature.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/updatesignature.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/whoisflying.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/whoisflying.jsp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/whoisparked.jsp" afterPath="$PROJECT_DIR$/src/main/webapp/whoisparked.jsp" />
     </list>
     <ignored path="FSEconomy.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -130,8 +217,8 @@
       <file leaf-file-name="admin.jsp" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/webapp/admin.jsp">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6701571" vertical-offset="1078" max-vertical-offset="1751">
-              <caret line="86" column="16" selection-start-line="86" selection-start-column="16" selection-end-line="86" selection-end-column="16" />
+            <state vertical-scroll-proportion="0.21326165" vertical-offset="0" max-vertical-offset="1751">
+              <caret line="7" column="59" selection-start-line="7" selection-start-column="59" selection-end-line="7" selection-end-column="59" />
               <folding />
             </state>
           </provider>
@@ -1219,30 +1306,30 @@
       <workItem from="1413284995100" duration="711000" />
       <workItem from="1413298186044" duration="58000" />
       <workItem from="1413298256386" duration="960000" />
-      <workItem from="1413300241657" duration="19705000" />
+      <workItem from="1413300241657" duration="19865000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="144303000" />
+    <option name="totallyTimeSpent" value="144463000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="148" y="8" width="1616" height="1058" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32901832" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3279396" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3279396" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Java Enterprise" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.399137" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31175837" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3279396" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32901832" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -1254,7 +1341,7 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32723358" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21116817" sideWeight="0.49910232" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31175837" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.31175837" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1781,8 +1868,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/webapp/admin.jsp">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6701571" vertical-offset="1078" max-vertical-offset="1751">
-          <caret line="86" column="16" selection-start-line="86" selection-start-column="16" selection-end-line="86" selection-end-column="16" />
+        <state vertical-scroll-proportion="0.21326165" vertical-offset="0" max-vertical-offset="1751">
+          <caret line="7" column="59" selection-start-line="7" selection-start-column="59" selection-end-line="7" selection-end-column="59" />
           <folding />
         </state>
       </provider>

@@ -5,7 +5,7 @@
 <%
     Data data = (Data)application.getAttribute("data");
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <%
     //check that we have right permissions, toss to index if not
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))

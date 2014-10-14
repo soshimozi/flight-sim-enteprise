@@ -3,7 +3,7 @@
         import="net.fseconomy.data.*"
 %>
 <%Data data = (Data)application.getAttribute("data");%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <%
     if(user == null || !user.isLoggedIn())
     {

@@ -5,8 +5,8 @@
 <%
     Data data = (Data)application.getAttribute("data");
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
-<jsp:useBean id="goods" class="net.fseconomy.data.GoodsBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="goods" class="net.fseconomy.data.GoodsBean" scope="session" />
 <%
 	String fromICAO = request.getParameter("fromICAO");
 	int owner = Integer.parseInt(request.getParameter("owner"));

@@ -2,7 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import = "net.fseconomy.data.*, java.util.*"
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"></jsp:useBean>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <%!
     String groupMenu(UserBean user, String name, boolean staffOnly, boolean includeBaseLink, String link, String arg, HttpServletResponse response)
     {
