@@ -56,7 +56,7 @@ public class FullFilter implements Filter
 	static String maintenanceAccessList = "";
 
 	//List of IPs to block due to being banned for misuse
-	static HashSet<String> blist = new HashSet<String>();
+	static HashSet<String> blist = new HashSet<>();
 	
     //Filtered items from log
     static String ignoreItems = "";
@@ -108,10 +108,10 @@ public class FullFilter implements Filter
 		}        
 
         //First check are we closed for maintenance
-        if(isClosedForMaintenance && maintenanceAccessList.indexOf(remoteAddr) < 0)
+        if(isClosedForMaintenance && !maintenanceAccessList.contains(remoteAddr))
         {
         	//print out closed for maintenance response
-        	PrintWriter out = (PrintWriter) response.getWriter();
+        	PrintWriter out = response.getWriter();
         	       
         	out.print("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n" +
                         "<HTML>\n" +
@@ -135,7 +135,7 @@ public class FullFilter implements Filter
         if(blist.contains(remoteAddr))
         {
         	//print out your a bad bad boy response
-        	PrintWriter out = (PrintWriter) response.getWriter();
+        	PrintWriter out = response.getWriter();
         	       
         	out.print("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n" +
                         "<HTML>\n" +
@@ -169,7 +169,7 @@ public class FullFilter implements Filter
         	ext = reqUri.substring(extindex);
         
         //If no extention found, or no ignore items found and not skip top.jsp/menu.jsp, then log it
-        if((extindex == -1 || ignoreItems.indexOf(ext) == -1) && !skipInclude)
+        if((extindex == -1 || !ignoreItems.contains(ext)) && !skipInclude)
         {
         	//get any attached parameters
 	        String queryString = request.getQueryString();   // ex: id=789&loc=CEX4
@@ -234,8 +234,8 @@ public class FullFilter implements Filter
 	{
 		//data.Data data = Data.getInstance();
 		
-		ResultSet rs = null;
-		String qry = "";
+		ResultSet rs;
+		String qry;
 		try
 		{
 			//clear our current banned IP list
@@ -256,7 +256,7 @@ public class FullFilter implements Filter
 			rs = dalHelper.ExecuteReadOnlyQuery(qry);			
 			if(rs.next())
 			{
-				isClosedForMaintenance = rs.getDouble(1) != 0 ? true : false;
+				isClosedForMaintenance = rs.getDouble(1) != 0;
 			} 
 			rs.close();
 
@@ -288,9 +288,6 @@ public class FullFilter implements Filter
 		catch (SQLException e)
 		{
 			e.printStackTrace();
-		}
-		finally
-		{
 		}
 	}
 }

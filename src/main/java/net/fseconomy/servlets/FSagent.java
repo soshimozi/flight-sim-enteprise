@@ -1,13 +1,9 @@
 package net.fseconomy.servlets;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,7 +57,7 @@ public class FSagent extends HttpServlet
 	{
 		String user = req.getParameter("user");
 		String password = req.getParameter("pass");
-		UserBean userBean = null;
+		UserBean userBean;
 		
 		if (user == null || password == null || (userBean=data.userExists(user, password, false)) == null)
 		{
@@ -104,36 +100,33 @@ public class FSagent extends HttpServlet
 			String output="";	
 			//if (!Data.agentVersion.equals(req.getParameter("version")))
 			//	throw new DataError("A new version of this program is available.");
-			if (action.equals("addAircraft"))
-			{
-				output = addModel(req);
-				if (output == null)
-					output = "mess=Your aircraft is not known, but a request is added to the database.";
-				else
-					output = "mess=Your aircraft is known as " + output;
-			} 
-			else if (action.equals("start"))
-			{
-				output=doStart(req, resp, userBean);
-			} 
-			else if (action.equals("test"))
-			{
-				String version = req.getParameter("version");
-				if (!data.GetFSUIPCClientVersion().equals(version))
-					throw new DataError("A new version of this program is available.");
-			} 
-			else if (action.equals("arrive"))
-			{
-				output = doArrive(req, resp, userBean);
-			} 
-			else if (action.equals("cancel"))
-			{
-				output = doCancel(req, resp, userBean);
-			} else
-			{
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action specified");
-				return;
-			}
+            switch (action)
+            {
+                case "addAircraft":
+                    output = addModel(req);
+                    if (output == null)
+                        output = "mess=Your aircraft is not known, but a request is added to the database.";
+                    else
+                        output = "mess=Your aircraft is known as " + output;
+                    break;
+                case "start":
+                    output = doStart(req, userBean);
+                    break;
+                case "test":
+                    String version = req.getParameter("version");
+                    if (!data.GetFSUIPCClientVersion().equals(version))
+                        throw new DataError("A new version of this program is available.");
+                    break;
+                case "arrive":
+                    output = doArrive(req, userBean);
+                    break;
+                case "cancel":
+                    output = doCancel(userBean);
+                    break;
+                default:
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action specified");
+                    return;
+            }
 			resp.getWriter().println(output);
 		} 
 		catch (DataError e)
@@ -177,7 +170,7 @@ public class FSagent extends HttpServlet
 		return data.closestAirport(dLat, dLon, 0);
 	}
 	
-	String doStart(HttpServletRequest req, HttpServletResponse resp, UserBean user) throws DataError
+	String doStart(HttpServletRequest req, UserBean user) throws DataError
 	{
 		String FSAircraft = req.getParameter("aircraft");
 		Data.closeAirport closest= closestAirport(req);
@@ -203,24 +196,26 @@ public class FSagent extends HttpServlet
 			throw new DataError("Maximum pilot hours in a 48 hour period reached");
 		
 		Object[] info = data.departAircraft(aircraft[0], user.getId(), closest.icao);
-		int payloadWeight = ((Integer)info[0]).intValue();
-		int totalWeight = ((Integer)info[1]).intValue();		
+		int payloadWeight = (Integer) info[0];
+		int totalWeight = (Integer) info[1];
 		AssignmentBean[] assignments = (AssignmentBean[]) info[2];
 		
-		StringBuffer buffer = new StringBuffer();
-		for (int c=0; c < assignments.length; c++)
-		{
-			String item, commodity = assignments[c].getCommodity();
-			if (commodity == null)
-				item = " : :" + assignments[c].getTo();
-			else
-			{
-				int amount = assignments[c].getAmount();
-				String units = assignments[c].getUnits() == AssignmentBean.UNIT_PASSENGERS ? "" : (" " + assignments[c].getSUnits());			
-				item = commodity + ":" + amount + units + ":" + assignments[c].getTo();
-			}
-			buffer.append("as=" + item + "\n");
-		}
+		StringBuilder buffer = new StringBuilder();
+        for (AssignmentBean assignment : assignments)
+        {
+            String item, commodity = assignment.getCommodity();
+            if (commodity == null)
+            {
+                item = " : :" + assignment.getTo();
+            }
+            else
+            {
+                int amount = assignment.getAmount();
+                String units = assignment.getUnits() == AssignmentBean.UNIT_PASSENGERS ? "" : (" " + assignment.getSUnits());
+                item = commodity + ":" + amount + units + ":" + assignment.getTo();
+            }
+            buffer.append("as=").append(item).append("\n");
+        }
 		
 		long maxrenttime;
 		int ultimateOwner = data.accountUltimateGroupOwner(aircraft[0].getOwner());
@@ -263,7 +258,7 @@ public class FSagent extends HttpServlet
 //			"\nweight=" + totalWeight + "\n" +
 //			buffer.toString();
 	}
-	String doCancel(HttpServletRequest req, HttpServletResponse resp, UserBean user) throws DataError
+	String doCancel(UserBean user) throws DataError
 	{
 		data.cancelFlight(user);
 		return "";
@@ -292,7 +287,7 @@ public class FSagent extends HttpServlet
 	
 	//moved from Data to here, didn't seem to be working from there - Airboss 1/29/11
 	private Lock lockProcessFlight = new ReentrantLock();
-	private Set<Integer> processFlightLock = new HashSet<Integer>(100);
+	private Set<Integer> processFlightLock = new HashSet<>(100);
 
 	//Moved lock methods from Data - Airboss 1/19/11
 	public boolean setProcessFlight(int userid) throws DataError
@@ -327,7 +322,7 @@ public class FSagent extends HttpServlet
 		}
 	}	
 	
-	String doArrive(HttpServletRequest req, HttpServletResponse resp, UserBean user) throws DataError
+	String doArrive(HttpServletRequest req, UserBean user) throws DataError
 	{		
 		//First things first, we need to check if we are already processing a flight for this user
 		// Add lock on userid, if already locked we are already processing so kick SENDERROR

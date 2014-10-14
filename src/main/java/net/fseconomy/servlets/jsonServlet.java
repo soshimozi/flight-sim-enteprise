@@ -1,23 +1,17 @@
 package net.fseconomy.servlets;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 
-import net.fseconomy.data.DALHelper;
 import net.fseconomy.util.Formatters;
 import net.fseconomy.data.Data;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  * FS Economy
@@ -43,17 +37,13 @@ public class jsonServlet extends HttpServlet
 	private static final long serialVersionUID = 1L;
 	
 	private Data data = null;
-    private DALHelper dalHelper = null;
 
-	public void init()
+    public void init()
 	{
 		//Get Data Context, create it if null
 		data = (Data) getServletContext().getAttribute("data");
 		if (data == null)
 			getServletContext().setAttribute("data", data = Data.getInstance());
-
-        Logger logger = LoggerFactory.getLogger(jsonServlet.class);
-        dalHelper = new DALHelper(logger);
 	}
 	
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
@@ -61,7 +51,7 @@ public class jsonServlet extends HttpServlet
     	String uri = request.getRequestURI();
     	if(uri.endsWith("pilotstatus"))
     	{
-    		getPilotStatus(request, response);
+    		getPilotStatus(response);
     	}
     	else
     	{
@@ -92,7 +82,7 @@ public class jsonServlet extends HttpServlet
     	}
     }
     
-    public void getPilotStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+    public void getPilotStatus(HttpServletResponse response) throws ServletException, IOException
     {
     	//This is called A LOT.
     	//The PilotStat class uses single character labels to reduce traffic.

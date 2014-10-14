@@ -73,7 +73,7 @@ public class SigServer extends HttpServlet
         String requestedImage = request.getPathInfo().toLowerCase();
 
         // Check if file name is actually supplied to the request URI.
-        if (requestedImage == null) 
+        if (requestedImage == null)
         {
             // Throw an exception, or send 404, or show default/warning image, or just ignore it.
             response.sendError(HttpServletResponse.SC_NOT_FOUND); // 404.
@@ -168,10 +168,10 @@ public class SigServer extends HttpServlet
 		//check the following formatting is correct
 		if( imageUri.length() < 7
 			|| !imageUri.endsWith(fileExt)
-			|| imageUri.substring(1).contains("/") 
+			|| imageUri.substring(1).contains("/")
 			|| imageUri.substring(1).contains("\\"))
 			return false;
-		
+
 		return true;
 	}
 	
@@ -203,10 +203,9 @@ public class SigServer extends HttpServlet
 	//Get user name stripped out of Uri and removing file .ext
 	String getUserName(String path)
 	{
-		String tmp = path.substring(1); 
-		String user = tmp.substring(0, tmp.length()-4);
-		
-		return user;
+		String tmp = path.substring(1);
+
+        return tmp.substring(0, tmp.length()-4);
 	}	
 	
 	//Determine if the statistics have updated
@@ -218,12 +217,9 @@ public class SigServer extends HttpServlet
 		Data.statistics curr = Data.statsmap.get(user);
 		Data.statistics prev = Data.prevstatsmap.get(user);
 
-		if( curr.flights == prev.flights
-			&& curr.totalFlightTime == prev.totalFlightTime)
-			return false;
-		
-		return true;
-	}	
+        return !(curr.flights == prev.flights && curr.totalFlightTime == prev.totalFlightTime);
+
+    }
 	
 	//Build out the new signature based upon the user name
 	private void createSignature(String user)

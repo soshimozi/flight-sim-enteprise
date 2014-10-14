@@ -52,15 +52,15 @@ public class Autologon extends HttpServlet {
 			return;			
 		}
 		
-		int offset = 0;
-		if (sOffset != null)
-			offset = Integer.parseInt(sOffset);
+        int offset = Integer.parseInt(sOffset);
 			
 		userBean.setTimeZone(new SimpleTimeZone(1000 * 60 * -offset, "Local"));
 		userBean.setLoggedIn(true);
 		data.reloadMemberships(userBean);
+
 		HttpSession s = request.getSession();
-		s.setAttribute("user", userBean);		
+		s.setAttribute("user", userBean);
+
 		response.sendRedirect("/index.jsp");
 	}
 	

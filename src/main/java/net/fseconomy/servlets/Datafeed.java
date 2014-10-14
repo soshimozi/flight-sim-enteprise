@@ -2,16 +2,8 @@ package net.fseconomy.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-//import java.sql.Connection;
-//import java.sql.ResultSet;
-//import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.Set;
-import java.util.Calendar;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
@@ -23,7 +15,6 @@ import net.fseconomy.data.*;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 
-//Added for ehCache support 6/10/10 - Airboss
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
@@ -76,10 +67,9 @@ public class Datafeed extends HttpServlet
 
 	CacheManager cacheManager;  
 		
-	private HashMap<String, Requestor> dataFeedRequestors = new HashMap<String, Requestor>();
-	private HashMap<String, Request> dataFeedRequests = new HashMap<String, Request>();
-	//private HashMap<String, DataFeedHit> dataFeedHits = new HashMap<String, DataFeedHit>();	
-	private HashMap<String, FeedHitData> userFeedProcessTimes = new HashMap<String, FeedHitData>();	
+	private HashMap<String, Requestor> dataFeedRequestors = new HashMap<>();
+	private HashMap<String, Request> dataFeedRequests = new HashMap<>();
+	private HashMap<String, FeedHitData> userFeedProcessTimes = new HashMap<>();
 
 	//---------------------
 	//Throttler settings!!
@@ -126,22 +116,18 @@ public class Datafeed extends HttpServlet
 		   Cache cache5min = new Cache(
 				     new CacheConfiguration("DataFeeds5Min", maxElements)
 				       .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
-				       .overflowToDisk(false)
 				       .eternal(false)
 				       .timeToLiveSeconds(300)
 				       .timeToIdleSeconds(300)
-				       .diskPersistent(false)
 				       .diskExpiryThreadIntervalSeconds(0));
 		   
 		   //Our 15 minute cache
 		   Cache cache15min = new Cache(
 				     new CacheConfiguration("DataFeeds15Min", maxElements)
 				       .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
-				       .overflowToDisk(false)
 				       .eternal(false)
 				       .timeToLiveSeconds(900)
 				       .timeToIdleSeconds(900)
-				       .diskPersistent(false)
 				       .diskExpiryThreadIntervalSeconds(0));
 
 		   //Lets add our new caches to the manager for access
@@ -188,9 +174,9 @@ public class Datafeed extends HttpServlet
 	{
 		public String query;
 		public int servedcount;
-		public int rejectedcount;
+		//public int rejectedcount;
 		public Timestamp lasthit;
-		public Hashtable<String, RequestItem> subqueries = new Hashtable<String, RequestItem>(); 
+		public Hashtable<String, RequestItem> subqueries = new Hashtable<>();
 	}
 
 	private class Requestor
@@ -205,7 +191,7 @@ public class Datafeed extends HttpServlet
 		public byte throttlecount;
 		public Timestamp lasthit;
 		public int mspassed;
-		public Hashtable<String, Request> requests = new Hashtable<String, Request>(); 
+		public Hashtable<String, Request> requests = new Hashtable<>();
 	}
 		
 	/**
@@ -213,15 +199,13 @@ public class Datafeed extends HttpServlet
 	 * @param servicekey - string access key of service
 	 * @param userkey - string read access key of requester
 	 * @param query - string requested datafeed
-	 * @return NONE
-	 * @author Airboss 12/1/11
 	 */
 	public synchronized void doCheckKeyLastRequest(String servicekey, String userkey,  String accesskey, String query, String searchparameter) throws DataError
 	{		
-		String requestorkey = null;
-		String requestorname = null;
+		String requestorkey;
+		String requestorname;
 		String searchparam = searchparameter == null ? "" : searchparameter;
-		UserBean accessKeyAccount = null;
+		UserBean accessKeyAccount;
 		String accountname = null;
 		
 		//Get our request time
@@ -434,15 +418,11 @@ public class Datafeed extends HttpServlet
 				requestitem.servedcount++;
 			}
 		}
-		
-		return;
 	}
 		
 	/**
 	 * return Updates HashMap for query name, incrementing count
 	 * @param query - query name of requested XMLFeed
-	 * @return void
-	 * @author Airboss 10/1/10
 	 */
 	private synchronized FeedHitData doFeedHit(String query)
 	{
@@ -496,18 +476,15 @@ public class Datafeed extends HttpServlet
 		
 		try
 		{
-			boolean isAircraftStatus = query.toLowerCase().contentEquals("aircraft") && searchparam.toLowerCase().contentEquals("status");
+            //Check that we have a query and access key minimum
+            if ((serviceKey == null && (userKey == null)) || (query == null))
+                throw new DataError("servicekey or userkey, and query parameters expected.");
+
+            boolean isAircraftStatus = query.toLowerCase().contentEquals("aircraft") && searchparam.toLowerCase().contentEquals("status");
 			
 			if(!isAircraftStatus)
-			{
-				//Check that we have a query and access key minimum
-				if ((serviceKey == null && userKey == null) || query == null)
-					throw new DataError("servicekey or userkey, and query parameters expected.");
-
-				//** Throws data error on any failure condition
 				doCheckKeyLastRequest(serviceKey, userKey, readAccessKey, query, searchparam);
-			}
-			
+
 			//updates hit counter for requested feed, returns object to update
 			FeedHitData fhd = doFeedHit(query + searchparam);
 			
@@ -515,37 +492,37 @@ public class Datafeed extends HttpServlet
 			long starttime = System.currentTimeMillis();
 
 			if (query.equalsIgnoreCase("Aircraft"))
-				output = Aircraft(req, resp);			
+				output = Aircraft(req);
 			else if (query.equalsIgnoreCase("AllIn"))
-				output = AllInAssignments(req, resp);			
+				output = AllInAssignments(req);
 			else if (query.equalsIgnoreCase("Assignments"))
-				output = Assignments(req, resp);			
+				output = Assignments(req);
 			else if (query.equalsIgnoreCase("Commodities"))
-				output = Commodities(req, resp);			
+				output = Commodities(req);
 			else if (query.equalsIgnoreCase("CycleTimeStats"))
-				output = CycleTimeStats(req, resp);			
+				output = CycleTimeStats(req);
 			else if (query.equalsIgnoreCase("Facilities"))
-				output = Facilities(req, resp);			
+				output = Facilities(req);
 			else if (query.equalsIgnoreCase("Fbos"))
-				output = Fbos(req, resp);			
+				output = Fbos(req);
 			else if (query.equalsIgnoreCase("FeedRequestStats"))
-				output = FeedRequestStats(req, resp);			
+				output = FeedRequestStats(req);
 			else if (query.equalsIgnoreCase("FeedHitStats"))
-				output = FeedHitStats(req, resp);			
+				output = FeedHitStats(req);
 			else if (query.equalsIgnoreCase("FeedStatsReset"))
-				output = FeedStatsReset(req, resp);			
+				output = FeedStatsReset(req);
 			else if (query.equalsIgnoreCase("FlightLogs"))
-				output = FlightLogs(req, resp);			
+				output = FlightLogs(req);
 			else if (query.equalsIgnoreCase("Group"))
-				output = Group(req, resp);			
+				output = Group(req);
 			else if (query.equalsIgnoreCase("Icao"))
-				output = Icao(req, resp);			
+				output = Icao(req);
 			else if (query.equalsIgnoreCase("Payments"))
-				output = Payments(req, resp);			
+				output = Payments(req);
 			else if (query.equalsIgnoreCase("ServiceRequestStats"))
-				output = ServiceRequestStats(req, resp);			
+				output = ServiceRequestStats(req);
 			else if (query.equalsIgnoreCase("Statistics"))
-				output = Statistics(req, resp);			
+				output = Statistics(req);
 			else
 				throw new DataError("Query not found!");
 
@@ -589,7 +566,7 @@ public class Datafeed extends HttpServlet
 	}
 
 	//Monitor AllIn assignment generation
-	private String AllInAssignments(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	private String AllInAssignments(HttpServletRequest req) throws DataError
 	{
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format);
@@ -598,7 +575,7 @@ public class Datafeed extends HttpServlet
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 		
 		if(csvformat)
@@ -607,7 +584,7 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//Get key parameter to authorize access
-		String key = (String) req.getParameter("admin");		
+		String key = req.getParameter("admin");
 
 		if( !key.contentEquals("notforeveryone"))
 		{
@@ -632,47 +609,45 @@ public class Datafeed extends HttpServlet
 			
 			AssignmentBean[] assignments = null;
 			assignments = data.getAssignmentsSQL("SELECT * FROM assignments WHERE aircraft is not null");
-			
-			for (int c=0; c < assignments.length; c++)
-			{			
-				AssignmentBean assignment = assignments[c];
-				
-		        String noHTMLAssignment = assignment.getSCargo().replaceAll("\\<.*?>","");
-		
-		        if(csvformat)
-		        {
-		        	csvoutput.append(assignment.getFromTemplate());
-					csvoutput.append(assignment.getId());        
-					csvoutput.append(assignment.getAircraft());
-					AircraftBean[] ac = data.getAircraftByRegistration(assignment.getAircraft());
-					csvoutput.append(ac[0].getMakeModel()); 
-					csvoutput.append(assignment.getFrom());
-					csvoutput.append(assignment.getTo());
-					csvoutput.append(assignment.getDistance());
-					csvoutput.append(assignment.getBearing());
-					csvoutput.append(noHTMLAssignment);
-					csvoutput.appendMoney(assignment.calcPay());
-					csvoutput.append(assignment.getExpires() == null ? "9999/1/1 00:00:00": assignment.getExpiresGMTDate());
-					csvoutput.newrow();
-		        }
-		        else
-		        {
-		        	xmloutput.append("<Assignment>\n");
-		        	xmloutput.append("templateId", assignment.getFromTemplate());
-					xmloutput.append("id", assignment.getId());        
-					xmloutput.append("aircraft", assignment.getAircraft());
-					AircraftBean[] ac = data.getAircraftByRegistration(assignment.getAircraft());
-					xmloutput.append("makemodel", ac[0].getMakeModel()); 
-					xmloutput.append("from", assignment.getFrom());
-					xmloutput.append("to", assignment.getTo());
-					xmloutput.append("distance", assignment.getDistance());
-					xmloutput.append("bearing", assignment.getBearing());
-					xmloutput.append("assignment", Converters.XMLHelper.protectSpecialCharacters(assignment.getSCargo()));
-					xmloutput.appendMoney("pay", assignment.calcPay());
-					xmloutput.append("expires", assignment.getExpires() == null ? "9999/1/1 00:00:00": assignment.getExpiresGMTDate());
-		        	xmloutput.append("</Assignment>\n");
-		        }
-			}
+
+            for (AssignmentBean assignment : assignments)
+            {
+                String noHTMLAssignment = assignment.getSCargo().replaceAll("<.*?>", "");
+
+                if (csvformat)
+                {
+                    csvoutput.append(assignment.getFromTemplate());
+                    csvoutput.append(assignment.getId());
+                    csvoutput.append(assignment.getAircraft());
+                    AircraftBean[] ac = data.getAircraftByRegistration(assignment.getAircraft());
+                    csvoutput.append(ac[0].getMakeModel());
+                    csvoutput.append(assignment.getFrom());
+                    csvoutput.append(assignment.getTo());
+                    csvoutput.append(assignment.getDistance());
+                    csvoutput.append(assignment.getBearing());
+                    csvoutput.append(noHTMLAssignment);
+                    csvoutput.appendMoney(assignment.calcPay());
+                    csvoutput.append(assignment.getExpires() == null ? "9999/1/1 00:00:00" : assignment.getExpiresGMTDate());
+                    csvoutput.newrow();
+                }
+                else
+                {
+                    xmloutput.append("<Assignment>\n");
+                    xmloutput.append("templateId", assignment.getFromTemplate());
+                    xmloutput.append("id", assignment.getId());
+                    xmloutput.append("aircraft", assignment.getAircraft());
+                    AircraftBean[] ac = data.getAircraftByRegistration(assignment.getAircraft());
+                    xmloutput.append("makemodel", ac[0].getMakeModel());
+                    xmloutput.append("from", assignment.getFrom());
+                    xmloutput.append("to", assignment.getTo());
+                    xmloutput.append("distance", assignment.getDistance());
+                    xmloutput.append("bearing", assignment.getBearing());
+                    xmloutput.append("assignment", Converters.XMLHelper.protectSpecialCharacters(assignment.getSCargo()));
+                    xmloutput.appendMoney("pay", assignment.calcPay());
+                    xmloutput.append("expires", assignment.getExpires() == null ? "9999/1/1 00:00:00" : assignment.getExpiresGMTDate());
+                    xmloutput.append("</Assignment>\n");
+                }
+            }
 		}
 		if(csvformat)
 			return csvoutput.toString();
@@ -683,12 +658,12 @@ public class Datafeed extends HttpServlet
 	}
 
 	//Returns Maintenance Cycle timing data, XML only
-	private String CycleTimeStats(HttpServletRequest req, HttpServletResponse resp) throws DataError 
+	private String CycleTimeStats(HttpServletRequest req) throws DataError
 	{
-		Converters.xmlBuffer xmloutput = null;
+		Converters.xmlBuffer xmloutput;
 		
 		//Get key parameter to authorize access
-		String key = (String) req.getParameter("admin");		
+		String key = req.getParameter("admin");
 
 		//generate output buffer
 		xmloutput = new Converters.xmlBuffer();
@@ -729,13 +704,13 @@ public class Datafeed extends HttpServlet
 	}
 
 	//Resets All feed timing data, XML only
-	private String FeedStatsReset(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	private String FeedStatsReset(HttpServletRequest req) throws DataError
 	{
 		//generate output buffer
-		Converters.xmlBuffer xmloutput = null;
+		Converters.xmlBuffer xmloutput;
 
 		//Get key parameter to authorize access
-		String key = (String) req.getParameter("admin");		
+		String key = req.getParameter("admin");
 
 		//generate output buffer
 		xmloutput = new Converters.xmlBuffer();
@@ -756,12 +731,12 @@ public class Datafeed extends HttpServlet
 	}
 
 	//Returns Timing data for serving the distinct feed requests
-	private String FeedHitStats(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	private String FeedHitStats(HttpServletRequest req) throws DataError
 	{
-		Converters.xmlBuffer xmloutput = null;
+		Converters.xmlBuffer xmloutput;
 		
 		//Get key parameter to authorize access
-		String key = (String) req.getParameter("admin");
+		String key = req.getParameter("admin");
 		
 		//generate output buffer
 		xmloutput = new Converters.xmlBuffer();
@@ -773,32 +748,32 @@ public class Datafeed extends HttpServlet
 		else
 		{		
 			Set<Entry<String, FeedHitData>> myset = userFeedProcessTimes.entrySet();
-			java.util.Iterator<Entry<String, FeedHitData>> it = myset.iterator();
-			
-			//dump out our HashMap data
-			while(it.hasNext())
-			{
-				FeedHitData fd = it.next().getValue();
-				
-				xmloutput.append("<DataFeed>\n");
-				xmloutput.append("Name", fd.name);			
-				xmloutput.append("HitCount", fd.hitcount);
-				xmloutput.append("AvgTime", fd.totaltime / fd.hitcount);
-				xmloutput.append("MinTime", fd.mintime);			
-				xmloutput.append("MaxTime", fd.maxtime);			
-				xmloutput.append("</DataFeed>\n");
-			}
-		}		
+
+            //dump out our HashMap data
+            for (Entry<String, FeedHitData> aMyset : myset)
+            {
+                FeedHitData fd = aMyset.getValue();
+
+                xmloutput.append("<DataFeed>\n");
+                xmloutput.append("Name", fd.name);
+                xmloutput.append("HitCount", fd.hitcount);
+                xmloutput.append("AvgTime", fd.totaltime / fd.hitcount);
+                xmloutput.append("MinTime", fd.mintime);
+                xmloutput.append("MaxTime", fd.maxtime);
+                xmloutput.append("</DataFeed>\n");
+            }
+		}
+
 		return "<DataFeedHitStats>\n" + xmloutput.toString() + "</DataFeedHitStats>\n";	
 	}
 
 	//Returns service request data
-	private String ServiceRequestStats(HttpServletRequest req,	HttpServletResponse resp) throws DataError
+	private String ServiceRequestStats(HttpServletRequest req) throws DataError
 	{
-		Converters.xmlBuffer xmloutput = null;
+		Converters.xmlBuffer xmloutput;
 		
 		//Get key parameter to authorize access
-		String key = (String) req.getParameter("admin");
+		String key = req.getParameter("admin");
 		
 		//generate output buffer
 		xmloutput = new Converters.xmlBuffer();
@@ -810,31 +785,31 @@ public class Datafeed extends HttpServlet
 		else
 		{		
 			Set<Entry<String, Requestor>> myset = dataFeedRequestors.entrySet();
-			java.util.Iterator<Entry<String, Requestor>> it = myset.iterator();
-			
-			//dump out our HashMap data
-			while(it.hasNext())
-			{
-				Requestor rd = it.next().getValue();
 
-				xmloutput.append("<Requester>\n");
-				xmloutput.append("Name", Converters.XMLHelper.protectSpecialCharacters(rd.requestorname));			
-				xmloutput.append("LastTimestamp", rd.ts.toString());
-				xmloutput.append("ServedCount", rd.servedcount);
-				xmloutput.append("RejectedCount", rd.rejectedcount);				
-				xmloutput.append("</Requester>\n");
-			}
-		}		
+            //dump out our HashMap data
+            for (Entry<String, Requestor> aMyset : myset)
+            {
+                Requestor rd = aMyset.getValue();
+
+                xmloutput.append("<Requester>\n");
+                xmloutput.append("Name", Converters.XMLHelper.protectSpecialCharacters(rd.requestorname));
+                xmloutput.append("LastTimestamp", rd.ts.toString());
+                xmloutput.append("ServedCount", rd.servedcount);
+                xmloutput.append("RejectedCount", rd.rejectedcount);
+                xmloutput.append("</Requester>\n");
+            }
+		}
+
 		return "<ServiceFeedRequests>\n" +xmloutput.toString() + "</ServiceFeedRequests>\n";	
 	}
 
 	//Returns User Request data
-	private String FeedRequestStats(HttpServletRequest req,	HttpServletResponse resp) throws DataError
+	private String FeedRequestStats(HttpServletRequest req) throws DataError
 	{
-		Converters.xmlBuffer xmloutput = null;
+		Converters.xmlBuffer xmloutput;
 		
 		//Get key parameter to authorize access
-		String key = (String) req.getParameter("admin");
+		String key = req.getParameter("admin");
 		
 		//generate output buffer
 		xmloutput = new Converters.xmlBuffer();
@@ -846,51 +821,50 @@ public class Datafeed extends HttpServlet
 		else
 		{		
 			Set<Entry<String, Requestor>> myset = dataFeedRequestors.entrySet();
-			java.util.Iterator<Entry<String, Requestor>> it = myset.iterator();
-			
-			//dump out our HashMap data
-			while(it.hasNext())
-			{
-				Requestor requestor = it.next().getValue();
-				
-				Set<Entry<String, Request>> myset2 = requestor.requests.entrySet();
-				java.util.Iterator<Entry<String, Request>> it2 = myset2.iterator();
 
-				xmloutput.append("<Requester>\n");
-				xmloutput.append("RequestorName", Converters.XMLHelper.protectSpecialCharacters(requestor.requestorname));			
-				xmloutput.append("LastTimestamp", requestor.ts.toString());
-				xmloutput.append("ServedCount", requestor.servedcount);
-				xmloutput.append("RejectedCount", requestor.rejectedcount);
-				
-				while(it2.hasNext())
-				{
-					Request request = it2.next().getValue();					
+            //dump out our HashMap data
+            for (Entry<String, Requestor> aMyset : myset)
+            {
+                Requestor requestor = aMyset.getValue();
 
-					Set<Entry<String, RequestItem>> myset3 = request.subqueries.entrySet();
-					java.util.Iterator<Entry<String, RequestItem>> it3 = myset3.iterator();
+                Set<Entry<String, Request>> myset2 = requestor.requests.entrySet();
+                Iterator<Entry<String, Request>> it2 = myset2.iterator();
 
-					xmloutput.append("<Request servedcount=\"" + request.servedcount + "\" query=\"" + request.query + "\">\n");
+                xmloutput.append("<Requester>\n");
+                xmloutput.append("RequestorName", Converters.XMLHelper.protectSpecialCharacters(requestor.requestorname));
+                xmloutput.append("LastTimestamp", requestor.ts.toString());
+                xmloutput.append("ServedCount", requestor.servedcount);
+                xmloutput.append("RejectedCount", requestor.rejectedcount);
 
-					while(it3.hasNext())
-					{
-						RequestItem item = it3.next().getValue();					
+                while (it2.hasNext())
+                {
+                    Request request = it2.next().getValue();
 
-						xmloutput.append("<Item searchparam=\"" + item.searchparam + "\" accountname=\"" + item.accountname + "\" servedcount=\"" + item.servedcount + "\"/>\n");
-					}
-					xmloutput.append("</Request>\n");
-				}
-				
-				xmloutput.append("</Requester>\n");
-			}
+                    Set<Entry<String, RequestItem>> myset3 = request.subqueries.entrySet();
+                    Iterator<Entry<String, RequestItem>> it3 = myset3.iterator();
+
+                    xmloutput.append("<Request servedcount=\"" + request.servedcount + "\" query=\"" + request.query + "\">\n");
+
+                    while (it3.hasNext())
+                    {
+                        RequestItem item = it3.next().getValue();
+
+                        xmloutput.append("<Item searchparam=\"" + item.searchparam + "\" accountname=\"" + item.accountname + "\" servedcount=\"" + item.servedcount + "\"/>\n");
+                    }
+                    xmloutput.append("</Request>\n");
+                }
+
+                xmloutput.append("</Requester>\n");
+            }
 		}		
 		return "<DataFeedRequests>\n" + xmloutput.toString() + "</DataFeedRequests>\n";	
 	}
 
 	//Return assignment data, from either myflight for pilots, or group assignment queue
-	private String Assignments(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	private String Assignments(HttpServletRequest req) throws DataError
 	{
-		int id = -1;
-		AssignmentBean[] assignments = null;
+		int id;
+		AssignmentBean[] assignments;
 
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format, DFPS.search);
@@ -925,7 +899,7 @@ public class Datafeed extends HttpServlet
 			UserBean account = data.getAccountById(id);		
 			
 			//Get our name parameter for the make/model we want to retrieve
-			String format = (String)req.getParameter("format");
+			String format = req.getParameter("format");
 			boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 					
 			//generate output buffer
@@ -958,7 +932,7 @@ public class Datafeed extends HttpServlet
 	}
 	
 	//Return user or group goods
-	private String Commodities(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	private String Commodities(HttpServletRequest req) throws DataError
 	{
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format, DFPS.search, DFPS.readaccesskey);
@@ -968,7 +942,7 @@ public class Datafeed extends HttpServlet
 		
 		//Get our name parameter for the make/model we want to retrieve
 		String readAccessKey = req.getParameter("readaccesskey");
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 		
 		//generate output buffer
@@ -985,31 +959,32 @@ public class Datafeed extends HttpServlet
 		UserBean account = data.getAccountById(id);
 				
 		GoodsBean[] goods = data.getGoodsForAccountAvailable(account.getId());
-		
-		for (int c=0; c < goods.length; c++)
-		{			
-			if(csvformat)
-			{
-				if(csvoutput.isHeaderEmpty())
-				{
-					csvoutput.appendHeaderItem("Location");
-					csvoutput.appendHeaderItem("Commodity");
-					csvoutput.appendHeaderItem("Amount");				
-				}
-				csvoutput.append(goods[c].getLocation());
-				csvoutput.append(goods[c].getCommodity());
-				csvoutput.append(goods[c].getAmount() + " kg");	
-				csvoutput.newrow();
-			}
-			else
-			{
-				xmloutput.append("<Commodity>\n");				
-				xmloutput.append("Location", goods[c].getLocation());
-				xmloutput.append("Type", goods[c].getCommodity());
-				xmloutput.append("Amount", goods[c].getAmount() + " kg");				
-				xmloutput.append("</Commodity>\n");
-			}
-		}		
+
+        for (GoodsBean good : goods)
+        {
+            if (csvformat)
+            {
+                if (csvoutput.isHeaderEmpty())
+                {
+                    csvoutput.appendHeaderItem("Location");
+                    csvoutput.appendHeaderItem("Commodity");
+                    csvoutput.appendHeaderItem("Amount");
+                }
+                csvoutput.append(good.getLocation());
+                csvoutput.append(good.getCommodity());
+                csvoutput.append(good.getAmount() + " kg");
+                csvoutput.newrow();
+            }
+            else
+            {
+                xmloutput.append("<Commodity>\n");
+                xmloutput.append("Location", good.getLocation());
+                xmloutput.append("Type", good.getCommodity());
+                xmloutput.append("Amount", good.getAmount() + " kg");
+                xmloutput.append("</Commodity>\n");
+            }
+        }
+
 		if(csvformat)
 			return csvoutput.toString();
 		else
@@ -1020,7 +995,7 @@ public class Datafeed extends HttpServlet
 	}
 
 	//return user or group flight statistics
-	private String Statistics(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	private String Statistics(HttpServletRequest req) throws DataError
 	{
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format, DFPS.search, DFPS.readaccesskey);
@@ -1030,7 +1005,7 @@ public class Datafeed extends HttpServlet
 		
 		//Get our name parameter for the make/model we want to retrieve
 		String readAccessKey = req.getParameter("readaccesskey");
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 		
 		//generate output buffer
@@ -1055,18 +1030,18 @@ public class Datafeed extends HttpServlet
 		{
 			throw new DataError("Statistics not calculated yet. Try again in a few minutes.");
 		}
-		
-		for (int c=0; c < stats.length; c++)
-		{
-			Data.statistics entry = stats[c];
-			if (entry.accountName.contentEquals(account.getName()))
-			{
-				flights = entry.flights;
-				totalMiles = entry.totalMiles;
-				time = TimeToHrsMins(entry.totalFlightTime);
-				break;
-			}
-		}
+
+        for (Data.statistics entry : stats)
+        {
+            if (entry.accountName.contentEquals(account.getName()))
+            {
+                flights = entry.flights;
+                totalMiles = entry.totalMiles;
+                time = TimeToHrsMins(entry.totalFlightTime);
+                break;
+            }
+        }
+
 		if(csvformat)
 		{
 			if(csvoutput.isHeaderEmpty())
@@ -1103,9 +1078,9 @@ public class Datafeed extends HttpServlet
 	}
 
 	//return flight logs for user or group by month/year
-	private String FlightLogs(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	private String FlightLogs(HttpServletRequest req) throws DataError
 	{
-		String results = null;
+		String results;
 		
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format, DFPS.search);
@@ -1113,158 +1088,152 @@ public class Datafeed extends HttpServlet
 		//Get our parameters
 		String searchParam = req.getParameter("search");
 
-		if(searchParam.equals("id"))
-		{
-			CheckParameters(req, DFPS.fromid);
-			
-			String readAccessKey = null;
-			String reg = null;
-			int id = -1;
-			UserBean account = null;
-			
-			//is key or reg?
-			if(req.getParameter("readaccesskey") != null)
-			{
-				CheckParameters(req, DFPS.readaccesskey);
-				
-				//Get our name parameter for the make/model we want to retrieve
-				readAccessKey = req.getParameter("readaccesskey");
-				
-				//escape single quotes contained in the string
-				id = data.getUserGroupIdByReadAccessKey(readAccessKey);
-				
-				if(id == -1)
-					throw new DataError("No User or Group found for provided ReadAccessKey.");
+        switch (searchParam)
+        {
+            case "id":
+            {
+                CheckParameters(req, DFPS.fromid);
 
-				account = data.getAccountById(id);		
-			}
-			else if(req.getParameter("aircraftreg") != null)
-			{
-				CheckParameters(req, DFPS.aircraftreg);
+                String readAccessKey;
+                String reg = null;
+                int id;
+                UserBean account = null;
 
-				//See if there is a specific aircraft the information is desired for
-				reg = req.getParameter("aircraftreg");
-			}
-			else
-			{
-				throw new DataError("Invalid search parameter!");
-			}
-			
-			int fromid = 0;
-			String sfromid = (String)req.getParameter("fromid");
-			fromid = Integer.parseInt(sfromid);
-			
-			LogBean[] log;	
-			if(reg != null && !reg.isEmpty())
-			{
-				log = data.getLogForAircraftFromId(reg, fromid);
-			}
-			else if(req.getParameter("type")!= null && req.getParameter("type").toLowerCase().contains("groupaircraft"))
-			{
-				AircraftBean[] aircraft = data.getAircraftOwnedByUser(account.getId());
-				if(aircraft.length > 0) 
-				{	
-					String regs = "";
-					for (int c=0; c < aircraft.length; c++)
-					{
-						if(c==0)
-						{
-							regs = "'" + aircraft[c].getRegistration() + "'";
-						}
-						else
-						{
-							regs = regs + "'" + aircraft[c].getRegistration() + "'";
-						}
-						
-						if((c+1) < aircraft.length)
-							regs = regs + ", ";					
-					}
-					log = data.getLogForGroupFromRegistrations(regs, fromid);
-				}
-				else
-				{
-					log = null;
-				}
-			}
-			else if(account.isGroup())
-			{
-				log = data.getLogForGroupFromId(account.getId(), fromid);
-			}
-			else
-			{
-				log = data.getLogForUserFromId(account.getName(), fromid);
-			}
-			results = ProcessFlightLogs(req, log, "FlightLogsFromId");
-			
-		}
-		else if(searchParam.equals("monthyear"))
-		{
-			CheckParameters(req, DFPS.month, DFPS.year);
+                //is key or reg?
+                if (req.getParameter("readaccesskey") != null)
+                {
+                    CheckParameters(req, DFPS.readaccesskey);
 
-			//Get our name parameter for the make/model we want to retrieve
-			String readAccessKey = null;
-			String reg = null;
-			int id = -1;
-			UserBean account = null;
-			
-			//is key or reg?
-			if(req.getParameter("readaccesskey") != null)
-			{
-				CheckParameters(req, DFPS.readaccesskey);
+                    //Get our name parameter for the make/model we want to retrieve
+                    readAccessKey = req.getParameter("readaccesskey");
 
-				//Get our name parameter for the make/model we want to retrieve
-				readAccessKey = req.getParameter("readaccesskey");
+                    //escape single quotes contained in the string
+                    id = data.getUserGroupIdByReadAccessKey(readAccessKey);
 
-				//escape single quotes contained in the string
-				id = data.getUserGroupIdByReadAccessKey(readAccessKey);
-				if(id == -1)
-					throw new DataError("No User or Group found for provided ReadAccessKey.");
+                    if (id == -1)
+                        throw new DataError("No User or Group found for provided ReadAccessKey.");
 
-				account = data.getAccountById(id);				
-			}
-			else if(req.getParameter("aircraftreg") != null)
-			{				
-				CheckParameters(req, DFPS.aircraftreg);
-				
-				//See if there is a specific aircraft the information is desired for
-				reg = req.getParameter("aircraftreg");
-			}
-			else
-			{
-				throw new DataError("Invalid search parameter!");
-			}
-			
-			//Month parameter is required, so if there is an error send back the error message
-			int month;
-			int year; 
-			try
-			{
-				month = ValidateMonth(req.getParameter("month"));
-				year = ValidateYear(req.getParameter("year"), month);
-			}
-			catch(DataError e)
-			{
-				throw e;
-			}
+                    account = data.getAccountById(id);
+                }
+                else if (req.getParameter("aircraftreg") != null)
+                {
+                    CheckParameters(req, DFPS.aircraftreg);
 
-			LogBean[] log;	
-			if(reg != null && !reg.isEmpty())
-				log = data.getLogForAircraftByMonth(reg, month, year);
-			else if(account.isGroup())
-				log = data.getLogForGroupByMonth(account.getId(), month, year);
-			else
-				log = data.getLogForUserByMonth(account.getName(), month, year);
+                    //See if there is a specific aircraft the information is desired for
+                    reg = req.getParameter("aircraftreg");
+                }
+                else
+                {
+                    throw new DataError("Invalid search parameter!");
+                }
 
-			results = ProcessFlightLogs(req, log, "FlightLogsByMonthYear");
-		}
-		else
-		{
-			throw new DataError("Invalid search parameter!");
-		}
+                int fromid;
+                String sfromid = req.getParameter("fromid");
+                fromid = Integer.parseInt(sfromid);
+
+                LogBean[] log;
+                if (reg != null && !reg.isEmpty())
+                {
+                    log = data.getLogForAircraftFromId(reg, fromid);
+                }
+                else if (req.getParameter("type") != null && req.getParameter("type").toLowerCase().contains("groupaircraft"))
+                {
+                    AircraftBean[] aircraft = data.getAircraftOwnedByUser(account.getId());
+                    if (aircraft.length > 0)
+                    {
+                        String regs = "";
+                        for (int c = 0; c < aircraft.length; c++)
+                        {
+                            if (c == 0)
+                            {
+                                regs = "'" + aircraft[c].getRegistration() + "'";
+                            }
+                            else
+                            {
+                                regs = regs + "'" + aircraft[c].getRegistration() + "'";
+                            }
+
+                            if ((c + 1) < aircraft.length)
+                                regs = regs + ", ";
+                        }
+                        log = data.getLogForGroupFromRegistrations(regs, fromid);
+                    }
+                    else
+                    {
+                        log = null;
+                    }
+                }
+                else if (account.isGroup())
+                {
+                    log = data.getLogForGroupFromId(account.getId(), fromid);
+                }
+                else
+                {
+                    log = data.getLogForUserFromId(account.getName(), fromid);
+                }
+                results = ProcessFlightLogs(req, log, "FlightLogsFromId");
+
+                break;
+            }
+            case "monthyear":
+            {
+                CheckParameters(req, DFPS.month, DFPS.year);
+
+                //Get our name parameter for the make/model we want to retrieve
+                String readAccessKey;
+                String reg = null;
+                int id;
+                UserBean account = null;
+
+                //is key or reg?
+                if (req.getParameter("readaccesskey") != null)
+                {
+                    CheckParameters(req, DFPS.readaccesskey);
+
+                    //Get our name parameter for the make/model we want to retrieve
+                    readAccessKey = req.getParameter("readaccesskey");
+
+                    //escape single quotes contained in the string
+                    id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+                    if (id == -1)
+                        throw new DataError("No User or Group found for provided ReadAccessKey.");
+
+                    account = data.getAccountById(id);
+                }
+                else if (req.getParameter("aircraftreg") != null)
+                {
+                    CheckParameters(req, DFPS.aircraftreg);
+
+                    //See if there is a specific aircraft the information is desired for
+                    reg = req.getParameter("aircraftreg");
+                }
+                else
+                {
+                    throw new DataError("Invalid search parameter!");
+                }
+
+                //Month parameter is required, so if there is an error send back the error message
+                int month = ValidateMonth(req.getParameter("month"));
+                int year = ValidateYear(req.getParameter("year"), month);
+
+                LogBean[] log;
+                if (reg != null && !reg.isEmpty())
+                    log = data.getLogForAircraftByMonth(reg, month, year);
+                else if (account.isGroup())
+                    log = data.getLogForGroupByMonth(account.getId(), month, year);
+                else
+                    log = data.getLogForUserByMonth(account.getName(), month, year);
+
+                results = ProcessFlightLogs(req, log, "FlightLogsByMonthYear");
+                break;
+            }
+            default:
+                throw new DataError("Invalid search parameter!");
+        }
 		return results;
 	}
 
-	private String Payments(HttpServletRequest req, HttpServletResponse resp) throws DataError 
+	private String Payments(HttpServletRequest req) throws DataError
 	{
 		PaymentBean[] log = null;
 		
@@ -1287,24 +1256,15 @@ public class Datafeed extends HttpServlet
 		if(searchParam.equals("monthyear"))
 		{
 			//Month parameter is required, so if there is an error send back the error message
-			int month;
-			int year; 
-			try
-			{
-				month = ValidateMonth(req.getParameter("month"));
-				year = ValidateYear(req.getParameter("year"), month);
-			}
-			catch(DataError e)
-			{
-				throw e;
-			}
-			
+			int month = ValidateMonth(req.getParameter("month"));
+			int year = ValidateYear(req.getParameter("year"), month);
+
 			log = data.getPaymentsForIdByMonth(account.getId(), month, year);
 		}
 		else if(searchParam.equals("id"))
 		{
-			int fromid = 0;
-			String sfromid = (String)req.getParameter("fromid");
+			int fromid;
+			String sfromid = req.getParameter("fromid");
 			if( sfromid != null)
 				fromid = Integer.parseInt(sfromid);
 			else
@@ -1319,9 +1279,9 @@ public class Datafeed extends HttpServlet
 		return ProcessPayments(req, log, "PaymentsByMonthYear");
 	}
 
-	private String Group(HttpServletRequest req, HttpServletResponse resp) throws DataError 
+	private String Group(HttpServletRequest req) throws DataError
 	{
-		String results = null;
+		String results;
 		
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format, DFPS.search, DFPS.readaccesskey);
@@ -1332,7 +1292,7 @@ public class Datafeed extends HttpServlet
 		//Get our parameters
 		String searchParam = req.getParameter("search");
 		String readAccessKey = req.getParameter("readaccesskey");
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 		
 		//generate output buffer
@@ -1361,7 +1321,7 @@ public class Datafeed extends HttpServlet
 				String level = "ERROR";
 				if(members[c].getMemberships().containsKey(id))
 				{
-					Data.groupMemberData gmd = (Data.groupMemberData) members[c].getMemberships().get(id);
+					Data.groupMemberData gmd = members[c].getMemberships().get(id);
 					level = UserBean.getGroupLevelName(gmd.memberLevel);
 				}
 
@@ -1402,9 +1362,9 @@ public class Datafeed extends HttpServlet
 		return results;
 	}
 
-	private String Facilities(HttpServletRequest req, HttpServletResponse resp) throws DataError 
+	private String Facilities(HttpServletRequest req) throws DataError
 	{
-		String result = null;
+		String result;
 		
 		CheckParameters(req, DFPS.format, DFPS.search, DFPS.readaccesskey);
 
@@ -1427,7 +1387,7 @@ public class Datafeed extends HttpServlet
 		return result;
 	}
 
-	private String Fbos(HttpServletRequest req, HttpServletResponse resp) throws DataError 
+	private String Fbos(HttpServletRequest req) throws DataError
 	{
 		String result = null;
 		
@@ -1435,93 +1395,90 @@ public class Datafeed extends HttpServlet
 
 		//Get our parameters
 		String searchParam = req.getParameter("search");
-		
-		if(searchParam.equals("key"))
-		{
-			CheckParameters(req, DFPS.format, DFPS.readaccesskey);
-			//Get our name parameter for the make/model we want to retrieve
-			String readAccessKey = req.getParameter("readaccesskey");
-	
-			//escape single quotes contained in the string
-			int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
-			if(id == -1)
-				throw new DataError("No User or Group found for provided ReadAccessKey.");
-			
-			//get selected aircraft
-			FboBean[] fbos = data.getFboByOwner(id);
-			result = ProcessFbos(req, fbos, "FboByKey");
-		}
-		else if(searchParam.equals("monthlysummary"))
-		{
-			CheckParameters(req, DFPS.format, DFPS.readaccesskey, DFPS.month, DFPS.year, DFPS.icao);
-			
-			Converters.csvBuffer csvoutput = null;
-			Converters.xmlBuffer xmloutput = null;
-			
-			//Get our name parameter for the make/model we want to retrieve
-			String readAccessKey = req.getParameter("readaccesskey");
-			String format = (String)req.getParameter("format");
-			boolean csvformat = format.compareToIgnoreCase("csv") == 0;
-			
-			//generate output buffer
-			if(csvformat)
-				csvoutput = new Converters.csvBuffer();
-			else
-				xmloutput = new Converters.xmlBuffer();
 
-			//escape single quotes contained in the string
-			int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
-			if(id == -1)
-				throw new DataError("No User or Group found for provided ReadAccessKey.");
+        switch (searchParam)
+        {
+            case "key":
+            {
+                CheckParameters(req, DFPS.format, DFPS.readaccesskey);
+                //Get our name parameter for the make/model we want to retrieve
+                String readAccessKey = req.getParameter("readaccesskey");
 
-			UserBean account = data.getAccountById(id);				
+                //escape single quotes contained in the string
+                int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+                if (id == -1)
+                    throw new DataError("No User or Group found for provided ReadAccessKey.");
 
-			String icao = (String) req.getParameter("icao");
-			
-			//if key owns fbo at icao continue, else throw access error!
-			String sql = "select * from fbo where location='" + icao + "' and owner=" + account.getId();
-			FboBean[] fbo = data.getFboSql(sql);
-			if(fbo == null || fbo.length == 0)
-				throw new DataError("No fbo found for provided ReadAccessKey.");
+                //get selected aircraft
+                FboBean[] fbos = data.getFboByOwner(id);
+                result = ProcessFbos(req, fbos, "FboByKey");
+                break;
+            }
+            case "monthlysummary":
+            {
+                CheckParameters(req, DFPS.format, DFPS.readaccesskey, DFPS.month, DFPS.year, DFPS.icao);
 
-			//Month parameter is required, so if there is an error send back the error message
-			int month;
-			int year; 
-			try
-			{
-				month = ValidateMonth(req.getParameter("month"));
-				year = ValidateYear(req.getParameter("year"), month);
-			}
-			catch(DataError e)
-			{
-				throw e;
-			}
-			
-			if(csvformat)
-				AddCSVFboPaymentSummaryItem(csvoutput, account, fbo[0], icao, month, year);
-			else
-				AddXMLFboPaymentSummaryItem(xmloutput, account, fbo[0], icao, month, year);
-			
-			if(csvformat)
-				result = csvoutput.toString();
-			else
-			{
-				String xsd = GetXsdByQuery("FboMonthlySummary");
-				result =  GetXMLHeader() + "<FboMonthlySummaryItems" + xsd + ">\n" + xmloutput.toString() + "</FboMonthlySummaryItems>\n";
-			}
-		}
-		else if(searchParam.equals("forsale"))
-		{
-			//get list of aircraft for sale
-			FboBean[] fbos = data.getFboForSale();
+                Converters.csvBuffer csvoutput = null;
+                Converters.xmlBuffer xmloutput = null;
 
-			result = ProcessFbos(req, fbos, "FbosForSale");				
-		}
+                //Get our name parameter for the make/model we want to retrieve
+                String readAccessKey = req.getParameter("readaccesskey");
+                String format = req.getParameter("format");
+                boolean csvformat = format.compareToIgnoreCase("csv") == 0;
+
+                //generate output buffer
+                if (csvformat)
+                    csvoutput = new Converters.csvBuffer();
+                else
+                    xmloutput = new Converters.xmlBuffer();
+
+                //escape single quotes contained in the string
+                int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+                if (id == -1)
+                    throw new DataError("No User or Group found for provided ReadAccessKey.");
+
+                UserBean account = data.getAccountById(id);
+
+                String icao = req.getParameter("icao");
+
+                //if key owns fbo at icao continue, else throw access error!
+                String sql = "select * from fbo where location='" + icao + "' and owner=" + account.getId();
+                FboBean[] fbo = data.getFboSql(sql);
+                if (fbo == null || fbo.length == 0)
+                    throw new DataError("No fbo found for provided ReadAccessKey.");
+
+                //Month parameter is required, so if there is an error send back the error message
+                int month = ValidateMonth(req.getParameter("month"));
+                int year = ValidateYear(req.getParameter("year"), month);
+
+                if (csvformat)
+                    AddCSVFboPaymentSummaryItem(csvoutput, account, fbo[0], icao, month, year);
+                else
+                    AddXMLFboPaymentSummaryItem(xmloutput, account, fbo[0], icao, month, year);
+
+                if (csvformat)
+                    result = csvoutput.toString();
+                else
+                {
+                    String xsd = GetXsdByQuery("FboMonthlySummary");
+                    result = GetXMLHeader() + "<FboMonthlySummaryItems" + xsd + ">\n" + xmloutput.toString() + "</FboMonthlySummaryItems>\n";
+                }
+                break;
+            }
+            case "forsale":
+            {
+                //get list of aircraft for sale
+                FboBean[] fbos = data.getFboForSale();
+
+                result = ProcessFbos(req, fbos, "FbosForSale");
+                break;
+            }
+        }
 		
 		return result;
 	}
 
-	private String Icao(HttpServletRequest req, HttpServletResponse resp) throws DataError 
+	private String Icao(HttpServletRequest req) throws DataError
 	{
 		String results = null;
 		
@@ -1529,99 +1486,104 @@ public class Datafeed extends HttpServlet
 
 		//Get our parameters
 		String searchParam = req.getParameter("search");
-		
-		if(searchParam.equals("aircraft"))
-		{
-			//Get our name parameter for the make/model we want to retrieve
-			String icao = (String) req.getParameter("icao");
 
-			//get selected aircraft
-			AircraftBean[] aircraft = data.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND location='" + icao + "' ORDER BY make, models.model");
+        switch (searchParam)
+        {
+            case "aircraft":
+            {
+                //Get our name parameter for the make/model we want to retrieve
+                String icao = req.getParameter("icao");
 
-			results = ProcessAircraft(req, aircraft, "IcaoAircraft");
-		}
-		else if(searchParam.equals("fbo"))
-		{
-			CheckParameters(req, DFPS.icao);
-			//**
-			//** Cannot use ProcessFbos here because we are adding in System Fbos after the main loop
-			//**
-			Converters.csvBuffer csvoutput = null;
-			Converters.xmlBuffer xmloutput = null;
-			int numfbos = 0;
-			
-			//Get our name parameter for the make/model we want to retrieve
-			String icao = (String) req.getParameter("icao");
-			String format = (String)req.getParameter("format");
-			boolean csvformat = format.compareToIgnoreCase("csv") == 0;
-			
-			//generate output buffer
-			if(csvformat)
-				csvoutput = new Converters.csvBuffer();
-			else
-				xmloutput = new Converters.xmlBuffer();
+                //get selected aircraft
+                AircraftBean[] aircraft = data.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND location='" + icao + "' ORDER BY make, models.model");
 
-			FboBean[] fbos = data.getFboByLocation(icao);
-			
-			if(fbos != null && fbos.length !=0)
-			{
-				//throw new DataError("No active FBO Found.\n");
+                results = ProcessAircraft(req, aircraft, "IcaoAircraft");
+                break;
+            }
+            case "fbo":
+            {
+                CheckParameters(req, DFPS.icao);
+                //**
+                //** Cannot use ProcessFbos here because we are adding in System Fbos after the main loop
+                //**
+                Converters.csvBuffer csvoutput = null;
+                Converters.xmlBuffer xmloutput = null;
+                int numfbos = 0;
 
-				//create an aircraft tag section for each alias
-				if(csvformat)
-					AddCSVFboItems(csvoutput, fbos, false);
-				else
-					AddXMLFboItems(xmloutput, fbos, false);
-				
-				numfbos = fbos.length;
-			}
-			
-			AirportBean airport = data.getAirport(icao);
+                //Get our name parameter for the make/model we want to retrieve
+                String icao = req.getParameter("icao");
+                String format = req.getParameter("format");
+                boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 
-			//Check if system resources available
-			if(airport != null && (airport.isAvgas() || airport.isJetA() || airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE))
-			{		
-				if(csvformat)
-					AddCSVSystemFboItem(csvoutput, airport);
-				else
-					AddXMLSystemFboItem(xmloutput, airport);
-			}
-			
-			//save to our output string
-			String xsd = GetXsdByQuery("IcaoFbos");
-			results =  GetXMLHeader() + "<IcaoFboItems total=\"" + numfbos + "\"" + xsd + ">\n" + xmloutput.toString() + "</IcaoFboItems>\n";
-		}
-		else if(searchParam.equals("jobsto") || searchParam.equals("jobsfrom"))
-		{
-			AssignmentBean[] assignments = null;
-			String icaos = (String) req.getParameter("icaos");		
-			
-			//Expected Icaos format: CZFA-CEX4-CFP4
-			//Kick if any quotes or semicolons found, could be injected sql
-			if(icaos.indexOf("\'") > -1 || icaos.indexOf(";") > -1)
-				throw new DataError("Invalid character detected. Format to use: CZFA-CEX4-CFP4");
-			
-			icaos = "'" + icaos.replaceAll("-", "','").trim() + "'";
+                //generate output buffer
+                if (csvformat)
+                    csvoutput = new Converters.csvBuffer();
+                else
+                    xmloutput = new Converters.xmlBuffer();
 
-			if(searchParam.equals("jobsfrom"))
-			{
-				assignments = data.getAssignmentsFromAirport(icaos);
-				results = ProcessJobs(req, assignments, "IcaoJobsFrom");
-			}
-			else
-			{
-				assignments = data.getAssignmentsToAirport(icaos);
-				results = ProcessJobs(req, assignments, "IcaoJobsTo");
-			}
-		}
+                FboBean[] fbos = data.getFboByLocation(icao);
+
+                if (fbos != null && fbos.length != 0)
+                {
+                    //throw new DataError("No active FBO Found.\n");
+
+                    //create an aircraft tag section for each alias
+                    if (csvformat)
+                        AddCSVFboItems(csvoutput, fbos, false);
+                    else
+                        AddXMLFboItems(xmloutput, fbos, false);
+
+                    numfbos = fbos.length;
+                }
+
+                AirportBean airport = data.getAirport(icao);
+
+                //Check if system resources available
+                if (airport != null && (airport.isAvgas() || airport.isJetA() || airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE))
+                {
+                    if (csvformat)
+                        AddCSVSystemFboItem(csvoutput, airport);
+                    else
+                        AddXMLSystemFboItem(xmloutput, airport);
+                }
+
+                //save to our output string
+                String xsd = GetXsdByQuery("IcaoFbos");
+                results = GetXMLHeader() + "<IcaoFboItems total=\"" + numfbos + "\"" + xsd + ">\n" + xmloutput.toString() + "</IcaoFboItems>\n";
+                break;
+            }
+            case "jobsto":
+            case "jobsfrom":
+                AssignmentBean[] assignments;
+                String icaos = req.getParameter("icaos");
+
+                //Expected Icaos format: CZFA-CEX4-CFP4
+                //Kick if any quotes or semicolons found, could be injected sql
+                if (icaos.contains("\'") || icaos.contains(";"))
+                    throw new DataError("Invalid character detected. Format to use: CZFA-CEX4-CFP4");
+
+                icaos = "'" + icaos.replaceAll("-", "','").trim() + "'";
+
+                if (searchParam.equals("jobsfrom"))
+                {
+                    assignments = data.getAssignmentsFromAirport(icaos);
+                    results = ProcessJobs(req, assignments, "IcaoJobsFrom");
+                }
+                else
+                {
+                    assignments = data.getAssignmentsToAirport(icaos);
+                    results = ProcessJobs(req, assignments, "IcaoJobsTo");
+                }
+                break;
+        }
 		return results;
 	}
 
-	private String Aircraft(HttpServletRequest req, HttpServletResponse resp) throws DataError 
+	private String Aircraft(HttpServletRequest req) throws DataError
 	{
 		int id = -1;
-		AircraftBean[] aircraft = null;
-		String queryname = "";
+		AircraftBean[] aircraft;
+		String queryname;
 		
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format, DFPS.search);
@@ -1646,11 +1608,11 @@ public class Datafeed extends HttpServlet
 		}
 		else if(searchParam.equals("configs"))
 		{
-			return AircraftConfigs(req, resp);
+			return AircraftConfigs(req);
 		}
 		else if(searchParam.equals("aliases"))
 		{
-			return AircraftAliases(req, resp);
+			return AircraftAliases(req);
 		}
 		else if(searchParam.equals("forsale"))
 		{
@@ -1663,7 +1625,7 @@ public class Datafeed extends HttpServlet
 			CheckParameters(req, DFPS.makemodel);
 			
 			//Get our name parameter for the make/model we want to retrieve
-			String aircraftname = (String) req.getParameter("makemodel");
+			String aircraftname = req.getParameter("makemodel");
 
 			//escape single quotes contained in the string
 			aircraftname = aircraftname.replaceAll("'", "\\\\'").replaceAll(";","");
@@ -1677,7 +1639,7 @@ public class Datafeed extends HttpServlet
 			CheckParameters(req, DFPS.ownername);
 			
 			//Get our name parameter for the make/model we want to retrieve
-			String ownersname = (String) req.getParameter("ownername");
+			String ownersname = req.getParameter("ownername");
 
 			//escape single quotes contained in the string
 			ownersname = ownersname.replaceAll("'", "\\\\'").replaceAll(";","");
@@ -1706,7 +1668,7 @@ public class Datafeed extends HttpServlet
 			CheckParameters(req, DFPS.aircraftreg);
 			
 			//Get our name parameter for the make/model we want to retrieve
-			String registration = (String) req.getParameter("aircraftreg");
+			String registration = req.getParameter("aircraftreg");
 
 			//escape single quotes contained in the string
 			registration = registration.replaceAll("'", "\\\\'").replaceAll(";","");
@@ -1722,7 +1684,7 @@ public class Datafeed extends HttpServlet
 			Converters.xmlBuffer output = new Converters.xmlBuffer();
 			
 			//Get our name parameter for the make/model we want to retrieve
-			String aircraftreg = (String) req.getParameter("aircraftreg");
+			String aircraftreg = req.getParameter("aircraftreg");
 
 			//escape single quotes contained in the string
 			aircraftreg = aircraftreg.replaceAll("'", "\\\\'").replaceAll(";","");
@@ -1759,12 +1721,12 @@ public class Datafeed extends HttpServlet
 		return ProcessAircraft(req, aircraft, queryname);
 	}
 
-	private String AircraftAliases(HttpServletRequest req, HttpServletResponse resp) 
+	private String AircraftAliases(HttpServletRequest req)
 	{
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 		
 		//generate output buffer
@@ -1785,12 +1747,12 @@ public class Datafeed extends HttpServlet
 		
 		if(csvformat)
 		{
-			for (int c=0; c < aircraft.length; c++)
-			{
-				csvoutput.append(aircraft[c].model);
-				csvoutput.append(aircraft[c].fsName);
-				csvoutput.newrow();
-			}		
+            for (Data.AircraftAlias anAircraft : aircraft)
+            {
+                csvoutput.append(anAircraft.model);
+                csvoutput.append(anAircraft.fsName);
+                csvoutput.newrow();
+            }
 		}
 		else
 		{		
@@ -1826,12 +1788,12 @@ public class Datafeed extends HttpServlet
 		}
 	}
 
-	private String AircraftConfigs(HttpServletRequest req, HttpServletResponse resp) 
+	private String AircraftConfigs(HttpServletRequest req)
 	{
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 		
 		//generate output buffer
@@ -1871,62 +1833,63 @@ public class Datafeed extends HttpServlet
 		}
 		
 		//create an aircraft tag section for each config
-		for (int c=0; c < aircraft.length; c++)
-		{			
-			if(csvformat)
-			{
-				csvoutput.append(aircraft[c].makemodel);			
-				csvoutput.append(aircraft[c].crew);
-				csvoutput.append(aircraft[c].seats);
-				csvoutput.append(aircraft[c].cruisespeed);
-				csvoutput.append(aircraft[c].gph);
-				csvoutput.append(aircraft[c].fueltype);
-				csvoutput.append(aircraft[c].maxWeight);
-				csvoutput.append(aircraft[c].emptyWeight);
-				csvoutput.appendMoney(aircraft[c].price);
-				csvoutput.append(aircraft[c].fcapExt1);
-				csvoutput.append(aircraft[c].fcapLeftTip);
-				csvoutput.append(aircraft[c].fcapLeftAux);
-				csvoutput.append(aircraft[c].fcapLeftMain);
-				csvoutput.append(aircraft[c].fcapCenter);
-				csvoutput.append(aircraft[c].fcapCenter2);
-				csvoutput.append(aircraft[c].fcapCenter3);
-				csvoutput.append(aircraft[c].fcapRightMain);
-				csvoutput.append(aircraft[c].fcapRightAux);
-				csvoutput.append(aircraft[c].fcapRightTip);
-				csvoutput.append(aircraft[c].fcapExt2);
-				csvoutput.append(aircraft[c].engines);
-				csvoutput.appendMoney(aircraft[c].enginePrice);
-				csvoutput.newrow();
-			}
-			else
-			{
-				xmloutput.append("<AircraftConfig>\n");
-				xmloutput.append("MakeModel", aircraft[c].makemodel);			
-				xmloutput.append("Crew", aircraft[c].crew);
-				xmloutput.append("Seats", aircraft[c].seats);
-				xmloutput.append("CruiseSpeed", aircraft[c].cruisespeed);
-				xmloutput.append("GPH", aircraft[c].gph);
-				xmloutput.append("FuelType", aircraft[c].fueltype);
-				xmloutput.append("MTOW", aircraft[c].maxWeight);
-				xmloutput.append("EmptyWeight", aircraft[c].emptyWeight);
-				xmloutput.appendMoney("Price", aircraft[c].price);
-				xmloutput.append("Ext1", aircraft[c].fcapExt1);
-				xmloutput.append("LTip", aircraft[c].fcapLeftTip);
-				xmloutput.append("LAux", aircraft[c].fcapLeftAux);
-				xmloutput.append("LMain", aircraft[c].fcapLeftMain);
-				xmloutput.append("Center1", aircraft[c].fcapCenter);
-				xmloutput.append("Center2", aircraft[c].fcapCenter2);
-				xmloutput.append("Center3", aircraft[c].fcapCenter3);
-				xmloutput.append("RMain", aircraft[c].fcapRightMain);
-				xmloutput.append("RAux", aircraft[c].fcapRightAux);
-				xmloutput.append("RTip", aircraft[c].fcapRightTip);
-				xmloutput.append("Ext2", aircraft[c].fcapExt2);
-				xmloutput.append("Engines", aircraft[c].engines);
-				xmloutput.appendMoney("EnginePrice", aircraft[c].enginePrice);
-				xmloutput.append("</AircraftConfig>\n");
-			}
-		}
+        for (Data.aircraftConfigs anAircraft : aircraft)
+        {
+            if (csvformat)
+            {
+                csvoutput.append(anAircraft.makemodel);
+                csvoutput.append(anAircraft.crew);
+                csvoutput.append(anAircraft.seats);
+                csvoutput.append(anAircraft.cruisespeed);
+                csvoutput.append(anAircraft.gph);
+                csvoutput.append(anAircraft.fueltype);
+                csvoutput.append(anAircraft.maxWeight);
+                csvoutput.append(anAircraft.emptyWeight);
+                csvoutput.appendMoney(anAircraft.price);
+                csvoutput.append(anAircraft.fcapExt1);
+                csvoutput.append(anAircraft.fcapLeftTip);
+                csvoutput.append(anAircraft.fcapLeftAux);
+                csvoutput.append(anAircraft.fcapLeftMain);
+                csvoutput.append(anAircraft.fcapCenter);
+                csvoutput.append(anAircraft.fcapCenter2);
+                csvoutput.append(anAircraft.fcapCenter3);
+                csvoutput.append(anAircraft.fcapRightMain);
+                csvoutput.append(anAircraft.fcapRightAux);
+                csvoutput.append(anAircraft.fcapRightTip);
+                csvoutput.append(anAircraft.fcapExt2);
+                csvoutput.append(anAircraft.engines);
+                csvoutput.appendMoney(anAircraft.enginePrice);
+                csvoutput.newrow();
+            }
+            else
+            {
+                xmloutput.append("<AircraftConfig>\n");
+                xmloutput.append("MakeModel", anAircraft.makemodel);
+                xmloutput.append("Crew", anAircraft.crew);
+                xmloutput.append("Seats", anAircraft.seats);
+                xmloutput.append("CruiseSpeed", anAircraft.cruisespeed);
+                xmloutput.append("GPH", anAircraft.gph);
+                xmloutput.append("FuelType", anAircraft.fueltype);
+                xmloutput.append("MTOW", anAircraft.maxWeight);
+                xmloutput.append("EmptyWeight", anAircraft.emptyWeight);
+                xmloutput.appendMoney("Price", anAircraft.price);
+                xmloutput.append("Ext1", anAircraft.fcapExt1);
+                xmloutput.append("LTip", anAircraft.fcapLeftTip);
+                xmloutput.append("LAux", anAircraft.fcapLeftAux);
+                xmloutput.append("LMain", anAircraft.fcapLeftMain);
+                xmloutput.append("Center1", anAircraft.fcapCenter);
+                xmloutput.append("Center2", anAircraft.fcapCenter2);
+                xmloutput.append("Center3", anAircraft.fcapCenter3);
+                xmloutput.append("RMain", anAircraft.fcapRightMain);
+                xmloutput.append("RAux", anAircraft.fcapRightAux);
+                xmloutput.append("RTip", anAircraft.fcapRightTip);
+                xmloutput.append("Ext2", anAircraft.fcapExt2);
+                xmloutput.append("Engines", anAircraft.engines);
+                xmloutput.appendMoney("EnginePrice", anAircraft.enginePrice);
+                xmloutput.append("</AircraftConfig>\n");
+            }
+        }
+
 		if(csvformat)
 			return csvoutput.toString();
 		else
@@ -1969,27 +1932,35 @@ public class Datafeed extends HttpServlet
 	private void CheckParameters(HttpServletRequest req, DFPS ... params) throws DataError
 	{
 		String error = null;
-		
-		for(int i = 0;i<params.length;i++)
-		{
-			//Get our parameter
-			String param = (String)req.getParameter(params[i].name());
-			
-			if(param == null || param.isEmpty())
-			{
-				//if year, ignore as its allowed to be missing
-				if(params[i] == DFPS.year)
-					continue;
-				
-				if(error != null)
-					error += ", " + params[i].name();
-				else
-					error = params[i].name(); 
-			}
-			else if( params[i] == DFPS.icao && param.length() > 4)
-				throw new DataError("ICAO invalid format.\n");
 
-		}
+        for (DFPS param1 : params)
+        {
+            //Get our parameter
+            String param = req.getParameter(param1.name());
+
+            if (param == null || param.isEmpty())
+            {
+                //if year, ignore as its allowed to be missing
+                if (param1 == DFPS.year)
+                {
+                    continue;
+                }
+
+                if (error != null)
+                {
+                    error += ", " + param1.name();
+                }
+                else
+                {
+                    error = param1.name();
+                }
+            }
+            else if (param1 == DFPS.icao && param.length() > 4)
+            {
+                throw new DataError("ICAO invalid format.\n");
+            }
+        }
+
 		if(error != null)
 			throw new DataError("Missing parameters found! [" + error + "]");
 	}
@@ -1999,7 +1970,6 @@ public class Datafeed extends HttpServlet
 	 * @param cacheName - string identifying the cache in CacheManager cacheManager
 	 * @param cacheItem - string identifying the item from the cache to return if available
 	 * @return String - cached string value, or "" if not found
-	 * @author Airboss
 	 */
 	public String CheckCacheForItem(String cacheName, String cacheItem)
 	{
@@ -2015,7 +1985,7 @@ public class Datafeed extends HttpServlet
 		//Get our stored item
 		Element e = cache.get(cacheItem);
 		if( e != null) //Found it!, otherwise default is returned
-			s = (String) e.getValue();
+			s = (String) e.getObjectValue();
 		
 		return s;
 	}
@@ -2023,8 +1993,7 @@ public class Datafeed extends HttpServlet
 	String TimeToHrsMins(int time)
 	{
 		int minutes = (int)((time + 30) / 60.0);
-		String s = Formatters.oneDigit.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
-		return s;
+        return Formatters.oneDigit.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
 	}	
 	
 	private int ValidateMonth(String mon) throws DataError
@@ -2083,7 +2052,7 @@ public class Datafeed extends HttpServlet
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 
 		//generate output buffer
@@ -2112,7 +2081,7 @@ public class Datafeed extends HttpServlet
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 
 		//generate output buffer
@@ -2141,7 +2110,7 @@ public class Datafeed extends HttpServlet
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 
 		//generate output buffer
@@ -2170,7 +2139,7 @@ public class Datafeed extends HttpServlet
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 
 		//generate output buffer
@@ -2181,9 +2150,9 @@ public class Datafeed extends HttpServlet
 
 		//create an aircraft tag section for each alias
 		if(csvformat)
-			AddCSVFacilityItems(csvoutput, facs, true);
+			AddCSVFacilityItems(csvoutput, facs);
 		else
-			AddXMLFacilityItems(xmloutput, facs, true);					
+			AddXMLFacilityItems(xmloutput, facs);
 		
 		if(csvformat)
 			return csvoutput.toString();
@@ -2199,7 +2168,7 @@ public class Datafeed extends HttpServlet
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 
 		//generate output buffer
@@ -2228,7 +2197,7 @@ public class Datafeed extends HttpServlet
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
 		
-		String format = (String)req.getParameter("format");
+		String format = req.getParameter("format");
 		boolean csvformat = format.compareToIgnoreCase("csv") == 0;
 
 		//generate output buffer
@@ -2552,111 +2521,125 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("Locked");			
 			buffer.appendHeaderItem("Comment");			
 		}
-		
-		for (int c=0; c < assignments.length; c++)
-		{			
-			AssignmentBean assignment = assignments[c];
-			
-			Map<String, Integer> flightsMap = new HashMap<String, Integer>();		
-			AircraftBean[] aircraft = data.getAircraftForUser(id);		
-		    if (aircraft.length > 0)
-		    	flightsMap = data.getMyFlightInfo(aircraft[0], id);
-			
-			UserBean lockedBy = null;
-			if (assignment.getUserlock() != 0) 
-				lockedBy =  data.getAccountById(assignment.getUserlock());
-			
-			String locked = lockedBy == null ? "-" : lockedBy.getName();
-			
-			String status;
-	        if (assignment.getActive() > 0)
-	        	status = assignment.getActive() == 2 ? "On Hold" : "Enroute";
-	        else if (flightsMap != null && flightsMap.containsKey((new Integer(assignment.getId()).toString())))
-	        	status = "Departing";
-	        else
-	        	status = "Selected";
-	
-	        String location = "";
-	        location = assignment.getLocation() == null ? "enroute" : assignment.getLocation();
-	
-	        String noHTMLAssignment = assignment.getSCargo().replaceAll("\\<.*?>","");
-	
-	        String expires = "";
-	        expires = assignment.getExpires() == null ? "never" : assignment.getSExpires();
-	
-	        buffer.append(assignment.getId());        
-	        buffer.append(status);        
-			buffer.append(location);        
-			buffer.append(assignment.getFrom());
-			buffer.append(assignment.getTo());
-			//buffer.append(assignment.getActualDistance(data));
-			//buffer.append(Formatters.threeDigits.format(assignment.getActualBearing(data)));
-			buffer.append(noHTMLAssignment);
-			buffer.append(assignment.getAmount());
-			buffer.append(assignment.getSUnits());
-			buffer.appendMoney(assignment.calcPay());
-			buffer.appendMoney(assignment.getPilotFee());		
-			buffer.append(expires);
-			buffer.append(assignment.getExpires() == null ? "9999/1/1 00:00:00": assignment.getExpiresGMTDate());
-			buffer.append(locked);	
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(assignment.getComment()));
-			buffer.newrow();	
-		}
+
+        for (AssignmentBean assignment : assignments)
+        {
+            Map<String, Integer> flightsMap = new HashMap<>();
+            AircraftBean[] aircraft = data.getAircraftForUser(id);
+            if (aircraft.length > 0)
+            {
+                flightsMap = data.getMyFlightInfo(aircraft[0], id);
+            }
+
+            UserBean lockedBy = null;
+            if (assignment.getUserlock() != 0)
+            {
+                lockedBy = data.getAccountById(assignment.getUserlock());
+            }
+
+            String locked = lockedBy == null ? "-" : lockedBy.getName();
+
+            String status;
+            if (assignment.getActive() > 0)
+            {
+                status = assignment.getActive() == 2 ? "On Hold" : "Enroute";
+            }
+            else if (flightsMap != null && flightsMap.containsKey((Integer.toString(assignment.getId()))))
+            {
+                status = "Departing";
+            }
+            else
+            {
+                status = "Selected";
+            }
+
+            String location;
+            location = assignment.getLocation() == null ? "enroute" : assignment.getLocation();
+
+            String noHTMLAssignment = assignment.getSCargo().replaceAll("<.*?>", "");
+
+            String expires;
+            expires = assignment.getExpires() == null ? "never" : assignment.getSExpires();
+
+            buffer.append(assignment.getId());
+            buffer.append(status);
+            buffer.append(location);
+            buffer.append(assignment.getFrom());
+            buffer.append(assignment.getTo());
+            //buffer.append(assignment.getActualDistance(data));
+            //buffer.append(Formatters.threeDigits.format(assignment.getActualBearing(data)));
+            buffer.append(noHTMLAssignment);
+            buffer.append(assignment.getAmount());
+            buffer.append(assignment.getSUnits());
+            buffer.appendMoney(assignment.calcPay());
+            buffer.appendMoney(assignment.getPilotFee());
+            buffer.append(expires);
+            buffer.append(assignment.getExpires() == null ? "9999/1/1 00:00:00" : assignment.getExpiresGMTDate());
+            buffer.append(locked);
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(assignment.getComment()));
+            buffer.newrow();
+        }
 	}
 
 	void AddXMLAssignmentItems(Converters.xmlBuffer buffer, AssignmentBean[] assignments, int id) throws DataError
-	{		
-		for (int c=0; c < assignments.length; c++)
-		{			
-			AssignmentBean assignment = assignments[c];
-			
-			Map<String, Integer> flightsMap = new HashMap<String, Integer>();		
-			AircraftBean[] aircraft = data.getAircraftForUser(id);		
-		    if (aircraft.length > 0)
-		    	flightsMap = data.getMyFlightInfo(aircraft[0], id);
-			
-			UserBean lockedBy = null;
-			if (assignment.getUserlock() != 0) 
-			{
-				lockedBy =  data.getAccountById(assignment.getUserlock());
-			}
-			String locked = lockedBy == null ? "-" : lockedBy.getName();
-			
-			String status;
-	        if (assignment.getActive() > 0)
-	        	status = assignment.getActive() == 2 ? "On Hold" : "Enroute";
-	        else if (flightsMap != null && flightsMap.containsKey((new Integer(assignment.getId()).toString())))
-	        	status = "Departing";
-	        else
-	        	status = "Selected";
-	
-	        String location = "";
-	        location = assignment.getLocation() == null ? "enroute" : assignment.getLocation();
-	
-	        String noHTMLAssignment = assignment.getSCargo().replaceAll("\\<.*?>","");
-	
-	        String expires = "";
-	        expires = assignment.getExpires() == null ? "never" : assignment.getSExpires();
-	
-			buffer.append("<Assignment>\n");		
-	        buffer.append("Id", assignment.getId());        
-	        buffer.append("Status", status);        
-			buffer.append("Location", location);        
-			buffer.append("From", assignment.getFrom());
-			buffer.append("Destination", assignment.getTo());
-			//buffer.append("NM", assignment.getActualDistance(data));
-			//buffer.append("Bearing", Formatters.threeDigits.format(assignment.getActualBearing(data)));
-			buffer.append("Assignment", noHTMLAssignment);
-			buffer.append("Amount", assignment.getAmount());
-			buffer.append("Units", assignment.getSUnits());
-			buffer.appendMoney("Pay", assignment.calcPay());
-			buffer.appendMoney("PilotFee", assignment.getPilotFee());		
-			buffer.append("Expires", expires);		
-			buffer.append("ExpireDateTime", assignment.getExpires() == null ? "9999/1/1 00:00:00": assignment.getExpiresGMTDate());		
-			buffer.append("Locked", locked);	
-			buffer.append("Comment", Converters.XMLHelper.protectSpecialCharacters(assignment.getComment()));
-			buffer.append("</Assignment>\n");
-		}
+	{
+        for (AssignmentBean assignment : assignments)
+        {
+            Map<String, Integer> flightsMap = new HashMap<>();
+            AircraftBean[] aircraft = data.getAircraftForUser(id);
+            if (aircraft.length > 0)
+            {
+                flightsMap = data.getMyFlightInfo(aircraft[0], id);
+            }
+
+            UserBean lockedBy = null;
+            if (assignment.getUserlock() != 0)
+            {
+                lockedBy = data.getAccountById(assignment.getUserlock());
+            }
+            String locked = lockedBy == null ? "-" : lockedBy.getName();
+
+            String status;
+            if (assignment.getActive() > 0)
+            {
+                status = assignment.getActive() == 2 ? "On Hold" : "Enroute";
+            }
+            else if (flightsMap != null && flightsMap.containsKey((Integer.toString(assignment.getId()))))
+            {
+                status = "Departing";
+            }
+            else
+            {
+                status = "Selected";
+            }
+
+            String location;
+            location = assignment.getLocation() == null ? "enroute" : assignment.getLocation();
+
+            String noHTMLAssignment = assignment.getSCargo().replaceAll("<.*?>", "");
+
+            String expires;
+            expires = assignment.getExpires() == null ? "never" : assignment.getSExpires();
+
+            buffer.append("<Assignment>\n");
+            buffer.append("Id", assignment.getId());
+            buffer.append("Status", status);
+            buffer.append("Location", location);
+            buffer.append("From", assignment.getFrom());
+            buffer.append("Destination", assignment.getTo());
+            //buffer.append("NM", assignment.getActualDistance(data));
+            //buffer.append("Bearing", Formatters.threeDigits.format(assignment.getActualBearing(data)));
+            buffer.append("Assignment", noHTMLAssignment);
+            buffer.append("Amount", assignment.getAmount());
+            buffer.append("Units", assignment.getSUnits());
+            buffer.appendMoney("Pay", assignment.calcPay());
+            buffer.appendMoney("PilotFee", assignment.getPilotFee());
+            buffer.append("Expires", expires);
+            buffer.append("ExpireDateTime", assignment.getExpires() == null ? "9999/1/1 00:00:00" : assignment.getExpiresGMTDate());
+            buffer.append("Locked", locked);
+            buffer.append("Comment", Converters.XMLHelper.protectSpecialCharacters(assignment.getComment()));
+            buffer.append("</Assignment>\n");
+        }
 	}
 
 	void AddCSVFlightLogItems(Converters.csvBuffer buffer, LogBean[] logs)
@@ -2687,131 +2670,149 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("RentalUnits");
 			buffer.appendHeaderItem("RentalCost");
 		}
-		
-		for (int c = 0; c < logs.length; c++)
-		{		
-			LogBean log = logs[c];
-			
-			String type = "None";
-			AircraftBean[] aircraft = data.getAircraftByRegistration(log.getAircraft());
-			if(aircraft != null && aircraft.length > 0)
-				type = aircraft[0].getMakeModel();
-			
-			String groupName = "";		
-			if(log.getGroupId() > 0)
-			{
-				UserBean[] group = data.getGroupById(log.getGroupId());
-				if (group.length > 0)
-					groupName = Converters.XMLHelper.protectSpecialCharacters(group[0].getName());
-			}
-			
-			String rentalType;
-			if (log.getAccounting() == 1)
-				rentalType = "tacho";
-			else
-				rentalType = "hobbs";
-			
-			String rentalUnits;
-			if (log.getAccounting() == 1)
-				rentalUnits = "" + log.getFlightEngineTicks();
-			else
-				rentalUnits = TimeToHrsMins(log.getFlightEngineTime());
-			
-			String totalenginetime = TimeToHrsMins(log.getTotalEngineTime());
-			String totalflighttime = TimeToHrsMins(log.getFlightEngineTime());		
-			
-			buffer.append(log.getId());
-			buffer.append(log.getType());			
-			buffer.append(Formatters.dateDataFeed.format(log.getTime()));
-			buffer.append(log.getDistance());
-			buffer.append(log.getUser() == null ? "" : log.getUser());
-			buffer.append(log.getAircraft());
-			buffer.append(type);
-			buffer.append(log.getFrom() == null ? "" : log.getFrom());
-			buffer.append(log.getTo() == null ? "" : log.getTo());
-			buffer.append(totalenginetime);
-			buffer.append(totalflighttime);
-			buffer.append(groupName);		
-			buffer.appendMoney(log.getIncome());
-			buffer.appendMoney(log.getPilotFee());
-			buffer.appendMoney(log.getCrewCost());
-			buffer.appendMoney(log.getmptTax());
-			buffer.appendMoney(log.getBonus());
-			buffer.appendMoney(log.getFuelCost());
-			buffer.appendMoney(log.getFboAssignmentFee());
-			buffer.appendMoney(log.getRentalPrice());
-			buffer.append(rentalType);
-			buffer.append(rentalUnits);
-			buffer.appendMoney(log.getRentalCost());
-			buffer.newrow();
-		}
+
+        for (LogBean log : logs)
+        {
+            String type = "None";
+            AircraftBean[] aircraft = data.getAircraftByRegistration(log.getAircraft());
+            if (aircraft != null && aircraft.length > 0)
+            {
+                type = aircraft[0].getMakeModel();
+            }
+
+            String groupName = "";
+            if (log.getGroupId() > 0)
+            {
+                UserBean[] group = data.getGroupById(log.getGroupId());
+                if (group.length > 0)
+                {
+                    groupName = Converters.XMLHelper.protectSpecialCharacters(group[0].getName());
+                }
+            }
+
+            String rentalType;
+            if (log.getAccounting() == 1)
+            {
+                rentalType = "tacho";
+            }
+            else
+            {
+                rentalType = "hobbs";
+            }
+
+            String rentalUnits;
+            if (log.getAccounting() == 1)
+            {
+                rentalUnits = "" + log.getFlightEngineTicks();
+            }
+            else
+            {
+                rentalUnits = TimeToHrsMins(log.getFlightEngineTime());
+            }
+
+            String totalenginetime = TimeToHrsMins(log.getTotalEngineTime());
+            String totalflighttime = TimeToHrsMins(log.getFlightEngineTime());
+
+            buffer.append(log.getId());
+            buffer.append(log.getType());
+            buffer.append(Formatters.dateDataFeed.format(log.getTime()));
+            buffer.append(log.getDistance());
+            buffer.append(log.getUser() == null ? "" : log.getUser());
+            buffer.append(log.getAircraft());
+            buffer.append(type);
+            buffer.append(log.getFrom() == null ? "" : log.getFrom());
+            buffer.append(log.getTo() == null ? "" : log.getTo());
+            buffer.append(totalenginetime);
+            buffer.append(totalflighttime);
+            buffer.append(groupName);
+            buffer.appendMoney(log.getIncome());
+            buffer.appendMoney(log.getPilotFee());
+            buffer.appendMoney(log.getCrewCost());
+            buffer.appendMoney(log.getmptTax());
+            buffer.appendMoney(log.getBonus());
+            buffer.appendMoney(log.getFuelCost());
+            buffer.appendMoney(log.getFboAssignmentFee());
+            buffer.appendMoney(log.getRentalPrice());
+            buffer.append(rentalType);
+            buffer.append(rentalUnits);
+            buffer.appendMoney(log.getRentalCost());
+            buffer.newrow();
+        }
 	}
 	
 	void AddXMLFlightLogItems(Converters.xmlBuffer buffer, LogBean[] logs)
-	{		
-		for (int c = 0; c < logs.length; c++)
-		{		
-			LogBean log = logs[c];
-			
-			String type;
-			try 
-			{
-				type = data.getAircraftByRegistration(log.getAircraft())[0].getMakeModel();
-			}
-			catch(ArrayIndexOutOfBoundsException e) 
-			{
-				type = "None";
-			}
-			
-			String groupName = "";		
-			if(log.getGroupId() > 0)
-			{
-				UserBean[] group = data.getGroupById(log.getGroupId());
-				if (group.length > 0)
-					groupName = Converters.XMLHelper.protectSpecialCharacters(group[0].getName());
-			}
-			
-			String rentalType;
-			if (log.getAccounting() == 1)
-				rentalType = "tacho";
-			else
-				rentalType = "hobbs";
-			
-			String rentalUnits;
-			if (log.getAccounting() == 1)
-				rentalUnits = "" + log.getFlightEngineTicks();
-			else
-				rentalUnits = TimeToHrsMins(log.getFlightEngineTime());
-			
-			String totalenginetime = TimeToHrsMins(log.getTotalEngineTime());
-			String totalflighttime = TimeToHrsMins(log.getFlightEngineTime());			
-			
-			buffer.append("<FlightLog>\n");
-			buffer.append("Id", log.getId());
-			buffer.append("Type", log.getType());			
-			buffer.append("Time", Formatters.dateDataFeed.format(log.getTime()));
-			buffer.append("Distance", log.getDistance());
-			buffer.append("Pilot", log.getUser());
-			buffer.append("Aircraft", log.getAircraft());
-			buffer.append("MakeModel", type);
-			buffer.append("From", log.getFrom() == null ? "" : log.getFrom());
-			buffer.append("To", log.getFrom() == null ? "" : log.getTo());
-			buffer.append("TotalEngineTime", totalenginetime);
-			buffer.append("FlightTime", totalflighttime);
-			buffer.append("GroupName", groupName);		
-			buffer.appendMoney("Income", log.getIncome());
-			buffer.appendMoney("PilotFee", log.getPilotFee());
-			buffer.appendMoney("CrewCost", log.getCrewCost());
-			buffer.appendMoney("BookingFee", log.getmptTax());
-			buffer.appendMoney("Bonus", log.getBonus());
-			buffer.appendMoney("FuelCost", log.getFuelCost());
-			buffer.appendMoney("GCF", log.getFboAssignmentFee());
-			buffer.appendMoney("RentalPrice", log.getRentalPrice());
-			buffer.append("RentalType", rentalType);
-			buffer.append("RentalUnits", rentalUnits);
-			buffer.appendMoney("RentalCost", log.getRentalCost());
-			buffer.append("</FlightLog>\n");
-		}
+	{
+        for (LogBean log : logs)
+        {
+            String type;
+            try
+            {
+                type = data.getAircraftByRegistration(log.getAircraft())[0].getMakeModel();
+            }
+            catch (ArrayIndexOutOfBoundsException e)
+            {
+                type = "None";
+            }
+
+            String groupName = "";
+            if (log.getGroupId() > 0)
+            {
+                UserBean[] group = data.getGroupById(log.getGroupId());
+                if (group.length > 0)
+                {
+                    groupName = Converters.XMLHelper.protectSpecialCharacters(group[0].getName());
+                }
+            }
+
+            String rentalType;
+            if (log.getAccounting() == 1)
+            {
+                rentalType = "tacho";
+            }
+            else
+            {
+                rentalType = "hobbs";
+            }
+
+            String rentalUnits;
+            if (log.getAccounting() == 1)
+            {
+                rentalUnits = "" + log.getFlightEngineTicks();
+            }
+            else
+            {
+                rentalUnits = TimeToHrsMins(log.getFlightEngineTime());
+            }
+
+            String totalenginetime = TimeToHrsMins(log.getTotalEngineTime());
+            String totalflighttime = TimeToHrsMins(log.getFlightEngineTime());
+
+            buffer.append("<FlightLog>\n");
+            buffer.append("Id", log.getId());
+            buffer.append("Type", log.getType());
+            buffer.append("Time", Formatters.dateDataFeed.format(log.getTime()));
+            buffer.append("Distance", log.getDistance());
+            buffer.append("Pilot", log.getUser());
+            buffer.append("Aircraft", log.getAircraft());
+            buffer.append("MakeModel", type);
+            buffer.append("From", log.getFrom() == null ? "" : log.getFrom());
+            buffer.append("To", log.getFrom() == null ? "" : log.getTo());
+            buffer.append("TotalEngineTime", totalenginetime);
+            buffer.append("FlightTime", totalflighttime);
+            buffer.append("GroupName", groupName);
+            buffer.appendMoney("Income", log.getIncome());
+            buffer.appendMoney("PilotFee", log.getPilotFee());
+            buffer.appendMoney("CrewCost", log.getCrewCost());
+            buffer.appendMoney("BookingFee", log.getmptTax());
+            buffer.appendMoney("Bonus", log.getBonus());
+            buffer.appendMoney("FuelCost", log.getFuelCost());
+            buffer.appendMoney("GCF", log.getFboAssignmentFee());
+            buffer.appendMoney("RentalPrice", log.getRentalPrice());
+            buffer.append("RentalType", rentalType);
+            buffer.append("RentalUnits", rentalUnits);
+            buffer.appendMoney("RentalCost", log.getRentalCost());
+            buffer.append("</FlightLog>\n");
+        }
 	}
 	
 	void AddCSVPaymentItems(Converters.csvBuffer buffer, PaymentBean[] payments)
@@ -2829,76 +2830,84 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("Aircraft");
 			buffer.appendHeaderItem("Comment");
 		}
-		
-		for (int c = 0; c < payments.length; c++)
-		{		
-			PaymentBean payment = payments[c];
-			
-			String fboname = "N/A"; 
-			if(payment.getFboId() != -1)
-			{
-				FboBean fbobean = data.getFbo(payment.getFboId());
-				if(fbobean != null)
-					fboname = fbobean.getLocation()+ " " + fbobean.getName();
-			}
-			
-			String toname = data.getAccountNameById(payment.getUser());
-			if(toname == null) 
-				toname = "Unknown";
 
-			String fromname = data.getAccountNameById(payment.getOtherParty());
-			if(fromname == null) 
-				fromname = "Unknown";
-			
-			buffer.append(payment.getId()); 
-			buffer.append(Formatters.dateDataFeed.format(payment.getTime()));
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(toname));
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(fromname));
-			buffer.appendMoney(payment.getAmount());
-			buffer.append(payment.getSReason());
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(fboname));
-			buffer.append(payment.getLocation() == null ? "" : payment.getLocation());
-			buffer.append(payment.getAircraft() == null ? "" : payment.getAircraft());
-			buffer.append(payment.getComment() == null ? "" : payment.getComment()); //Converters.XMLHelper.protectSpecialCharacters(payment.getComment()));
-			buffer.newrow();
-		}
+        for (PaymentBean payment : payments)
+        {
+            String fboname = "N/A";
+            if (payment.getFboId() != -1)
+            {
+                FboBean fbobean = data.getFbo(payment.getFboId());
+                if (fbobean != null)
+                {
+                    fboname = fbobean.getLocation() + " " + fbobean.getName();
+                }
+            }
+
+            String toname = data.getAccountNameById(payment.getUser());
+            if (toname == null)
+            {
+                toname = "Unknown";
+            }
+
+            String fromname = data.getAccountNameById(payment.getOtherParty());
+            if (fromname == null)
+            {
+                fromname = "Unknown";
+            }
+
+            buffer.append(payment.getId());
+            buffer.append(Formatters.dateDataFeed.format(payment.getTime()));
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(toname));
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(fromname));
+            buffer.appendMoney(payment.getAmount());
+            buffer.append(payment.getSReason());
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(fboname));
+            buffer.append(payment.getLocation() == null ? "" : payment.getLocation());
+            buffer.append(payment.getAircraft() == null ? "" : payment.getAircraft());
+            buffer.append(payment.getComment() == null ? "" : payment.getComment()); //Converters.XMLHelper.protectSpecialCharacters(payment.getComment()));
+            buffer.newrow();
+        }
 	}
 	
 	void AddXMLPaymentItems(Converters.xmlBuffer buffer, PaymentBean[] payments)
 	{
-		for (int c = 0; c < payments.length; c++)
-		{		
-			PaymentBean payment = payments[c];
-			
-			String fboname = "N/A"; 
-			if(payment.getFboId() != -1)
-			{
-				FboBean fbobean = data.getFbo(payment.getFboId());
-				if(fbobean != null)
-					fboname = fbobean.getLocation()+ " " + fbobean.getName();
-			}
+        for (PaymentBean payment : payments)
+        {
+            String fboname = "N/A";
+            if (payment.getFboId() != -1)
+            {
+                FboBean fbobean = data.getFbo(payment.getFboId());
+                if (fbobean != null)
+                {
+                    fboname = fbobean.getLocation() + " " + fbobean.getName();
+                }
+            }
 
-			String toname = data.getAccountNameById(payment.getUser());
-			if(toname == null) 
-				toname = "Unknown";
+            String toname = data.getAccountNameById(payment.getUser());
+            if (toname == null)
+            {
+                toname = "Unknown";
+            }
 
-			String fromname = data.getAccountNameById(payment.getOtherParty());
-			if(fromname == null) 
-				fromname = "Unknown";
-			
-			buffer.append("<Payment>\n");
-			buffer.append("Id", payment.getId());
-			buffer.append("Date", Formatters.dateDataFeed.format(payment.getTime()));
-			buffer.append("To", Converters.XMLHelper.protectSpecialCharacters(toname));
-			buffer.append("From", Converters.XMLHelper.protectSpecialCharacters(fromname));
-			buffer.appendMoney("Amount", payment.getAmount());
-			buffer.append("Reason", payment.getSReason());
-			buffer.append("Fbo", Converters.XMLHelper.protectSpecialCharacters(fboname));
-			buffer.append("Location", payment.getLocation());
-			buffer.append("Aircraft", payment.getAircraft());
-			buffer.append("Comment", Converters.XMLHelper.protectSpecialCharacters(payment.getComment()));
-			buffer.append("</Payment>\n");	
-		}
+            String fromname = data.getAccountNameById(payment.getOtherParty());
+            if (fromname == null)
+            {
+                fromname = "Unknown";
+            }
+
+            buffer.append("<Payment>\n");
+            buffer.append("Id", payment.getId());
+            buffer.append("Date", Formatters.dateDataFeed.format(payment.getTime()));
+            buffer.append("To", Converters.XMLHelper.protectSpecialCharacters(toname));
+            buffer.append("From", Converters.XMLHelper.protectSpecialCharacters(fromname));
+            buffer.appendMoney("Amount", payment.getAmount());
+            buffer.append("Reason", payment.getSReason());
+            buffer.append("Fbo", Converters.XMLHelper.protectSpecialCharacters(fboname));
+            buffer.append("Location", payment.getLocation());
+            buffer.append("Aircraft", payment.getAircraft());
+            buffer.append("Comment", Converters.XMLHelper.protectSpecialCharacters(payment.getComment()));
+            buffer.append("</Payment>\n");
+        }
 	}
 
 	private void AddCSVAircraftItems(Converters.csvBuffer buffer, AircraftBean[] aircraftlist)
@@ -2927,160 +2936,168 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("EngineTime");
 			buffer.appendHeaderItem("TimeLast100hr");			
 		}
-		
-		for (int c=0; c < aircraftlist.length; c++)
-		{			
-			AircraftBean aircraft = aircraftlist[c];
-			//setup our needed variables
-			String loc;
-			String locname;
-			ModelBean modelBean = data.getModelById(aircraft.getModelId())[0];
-			AirportBean location = data.getAirport(aircraft.getLocation());
-			
-			if( aircraft.getLocation() == null)
-			{
-				loc = "In Flight";
-				locname = "In Flight";
-			}
-			else
-			{
-				loc = aircraft.getLocation();				
-				locname = location.getTitle();
-			}
-			
-			//get the aircraft owner, stolen from AircraftLog.jsp
-			String owner = "Bank of FSE";
-			if (aircraft.getOwner() != 0)
-			{
-				UserBean uOwner = data.getAccountById(aircraft.getOwner());
-				if (uOwner != null)
-				{
-					if (uOwner.isGroup())
-					{
-						UserBean gOwner = data.getAccountById(data.accountUltimateGroupOwner(uOwner.getId()));
-						if (gOwner != null)
-							owner = uOwner.getName() + " (" + gOwner.getName() + ")";
-						else
-							owner = uOwner.getName();
-					}
-					else
-					{
-						owner = uOwner.getName();
-					}
-				}
-			}
-			
-			String userlockname;
-			if(aircraft.getUserLock() > 0)
-			{
-				UserBean lockuser = data.getAccountById(aircraft.getUserLock());			
-				userlockname = lockuser.getName();
-			}
-			else
-			{
-				userlockname = "Not rented.";
-			}
-			
-			buffer.append(aircraft.getMakeModel());			
-			buffer.append(aircraft.getRegistration());			
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(owner));
-			buffer.append(loc);
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(locname));
-			buffer.append(aircraft.getHome());
-			buffer.appendMoney(aircraft.getSellPrice());
-			buffer.appendMoney(aircraft.getMinimumPrice(modelBean));
-			buffer.append(aircraft.getSEquipment());
-			buffer.appendMoney(aircraft.getRentalPriceDry());
-			buffer.appendMoney(aircraft.getRentalPriceWet());
-			buffer.append(aircraft.getSAccounting());
-			buffer.appendMoney(aircraft.getBonus());
-			buffer.append(aircraft.getMaxRentTime());
-			buffer.append(userlockname);
-			buffer.append(Formatters.twoDecimals.format(aircraft.getTotalFuel()/aircraft.getTotalCapacity()));
-			buffer.append(aircraft.getCanFlyAssignments(modelBean)? 0 : 1);
-			buffer.append(aircraft.getAirframeHoursString());
-			buffer.append(aircraft.getEngineHoursString());
-			buffer.append(aircraft.getHoursSinceLastCheckString());
-			buffer.newrow();
-		}
+
+        for (AircraftBean aircraft : aircraftlist)
+        {
+            //setup our needed variables
+            String loc;
+            String locname;
+            ModelBean modelBean = data.getModelById(aircraft.getModelId())[0];
+            AirportBean location = data.getAirport(aircraft.getLocation());
+
+            if (aircraft.getLocation() == null)
+            {
+                loc = "In Flight";
+                locname = "In Flight";
+            }
+            else
+            {
+                loc = aircraft.getLocation();
+                locname = location.getTitle();
+            }
+
+            //get the aircraft owner, stolen from AircraftLog.jsp
+            String owner = "Bank of FSE";
+            if (aircraft.getOwner() != 0)
+            {
+                UserBean uOwner = data.getAccountById(aircraft.getOwner());
+                if (uOwner != null)
+                {
+                    if (uOwner.isGroup())
+                    {
+                        UserBean gOwner = data.getAccountById(data.accountUltimateGroupOwner(uOwner.getId()));
+                        if (gOwner != null)
+                        {
+                            owner = uOwner.getName() + " (" + gOwner.getName() + ")";
+                        }
+                        else
+                        {
+                            owner = uOwner.getName();
+                        }
+                    }
+                    else
+                    {
+                        owner = uOwner.getName();
+                    }
+                }
+            }
+
+            String userlockname;
+            if (aircraft.getUserLock() > 0)
+            {
+                UserBean lockuser = data.getAccountById(aircraft.getUserLock());
+                userlockname = lockuser.getName();
+            }
+            else
+            {
+                userlockname = "Not rented.";
+            }
+
+            buffer.append(aircraft.getMakeModel());
+            buffer.append(aircraft.getRegistration());
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(owner));
+            buffer.append(loc);
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(locname));
+            buffer.append(aircraft.getHome());
+            buffer.appendMoney(aircraft.getSellPrice());
+            buffer.appendMoney(aircraft.getMinimumPrice(modelBean));
+            buffer.append(aircraft.getSEquipment());
+            buffer.appendMoney(aircraft.getRentalPriceDry());
+            buffer.appendMoney(aircraft.getRentalPriceWet());
+            buffer.append(aircraft.getSAccounting());
+            buffer.appendMoney(aircraft.getBonus());
+            buffer.append(aircraft.getMaxRentTime());
+            buffer.append(userlockname);
+            buffer.append(Formatters.twoDecimals.format(aircraft.getTotalFuel() / aircraft.getTotalCapacity()));
+            buffer.append(aircraft.getCanFlyAssignments(modelBean) ? 0 : 1);
+            buffer.append(aircraft.getAirframeHoursString());
+            buffer.append(aircraft.getEngineHoursString());
+            buffer.append(aircraft.getHoursSinceLastCheckString());
+            buffer.newrow();
+        }
 	}
 	
 	private void AddXMLAircraftItems(Converters.xmlBuffer buffer, AircraftBean[] aircraftlist)
 	{
-		for (int c=0; c < aircraftlist.length; c++)
-		{			
-			AircraftBean aircraft = aircraftlist[c];
-			//setup our needed variables
-			String loc;
-			String locname;
-			ModelBean modelBean = data.getModelById(aircraft.getModelId())[0];
-			AirportBean location = data.getAirport(aircraft.getLocation());
-			
-			if( aircraft.getLocation() == null)
-			{
-				loc = "In Flight";
-				locname = "In Flight";
-			}
-			else
-			{
-				loc = aircraft.getLocation();				
-				locname = location.getTitle();
-			}
-			
-			//get the aircraft owner, stolen from AircraftLog.jsp
-			String owner = "Bank of FSE";
-			if (aircraft.getOwner() != 0)
-			{
-				UserBean uOwner = data.getAccountById(aircraft.getOwner());
-				if (uOwner != null)
-					if (uOwner.isGroup())
-					{
-						UserBean gOwner = data.getAccountById(data.accountUltimateGroupOwner(uOwner.getId()));
-						if (gOwner != null)
-							owner = uOwner.getName() + " (" + gOwner.getName() + ")";
-						else
-							owner = uOwner.getName();
-					}
-					else
-					{
-						owner = uOwner.getName();
-					}
-			}
-			
-			String userlockname;
-			if(aircraft.getUserLock() > 0)
-			{
-				UserBean lockuser = data.getAccountById(aircraft.getUserLock());			
-				userlockname = lockuser.getName();
-			}
-			else
-			{
-				userlockname = "Not rented.";
-			}
-			
-			buffer.append("<Aircraft>\n");
-			buffer.append("MakeModel", aircraft.getMakeModel());			
-			buffer.append("Registration", aircraft.getRegistration());			
-			buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(owner));
-			buffer.append("Location", loc);
-			buffer.append("LocationName", Converters.XMLHelper.protectSpecialCharacters(locname));
-			buffer.append("Home", aircraft.getHome());
-			buffer.appendMoney("SalePrice", aircraft.getSellPrice());
-			buffer.appendMoney("SellbackPrice", aircraft.getMinimumPrice(modelBean));
-			buffer.append("Equipment", aircraft.getSEquipment());
-			buffer.appendMoney("RentalDry", aircraft.getRentalPriceDry());
-			buffer.appendMoney("RentalWet", aircraft.getRentalPriceWet());
-			buffer.append("RentalType", aircraft.getSAccounting());
-			buffer.append("Bonus", aircraft.getBonus());
-			buffer.append("RentalTime", aircraft.getMaxRentTime());
-			buffer.append("RentedBy", userlockname);
-			buffer.append("FuelPct", Formatters.twoDecimals.format(aircraft.getTotalFuel()/aircraft.getTotalCapacity()));
-			buffer.append("NeedsRepair", aircraft.getCanFlyAssignments(modelBean)? 0 : 1);
-			buffer.append("AirframeTime", aircraft.getAirframeHoursString());
-			buffer.append("EngineTime", aircraft.getEngineHoursString());
-			buffer.append("TimeLast100hr", aircraft.getHoursSinceLastCheckString());
-			buffer.append("</Aircraft>\n");
-		}
+        for (AircraftBean aircraft : aircraftlist)
+        {
+            //setup our needed variables
+            String loc;
+            String locname;
+            ModelBean modelBean = data.getModelById(aircraft.getModelId())[0];
+            AirportBean location = data.getAirport(aircraft.getLocation());
+
+            if (aircraft.getLocation() == null)
+            {
+                loc = "In Flight";
+                locname = "In Flight";
+            }
+            else
+            {
+                loc = aircraft.getLocation();
+                locname = location.getTitle();
+            }
+
+            //get the aircraft owner, stolen from AircraftLog.jsp
+            String owner = "Bank of FSE";
+            if (aircraft.getOwner() != 0)
+            {
+                UserBean uOwner = data.getAccountById(aircraft.getOwner());
+                if (uOwner != null)
+                {
+                    if (uOwner.isGroup())
+                    {
+                        UserBean gOwner = data.getAccountById(data.accountUltimateGroupOwner(uOwner.getId()));
+                        if (gOwner != null)
+                        {
+                            owner = uOwner.getName() + " (" + gOwner.getName() + ")";
+                        }
+                        else
+                        {
+                            owner = uOwner.getName();
+                        }
+                    }
+                    else
+                    {
+                        owner = uOwner.getName();
+                    }
+                }
+            }
+
+            String userlockname;
+            if (aircraft.getUserLock() > 0)
+            {
+                UserBean lockuser = data.getAccountById(aircraft.getUserLock());
+                userlockname = lockuser.getName();
+            }
+            else
+            {
+                userlockname = "Not rented.";
+            }
+
+            buffer.append("<Aircraft>\n");
+            buffer.append("MakeModel", aircraft.getMakeModel());
+            buffer.append("Registration", aircraft.getRegistration());
+            buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(owner));
+            buffer.append("Location", loc);
+            buffer.append("LocationName", Converters.XMLHelper.protectSpecialCharacters(locname));
+            buffer.append("Home", aircraft.getHome());
+            buffer.appendMoney("SalePrice", aircraft.getSellPrice());
+            buffer.appendMoney("SellbackPrice", aircraft.getMinimumPrice(modelBean));
+            buffer.append("Equipment", aircraft.getSEquipment());
+            buffer.appendMoney("RentalDry", aircraft.getRentalPriceDry());
+            buffer.appendMoney("RentalWet", aircraft.getRentalPriceWet());
+            buffer.append("RentalType", aircraft.getSAccounting());
+            buffer.append("Bonus", aircraft.getBonus());
+            buffer.append("RentalTime", aircraft.getMaxRentTime());
+            buffer.append("RentedBy", userlockname);
+            buffer.append("FuelPct", Formatters.twoDecimals.format(aircraft.getTotalFuel() / aircraft.getTotalCapacity()));
+            buffer.append("NeedsRepair", aircraft.getCanFlyAssignments(modelBean) ? 0 : 1);
+            buffer.append("AirframeTime", aircraft.getAirframeHoursString());
+            buffer.append("EngineTime", aircraft.getEngineHoursString());
+            buffer.append("TimeLast100hr", aircraft.getHoursSinceLastCheckString());
+            buffer.append("</Aircraft>\n");
+        }
 	}	
 	
 	private void AddCSVSystemFboItem(Converters.csvBuffer buffer, AirportBean airport)
@@ -3149,7 +3166,7 @@ public class Datafeed extends HttpServlet
 		buffer.append("</FBO>\n");
 	}
 	
-	private void AddCSVFacilityItems(Converters.csvBuffer buffer, FboFacilityBean[] facs, boolean showsupplies)
+	private void AddCSVFacilityItems(Converters.csvBuffer buffer, FboFacilityBean[] facs)
 	{
 		if(buffer.isHeaderEmpty())
 		{			
@@ -3164,89 +3181,90 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("Fbo");
 			buffer.appendHeaderItem("Status");
 		}
-		
-		for (int c=0; c < facs.length; c++)
-		{
-			FboFacilityBean fac = facs[c];
-			FboBean fbo = data.getFbo(fac.getFboId());
-			AirportBean airport = data.getAirport(fac.getLocation());
 
-			buffer.append(fac.getLocation());
-			buffer.append(airport.getName());			
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(fac.getName()));			
-			buffer.append(fac.getCommodity() != null ? fac.getCommodity().trim() : "");			
+        for (FboFacilityBean fac : facs)
+        {
+            FboBean fbo = data.getFbo(fac.getFboId());
+            AirportBean airport = data.getAirport(fac.getLocation());
 
-			int totalgates = fbo.getFboSize() * airport.getFboSlots();
-			int rentedgates = 0;
-			if(fac.getReservedSpace()>= 0)
-			{
-				//Owner facility record, see if there are any non-rented slots
-				FboFacilityBean[] facrenters = data.getFboRenterFacilities(fbo);
-				int rentcount = 0;
-				for (int i=0; i < facrenters.length; i++)
-				{
-					rentcount += facrenters[i].getSize();
-				}
-				rentedgates = fac.getReservedSpace() + ((totalgates - fac.getReservedSpace()) - rentcount);
-			}
-			else
-			{
-				rentedgates = fac.getSize();
-			}
-			
-			buffer.append(totalgates);
-			buffer.append(rentedgates);
-			
-			buffer.append(fac.getPublicByDefault() ? "Yes" : "No");
-			buffer.append(fac.getIcaoSet() != null ? fac.getIcaoSet() : "");
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));
-			buffer.append((fbo.isActive() ? "Open" : "Closed"));
+            buffer.append(fac.getLocation());
+            buffer.append(airport.getName());
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(fac.getName()));
+            buffer.append(fac.getCommodity() != null ? fac.getCommodity().trim() : "");
 
-			buffer.newrow();
-		}
+            int totalgates = fbo.getFboSize() * airport.getFboSlots();
+            int rentedgates;
+            if (fac.getReservedSpace() >= 0)
+            {
+                //Owner facility record, see if there are any non-rented slots
+                FboFacilityBean[] facrenters = data.getFboRenterFacilities(fbo);
+                int rentcount = 0;
+
+                for (FboFacilityBean facrenter : facrenters)
+                {
+                    rentcount += facrenter.getSize();
+                }
+
+                rentedgates = fac.getReservedSpace() + ((totalgates - fac.getReservedSpace()) - rentcount);
+            }
+            else
+            {
+                rentedgates = fac.getSize();
+            }
+
+            buffer.append(totalgates);
+            buffer.append(rentedgates);
+
+            buffer.append(fac.getPublicByDefault() ? "Yes" : "No");
+            buffer.append(fac.getIcaoSet() != null ? fac.getIcaoSet() : "");
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));
+            buffer.append((fbo.isActive() ? "Open" : "Closed"));
+
+            buffer.newrow();
+        }
 	}
 	
-	private void AddXMLFacilityItems(Converters.xmlBuffer buffer, FboFacilityBean[] facs, boolean showsupplies)
+	private void AddXMLFacilityItems(Converters.xmlBuffer buffer, FboFacilityBean[] facs)
 	{
-		for (int c=0; c < facs.length; c++)
-		{
-			FboFacilityBean fac = facs[c];
-			FboBean fbo = data.getFbo(fac.getFboId());
-			AirportBean airport = data.getAirport(fac.getLocation());
+        for (FboFacilityBean fac : facs)
+        {
+            FboBean fbo = data.getFbo(fac.getFboId());
+            AirportBean airport = data.getAirport(fac.getLocation());
 
-			buffer.append("<Facility>\n");		
-			buffer.append("Icao", fac.getLocation());
-			buffer.append("Location", airport.getName());			
-			buffer.append("Carrier", Converters.XMLHelper.protectSpecialCharacters(fac.getName()));			
-			buffer.append("CommodityNames", fac.getCommodity() != null ? fac.getCommodity().trim() : "");			
+            buffer.append("<Facility>\n");
+            buffer.append("Icao", fac.getLocation());
+            buffer.append("Location", airport.getName());
+            buffer.append("Carrier", Converters.XMLHelper.protectSpecialCharacters(fac.getName()));
+            buffer.append("CommodityNames", fac.getCommodity() != null ? fac.getCommodity().trim() : "");
 
-			int totalgates = fbo.getFboSize() * airport.getFboSlots();
-			int rentedgates = 0;
-			if(fac.getReservedSpace()>= 0)
-			{
-				//Owner facility record, see if there are any non-rented slots
-				FboFacilityBean[] facrenters = data.getFboRenterFacilities(fbo);
-				int rentcount = 0;
-				for (int i=0; i < facrenters.length; i++)
-				{
-					rentcount += facrenters[i].getSize();
-				}
-				rentedgates = fac.getReservedSpace() + ((totalgates - fac.getReservedSpace()) - rentcount);
-			}
-			else
-			{
-				rentedgates = fac.getSize();
-			}
-			
-			buffer.append("GatesTotal", totalgates);
-			buffer.append("GatesRented", rentedgates);
-			
-			buffer.append("JobsPublic", fac.getPublicByDefault() ? "Yes" : "No");
-			buffer.append("Destinations", fac.getIcaoSet() != null ? fac.getIcaoSet() : "");
-			buffer.append("Fbo", Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));
-			buffer.append("Status", (fbo.isActive() ? "Open" : "Closed"));
-			buffer.append("</Facility>\n");		
-		}
+            int totalgates = fbo.getFboSize() * airport.getFboSlots();
+            int rentedgates;
+            if (fac.getReservedSpace() >= 0)
+            {
+                //Owner facility record, see if there are any non-rented slots
+                FboFacilityBean[] facrenters = data.getFboRenterFacilities(fbo);
+                int rentcount = 0;
+                for (FboFacilityBean facrenter : facrenters)
+                {
+                    rentcount += facrenter.getSize();
+                }
+
+                rentedgates = fac.getReservedSpace() + ((totalgates - fac.getReservedSpace()) - rentcount);
+            }
+            else
+            {
+                rentedgates = fac.getSize();
+            }
+
+            buffer.append("GatesTotal", totalgates);
+            buffer.append("GatesRented", rentedgates);
+
+            buffer.append("JobsPublic", fac.getPublicByDefault() ? "Yes" : "No");
+            buffer.append("Destinations", fac.getIcaoSet() != null ? fac.getIcaoSet() : "");
+            buffer.append("Fbo", Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));
+            buffer.append("Status", (fbo.isActive() ? "Open" : "Closed"));
+            buffer.append("</Facility>\n");
+        }
 	}
 
 	private void AddCSVFboItems(Converters.csvBuffer buffer, FboBean[] fbos, boolean showsupplies)
@@ -3271,98 +3289,112 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("SuppliedDays");
 			buffer.appendHeaderItem("SellPrice");
 		}
-		
-		for (int c=0; c < fbos.length; c++)
-		{
-			FboBean fbo = fbos[c];			
-			AirportBean airport = data.getAirport(fbo.getLocation());
-			
-			UserBean fboowner = data.getAccountById(fbo.getOwner());
-			int groupOwnerid = data.accountUltimateGroupOwner(fbo.getOwner());
-			UserBean ultimateOwner = data.getAccountById(groupOwnerid);
-			
-			int totalSpace = fbo.getFboSize() * airport.getFboSlots();
-			int rented = data.getFboFacilityBlocksInUse(fbo.getId());	 	    
-			GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
-			GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
-			
-			buffer.append((fbo.isActive() ? "Active" : "Closed"));			
-			buffer.append(airport.getName());			
-			buffer.append(fbo.getName());			
-			buffer.append(Converters.XMLHelper.protectSpecialCharacters(fboowner.getName()) + (fboowner.isGroup() ? "(" + Converters.XMLHelper.protectSpecialCharacters(ultimateOwner.getName()) + ")" : ""));			
-			buffer.append(fbo.getLocation());
-			buffer.append(airport.getCity() + ", " + airport.getCountry());
-			buffer.append(fbo.getFboSize());
-			buffer.append(((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No"));
-			buffer.append(((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + totalSpace : "No Passenger Terminal"));
-			buffer.append(((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + rented : "No Passenger Terminal"));
-			buffer.append(fuel != null ? fuel.getAmount() : 0);
-			buffer.append(jeta != null ? jeta.getAmount() : 0);							
-			buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_BUILDING_MATERIALS));
-			
-			if(showsupplies)
-				buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES));
-			else
-				buffer.append("0");
-			
-			buffer.append(fbo.getSuppliesPerDay(airport));							
-			
-			if(showsupplies)
-				buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
-			else
-				buffer.append("0");
-			
-			buffer.appendMoney(fbo.getPrice());
-			buffer.newrow();
-		}
+
+        for (FboBean fbo : fbos)
+        {
+            AirportBean airport = data.getAirport(fbo.getLocation());
+
+            UserBean fboowner = data.getAccountById(fbo.getOwner());
+            int groupOwnerid = data.accountUltimateGroupOwner(fbo.getOwner());
+            UserBean ultimateOwner = data.getAccountById(groupOwnerid);
+
+            int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+            int rented = data.getFboFacilityBlocksInUse(fbo.getId());
+            GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
+            GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
+
+            buffer.append((fbo.isActive() ? "Active" : "Closed"));
+            buffer.append(airport.getName());
+            buffer.append(fbo.getName());
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(fboowner.getName()) + (fboowner.isGroup() ? "(" + Converters.XMLHelper.protectSpecialCharacters(ultimateOwner.getName()) + ")" : ""));
+            buffer.append(fbo.getLocation());
+            buffer.append(airport.getCity() + ", " + airport.getCountry());
+            buffer.append(fbo.getFboSize());
+            buffer.append(((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No"));
+            buffer.append(((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + totalSpace : "No Passenger Terminal"));
+            buffer.append(((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + rented : "No Passenger Terminal"));
+            buffer.append(fuel != null ? fuel.getAmount() : 0);
+            buffer.append(jeta != null ? jeta.getAmount() : 0);
+            buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_BUILDING_MATERIALS));
+
+            if (showsupplies)
+            {
+                buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES));
+            }
+            else
+            {
+                buffer.append("0");
+            }
+
+            buffer.append(fbo.getSuppliesPerDay(airport));
+
+            if (showsupplies)
+            {
+                buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
+            }
+            else
+            {
+                buffer.append("0");
+            }
+
+            buffer.appendMoney(fbo.getPrice());
+            buffer.newrow();
+        }
 	}
 	
 	private void AddXMLFboItems(Converters.xmlBuffer buffer, FboBean[] fbos, boolean showsupplies)
 	{
-		for (int c=0; c < fbos.length; c++)
-		{
-			FboBean fbo = fbos[c];
-			AirportBean airport = data.getAirport(fbo.getLocation());
-			
-			UserBean fboowner = data.getAccountById(fbo.getOwner());
-			int groupOwnerid = data.accountUltimateGroupOwner(fbo.getOwner());
-			UserBean ultimateOwner = data.getAccountById(groupOwnerid);
-			
-			int totalSpace = fbo.getFboSize() * airport.getFboSlots();
-			int rented = data.getFboFacilityBlocksInUse(fbo.getId());	 	    
-			GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
-			GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
-			
-			buffer.append("<FBO>\n");		
-			buffer.append("Status", (fbo.isActive() ? "Active" : "Closed"));			
-			buffer.append("Airport", airport.getName());			
-			buffer.append("Name", Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));			
-			buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(fboowner.getName()) + (fboowner.isGroup() ? "(" + Converters.XMLHelper.protectSpecialCharacters(ultimateOwner.getName()) + ")" : ""));			
-			buffer.append("Icao", fbo.getLocation());
-			buffer.append("Location", airport.getCity() + ", " + airport.getCountry());
-			buffer.append("Lots", fbo.getFboSize());
-			buffer.append("RepairShop", ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No"));
-			buffer.append("Gates", ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + totalSpace : "No Passenger Terminal"));
-			buffer.append("GatesRented", ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + rented : "No Passenger Terminal"));
-			buffer.append("Fuel100LL", fuel != null ? fuel.getAmount() : 0);
-			buffer.append("FuelJetA", jeta != null ? jeta.getAmount() : 0);							
-			buffer.append("BuildingMaterials", data.getGoodsQty(fbo, GoodsBean.GOODS_BUILDING_MATERIALS));
-			
-			if(showsupplies)
-				buffer.append("Supplies", data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES));
-			else
-				buffer.append("Supplies", 0);
-				
-			buffer.append("SuppliesPerDay", fbo.getSuppliesPerDay(airport));
-			
-			if(showsupplies)
-				buffer.append("SuppliedDays", data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
-			else
-				buffer.append("SuppliedDays", 0);
-				
-			buffer.appendMoney("SellPrice", fbo.getPrice());
-			buffer.append("</FBO>\n");
-		}
+        for (FboBean fbo : fbos)
+        {
+            AirportBean airport = data.getAirport(fbo.getLocation());
+
+            UserBean fboowner = data.getAccountById(fbo.getOwner());
+            int groupOwnerid = data.accountUltimateGroupOwner(fbo.getOwner());
+            UserBean ultimateOwner = data.getAccountById(groupOwnerid);
+
+            int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+            int rented = data.getFboFacilityBlocksInUse(fbo.getId());
+            GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
+            GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
+
+            buffer.append("<FBO>\n");
+            buffer.append("Status", (fbo.isActive() ? "Active" : "Closed"));
+            buffer.append("Airport", airport.getName());
+            buffer.append("Name", Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));
+            buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(fboowner.getName()) + (fboowner.isGroup() ? "(" + Converters.XMLHelper.protectSpecialCharacters(ultimateOwner.getName()) + ")" : ""));
+            buffer.append("Icao", fbo.getLocation());
+            buffer.append("Location", airport.getCity() + ", " + airport.getCountry());
+            buffer.append("Lots", fbo.getFboSize());
+            buffer.append("RepairShop", ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No"));
+            buffer.append("Gates", ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + totalSpace : "No Passenger Terminal"));
+            buffer.append("GatesRented", ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + rented : "No Passenger Terminal"));
+            buffer.append("Fuel100LL", fuel != null ? fuel.getAmount() : 0);
+            buffer.append("FuelJetA", jeta != null ? jeta.getAmount() : 0);
+            buffer.append("BuildingMaterials", data.getGoodsQty(fbo, GoodsBean.GOODS_BUILDING_MATERIALS));
+
+            if (showsupplies)
+            {
+                buffer.append("Supplies", data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES));
+            }
+            else
+            {
+                buffer.append("Supplies", 0);
+            }
+
+            buffer.append("SuppliesPerDay", fbo.getSuppliesPerDay(airport));
+
+            if (showsupplies)
+            {
+                buffer.append("SuppliedDays", data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
+            }
+            else
+            {
+                buffer.append("SuppliedDays", 0);
+            }
+
+            buffer.appendMoney("SellPrice", fbo.getPrice());
+            buffer.append("</FBO>\n");
+        }
 	}
 
 	//NOTE NOTE NOTE!!!
@@ -3384,46 +3416,42 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("PtAssignment");
 			buffer.appendHeaderItem("All-In");
 		}
-		
-		for (int c=0; c < assignments.length; c++)
-		{			
-			AssignmentBean assignment = assignments[c];
-			
-			buffer.append(assignment.getId());			
-			buffer.append(assignment.getLocation());
-			buffer.append(assignment.getTo());
-			buffer.append(assignment.getFrom());
-			buffer.append(assignment.getAmount());
-			buffer.append(assignment.getSUnits());
-			buffer.append(assignment.getCommodity()==null ? "Group Assignment" : Converters.XMLHelper.protectSpecialCharacters(assignment.getCommodity()));			
-			buffer.appendMoney(assignment.calcPay()); 
-			buffer.append(assignment.getSExpires()); 
-			buffer.append(assignment.getExpiresGMTDate()); 
-			buffer.append(new Boolean(assignment.isPtAssignment()).toString());			
-			buffer.append(new Boolean(assignment.getType() == AssignmentBean.TYPE_ALLIN));			
-			buffer.newrow();
-		}
+
+        for (AssignmentBean assignment : assignments)
+        {
+            buffer.append(assignment.getId());
+            buffer.append(assignment.getLocation());
+            buffer.append(assignment.getTo());
+            buffer.append(assignment.getFrom());
+            buffer.append(assignment.getAmount());
+            buffer.append(assignment.getSUnits());
+            buffer.append(assignment.getCommodity() == null ? "Group Assignment" : Converters.XMLHelper.protectSpecialCharacters(assignment.getCommodity()));
+            buffer.appendMoney(assignment.calcPay());
+            buffer.append(assignment.getSExpires());
+            buffer.append(assignment.getExpiresGMTDate());
+            buffer.append(Boolean.toString(assignment.isPtAssignment()));
+            buffer.append(assignment.getType() == AssignmentBean.TYPE_ALLIN);
+            buffer.newrow();
+        }
 	}
 
 	private void AddXMLJobItems(Converters.xmlBuffer buffer, AssignmentBean[] assignments)
 	{
-		for (int c=0; c < assignments.length; c++)
-		{			
-			AssignmentBean assignment = assignments[c];
-			
-			buffer.append("<Assignment>\n");
-			buffer.append("Id", assignment.getId());			
-			buffer.append("Location", assignment.getLocation());
-			buffer.append("ToIcao", assignment.getTo());
-			buffer.append("FromIcao", assignment.getFrom());
-			buffer.append("Amount", assignment.getAmount());
-			buffer.append("UnitType", assignment.getSUnits());
-			buffer.append("Commodity", Converters.XMLHelper.protectSpecialCharacters(assignment.getCommodity()));			
-			buffer.appendMoney("Pay", assignment.calcPay());
-			buffer.append("Expires", assignment.getSExpires());
-			buffer.append("ExpireDateTime", assignment.getExpiresGMTDate());
-			buffer.append("PtAssignment", new Boolean(assignment.isPtAssignment()).toString());			
-			buffer.append("</Assignment>\n");
-		}
+        for (AssignmentBean assignment : assignments)
+        {
+            buffer.append("<Assignment>\n");
+            buffer.append("Id", assignment.getId());
+            buffer.append("Location", assignment.getLocation());
+            buffer.append("ToIcao", assignment.getTo());
+            buffer.append("FromIcao", assignment.getFrom());
+            buffer.append("Amount", assignment.getAmount());
+            buffer.append("UnitType", assignment.getSUnits());
+            buffer.append("Commodity", Converters.XMLHelper.protectSpecialCharacters(assignment.getCommodity()));
+            buffer.appendMoney("Pay", assignment.calcPay());
+            buffer.append("Expires", assignment.getSExpires());
+            buffer.append("ExpireDateTime", assignment.getExpiresGMTDate());
+            buffer.append("PtAssignment", Boolean.toString(assignment.isPtAssignment()));
+            buffer.append("</Assignment>\n");
+        }
 	}
 }

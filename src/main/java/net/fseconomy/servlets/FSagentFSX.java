@@ -1,13 +1,10 @@
 package net.fseconomy.servlets;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
@@ -104,7 +101,7 @@ public class FSagentFSX extends HttpServlet
 		
 		String user = req.getParameter("user");
 		String password = req.getParameter("pass");
-		UserBean userBean = null;
+		UserBean userBean;
 		
 		if (user == null || password == null || (userBean=data.userExists(user, password, false)) == null)
 		{
@@ -182,18 +179,29 @@ public class FSagentFSX extends HttpServlet
 		
 		String content = "";
 		try
-		{	if (action.equals("aircraftProbe"))
-				content = aircraftProbe(req);
-			else if (action.equals("accountCheck"))				// If we've made it this far, the account is OK.
-				content = "<ok/>";
-			else if (action.equals("startFlight"))
-				content = startFlight(userBean, req);
-			else if (action.equals("cancel"))
-				content = doCancel(userBean, req);
-			else if (action.equals("arrive"))
-				content = doArrive(userBean, req);
-			else if (action.equals("addModel"))
-				content = addModel(req);		
+		{
+            switch (action)
+            {
+                case "aircraftProbe":
+                    content = aircraftProbe(req);
+                    break;
+                case "accountCheck":
+                    // If we've made it this far, the account is OK.
+                    content = "<ok/>";
+                    break;
+                case "startFlight":
+                    content = startFlight(userBean, req);
+                    break;
+                case "cancel":
+                    content = doCancel(userBean);
+                    break;
+                case "arrive":
+                    content = doArrive(userBean, req);
+                    break;
+                case "addModel":
+                    content = addModel(req);
+                    break;
+            }
 		} 
 		catch (DataError e)
 		{
@@ -233,7 +241,7 @@ public class FSagentFSX extends HttpServlet
 		output.append("<airport>\n");
 		output.append(xmlNode("icao", airport.getIcao()));
 		output.append(xmlNodeCDATA("name", airport.getName()));
-		output.append("<fuelPrice>" + airport.getFuelPrice() + "</fuelPrice>\n");
+		output.append("<fuelPrice>").append(airport.getFuelPrice()).append("</fuelPrice>\n");
 		output.append("</airport>\n");
 		return output;
 	}
@@ -241,9 +249,9 @@ public class FSagentFSX extends HttpServlet
 	{
 		StringBuffer output = new StringBuffer();
 		output.append("<closeAirport>\n");
-		output.append("<icao>" + airport.icao + "</icao>\n");
-		output.append("<distance>" + airport.distance + "</distance>\n");
-		output.append("<bearing>" + airport.bearing + "</bearing>\n");
+		output.append("<icao>").append(airport.icao).append("</icao>\n");
+		output.append("<distance>").append(airport.distance).append("</distance>\n");
+		output.append("<bearing>").append(airport.bearing).append("</bearing>\n");
 		output.append("</closeAirport>\n");
 		return output;
 	}
@@ -251,7 +259,7 @@ public class FSagentFSX extends HttpServlet
 	{
 		StringBuffer output = new StringBuffer();
 		output.append("<aircraft>\n");
-		output.append("<registration>" + aircraft.getRegistration() + "</registration>\n");
+		output.append("<registration>").append(aircraft.getRegistration()).append("</registration>\n");
 		output.append(xmlNodeCDATA("type", aircraft.getMakeModel()));
 		output.append("</aircraft>\n");
 		return output;
@@ -298,7 +306,7 @@ public class FSagentFSX extends HttpServlet
 	
 	String aircraftProbe(HttpServletRequest req)
 	{
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		String aircraftTitle = req.getParameter("aircraft");
 		Data.closeAirport airport = closestAirport(req);
 		
@@ -313,16 +321,27 @@ public class FSagentFSX extends HttpServlet
 		
 		if (currentAirport.size() > 0)
 			result.append(airportToXml((AirportBean) currentAirport.get(0)));
+
 		if (airportList.size() > 0)
-			for (Iterator i = airportList.iterator(); i.hasNext(); )
-				result.append(closeAirportToXml((Data.closeAirport)i.next()));
+        {
+            for (Object anAirportList : airportList)
+            {
+                result.append(closeAirportToXml((Data.closeAirport) anAirportList));
+            }
+        }
+
 		if (alternativeAircraft.size() > 0)
-			for (Iterator i = alternativeAircraft.iterator(); i.hasNext(); )
-				result.append(aircraftToXml((AircraftBean)i.next()));
+        {
+            for (Object anAlternativeAircraft : alternativeAircraft)
+            {
+                result.append(aircraftToXml((AircraftBean) anAlternativeAircraft));
+            }
+        }
+
 		return result.toString();
 	}
 	
-	String doCancel(UserBean user, HttpServletRequest req) throws DataError
+	String doCancel(UserBean user) throws DataError
 	{
 		data.cancelFlight(user);
 		return "<ok/>";
@@ -330,7 +349,7 @@ public class FSagentFSX extends HttpServlet
 	
 	String startFlight(UserBean user, HttpServletRequest req) throws DataError
 	{
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		
 		// Ok, lets get the parameters for aircraft and closest airport so we can do some checks
 		// FSAircraft is the title name from FSX/9, we'll compare it against the FSE mappings
@@ -376,17 +395,16 @@ public class FSagentFSX extends HttpServlet
 		Object[] info = data.departAircraft(aircraft[0], user.getId(), closest.icao);
 		
 		// Reformat the data into typed variables
-		int payloadWeight = ((Integer)info[0]).intValue();
-		int totalWeight = ((Integer)info[1]).intValue();
-		boolean rentedDry = ((Boolean)info[3]).booleanValue();
+		int payloadWeight = (Integer) info[0];
+		int totalWeight = (Integer) info[1];
+		boolean rentedDry = (Boolean) info[3];
 		
 		float[] fuel = aircraft[0].getFuelInGallons();
-		StringBuffer fuelString = new StringBuffer();
-		for (int c=0; c < fuel.length; c++)
-		{
-			fuelString.append(Float.toString(fuel[c])+ " ");
-		}
-		
+		StringBuilder fuelString = new StringBuilder();
+
+        for (float aFuel : fuel)
+            fuelString.append(Float.toString(aFuel)).append(" ");
+
 		long maxrenttime;
 		int ultimateOwner = data.accountUltimateGroupOwner(aircraft[0].getOwner());
 		if(user.getId() == ultimateOwner)
@@ -410,17 +428,16 @@ public class FSagentFSX extends HttpServlet
 		result.append(xmlNode("rentalPrice", rentedDry ? aircraft[0].getRentalPriceDry() : aircraft[0].getRentalPriceWet()));
 		
 		// List all our assignments
-		for (int i=0; i < assignments.length; i++)
-		{
-			AssignmentBean as = assignments[i];
-			result.append("<assignment>\n");
-			result.append(xmlNode("from", as.getFrom()));
-			result.append(xmlNode("to", as.getTo()));
-			String noHTMLAssignment = as.getSCargo().replaceAll("\\<.*?>","");
-			result.append(xmlNodeCDATA("cargo", noHTMLAssignment));
-			result.append(xmlNodeCDATA("comment", as.getComment()));
-			result.append("</assignment>\n");
-		}		
+        for (AssignmentBean as : assignments)
+        {
+            result.append("<assignment>\n");
+            result.append(xmlNode("from", as.getFrom()));
+            result.append(xmlNode("to", as.getTo()));
+            String noHTMLAssignment = as.getSCargo().replaceAll("<.*?>", "");
+            result.append(xmlNodeCDATA("cargo", noHTMLAssignment));
+            result.append(xmlNodeCDATA("comment", as.getComment()));
+            result.append("</assignment>\n");
+        }
 		
 		return result.toString();
 	}
@@ -446,16 +463,13 @@ public class FSagentFSX extends HttpServlet
 		return (int[][]) returnValue.toArray(new int[0][0]);
 	}
 	
-	//moved from Data to here, didn't seem to be working from there - Airboss 1/29/11
 	private Lock lockProcessFlight = new ReentrantLock();
-	private Set<Integer> processFlightLock = new HashSet<Integer>(100);
+	private Set<Integer> processFlightLock = new HashSet<>(100);
 
-	//Moved lock methods from Data - Airboss 1/19/11
 	public boolean setProcessFlight(int userid) throws DataError
 	{
 		boolean b;
 
-//System.out.println("userid: " + userid);
 		lockProcessFlight.lock();
 		try 
 		{
@@ -466,7 +480,6 @@ public class FSagentFSX extends HttpServlet
 			lockProcessFlight.unlock();
 		}
 			
-//System.out.println("b found: " + b);
 		return b;
 	}
 	

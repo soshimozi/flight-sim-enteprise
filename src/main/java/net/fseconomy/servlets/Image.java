@@ -12,10 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.fseconomy.data.*;
 
-/**
- * @version 	1.0
- * @author
- */
 public class Image extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
