@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="DB" class="ch.qos.logback.classic.db.DBAppender">
+        <connectionSource class="ch.qos.logback.core.db.JNDIConnectionSource">
+            <jndiLocation>java:jboss/datasources/fseconomy</jndiLocation>
+        </connectionSource>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="DB"/>
+    </root>
+
+</configuration>
+

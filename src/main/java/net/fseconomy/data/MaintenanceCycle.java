@@ -1,0 +1,2160 @@
+package net.fseconomy.data;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
+
+import javax.sql.rowset.CachedRowSet;
+
+import net.fseconomy.data.Data.statistics;
+import net.fseconomy.util.Converters;
+import net.fseconomy.util.Formatters;
+
+public class MaintenanceCycle implements Runnable
+{
+	static final int REG_ICAO = 0;
+	static final int REG_PREFIX = 1;
+	static final int REG_POSTFIX = 2;
+
+	public static final int CycleType30Min = 0;
+	public static final int CycleTypeDaily = 1;
+
+	public static final int ASSGN_COUNT = 0;
+	public static final int ASSGN_MAX = 1;
+	public static final int ASSGN_MIN = 2;
+	public static final int ASSGN_AVG = 3;
+	
+	int lastDailyRun;
+	double interestPositive;
+	double interestNegative;
+	static String lastStatus;
+	static Date lastUpdate;
+	
+	private static CycleTimeData cycleTimeHistory;
+	public static Date assignmentsLastUpdate = new Date();
+	public static Map<Integer, Integer[]> assignmentsPerTemplate = null;
+
+	Data data = null;
+	private static MaintenanceCycle maintenanceInstance = null;
+	
+	public static MaintenanceCycle getInstance()
+	{
+		return maintenanceInstance;
+	}
+	
+	public MaintenanceCycle(Data dataInstance)
+	{
+		data = dataInstance;
+		Data.logger.info("MaintenanceCycle Constructor called");
+		
+		lastDailyRun = -1;
+		//interestPositive = Math.pow(1.05, 1/365.0) - 1;
+		//interestNegative = Math.pow(1.10, 1/365.0) - 1;	
+		interestPositive = .05 /365.0;
+		interestNegative = .10 / 365.0;	
+		
+		maintenanceInstance = this;
+		
+		// for signature template selection
+		GregorianCalendar today = new GregorianCalendar();
+		Data.currMonth = today.get(Calendar.MONTH) + 1;
+	}
+	
+	public class CycleTimeData
+	{ 
+		public long[] logstarttime = new long[2];
+		public long[] hitcount = new long[2];
+		public long[] totaltime = new long[2];
+		public long[] mintime = new long[2];
+		public long[] maxtime = new long[2];
+	}
+
+	private synchronized void doCycleElapsedTimeUpdate(int cycletype, long starttime, long endtime)
+	{		
+		Data.logger.info(new Timestamp(System.currentTimeMillis()) + ": " + "Cycle Completed: type = " + cycletype + ", elapsed time = " + (endtime-starttime) + "ms");
+
+		if(cycleTimeHistory == null)
+			cycleTimeHistory = new CycleTimeData();
+
+		//Last recorded cycle time
+		cycleTimeHistory.logstarttime[cycletype] = System.currentTimeMillis();
+		
+		long elapsed = endtime - starttime;
+		
+		cycleTimeHistory.hitcount[cycletype]++;
+		
+		cycleTimeHistory.totaltime[cycletype] += elapsed;
+
+		//set initial value if first update
+		if(cycleTimeHistory.mintime[cycletype] == 0) 
+			cycleTimeHistory.mintime[cycletype] = elapsed;
+		
+		if(cycleTimeHistory.mintime[cycletype] > elapsed)
+			cycleTimeHistory.mintime[cycletype] = elapsed;
+		
+		if(cycleTimeHistory.maxtime[cycletype] < elapsed)
+			cycleTimeHistory.maxtime[cycletype] = elapsed;
+	}
+	
+	public static CycleTimeData getCycleTimeData()
+	{
+		return cycleTimeHistory;
+	}	
+	
+	void updateStatus(String message)
+	{
+		lastStatus = message;
+		lastUpdate = new Date();
+	}
+	
+	public static String status()
+	{
+		if (lastStatus == null)
+			return "Unknown";
+		
+		return  Formatters.dateyyyymmddhhmmzzz.format(lastUpdate) + ":" + lastStatus;
+	}
+	
+	boolean isOncePerDay()
+	{
+		GregorianCalendar today = new GregorianCalendar();
+		int dayOfWeek = today.get(Calendar.DAY_OF_WEEK);
+		Data.currMonth = today.get(Calendar.MONTH) + 1;
+		getLastInterestRun();
+
+		if (dayOfWeek == lastDailyRun)
+			return false;
+
+		return true;
+	}
+	
+	boolean oneTimeStats = false;
+	public void SetOneTimeStatsOnly(boolean flag)
+	{
+		oneTimeStats = flag;
+	}
+	
+	public void run()
+	{
+		if(oneTimeStats)
+		{
+			oneTimeStats = false;
+			doStatsAndLoanLimitChecks();			
+			return;
+		}
+		
+		//start time 
+		long starttime = System.currentTimeMillis();			
+		int cycletype = CycleType30Min;
+
+		logSignatureStats();
+		
+		doStatsAndLoanLimitChecks();			
+		doAircraftMaintenance();			
+		
+		//TODO: comment out for test server for faster cycle times
+		//Goods cleanup, opens and closes fbo's
+	    checkGoodsRecords();
+	    processFboStatus();
+		processFboRenters();
+		processBulkFuelOrders();
+		
+		//TODO: comment out for test server for faster cycle times
+		processFboAssigments(); //green assignments
+		processTemplateAssignments(); //template assignments
+		
+		//TODO examine to see if we need to randomize release times on this a bit more
+		freeExpiredFBOs();
+		
+		if(isOncePerDay())
+		{
+			cycletype = CycleTypeDaily;
+			
+			processBankInterest();
+			processAircraftCondition();				
+			processFboSupplyUsage();
+			
+			checkRegistrations();
+		}		
+
+		//For Data Feeds
+		assignmentsLastUpdate = new Date();
+
+		//update timing info
+		doCycleElapsedTimeUpdate(cycletype, starttime, System.currentTimeMillis());
+		
+		updateStatus("Maintenance cycle finished");							
+	}
+	
+	void logSignatureStats()
+	{
+		long defaultCount = Data.defaultCount;
+		long createCount = Data.createCount;
+		long cacheCount = Data.cacheCount;
+		long bytesServed = Data.bytesServed;
+		long totalImagesSent = Data.totalImagesSent;
+
+		Data.logger.info("Signature stats: defaultCount = " + defaultCount + ", createCount = " + createCount + " , cacheCount = " + cacheCount + ", totalImagesSent = " + totalImagesSent + ", totalBytes = " + bytesServed);
+	}
+
+	void doAircraftMaintenance()
+	{
+		createAircraft();
+		sellAircraft();
+
+		checkRentalPrices();
+		checkAircraftHomes();
+		checkAircraftMaintenance();		
+		checkAircraftShipping();		
+		checkStalledAircraft();		
+	}
+
+	void getLastInterestRun()
+	{
+		updateStatus("Reading sysvariables");
+		try
+		{
+			String qry = "SELECT VarDateTime FROM sysvariables WHERE VariableName = 'LastInterestRun'";
+			Timestamp ts = data.dalHelper.ExecuteScalar(qry, new DALHelper.TimestampResultTransformer());
+			if(ts != null)
+			{
+				Timestamp LastInterestRun = ts;
+				Calendar calendar = new GregorianCalendar();
+				calendar.setTime(LastInterestRun);
+				lastDailyRun = calendar.get(Calendar.DAY_OF_WEEK);
+			} 
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	void checkGoodsRecords()
+	{
+	    updateStatus("Cleaning up goods");
+	    try
+	    {
+	    	String qry = "";
+	      
+	    	qry = qry + "DELETE FROM goods WHERE amount = 0 AND not exists (SELECT * FROM fbo where fbo.owner = goods.owner AND fbo.location = goods.location);";
+	    	qry = qry + "UPDATE goods SET amount = amount - LEAST(20, amount) WHERE owner = 0 AND amount > 0;";
+	    	qry = qry + "UPDATE goods SET amount = amount + LEAST(20, -amount) WHERE owner = 0 AND amount < 0;";
+	      
+	    	this.data.dalHelper.ExecuteBatchUpdate(qry);
+	    }
+	    catch (SQLException e)
+	    {
+	    	e.printStackTrace();
+	    }
+	}
+	  
+	void processFboStatus()
+	{
+	    updateStatus("Cleaning up goods");
+	    try
+	    {
+	    	String qry = "";
+	      
+	      	qry = qry + "UPDATE fbo SET active = 1, inactivesince = NULL WHERE active = 0 AND EXISTS (SELECT * FROM goods WHERE fbo.owner = goods.owner AND fbo.location = goods.location AND type = 2 AND amount >= 10);";
+	      	qry = qry + "UPDATE fbo SET active = 0, inactivesince = current_timestamp WHERE active = 1 AND NOT EXISTS (SELECT * FROM goods WHERE fbo.owner = goods.owner AND fbo.location = goods.location AND type = 2 AND amount >= 10);";
+	      
+	      	this.data.dalHelper.ExecuteBatchUpdate(qry);
+	    }
+	    catch (SQLException e)
+	    {
+	    	e.printStackTrace();
+	    }
+	}
+	  
+	void doStatsAndLoanLimitChecks()
+	{
+		updateStatus("Gathering statistics");
+		
+		ResultSet rs = null;
+		
+		try
+		{
+			List<statistics> stats = new ArrayList<statistics>();
+			
+			// Overall total stats
+			String qry = "SELECT sum(flightenginetime), sum(distance), sum(income) FROM log";
+			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			if(rs.next())
+			{
+				data.setMinutesFlown(rs.getLong(1)/60);
+				data.setMilesFlown(rs.getLong(2));
+				data.setTotalIncome((long)rs.getDouble(3));
+			}
+			
+			Map<Integer, Set<AircraftBean>> aircraft = new HashMap<Integer, Set<AircraftBean>>();
+
+			qry = "SELECT aircraft.*, models.* from aircraft, models WHERE owner > 0 AND aircraft.model = models.id";
+			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				AircraftBean thisAircraft = new AircraftBean(rs);
+				Integer iOwner = new Integer(thisAircraft.getOwner());
+				Set<AircraftBean> ownerSet = aircraft.get(iOwner);
+				
+				if (ownerSet == null)
+				{
+					ownerSet = new HashSet<AircraftBean>();
+					aircraft.put(iOwner, ownerSet);
+				}
+				
+				ownerSet.add(thisAircraft);
+			}
+
+			StringBuffer idSet = new StringBuffer();
+
+			HashMap<Integer, UserBean> usersById = new HashMap<Integer, UserBean>();
+			HashMap<String, UserBean> usersByName = new HashMap<String, UserBean>();
+
+			qry = "SELECT * from accounts WHERE accounts.id > 0";
+			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				UserBean user = new UserBean(rs);
+				usersById.put(new Integer(user.getId()), user);
+				usersByName.put(user.getName().toLowerCase(), user);
+			}
+			
+			HashMap<Integer, String> ownersByGroup = new HashMap<Integer, String>();
+
+			qry = "SELECT name, groupId from groupmembership, accounts where groupmembership.level='owner' and userId = accounts.id";
+			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+				ownersByGroup.put(new Integer(rs.getInt(2)), rs.getString(1));
+			
+			qry = "SELECT user, count(log.user), sum(distance), sum(flightEngineTime), min(time) from log WHERE log.type = 'flight' group by user";
+			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				UserBean thisUser = (UserBean) usersByName.get(rs.getString(1).toLowerCase());
+				if (thisUser == null)
+					continue;
+				
+				if ((thisUser.getExposure() & UserBean.EXPOSURE_SCORE) > 0)
+					stats.add(new statistics(thisUser.id, thisUser.getName(), null, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(new Integer(thisUser.getId())), false));
+				
+				//Loan check, if 10 flights and current limit is 0, add name to update list
+				if (thisUser.getLoanLimit() == 0 && rs.getInt(2) >= 10)
+				{
+					if (idSet.length() > 0)
+						idSet.append(",");
+
+					idSet.append(thisUser.getId());
+				}
+			}
+
+			qry = "SELECT groupId, count(log.user), sum(distance), sum(flightEngineTime), min(time) from log WHERE log.groupid is not null AND log.type = 'flight' group by groupId";
+			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				UserBean thisUser = (UserBean) usersById.get(new Integer(rs.getInt(1)));
+				if (thisUser == null)
+					continue;
+				String owner = (String) ownersByGroup.get(new Integer(rs.getInt(1)));
+				if ((thisUser.getExposure() & UserBean.EXPOSURE_SCORE) > 0)
+					stats.add(new statistics(thisUser.id, thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(new Integer(thisUser.getId())), true));
+			}
+
+			qry = "SELECT id FROM accounts WHERE type='group' AND NOT EXISTS (SELECT * FROM log WHERE log.groupid = accounts.id)";
+			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				UserBean thisUser = (UserBean) usersById.get(new Integer(rs.getInt(1)));
+				if (thisUser == null)
+					continue;
+				String owner = (String) ownersByGroup.get(new Integer(rs.getInt(1)));
+				if ((thisUser.getExposure() & UserBean.EXPOSURE_SCORE) > 0)
+					stats.add(new statistics(thisUser.id, thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), 0, 0, 0, null, aircraft.get(new Integer(thisUser.getId())), true));
+			}				
+
+			data.statistics = (statistics[]) stats.toArray(new statistics[0]);
+			Arrays.sort(data.statistics);
+			
+			HashMap<String, statistics> hm = new HashMap<String, statistics>();
+			for( statistics s : stats)
+				hm.put(s.accountName.toLowerCase(), s);
+			
+			Data.prevstatsmap = Data.statsmap;
+			Data.statsmap = hm;
+			
+			if (idSet.length() > 0)
+			{
+				qry = "UPDATE accounts SET `limit` = 40000 WHERE id in (" + idSet.toString() + ")";
+				data.dalHelper.ExecuteUpdate(qry);
+			}				
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+		updateStatus("Stats finished");
+	}
+	
+	/**
+	* Sets random 4-digit aircraft condition
+	* Called from processInterest() once a day
+	*/
+	void processAircraftCondition()
+	{
+		updateStatus("Setting Aircraft Condition");
+
+		try
+		{
+			String qry = "SELECT * FROM aircraft";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				int condition = rs.getInt("condition");
+				
+				//if aircraft is not broken or if it is owned by the bank whether broken or not
+				if (condition > AircraftBean.REPAIR_RANGE_HIGH || rs.getInt("owner") == 0)
+				{
+					int randomCondition = (int) (50000 + (59999 - 50000) * Math.random());
+
+					qry = "UPDATE aircraft SET `condition` = ? WHERE registration = ?";						
+					data.dalHelper.ExecuteUpdate(qry, randomCondition, rs.getString("registration"));
+				}
+			}
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	void processBankInterest()
+	{
+	    updateStatus("Processing bank interest");
+	    try
+	    {
+	    	GregorianCalendar today = new GregorianCalendar();
+	    	int day = today.get(Calendar.DAY_OF_MONTH);
+	    	if (1 == day)
+	    	{
+	    		String qry = "UPDATE accounts SET bank = bank + interest WHERE type = 'person' AND exposure > 0";
+	    		this.data.dalHelper.ExecuteUpdate(qry);
+	        
+
+	    		int counter = 0;
+	    		BigDecimal totalPaid = new BigDecimal(0.00);
+	    		
+	    		qry = "select id, interest from accounts WHERE type = 'person' AND exposure > 0 AND interest > 0.00";
+	    		ResultSet rs = this.data.dalHelper.ExecuteReadOnlyQuery(qry);
+	    		while (rs.next())
+	    		{
+	    			Money interest = new Money(rs.getBigDecimal("interest").doubleValue());
+	    			this.data.addPaymentRecord(rs.getInt("id"), 0, interest, PaymentBean.INTEREST_PAYMENT, 0, 0, "", "", "");
+
+	    			totalPaid = totalPaid.add(rs.getBigDecimal("interest"));
+	    			counter++;
+	    		}
+	    		
+	    		qry = "UPDATE accounts SET interest = 0.00 where type = 'person'";
+	    		this.data.dalHelper.ExecuteUpdate(qry, new Object[0]);
+	    		
+	    		Data.logger.info("Interest Payments: Total Payout - " + totalPaid.toString() + " to " + counter + " pilots");
+	    	}
+	    	
+	    	//1 million balance cap - no additional interest on balances over 1 million
+			//exclude group accounts - no interest paid to group accounts
+	    	String qry = "UPDATE accounts SET interest = interest + ROUND(LEAST((LEAST(money, 0) + bank), 1000000) * (case when (LEAST(money, 0) + bank) < 0 then " + this.interestNegative + "when (LEAST(money, 0) + bank) > 0 then " + this.interestPositive + " else 1 end), 2) where type = 'person' and exposure > 0";
+	    	this.data.dalHelper.ExecuteUpdate(qry, new Object[0]);
+	      
+	    	qry = "UPDATE sysvariables SET VarDateTime = Now() WHERE VariableName = 'LastInterestRun'";
+	    	this.data.dalHelper.ExecuteUpdate(qry, new Object[0]);
+	    }
+	    catch (SQLException e)
+	    {
+	    	e.printStackTrace();
+	    }
+	}	  
+	
+	/**
+	 * Calculate Supply usage
+	 * 
+	 * This is kind of bass ackwards in that it queries based upon the goods table versus
+	 * owned FBOs. The 'assumption' is that there is a goods entry for all owned facilities
+	 * so if that is not the case then those facilities would never use supplies.
+	 */
+	void processFboSupplyUsage()
+	{
+		updateStatus("Processing fbo supply usage");
+
+		try
+		{
+			int suppliesKG = GoodsBean.AMOUNT_FBO_SUPPLIES_PER_DAY;  
+
+			String qry = 									
+				" UPDATE goods, (SELECT goods.type, goods.location, goods.owner, case when airports.size < " + AirportBean.MIN_SIZE_MED + " then 1*fbo.fbosize when airports.size < " + AirportBean.MIN_SIZE_BIG + " then 2*fbo.fbosize else 3*fbo.fbosize end size FROM goods, fbo, airports " + 
+				" WHERE  goods.type=" + GoodsBean.GOODS_SUPPLIES + " AND fbo.location = goods.location AND fbo.owner = goods.owner AND airports.icao = goods.location) t "+
+				" Set amount = amount - (" + suppliesKG + " * t.size) "+
+				" where goods.type=t.type AND goods.location=t.location AND goods.owner=t.owner ";
+			data.dalHelper.ExecuteUpdate(qry);				
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	void freeExpiredFBOs()		
+	{
+		updateStatus("Freeing FBOs > 45 Days Inactive");
+		
+		try
+		{
+			String qry = "select * from fbo where inactivesince < date_sub(curdate(), interval 45 day)";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while(rs.next())
+			{
+				qry = "delete from goods where owner= ? and location= ? and type= ?";
+				data.dalHelper.ExecuteUpdate(qry, rs.getInt("owner"), rs.getString("location"), GoodsBean.GOODS_SUPPLIES);
+				
+				data.resetAllGoodsSellBuyFlag(rs.getInt("owner"), rs.getString("location"));
+
+				qry = "delete from fbofacilities where fboid = ?";
+				data.dalHelper.ExecuteUpdate(qry, rs.getInt("id"));
+
+				qry = "delete from fbo where id = ?";
+				data.dalHelper.ExecuteUpdate(qry, rs.getInt("id"));					
+			}
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	Set<String> parseIcaoSet(String icaos, boolean allowMacros)
+	{
+		if (icaos == null)
+			return null;
+		
+		String items[] = icaos.toUpperCase().trim().split(",\\ *");
+		
+		if (items.length == 0)
+			return null;
+		
+		Set<String> airports = new HashSet<String>();
+		Set<String> M = new HashSet<String>();
+		String item;
+		
+		for (int c = 0; c < items.length; c++)
+		{
+			item = items[c].trim();
+			if (allowMacros && item.startsWith("$"))
+			{
+				M.add(item);
+			} 
+			else 
+			{
+				airports.add(item);
+			}
+		}
+		
+		if (!M.isEmpty())
+		{
+			String macros[] = (String[]) M.toArray(new String[0]);
+			try
+			{
+				String sql;
+				for (int c = 0; c < macros.length; c++)
+				{
+					sql = null;
+					if (macros[c].equals("$FBO"))
+						sql = "SELECT DISTINCT a.icao FROM airports a JOIN fbo f ON f.location = a.icao AND f.active = 1";
+					else if (macros[c].equals("$WATER"))
+						sql = "SELECT icao FROM airports where type = 'water'";
+					else if (macros[c].equals("$MILITARY"))
+						sql = "SELECT icao FROM airports where type = 'military'";
+					
+					if (sql != null) 
+					{
+						ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(sql);
+						while (rs.next())
+						{
+							airports.add(rs.getString(1));
+						}
+					}
+				}
+			} 
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			} 
+		}
+		
+		if (airports.isEmpty())
+			airports = null;
+		
+		return airports;
+	}
+	
+	void processTemplateAssignments()
+	{
+		try
+		{
+			String qry = 
+				  " DELETE FROM assignments "
+				+ " WHERE "
+				+ "	(fromFboTemplate is null " // Delete unmoved unlocked expired assignments
+				+ "	and active = 0 "
+				+ "	AND userlock is null " 
+				+ "	AND groupId is null "
+				+ "	AND location = fromicao " 
+				+ "	AND expires is not null "
+				+ "	AND now() > expires) "
+				+ "	OR "
+				+ "	(fromFboTemplate is null " // Delete unmoved expired assignments after 1 day
+				+ "	and active <> 1 "
+				+ "	AND location = fromicao " 
+				+ "	AND expires is not null "
+				+ "	AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
+				+ "	OR "
+				+ "	(fromFboTemplate is null " // Delete moved expired assignments after 45 days
+				+ "	and active <> 1 "
+				+ "	AND expires is not null " 
+				+ "	AND DATE_SUB(now(), INTERVAL 45 DAY) > expires) ";
+			data.dalHelper.ExecuteUpdate(qry);;
+
+			//We are caching here several of the bigger ICAO lists created by the template
+			//macros $FBO, and $MILITARY so that its called only once per cycle, instead of
+			//for each template that uses them
+			
+			//Get the $FBO ICAOs and save them
+			Set<String> icaosetFBO = parseIcaoSet("$FBO", true);
+			StringBuffer whereSetFBO = new StringBuffer();
+			if (icaosetFBO != null)
+			{
+				String tempicaos[] = (String[]) icaosetFBO.toArray(new String[0]);
+				for (int c = 0; c < tempicaos.length; c++)
+				{
+					if (whereSetFBO.length() > 0)
+						whereSetFBO.append(", ");
+					whereSetFBO.append("'" + tempicaos[c] + "'");
+				}
+			}
+
+			//get the $MILITARY ICAOs and save them
+			Set<String> icaosetMilitary = parseIcaoSet("$MILITARY", true);
+			StringBuffer whereSetMILITARY = new StringBuffer();
+			if (icaosetMilitary != null)
+			{
+				String tempicaos[] = (String[]) icaosetMilitary.toArray(new String[0]);
+				for (int c = 0; c < tempicaos.length; c++)
+				{
+					if (whereSetMILITARY.length() > 0)
+						whereSetMILITARY.append(", ");
+					whereSetMILITARY.append("'" + tempicaos[c] + "'");
+				}
+			}
+			
+			qry = "SELECT * from templates";
+			ResultSet rsTemplate = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rsTemplate.next())
+			{
+				int jobsCreatedForTemplate = 0;
+				int id = rsTemplate.getInt("id");
+				
+				updateStatus("Working on assignments for template " + id);
+				
+				double frequency = rsTemplate.getDouble("frequency");					
+				int maxDistance = rsTemplate.getInt("targetDistance");
+
+				//if its a dead template, skip it
+				if (frequency == 0 || maxDistance == 0)
+					continue;
+
+				double targetPay = rsTemplate.getDouble("targetPay");
+				double Deviation = maxDistance * ((double)rsTemplate.getInt("distanceDev")/100.0);
+				double amountDev = rsTemplate.getInt("amountDev")/100.0;
+				double payDev = (double) rsTemplate.getInt("payDev") / 100.0;
+
+				int keepAlive = rsTemplate.getInt("targetKeepAlive");
+				int targetAmount = rsTemplate.getInt("targetAmount");
+				int maxSize = rsTemplate.getInt("matchMaxSize");
+				int minSize = rsTemplate.getInt("matchMinSize");					
+				
+				boolean isAllIn = rsTemplate.getString("typeOfPay").equals("allin");
+				boolean waterOk = !isAllIn;
+				
+				String commodity = rsTemplate.getString("commodity");	
+				String units = rsTemplate.getString("units");
+				String icaos1 = rsTemplate.getString("icaoSet1");
+				String icaos2 = rsTemplate.getString("icaoSet2");
+				
+				int seatsFrom = rsTemplate.getInt("seatsFrom");
+				int seatsTo = rsTemplate.getInt("seatsTo");
+				int speedFrom = rsTemplate.getInt("speedFrom");
+				int speedTo = rsTemplate.getInt("speedTo");
+
+				Set<String> icaoSet1 = null, icaoSet2 = null;
+				StringBuffer where = new StringBuffer();
+				
+				if(icaos1 == "$FBO")
+				{
+					icaoSet1 = icaosetFBO;
+					where = whereSetFBO;
+					frequency = frequency * icaoSet1.size();
+				}
+				else if(icaos1 == "$MILITARY")
+				{
+					icaoSet1 = icaosetMilitary;
+					where = whereSetMILITARY;
+					frequency = frequency * icaoSet1.size();
+				}
+				else
+				{
+					icaoSet1 = parseIcaoSet(icaos1, true);
+				
+					if (icaoSet1 != null)
+					{
+						String tempicaos[] = (String[]) icaoSet1.toArray(new String[0]);
+						for (int c = 0; c < tempicaos.length; c++)
+						{
+							if (where.length() > 0)
+								where.append(", ");
+							
+							where.append("'" + tempicaos[c] + "'");
+						}
+						if (icaos1.contains("$"))
+							frequency = frequency * icaoSet1.size();
+					}
+				}
+				
+				if(icaos2 == "$FBO")
+				{
+					icaoSet2 = icaosetFBO;
+				}
+				else if(icaos2 == "$MILITARY")
+				{
+					icaoSet2 = icaosetMilitary;
+				}
+				else
+				{
+					icaoSet2 = parseIcaoSet(icaos2, true);
+				}
+				
+				String query;
+				String needed;
+				if (icaoSet1 == null && icaoSet2 == null)
+				{
+					String having = "needed > got";
+					if (maxSize > 0)
+						having = having + " AND smallest < " + maxSize;
+					
+					if (minSize > 0)
+						having = having + " AND largest > " + minSize;
+					
+					needed = frequency + " * sqrt(sum(size)/6000) as needed";
+					query = "SELECT bucket, min(size) AS smallest, max(size) AS largest, " + needed +
+						 ", count(assignments.id) AS got, avg(lat) FROM airports LEFT join assignments ON assignments.fromicao = airports.icao AND fromtemplate = " + 
+						 id + " GROUP by bucket HAVING " + having;
+				} 
+				else
+				{			
+					String whereString = "";			
+					
+					if (where.length() > 0)
+						whereString = whereString + "WHERE icao in (" + where.toString() + ")";
+					
+					needed = frequency + " as needed";
+					query = "SELECT 0, 0, 0, " + needed + ", count(assignments.id) AS got, avg(lat) FROM airports LEFT JOIN assignments ON assignments.fromicao = airports.icao AND fromtemplate = " + id + " " + whereString ;						
+				}
+				
+				ResultSet bucketRs = data.dalHelper.ExecuteReadOnlyQuery(query);
+				while (bucketRs.next())
+				{
+					int bucket = bucketRs.getInt(1);
+					double dTogo = bucketRs.getDouble(4) - bucketRs.getInt(5); 
+					double latitude = bucketRs.getDouble(6);
+
+					int togo;
+					List<String> airportFromList;
+					
+					if (dTogo <= 0 || (dTogo < 1 && Math.random() > dTogo))
+						continue;
+					
+					togo = (int) Math.max(1, dTogo);
+					
+					if (icaoSet1 != null || icaoSet2 != null)
+					{
+						airportFromList = new ArrayList<String>(icaoSet1);
+					} 
+					else
+					{							
+						where = new StringBuffer("bucket = " + bucket);
+						
+						if (waterOk)
+							where.append(" AND type in ('civil','water')");
+						else
+							where.append(" AND type='civil'");
+						
+						if (maxSize > 0)
+							where.append(" AND size < " + maxSize);
+						
+						if (minSize > 0)
+							where.append(" AND size > " + minSize);
+						
+						if (isAllIn)
+							where.append(" AND exists (SELECT * FROM aircraft WHERE aircraft.location = airports.icao and aircraft.owner = 0)");
+													
+						airportFromList = new ArrayList<String>();	
+
+						qry = "SELECT icao FROM airports WHERE  " + where.toString();
+						ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+						while (rs.next())
+							airportFromList.add(rs.getString(1));
+					}
+					
+					if (airportFromList.isEmpty())
+						continue;
+					
+					while (togo-- > 0)
+					{
+						String icao = (String) airportFromList.get((int)(Math.random() * airportFromList.size()));
+							
+						int cargoAmount = (int)(targetAmount * (1 + (Math.random() * 2*amountDev) - amountDev));
+						if (cargoAmount == 0)
+							cargoAmount = 1;
+						
+						double pay = targetPay * (1 + (Math.random() * 2*payDev) - payDev);
+
+						Data.closeAirport to = data.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk);
+						if (to == null)
+							continue;
+	
+						String aircraft = null;
+						if (isAllIn) 
+						{
+							//TODO This should probably randomize the returned aircraft that meet the criteria if more then one
+							//All-In change - find available aircraft at airport that have not already been assigned to an All-In job - thanks Airboss for query help
+							String queryToFindFreeAircraft = "select registration from aircraft, models " +
+									"where location = '" + icao + "' " +
+									"and owner = 0 " + 
+									"and userlock is null " +
+									"and registration not in( select * from (select aircraft from assignments where aircraft is not null and location = '" + icao+ "') as t) " +
+									"and models.id = aircraft.model ";
+							
+							//check for seats and cruise speed filters on aircraft assignment for template
+							StringBuffer aircraftFilterWhereClause = new StringBuffer();
+
+							//if no filters are set for seats size filter, just add a condition to be bigger then the units specified in the job
+							//this will ensure a 172 is not chosen to take a 10 pax job
+							//if filter values are set those are used instead in the where clause
+							if (seatsFrom == 0 && seatsTo == 0) 
+							{	//no filters set, use some base values to make sure an in appropriate plane is not assigned
+								if (units.equals("passengers"))
+								{
+									aircraftFilterWhereClause.append(" and seats >= " + targetAmount);
+									aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + targetAmount * 77 + " < maxWeight"); 
+								}
+								else if (units.equals("KGs"))
+								{
+									aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + targetAmount + " < maxWeight");
+								}
+							}
+							else 
+							{	//filters set
+								if (seatsFrom > 0) 
+									aircraftFilterWhereClause.append(" and seats >= " + seatsFrom);
+								
+								if (seatsFrom == 0 && seatsTo > 0)										
+									aircraftFilterWhereClause.append(" and seats >= " + targetAmount);
+								
+								if (seatsTo > 0)
+									aircraftFilterWhereClause.append(" and seats <= " + seatsTo);
+								
+								if (speedFrom > 0) 
+									aircraftFilterWhereClause.append(" and cruisespeed >= " + speedFrom);
+								
+								if (speedTo > 0)
+										aircraftFilterWhereClause.append(" and cruisespeed <= " + speedTo);
+								
+								if (units.equals("passengers"))
+									aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + targetAmount * 77 + " < maxWeight");
+								else 
+									aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + targetAmount + " < maxWeight");
+							}
+							
+							StringBuffer finalAircraftFilterQuery = new StringBuffer(queryToFindFreeAircraft);
+							finalAircraftFilterQuery.append(aircraftFilterWhereClause.toString());
+							
+							//We only use one, so limit it.
+							finalAircraftFilterQuery.append(" LIMIT 1");
+
+							ResultSet aircraftRs = data.dalHelper.ExecuteReadOnlyQuery(finalAircraftFilterQuery.toString());
+
+							if (aircraftRs.next())
+								aircraft = aircraftRs.getString(1);
+							else // no aircraft found, skip it
+								continue;
+						}
+						
+						int distance = (int) Math.round(to.distance);
+						int bearing = (int) Math.round(to.bearing);
+						
+						String fromIcao;
+						String toIcao;
+						if (isAllIn || Math.random() < 0.5) // never reverse an AllIn flight
+						{
+							fromIcao = icao;
+							toIcao = to.icao;
+						} 
+						else 
+						{
+							// reverse the flight
+							fromIcao = to.icao;
+							toIcao = icao;
+							if (bearing < 180)
+								bearing += 180;
+							else
+								bearing -= 180;
+						}
+						
+						Timestamp now = new Timestamp(System.currentTimeMillis());				
+						Calendar expires = GregorianCalendar.getInstance();
+						expires.add(GregorianCalendar.DAY_OF_MONTH, keepAlive);
+						expires.add(GregorianCalendar.HOUR, (int)(Math.random() * 24 - 12));
+
+						StringBuilder fields = new StringBuilder();
+						StringBuilder values = new StringBuilder();
+						
+						fields.append("bearing, creation, expires, commodity, units, amount, fromicao, location, toicao, distance, pay, fromTemplate");
+						values.append("" + bearing);
+						values.append(", '" + now + "'");
+						values.append(", '" + new Timestamp(expires.getTime().getTime()) + "'");
+						values.append(", '" + Converters.escapeSQL(commodity) + "'");
+						values.append(", '" + units + "'");
+						values.append(", " + cargoAmount);
+						values.append(", '" + fromIcao + "'");
+						values.append(", '" + fromIcao + "'");
+						values.append(", '" + toIcao + "'");
+						values.append(", " + distance);
+						values.append(", " + (float)pay);
+						values.append(", " + id);
+
+						if (isAllIn)
+						{
+							fields.append(", aircraft");
+							values.append(", '" + aircraft + "'");
+						}
+						
+						qry = "INSERT INTO assignments (" + fields.toString() + ") VALUES(" + values.toString() + ")";
+						data.dalHelper.ExecuteUpdate(qry);
+
+						jobsCreatedForTemplate++;
+					}
+				}
+			}
+
+			assignmentsPerTemplate = new HashMap<Integer, Integer[]>();
+
+			qry = "SELECT fromtemplate, count(*) as count, max(pay * amount * (distance / 100.0)) as pmax, min(pay * amount * (distance / 100.0)) as pmin, avg(pay * amount * (distance / 100.0)) as pmean from assignments group by fromtemplate";
+			ResultSet rsTemplatesFound = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rsTemplatesFound.next())
+			{
+				Integer[] ia = new Integer[4];
+				ia[ASSGN_COUNT] = new Integer(rsTemplatesFound.getInt(2));
+				ia[ASSGN_MAX] = new Integer((int)(rsTemplatesFound.getDouble(3) + .5));
+				ia[ASSGN_MIN] = new Integer((int)(rsTemplatesFound.getDouble(4) + .5));
+				ia[ASSGN_AVG] = new Integer((int)(rsTemplatesFound.getDouble(5) + .5));
+				
+				assignmentsPerTemplate.put(new Integer(rsTemplatesFound.getInt(1)), ia );
+			}
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	void processFboRenters()
+	{
+		try
+		{
+			int RentDayOfMonth = 1;
+			
+			String qry = "select r.id, r.occupant, r.fboId, r.location, r.size, o.occupant as owner, o.rent, f.active " +
+						 	"from fbofacilities r " +
+							"join fbo f on f.id = r.fboId " +
+							"join fbofacilities o on o.fboId = r.fboId and o.reservedSpace >= 0 and o.allowRenew = 1 " +
+							"where r.reservedSpace < 0 and r.renew = 1 and r.allowRenew = 1 and r.lastRentPayment < date_add(current_date, interval -day(current_date) + ? day)";				
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry, RentDayOfMonth);			
+			while (rs.next())
+			{
+				int occupant = rs.getInt("occupant");
+				int rent = rs.getInt("rent") * rs.getInt("size");
+				if (rs.getInt("active") > 0)
+				{
+					if (data.checkAnyFunds(occupant, (double)rent))
+					{
+						data.doPayment(occupant, rs.getInt("owner"), (double)rent, PaymentBean.FBO_FACILITY_RENT, 0, rs.getInt("fboId"), rs.getString("location"), "", "", false);
+						
+						qry = "update fbofacilities set lastRentPayment = current_timestamp where id = ?";
+						data.dalHelper.ExecuteUpdate(qry, rs.getInt("id"));
+					}
+				}
+			}
+		
+			// Delete delinquent Renters
+			qry = "delete from fbofacilities where reservedSpace < 0 and lastRentPayment < date_add(current_date, interval -day(current_date) + ? day)";
+			data.dalHelper.ExecuteUpdate(qry, RentDayOfMonth);
+		}
+		catch(SQLException e)
+		{		
+			e.printStackTrace();
+		}			
+	}
+	
+	void deleteExpiredAssignments()
+	{
+		// NOTE: Adjust the extratime values in AssignmentBean.getSExpires() if changing these queries.
+		
+		// Delete unmoved unlocked expired assignments
+		String qry = "DELETE FROM assignments WHERE fromFboTemplate is not null and active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires;";				
+		// Delete locked expired assignments after User Set # of Days
+		qry = qry + "DELETE FROM assignments WHERE fromFboTemplate is not null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 48 HOUR) > expires;";				
+		// Delete moved expired assignments after User Set # of Days
+		qry = qry + "DELETE FROM assignments WHERE fromFboTemplate is not null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL 48 HOUR) > expires;";
+
+		try
+		{
+			data.dalHelper.ExecuteBatchUpdate(qry);
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	void processFboAssigments()
+	{
+		try
+		{
+			deleteExpiredAssignments();
+			
+			int ChancesPerDay = 6;
+			boolean oneAssignmentPerLoop = true;
+			int keepAlive = 0;
+			int fboLoopCounter = 0;
+			
+			String qry = 
+				"Select t.* from " +
+				"(select rand() as chance, f.id, f.fbosize from fbo f where f.active = 1)  t " + 
+				"where t.chance < ?/48 " +
+				"order by t.chance, t.id;";
+			CachedRowSet rsFBOs = data.dalHelper.ExecuteReadOnlyQuery(qry, ChancesPerDay);
+			
+			//Get the FBO count
+			int fboCount = rsFBOs.size();
+
+			while (rsFBOs.next())
+			{
+				fboLoopCounter += 1;
+				boolean flgNoGatesRented = false;
+				
+				int fboJobs = 1; //default is one job
+				int fboSize = rsFBOs.getInt("fbosize");
+
+				if(fboSize > 1)
+				{
+					fboJobs = (int)(Math.random() * fboSize + .5);
+					if( fboJobs < 1 )
+						fboJobs = 1; // minimum is one job
+				}			
+				
+				qry = "Select t.* from " + 
+						"(select rand() as chance, ff.* from fbofacilities ff where fboid = ?) t " + 
+						" order by t.chance, t.id " +
+						" limit 0,?;";
+				CachedRowSet rsFacilities = data.dalHelper.ExecuteReadOnlyQuery(qry, rsFBOs.getInt("id"), fboSize);
+			
+				//Get the facility count
+				int facCount = rsFacilities.size();
+
+				if( facCount <= 0)
+					continue;
+				
+				for(int i = 0; i < fboJobs; i++ )
+				{
+					if( i == 0 )
+					{
+						rsFacilities.next();
+						
+						//Check if only a single facility is returned, assume the owner reserved all gates
+						if( rsFacilities.getInt("reservedspace") == fboSize*3)
+							flgNoGatesRented = true;
+					}
+					else
+					{
+						if( !flgNoGatesRented )
+						{
+							//Get the next record
+							rsFacilities.next();
+							
+							//if we have moved past the last record, reuse the last
+							//this handles larger airfields that might only have 2 facilities but 3 jobs generated
+							if( rsFacilities.isAfterLast())
+							{
+								rsFacilities.last();
+							}
+						}
+					}
+					
+					//Get the current facility data
+					FboFacilityBean template = new FboFacilityBean(rsFacilities);
+					
+					//user-set # of days to set for initial PT job expiration
+					//Added minimum live time is 1 day
+					keepAlive = template.daysActive <= 0 ? 1 : template.daysActive;  
+					int id = template.getId();
+
+					updateStatus("Working on FBO Assignments for template " + id + " Processing " + fboLoopCounter + " of " + fboCount + " FBO's");
+
+					FboBean fbo = data.getFbo(template.getFboId());
+					AirportBean airport = data.getAirport(template.getLocation());
+					
+					//This section will either use the facility size if player rented
+					//or if the fbo own has reserved all gates or none have rented (size==0)
+					//then the available units allowed are calculated
+					int unitsAllowed = template.getSize();
+					if (unitsAllowed == 0) //owner reserved or none rented
+					{
+						// small - 1*3, medium - 2*3, large - 3*3
+						unitsAllowed = fbo.getFboSize() * airport.getFboSlots();
+						
+						//see if any gates are rented (reservedspace == -1)
+						qry = "select sum(size) from fbofacilities where reservedSpace < 0 and fboId = ?";
+						ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry, template.getFboId());
+
+						//remove rented gate counts if any found
+						if (rs.next())
+							unitsAllowed -= rs.getInt(1);
+					}
+
+					//compute total pax count at 3 per gate
+					unitsAllowed *= 3;
+					
+					//Go to next winner if no available paxs, this could occur if owner facility, and all gates rented
+					if (unitsAllowed <= 0)
+						continue;
+
+//TODO minUnits needs to be looked at					
+					//this is always going to be 0 if I read the code right
+					int minUnits = template.getMinUnitsPerTrip();
+					
+					//this is going to be the pax upper limit set by the gate owner/renter
+					int maxUnits = template.getMaxUnitsPerTrip();
+					if (maxUnits <= 0)
+						maxUnits = unitsAllowed;
+					
+					//Why is this set to half the max value?
+					//If the gate is set to 10, the smallest value is going to be 5
+					minUnits = maxUnits / 2;     // Bean minUnits setting is ignored.
+					
+					int minDistance = template.getMinDistance();
+					int maxDistance = template.getMaxDistance();
+					
+					if (minDistance > maxDistance || minDistance < 0)
+						minDistance = 0;
+					
+					if (minDistance > maxDistance || maxDistance > FboFacilityBean.MAX_ASSIGNMENT_DISTANCE)
+						maxDistance = FboFacilityBean.MAX_ASSIGNMENT_DISTANCE;
+					
+					int minSize = template.getMatchMinSize();
+					int maxSize = template.getMatchMaxSize();
+					
+					if (minSize > maxSize || minSize < 0)
+						minSize = 0;
+					
+					if (minSize > maxSize || maxSize > 99999)
+						maxSize = 99999;
+					
+					String icaos = template.getIcaoSet();
+					if (icaos != null && "".equals(icaos))
+						icaos = null;
+					
+					Set<String> icaoSet2 = parseIcaoSet(icaos, false);
+					if (icaoSet2 != null && !icaoSet2.isEmpty())
+					{
+						minDistance = 0;
+						maxDistance = FboFacilityBean.MAX_ASSIGNMENT_DISTANCE;
+						minSize = 0;
+						maxSize = 99999;
+					}
+					
+					qry = "select sum(amount) FROM assignments where fromFboTemplate = ?"; 
+					int jobsFound = data.dalHelper.ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
+
+					int togo = unitsAllowed - jobsFound; 
+					
+					while (togo > 0)
+					{
+						if (maxUnits > togo)
+							maxUnits = togo;
+						
+						if (minUnits >= maxUnits)
+							minUnits = maxUnits / 2;
+
+						String icao = template.getLocation();
+						
+						int cargoAmount = minUnits + (int)(Math.random() * (1 + (maxUnits - minUnits)));
+						
+						if (cargoAmount == 0)
+							cargoAmount = 1;
+						
+						togo -= cargoAmount;
+						
+						qry = "select avg(lat) FROM assignments LEFT join  airports ON fromicao = airports.icao where fromFboTemplate = ?"; 
+						double lat = data.dalHelper.ExecuteScalar(qry, new DALHelper.DoubleResultTransformer(), id);
+						
+						Data.closeAirport to = data.getRandomCloseAirport(icao, minDistance, maxDistance, minSize, maxSize, lat, icaoSet2, template.getAllowWater());
+						if (to == null)
+							continue;
+	
+						int distance = (int) Math.round(to.distance);
+						int bearing = (int) Math.round(to.bearing);
+						
+						String fromIcao;
+						String toIcao;
+						if (Math.random() < 0.5)
+						{
+							fromIcao = icao;
+							toIcao = to.icao;
+						} 
+						else 
+						{
+							// reverse the flight
+							fromIcao = to.icao;
+							toIcao = icao;
+							if (bearing < 180)
+								bearing += 180;
+							else
+								bearing -= 180;
+						}
+						
+						// Next two lines for user-input active days for unclaimed and claimed jobs
+						// Calendar Expires + KeepAlive is what the job is set to expire at when created
+						// KeepAlive is initialized to the user-set # of days
+						// daysClaimedActive is a data field in assignments that was created for locked jobs
+						// but is currently not being used.
+						Timestamp now = new Timestamp(System.currentTimeMillis());				
+						Calendar expires = GregorianCalendar.getInstance();
+						expires.add(GregorianCalendar.DAY_OF_MONTH, keepAlive);
+						int pay = (int) Math.round(template.getPay(distance, cargoAmount));
+
+						StringBuilder fields = new StringBuilder();
+						StringBuilder values = new StringBuilder();
+						
+						fields.append("bearing, creation, expires, commodity, units, amount, fromicao, location, toicao, distance, pay, fromFboTemplate, DaysClaimedActive");
+						values.append("" + bearing);
+						values.append(", '" + now + "'");
+						values.append(", '" + new Timestamp(expires.getTime().getTime()) + "'");
+						values.append(", '" + Converters.escapeSQL(template.getRandomCommodity(cargoAmount)) + "'");
+						values.append(", '" + template.getSUnits() + "'");
+						values.append(", " + cargoAmount);
+						values.append(", '" + fromIcao + "'");
+						values.append(", '" + fromIcao + "'");
+						values.append(", '" + toIcao + "'");
+						values.append(", " + distance);
+						values.append(", " + (float)pay);
+						values.append(", " + template.getId());
+						values.append(", " + template.getDaysClaimedActive());
+
+						if (!template.getPublicByDefault())
+						{
+							UserBean account = data.getAccountById(template.getOccupant());
+							if (account != null)
+							{
+								if (account.isGroup())
+								{
+									float pilotFee = (float)(pay * cargoAmount * distance * 0.01 * account.getDefaultPilotFee() / 100);
+									fields.append(", groupId");
+									values.append(", " + account.getId());
+									
+									fields.append(", pilotFee");
+									values.append(", " + pilotFee);
+								} 
+								else 
+								{
+									fields.append(", userlock");
+									values.append(", " + account.getId());
+								}
+							}
+						}
+						
+						qry = "INSERT INTO assignments (" + fields.toString() + ") VALUES(" + values.toString() + ")";
+						data.dalHelper.ExecuteUpdate(qry);
+
+						if (oneAssignmentPerLoop)
+							break;
+					}
+				}
+			}
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+
+	void sellAircraft()
+	{
+		updateStatus("Putting aircraft on the market");
+		try
+		{
+			//remove aircraft from the sale list that has expired
+			String qry = "UPDATE aircraft SET sellPrice = null, marketTimeout = null WHERE owner = 0 AND now() > marketTimeout";
+			data.dalHelper.ExecuteUpdate(qry);
+			
+			// get a count of each model of plane where the planes are not for sale
+			qry = "SELECT models.make, models.model, models.numSell, models.id, sum(CASE WHEN sellprice is not null THEN 1 ELSE 0 END) as forSale, sum(CASE WHEN sellprice is null THEN 1 ELSE 0 END) as notForSale FROM aircraft, models where aircraft.model = models.id and aircraft.owner = 0 group by (models.id)";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				int model = rs.getInt("id");
+				int toSell = rs.getInt("numSell");
+				int forSale = rs.getInt("forSale");
+				int notForSale = rs.getInt("notForSale");
+				
+				toSell = toSell - forSale;
+				
+				//break out of the loop if we have met our goal
+				if (toSell <= 0)  
+					continue;
+				
+				double probability = toSell/(double)notForSale;					
+				
+				qry = "SELECT * FROM aircraft WHERE sellPrice is null AND owner=0 AND location <> 'DEAD' AND model = ?";
+				ResultSet toSellRS = data.dalHelper.ExecuteReadOnlyQuery(qry, model);
+				while (toSellRS.next())
+				{
+					if (Math.random() > probability)  //introduced randomness in putting up ac for sale put back in 4/28/08
+						continue;
+					
+					if (toSell <= 0) // break out of the loop when we have the number for sale we want.
+						continue;
+						
+					toSell = toSell -1;  // added this instead of the random comparison above
+					
+					Calendar expires = GregorianCalendar.getInstance();
+					expires.add(GregorianCalendar.DAY_OF_MONTH, 2);  // was 7
+					expires.add(GregorianCalendar.HOUR, (int)(Math.random() * 72));  // was 24
+
+					String reg = toSellRS.getString("registration");
+					AircraftBean[] aircraft = data.getAircraftByRegistration(reg);
+
+					int sellPrice = aircraft[0].getSystemSellPrice(); //includes raw equipment costs
+					sellPrice = (int) Math.round(sellPrice * (1 + Math.random() * 0.4 - 0.2));
+					
+					qry = "UPDATE aircraft SET sellPrice = ?, markettimeOut = ? where registration = ?";
+					data.dalHelper.ExecuteUpdate(qry, sellPrice,  new Timestamp(expires.getTime().getTime()), reg);
+					Data.logger.info("Selling aircraft: " + aircraft[0].getMakeModel() + ", " + reg + ", Price = " + sellPrice + ", expires = " + expires.getTime().toString());
+					
+					//remove any AllIn assignments that might be attached to this aircraft
+					qry = "DELETE FROM assignments WHERE aircraft = ?";
+					data.dalHelper.ExecuteUpdate(qry, reg);						
+				}
+			}
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	void checkStalledAircraft()
+	{
+		updateStatus("Freeing aircraft that have not been checked in");
+		try
+		{
+			String qry = "SELECT * FROM aircraft WHERE userlock is not null";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry); 
+			while (rs.next())
+			{
+				Timestamp lockedSince = rs.getTimestamp("lockedSince");
+				if (lockedSince == null)
+					continue;
+
+				long maxRentTime = 10800;
+				int ultimateOwner = data.accountUltimateOwner(rs.getInt("owner"));
+				if(rs.getInt("userlock") == ultimateOwner)
+				{
+					maxRentTime = 1000 * 60 * 60; //1000 hours in seconds
+				}
+				else if (rs.getString("maxRentTime") == null)
+				{
+					qry = "SELECT maxRentTime FROM models WHERE id = ?";
+					int modelMaxRentTime = data.dalHelper.ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), rs.getInt("model"));
+					if (modelMaxRentTime > 0)
+						maxRentTime = modelMaxRentTime;
+				} 
+				else 
+				{
+					maxRentTime = rs.getInt("maxRentTime");
+				}					
+				
+				if (new Timestamp(System.currentTimeMillis() - 1000 * maxRentTime).after(lockedSince))
+				{
+					int userlock = rs.getInt("userlock");
+					String reg = rs.getString("registration");
+					String location = rs.getString("location") == null ? rs.getString("departedFrom") : rs.getString("location");
+					
+					//free aircraft
+					qry = "UPDATE aircraft SET lockedSince=null, userlock=null, departedFrom=null, holdRental=false, location = ? WHERE registration = ?";
+					data.dalHelper.ExecuteUpdate(qry, location, reg);
+
+					//release enroute assignments
+					qry = "UPDATE assignments SET active = 0 WHERE active = 1 AND userlock = ?";
+					data.dalHelper.ExecuteUpdate(qry, userlock);
+					
+					//clean any All-In jobs associated with released plane
+					qry = "UPDATE assignments SET userlock=null WHERE aircraft = ?";
+					data.dalHelper.ExecuteUpdate(qry, reg);
+				}					
+			}
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	void processBulkFuelOrders() 
+	{
+		updateStatus("Doing Bulk Fuel orders");
+
+		try
+		{
+			String qry = "select id, owner, location, bulk100llOrdered, bulkJetAOrdered from fbo where bulkFuelOrderTimeStamp IS NOT NULL AND bulkFuelDeliveryDateTime < now()";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				int id = rs.getInt("id");
+				int owner = rs.getInt("owner");
+				String icao = rs.getString("location");
+				int amount100ll = rs.getInt("bulk100llOrdered");
+				int amountJetA = rs.getInt("bulkJetAOrdered");					
+
+				updateFboFuelRecord(amount100ll, amountJetA, icao, owner);
+				data.resetBulkFuelOrder(id);
+				
+				//log the delivery as a $0 transaction
+				data.doPayBulkFuelDelivered(owner, 0, 0, id, "Delivery report --  100LL " + amount100ll + " Kg -- JetA " + amountJetA + " Kg", icao);					
+			}
+		}
+		catch (SQLException e ) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	void updateFboFuelRecord(int amount100ll, int amountJetA, String icao, int owner) throws SQLException
+	{
+		if(amount100ll <= 0 && amountJetA <= 0)
+			return;
+		
+		String qry = ""; 
+		
+		if(amount100ll > 0 && doesFuelRecordExist(GoodsBean.GOODS_FUEL100LL, icao, owner))
+			qry = "update goods set amount=amount + " + amount100ll + " where type = " + GoodsBean.GOODS_FUEL100LL + " AND location = '" + icao + "' AND owner = " + owner+ ";";
+		else if(amount100ll > 0)
+			qry = "insert into goods(amount, type, location, owner) values(" + amount100ll + ", " + GoodsBean.GOODS_FUEL100LL + ", '" + icao + "', " + owner + ");";
+		
+		if(amountJetA > 0 && doesFuelRecordExist(GoodsBean.GOODS_FUELJETA, icao, owner))
+			qry += "update goods set amount=amount + " + amountJetA + " where type = " + GoodsBean.GOODS_FUELJETA + " AND location = '" + icao + "' AND owner = " + owner + ";";
+		else if(amountJetA > 0)
+			qry += "insert into goods(amount, type, location, owner) values(" + amountJetA + ", " + GoodsBean.GOODS_FUELJETA + ", '" + icao + "', " + owner + ");";
+		
+		data.dalHelper.ExecuteBatchUpdate(qry);			
+	}
+	
+	boolean doesFuelRecordExist(int type, String icao, int owner) throws SQLException
+	{
+		String qry = "SELECT (count(type) > 0) as found FROM goods where type = ? AND location = ? AND owner = ?";
+		return data.dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), type, icao, owner);
+	}
+	
+	/**
+	 * This method checks for aircraft with shipping states of 1 or 3, for processing
+	 * State 1 is disassembly and upon completion creates a new assignment, and changes
+	 * state to 2 (crated)
+     * State 3 is reassembly and upon completion resets the aircraft back to normal active state (0)
+	 **/
+	void checkAircraftShipping()
+	{
+		updateStatus("Doing Aircraft shipping update.");
+		
+		try
+		{
+			String qry = "SELECT * FROM aircraft WHERE (shippingState = 1 OR shippingState = 3)";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			
+			while (rs.next())
+			{
+				int shippingState = rs.getInt("shippingState");
+
+				Timestamp statenext = rs.getTimestamp("shippingStateNext");
+				Timestamp now = new Timestamp(new Date().getTime());					
+				
+				//Check if its met the required delay
+				if( statenext.compareTo(now) < 0)
+				{
+					//Crate up and create the assignment if disassembly has completed
+					if(shippingState == 1)
+					{
+						qry = "UPDATE aircraft SET shippingState = 2 WHERE registration = ?";
+						data.dalHelper.ExecuteUpdate(qry, rs.getString("registration"));
+						
+						//Needed to get the aircraft empty weight
+						AircraftBean[] aircraft = data.getAircraftByRegistration(rs.getString("registration"));
+						
+						AssignmentBean assignment;
+						assignment = new AssignmentBean();
+						
+						assignment.setId(-1);
+						assignment.setCreation(new Timestamp(System.currentTimeMillis()));
+						assignment.setCreatedByUser(true);
+						assignment.setUnits(AssignmentBean.UNIT_KG);
+						
+						
+						assignment.setAmount(aircraft[0].getEmptyWeight());
+						assignment.editAmountAllowed(null);
+						assignment.setGroup(false);
+						assignment.setCommodityId(99);
+						assignment.setCommodity("Aircraft " + rs.getString("registration") + " Shipment Crate");
+						assignment.setOwner(rs.getInt("owner"));
+						assignment.setLocation(rs.getString("location"));
+						assignment.setFrom(rs.getString("location"));
+						assignment.setTo(rs.getString("shippingTo"));
+						assignment.setPilotFee(0);	
+						
+						try
+						{
+							UserBean user = data.getAccountById(rs.getInt("owner"));
+							data.updateAssignment(assignment, user);
+						}
+						catch(DataError e)
+						{
+							e.printStackTrace();
+						}
+					}
+					
+					if(shippingState == 3)
+					{
+						qry = "UPDATE aircraft SET shippingState = 0 WHERE registration = ?";
+						data.dalHelper.ExecuteUpdate(qry, rs.getString("registration"));
+					}																	
+				}
+			}
+		} 
+		catch (SQLException e)
+		{
+				e.printStackTrace();
+		} 
+	}
+	
+	void checkAircraftMaintenance()
+	{
+	    updateStatus("Doing maintenance on aircraft");
+	    
+	    try
+	    {
+	    	//100 hour check
+	    	String qry = "SELECT * FROM aircraft, models WHERE userlock is null AND models.id = aircraft.model AND owner = 0 AND (engine1 - lastCheck)/3600 > 100";
+	    	ResultSet rs = this.data.dalHelper.ExecuteReadOnlyQuery(qry);
+	    	while (rs.next())
+	    	{
+	    		AircraftBean aircraft = new AircraftBean(rs);
+	    		try
+	    		{
+	    			this.data.doMaintenance(aircraft, 1, null, null);
+	    		}
+	    		catch (DataError e1)
+	    		{
+	    			e1.printStackTrace();
+	    		}
+	    	}
+	    	
+	    	//Avgas TBO Check
+	      	qry = "SELECT * FROM aircraft, models WHERE userlock is null AND models.id = aircraft.model AND models.fueltype=0 AND owner = 0 AND (engine1/3600) > 1500";
+	      	rs = this.data.dalHelper.ExecuteReadOnlyQuery(qry);
+	      	while (rs.next())
+	      	{
+	      		AircraftBean aircraft = new AircraftBean(rs);
+	        	try
+	        	{
+	        		this.data.doMaintenance(aircraft, 2, null, null);
+	        	}
+	        	catch (DataError e1)
+	        	{
+	        		e1.printStackTrace();
+	        	}
+	      	}
+	      
+	      	//JetA TBO check
+	      	qry = "SELECT * FROM aircraft, models WHERE userlock is null AND models.id = aircraft.model AND models.fueltype=1 AND owner = 0 AND (engine1/3600) > 2000";
+	      	rs = this.data.dalHelper.ExecuteReadOnlyQuery(qry, new Object[0]);
+	      	while (rs.next())
+	      	{
+	      		AircraftBean aircraft = new AircraftBean(rs);
+	        	try
+	        	{
+	        		this.data.doMaintenance(aircraft, 2, null, null);
+	        	}
+	        	catch (DataError e1)
+	        	{
+	        		e1.printStackTrace();
+	        	}
+	      	}
+	    }
+	    catch (SQLException e)
+	    {
+	    	e.printStackTrace();
+	    }
+	}
+	  
+	void checkRentalPrices()
+	{
+		updateStatus("Resetting rental prices");
+		try
+		{
+			String qry = "SELECT * FROM models WHERE priceDirty = 1";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				ModelBean model = new ModelBean(rs);
+				
+				qry = "UPDATE models SET priceDirty = 0 where id = ?";
+				data.dalHelper.ExecuteUpdate(qry, model.getId());
+			
+				qry = "SELECT * FROM aircraft WHERE owner = 0 and model = ?";
+				ResultSet rs2 = data.dalHelper.ExecuteReadOnlyQuery(qry, model.getId());
+				while (rs2.next())
+				{
+					String reg = rs2.getString("registration");
+					int equipment = rs2.getInt("equipment");
+					int price = model.getTotalRentalTarget(equipment);
+					
+					//randomize price +/- 20%
+					price *= 1+(Math.random()*0.40) - 0.2;
+					
+					//get fuel cost for wet rental
+					int fuelCost = (int)Math.round(model.getGph() * data.getFuelPrice(rs2.getString("home")));
+					
+					if (rs2.getString("rentalDry") != null)
+					{
+						qry = "UPDATE aircraft SET rentalDry = ? where registration = ?";
+						data.dalHelper.ExecuteUpdate(qry, price, reg);
+					}
+					
+					if (rs2.getString("rentalWet") != null)
+					{
+						qry = "UPDATE aircraft SET rentalWet = ? where registration = ?";
+						data.dalHelper.ExecuteUpdate(qry, price + fuelCost, reg);
+					}
+				}
+			}	
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	void checkAircraftHomes()
+	{
+		updateStatus("Moving aircraft to new home");
+		try
+		{
+			String qry = "SELECT aircraft.registration, models.minairportsize, lat, lon FROM aircraft, airports, models where home = icao AND models.id = aircraft.model and models.minairportsize > size AND aircraft.owner = 0 AND aircraft.userlock is NULL ";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				Data.closeAirport newHome = data.closestAirport(rs.getDouble(3), rs.getDouble(4), rs.getInt(2), false);
+				if (newHome == null)
+					continue;
+					
+				qry = "UPDATE aircraft SET home = ?, location = ? WHERE registration = ?";
+				data.dalHelper.ExecuteUpdate(qry, newHome.icao, newHome.icao, rs.getString(1));
+			}	
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		} 
+	}
+	
+	void createAircraft()
+	{
+		Statement stmt = null, updater = null, airports = null;
+		ResultSet rs = null, updateSet = null, airportSet = null;
+		Connection conn = null;
+		updateStatus("Creating new aircraft");
+		try
+		{
+			conn = data.dalHelper.getConnection();
+			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet. CONCUR_READ_ONLY);
+			rs = stmt.executeQuery("SELECT models.amount, count(aircraft.model), models.*  FROM models LEFT JOIN aircraft ON aircraft.model = models.id GROUP BY models.id");
+			updater = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet. CONCUR_UPDATABLE);					
+			airports = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet. CONCUR_READ_ONLY);
+
+			Set<String> usedRegistrations = getAircraftRegistrationSet();
+			
+			while(rs.next())
+			{
+				int amountToCreate = rs.getInt(1) - rs.getInt(2);
+				if (amountToCreate == 0)
+					continue;
+				
+				ModelBean model = new ModelBean(rs);												
+				int[] capacity = model.getCapacity();
+				
+				if (amountToCreate > 0)
+				{
+					updateSet = updater.executeQuery("SELECT * FROM aircraft where 1=2");
+					airportSet = airports.executeQuery("SELECT airports.icao, size, prefix, registration FROM airports, registrations WHERE type='civil' AND airports.country = registrations.country AND airports.size > " + model.getMinAirportSize() + " ORDER BY rand() LIMIT " + amountToCreate);
+					while (airportSet.next())
+					{
+						String home = airportSet.getString(1);
+						String registration = getNewAircraftRegistration(usedRegistrations, airportSet.getString(3), airportSet.getString(4));									
+						usedRegistrations.add(registration);
+						
+						updateSet.moveToInsertRow();						
+						updateSet.updateString("registration", registration);
+						updateSet.updateString("home", home);
+						updateSet.updateString("location", home);
+						updateSet.updateInt("model", model.getId());
+						int mask = createNewAircraftBaseEquipment(model.getEquipment());
+						updateSet.updateInt("equipment", mask);
+						int rent = model.getTotalRentalTarget(mask);
+						rent *= 1+(Math.random()*0.40) - 0.2;
+						updateSet.updateInt("RentalDry", (int)rent);
+						int fuelCost = (int)Math.round(model.getGph() * data.getFuelPrice(home));
+
+						//update so that models with 0 rental price cannot be rented - airboss 7/1/12
+						if((int)rent != 0)
+							updateSet.updateInt("RentalWet", fuelCost + rent);
+
+						if (capacity[0] > 0)
+							updateSet.updateDouble("fuelCenter", 0.5);
+						
+						if (capacity[1] > 0)
+							updateSet.updateDouble("fuelLeftMain", 0.5);
+						
+						if (capacity[2] > 0)
+							updateSet.updateDouble("fuelLeftAux", 0.5);
+						
+						if (capacity[3] > 0)
+							updateSet.updateDouble("fuelLeftTip", 0.5);
+						
+						if (capacity[4] > 0)
+							updateSet.updateDouble("fuelRightMain", 0.5);
+						
+						if (capacity[5] > 0)
+							updateSet.updateDouble("fuelRightAux", 0.5);
+						
+						if (capacity[6] > 0)
+							updateSet.updateDouble("fuelRightTip", 0.5);
+						
+						updateSet.insertRow();	
+						Data.logger.info("CreateAircraft creating unit - Model:" + model.getId());
+					}
+					
+					airportSet.close();
+					updateSet.close();
+				} 
+				else
+				{
+					double probability = (double)rs.getInt(2) / (double)-amountToCreate;
+					updateSet = updater.executeQuery("SELECT * FROM aircraft WHERE userlock IS NULL AND owner = 0 AND engine1 IS NULL AND NOT EXISTS (SELECT * FROM assignments WHERE assignments.aircraft = aircraft.registration) AND model = " + model.getId() + " AND rand() < " + probability);
+					while (updateSet.next())
+					{
+						Data.logger.info("CreateAircraft deleting unit - Model:" + updateSet.getInt("model"));
+						updateSet.deleteRow();
+					}
+				}						
+			}
+		} 
+		catch (SQLException e)
+		{
+			e.printStackTrace();				
+		} 
+		finally
+		{
+			data.dalHelper.tryClose(updateSet);
+			data.dalHelper.tryClose(airportSet);
+			data.dalHelper.tryClose(airports);
+			data.dalHelper.tryClose(updater);
+			data.dalHelper.tryClose(rs);
+			data.dalHelper.tryClose(stmt);
+			data.dalHelper.tryClose(conn);
+		}
+	}
+	
+	Set<String> getAircraftRegistrationSet() throws SQLException
+	{
+		Set<String> usedRegistrations = new HashSet<String>();		
+	
+		String qry = "SELECT registration from aircraft";
+		ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+		while (rs.next())
+			usedRegistrations.add(rs.getString(1));
+
+		return usedRegistrations;
+	}
+	
+	String getNewAircraftRegistration(Set<String> usedRegistrations, String prefix, String postfix)
+	{
+		StringBuffer registration;
+		int loopCounter = 0;
+		
+		do
+		{
+			registration = new StringBuffer(prefix);
+			registration.append('-');
+			
+			for (int loop = 0; loop < postfix.length(); loop++)
+			{
+				char thisChar = postfix.charAt(loop);
+				
+				if (Character.isDigit(thisChar))
+				{
+					registration.append((int)Math.round(Math.random()*9));
+				}
+				else if (Character.isLowerCase(thisChar))
+				{
+					registration.append((char)('A'+(int)Math.round(Math.random()*25)));
+				}
+				else if (Character.isUpperCase(thisChar))
+				{
+					registration.append(thisChar);
+				}
+				else
+				{
+					int ran = (int)Math.round(Math.random()*35);
+					
+					if (ran < 10)
+						registration.append(ran);
+					else
+						registration.append((char)('A'+ran-10));
+				}
+			}
+			
+			loopCounter++;
+			if(loopCounter > 1000)
+			{
+				//Apparently we have ran out of registration codes, add a extended postfix
+				Data.logger.info("New Registration generator excessive looping: prefix [" + prefix + "], postfix [" + postfix + "]");
+				
+				registration.append('-');
+				int ran = (int)Math.round(Math.random()*100);
+				registration.append(ran);
+			}	
+		} while(usedRegistrations.contains(registration.toString()));
+		
+		return registration.toString();
+	}
+	
+	int createNewAircraftBaseEquipment(int modelequipment)
+	{
+		int mask = 0;
+		switch (modelequipment)
+		{
+			case ModelBean.EQUIPMENT_VFR_ONLY :
+				break;
+				
+			case ModelBean.EQUIPMENT_IFR_ONLY:
+				mask = ModelBean.EQUIPMENT_GPS_MASK|ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
+				break;
+				
+			case ModelBean.EQUIPMENT_VFR_IFR:
+				switch ((int)(Math.random()*6))
+				{
+					case 0:
+					case 1:
+					case 2:
+						break;
+						
+					case 3:												
+						mask = ModelBean.EQUIPMENT_AP_MASK;
+						break;	
+						
+					case 4: 
+						mask = ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
+						break;
+						
+					case 5: 
+						mask = ModelBean.EQUIPMENT_GPS_MASK|ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
+						break;											
+				}
+				break;
+				
+			default:
+				Data.logger.info( "createNewAircraftBaseEquipment(): model equipment not defined for: " + modelequipment +
+									", Default VFR used.");
+		}
+		
+		return mask;
+	}
+
+	private Set<String> getCurrentRegistrations()
+	{
+		HashSet<String> regSet = new HashSet<String>();
+		
+		try
+		{
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery("SELECT registration from aircraft");
+			while (rs.next())
+			{
+				regSet.add(rs.getString(1));
+			}
+			
+			// load orphan registrations from damage table in usedRegistrations	
+			rs = data.dalHelper.ExecuteReadOnlyQuery("SELECT aircraft FROM damage left join aircraft on aircraft = registration where registration is null");
+			while (rs.next())
+			{
+				regSet.add(rs.getString(1));
+			}
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();				
+		}
+		
+		return regSet;
+	}
+	
+	private Map<String, List<String[]>> getCountryRegistrationCodes()
+	{
+		Map<String, List<String[]>> map = new HashMap<String, List<String[]>>();
+		try
+		{
+			String qry = "SELECT country, icao, prefix, registration FROM registrations";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			
+			while (rs.next())
+			{
+				List<String[]> list = map.get(rs.getString(1));
+				if(list != null)
+				{
+					list.add(new String[]{rs.getString(2),rs.getString(3),rs.getString(4)});
+				}
+				else
+				{
+					list = new ArrayList<String[]>();
+					list.add(new String[]{rs.getString(2),rs.getString(3),rs.getString(4)});
+					map.put(rs.getString(1), list);
+				}
+			}
+		}
+		catch(SQLException e)
+		{
+			e.printStackTrace();				
+		}
+		
+		return map;
+	}
+	
+	String getICAORegistrationCountry(String icao)
+	{
+		String qry = "";
+		try 
+		{
+			qry = "SELECT r.country FROM airports a, registrations r WHERE a.country = r.country AND a.ICAO = ?";
+			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry, icao);
+			if(rs.next())
+			{
+				return rs.getString(1);
+			}
+			else
+			{
+				Data.logger.debug("Error in isValidRegistration(), did not find country for ICAO: " + icao);
+
+				return "Default";
+			}
+		}
+		catch (SQLException e)
+		{
+			System.err.println(qry);
+			e.printStackTrace();				
+		} 
+		
+		return null;
+	}
+	
+	boolean isValidPrefix(String reg, String prefix)
+	{
+		if(reg.startsWith(prefix))
+			return true;
+		
+		return false;
+	}
+	
+	boolean isValidRegistrationFormat(String postfix, String reg)
+	{
+		for(int i=0;i<postfix.length();i++)
+		{
+			char c = postfix.charAt(i);
+			if(Character.isDigit(c))
+			{
+				if(!Character.isDigit(reg.charAt(i)))
+					return false;				
+			}
+			else if(Character.isLetter(c))
+			{
+				//Literal
+				if(Character.isUpperCase(c))
+				{
+					if(reg.charAt(i) != c)
+						return false;
+				}
+				else
+				{
+					if(!Character.isLetter(reg.charAt(i)))
+						return false;
+				}
+			}
+			else if(c == '#') // letter or digit
+			{
+				if(!Character.isLetterOrDigit(reg.charAt(i)))
+					return false;
+			}
+			else //should never reach, force new registration
+			{
+				Data.logger.info("Error in isValidRegistrationFormat(), registration postfix not a valid format symbol!: [" + c + "] of [" + postfix + "]");
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	boolean isValidRegistrationPostfix(String reg, String prefix, String postfix)
+	{
+		String body = reg.substring(prefix.length());
+		if(body.length() != postfix.length())
+			return false;
+		
+		if(!isValidRegistrationFormat(postfix, body))
+			return false;
+			
+		return true;
+	}
+	
+	boolean isValidRegistration(String reg, List<String[]> coding) // String homeIcao, Map<String, String[]> countryRegistrationCodes)
+	{
+		int index = 0;
+		boolean found = false;
+		
+		do
+		{
+			String prefix = (coding.get(index))[REG_PREFIX];
+			String postfix = (coding.get(index))[REG_POSTFIX];				
+	
+			//checks use the separator -
+			prefix = prefix.concat("-");
+			
+			if( isValidPrefix(reg, prefix) && isValidRegistrationPostfix(reg, prefix, postfix))
+				found = true;
+
+			index++;
+		} while(index < coding.size());
+			
+		return found;
+	}
+	
+	private void updateAircraftToNewRegistration(String reg, String newreg)
+	{
+		try
+		{
+			StringBuilder qry = new StringBuilder();
+			
+			//can't use parameters for batch
+			qry.append("UPDATE log SET aircraft = '" + newreg + "' WHERE aircraft = '" + reg + "';");
+			qry.append("UPDATE payments SET aircraft = '" + newreg + "' WHERE aircraft = '" + reg + "';");
+			qry.append("UPDATE damage SET aircraft = '" + newreg + "' WHERE aircraft = '" + reg + "';");
+			qry.append("UPDATE aircraft SET registration = '" + newreg + "' WHERE registration = '" + reg + "';");
+			
+			data.dalHelper.ExecuteBatchUpdate(qry.toString());
+		}
+		catch (SQLException e)
+		{
+			Data.logger.error("ERROR: Changing aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]");
+			e.printStackTrace();				
+		} 
+	}
+	
+	void resetRegistration(String home, String reg, List<String[]> coding, Set<String> currRegs)
+	{
+		int index = 0;
+		int foundCount = 0;
+		List<Integer> list = new ArrayList<Integer>();
+
+		do
+		{
+			String icaoprefix = coding.get(index)[REG_ICAO];
+			if( home.startsWith(icaoprefix))
+			{
+				foundCount++;
+				list.add(index);
+			}
+			index++;
+		} while(index < coding.size());
+		
+		//assumption - there will always be at least 1 coding
+		index = 0;
+
+		if(foundCount > 1)
+			index = list.get((int)Math.round(Math.random()*foundCount));
+
+		String prefix = coding.get(index)[REG_PREFIX];
+		String postfix = coding.get(index)[REG_POSTFIX];
+		String newreg = getNewAircraftRegistration(currRegs, prefix, postfix);
+		
+		currRegs.add(newreg);		
+		updateAircraftToNewRegistration(reg, newreg);
+		
+		Data.logger.info("Changed aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]");
+	}	
+	
+	void checkRegistrations()
+	{
+		updateStatus("Checking registrations");
+		
+		try 
+		{
+			//do these once here for optimization
+			Map<String, List<String[]>> countryRegistrationCodes = getCountryRegistrationCodes();
+			Set<String> regs = getCurrentRegistrations();
+
+			int resetCount = 0;
+			
+			String qry = "SELECT * from aircraft WHERE owner = 0 and userlock is null";
+			CachedRowSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			while (rs.next()) 
+			{
+				String reg = rs.getString("registration");
+				String home = rs.getString("home");
+				String icaocountry = getICAORegistrationCountry(home);				
+				List<String[]> coding = countryRegistrationCodes.get(icaocountry);
+
+				if(!isValidRegistration(reg, coding))
+				{
+					resetCount++;
+					resetRegistration(home, reg, coding, regs);					
+				}				
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();				
+		} 
+	}	
+}
