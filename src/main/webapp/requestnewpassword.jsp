@@ -2,11 +2,13 @@
         contentType="text/html; charset=ISO-8859-1"
 %>
 <%
+    String returnPage = request.getRequestURI();
+
     String message = (String) request.getAttribute("message");
     if (message != null)
     {
 %>
-    <div class="message"><%= message %></div>
+        <div class="message"><%= message %></div>
 <%
         return;
     }
@@ -31,20 +33,18 @@
 <div class="content">
 	<h2>Login incorrect</h2>
 	<p>
-	If you don't remember your password you can request a new password here:
+	    If you don't remember your password you can request a new password here:
 	</p>
 	<div class="form" style="width: 400px">
-	<form method="post" action="userctl">
-	Username<br/>
-	<input name="user" type="text" class="textarea" size="10" />
-	<br/>
-	Email<br/>
-	<input name="email" type="text" class="textarea" size="40" />
-	<br/><br/>
-	<input type="submit" class="button" value="Request password" />
-	<input type="hidden" name="event" value="password"/>
-	<input type="hidden" name="return" value="invalidlogin.jsp"/>
-	</form>
+        <form method="post" action="userctl">
+            Username<br>
+            <input name="user" type="text" class="textarea" size="10" /><br>
+            Email<br>
+            <input name="email" type="text" class="textarea" size="40" /><br><br>
+            <input type="submit" class="button" value="Request password" />
+            <input type="hidden" name="event" value="password"/>
+            <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+        </form>
 	</div>
 </div>
 

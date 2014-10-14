@@ -105,8 +105,7 @@ public class UserCtl extends HttpServlet
 	    int minutes = calendar.get(Calendar.MINUTE);
 	    //int seconds = calendar.get(Calendar.SECOND);
 	    //int millis = calendar.get(Calendar.MILLISECOND);
-	    int minutesToNextHour = 60 - minutes;
-	    int total = minutesToNextHour;
+        int total = 60 - minutes;
 	    
 	    if(total > 30)
 	    	total -= 30;
@@ -150,118 +149,166 @@ public class UserCtl extends HttpServlet
 		{
 			try
 			{
-				if ("Agree & Log in".equals(action))
-				{
-					if (doLogin(req, resp) == false)
-						returnToPage = "requestnewpassword.jsp";
-					else
-						returnToPageOverride = "index.jsp";
-				} 
-				else if ("Log out".equals(action))
-				{
-					doLogout(req, resp);
-					returnToPageOverride = "index.jsp";
-				}
-				else if ("Assignment".equals(action))
-					processAssignment(req, resp);
-				else if ("Aircraft".equals(action))
-					addAircraft(req, resp);
-				else if ("AircraftLeaseReturn".equals(action))
-					returnLeaseAircraft(req, resp);
-				else if ("Cancel".equals(action))
-					cancelFlight(req, resp);
-				else if ("Market".equals(action))
-					market(req, resp);
-				else if ("MarketFbo".equals(action))
-					marketfbo(req, resp);
-				else if ("sell".equals(action))
-					doSell(req, resp);				
-				else if ("create".equals(action))
-				{
-					newUser(req, resp);
-					req.getRequestDispatcher("signup.jsp").forward(req, resp);
-					return;
-				}
-				else if ("updateAcct".equals(action))
-					updateUser(req, resp);
-				else if ("password".equals(action))
-					newPassword(req, resp);	
-				else if ("changePassword".equals(action))
-					changePassword(req, resp);
-				else if ("lockAccount".equals(action))
-					lockAccount(req, resp);
-				else if ("unlockAccount".equals(action))
-					unlockAccount(req, resp);
-				else if ("bank".equals(action))
-					doBank(req, resp);			
-				else if ("mappings".equals(action))
-					doMappings(req, resp);		
-				else if ("joingroup".equals(action))
-					doJoinGroup(req, resp);			
-				else if ("cancelgroup".equals(action))
-					doCancelGroup(req, resp);			
-				else if ("kickgroup".equals(action))
-					doKickGroup(req, resp);
-				else if ("deletegroup".equals(action))
-					doDeleteGroup(req, resp);
-				else if ("memberlevel".equals(action))
-					doMemberLevel(req, resp);
-				else if ("invitation".equals(action))
-					doInvitation(req, resp);					
-				else if ("maintenance".equals(action))
-					doMaintenance(req, resp);
-				else if ("equipment".equals(action))
-					doEquipment(req, resp);	
-				else if ("refuel".equals(action))
-					doRefuel(req, resp);
-				else if ("flyForGroup".equals(action))
-					doFlyForGroup(req, resp);
-				else if ("payGroup".equals(action))
-					doPayGroup(req, resp);
-				else if ("buyGoods".equals(action))
-					doBuySellGoods(req, resp, true);
-				else if ("sellGoods".equals(action))
-					doBuySellGoods(req, resp, false);
-				else if ("deleteFbo".equals(action))
-					doDeleteFbo(req, resp);
-				else if ("upgradeFbo".equals(action))
-					doUpgradeFbo(req, resp);
-				else if ("rentFboFacility".equals(action))
-					doRentFboFacility(req, resp);
-				else if ("deleteFboFacility".equals(action))
-					doDeleteFboFacility(req, resp);
-				else if ("bankTransfer".equals(action))
-					doBankTransfer(req, resp);
-				else if ("updateAircraft".equals(action))
-					doUpdateAircraft(req, resp);
-				else if ("adjustGoods".equals(action))
-					doAdjustGoods(req, resp);
-				else if ("resetBanList".equals(action))
-					doResetBanList(req, resp);
-				else if ("confirmBulkFuel".equals(action))
-					doBulkFuelPurchase(req, resp, true);				
-				else if ("updateXPlaneMD5".equals(action))
-					doUpdateXPlaneMD5(req, resp);
-				else if ("editFboFacility".equals(action))
-					doEditFboFacility(req, resp);				
-				else if ("editFbo".equals(action))
-					doEditFbo(req, resp);
-				else if ("buildRepair".equals(action))
-					doBuildRepair(req, resp);
-				else if ("buildPassenger".equals(action))
-					returnToPageOverride = doBuildPassenger(req, resp);
-				else if ("bankBalance".equals(action))
-					doBankBalance(req, resp);
-				else if ("leaseAircraft".equals(action))
-					doLeaseAircraft(req, resp);
-				else if ("editAircraft".equals(action))
-					doEditAircraft(req, resp);
-				else if ("transferAircraft".equals(action))
-					doTransferAircraft(req, resp);
-				else if ("shipAircraft".equals(action))
-					doShipAircraft(req, resp);
-				else if ("editFuelPrices".equals(action))
-					doEditFuelPrices(req, resp);
+                switch (action)
+                {
+                    case "Agree & Log in":
+                        if (!doLogin(req))
+                            returnToPage = "requestnewpassword.jsp";
+                        else
+                            returnToPageOverride = "index.jsp";
+                        break;
+                    case "Log out":
+                        doLogout(req);
+                        returnToPageOverride = "index.jsp";
+                        break;
+                    case "create":
+                        newUser(req);
+                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        return;
+                    case "updateAcct":
+                        updateUser(req);
+                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        return;
+                    case "password":
+                        newPassword(req);
+                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        return;
+                    case "changePassword":
+                        changePassword(req);
+                        break;
+                    case "lockAccount":
+                        lockAccount(req);
+                        break;
+                    case "unlockAccount":
+                        unlockAccount(req);
+                        break;
+                    case "Assignment":
+                        processAssignment(req);
+                        break;
+                    case "Aircraft":
+                        addAircraft(req);
+                        break;
+                    case "AircraftLeaseReturn":
+                        returnLeaseAircraft(req);
+                        break;
+                    case "Cancel":
+                        cancelFlight(req);
+                        break;
+                    case "Market":
+                        market(req);
+                        break;
+                    case "MarketFbo":
+                        marketfbo(req);
+                        break;
+                    case "sell":
+                        doSell(req);
+                        break;
+                    case "bank":
+                        doBank(req);
+                        break;
+                    case "mappings":
+                        doMappings(req);
+                        break;
+                    case "joingroup":
+                        doJoinGroup(req);
+                        break;
+                    case "cancelgroup":
+                        doCancelGroup(req);
+                        break;
+                    case "kickgroup":
+                        doKickGroup(req);
+                        break;
+                    case "deletegroup":
+                        doDeleteGroup(req);
+                        break;
+                    case "memberlevel":
+                        doMemberLevel(req);
+                        break;
+                    case "invitation":
+                        doInvitation(req);
+                        break;
+                    case "maintenance":
+                        doMaintenance(req);
+                        break;
+                    case "equipment":
+                        doEquipment(req);
+                        break;
+                    case "refuel":
+                        doRefuel(req);
+                        break;
+                    case "flyForGroup":
+                        doFlyForGroup(req);
+                        break;
+                    case "payGroup":
+                        doPayGroup(req);
+                        break;
+                    case "buyGoods":
+                        doBuySellGoods(req, true);
+                        break;
+                    case "sellGoods":
+                        doBuySellGoods(req, false);
+                        break;
+                    case "deleteFbo":
+                        doDeleteFbo(req);
+                        break;
+                    case "upgradeFbo":
+                        doUpgradeFbo(req);
+                        break;
+                    case "rentFboFacility":
+                        doRentFboFacility(req);
+                        break;
+                    case "deleteFboFacility":
+                        doDeleteFboFacility(req);
+                        break;
+                    case "bankTransfer":
+                        doBankTransfer(req);
+                        break;
+                    case "updateAircraft":
+                        doUpdateAircraft(req);
+                        break;
+                    case "adjustGoods":
+                        doAdjustGoods(req);
+                        break;
+                    case "resetBanList":
+                        doResetBanList(req);
+                        break;
+                    case "confirmBulkFuel":
+                        doBulkFuelPurchase(req);
+                        break;
+                    case "updateXPlaneMD5":
+                        doUpdateXPlaneMD5(req);
+                        break;
+                    case "editFboFacility":
+                        doEditFboFacility(req);
+                        break;
+                    case "editFbo":
+                        doEditFbo(req);
+                        break;
+                    case "buildRepair":
+                        doBuildRepair(req);
+                        break;
+                    case "buildPassenger":
+                        returnToPageOverride = doBuildPassenger(req);
+                        break;
+                    case "bankBalance":
+                        doBankBalance(req);
+                        break;
+                    case "leaseAircraft":
+                        doLeaseAircraft(req);
+                        break;
+                    case "editAircraft":
+                        doEditAircraft(req);
+                        break;
+                    case "transferAircraft":
+                        doTransferAircraft(req);
+                        break;
+                    case "shipAircraft":
+                        doShipAircraft(req);
+                        break;
+                    case "editFuelPrices":
+                        doEditFuelPrices(req);
+                        break;
+                }
 
 				if(returnToPageOverride != null)
 					resp.sendRedirect(returnToPageOverride);
@@ -286,7 +333,7 @@ public class UserCtl extends HttpServlet
 		}
 	}
 	
-	void doEditFuelPrices(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doEditFuelPrices(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
@@ -310,21 +357,21 @@ public class UserCtl extends HttpServlet
 
 		if(priceJetA == 0.0 && price100ll == 0.0)
 			return;
-		
-		for(int i=0; i<fbos.length; i++)
-		{
-			if(price100ll > 0)			
-				fbos[i].setFuel100LL(price100ll);
 
-			if(priceJetA > 0)			
-				fbos[i].setFueljeta(priceJetA);
-			
-			data.updateFbo(fbos[i], user);					
-		}
+        for (FboBean fbo : fbos)
+        {
+            if (price100ll > 0)
+                fbo.setFuel100LL(price100ll);
+
+            if (priceJetA > 0)
+                fbo.setFueljeta(priceJetA);
+
+            data.updateFbo(fbo, user);
+        }
 
 	}
 	
-	void doShipAircraft(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doShipAircraft(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
@@ -349,7 +396,7 @@ public class UserCtl extends HttpServlet
 		data.processAircraftShipment(user, aircraft, shipto, departSvc, destSvc );
 	}
 	
-	void doTransferAircraft(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doTransferAircraft(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
@@ -364,7 +411,7 @@ public class UserCtl extends HttpServlet
 		data.transferac(reg, ibuyer, aircraft.getOwner(), aircraft.getLocation());
 	}
 	
-	void doEditAircraft(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doEditAircraft(HttpServletRequest req) throws DataError
 	{		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
@@ -438,7 +485,7 @@ public class UserCtl extends HttpServlet
 		data.updateAircraft(aircraft, newReg, user);
 	}	
 	
-	void doLeaseAircraft(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doLeaseAircraft(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
@@ -454,10 +501,9 @@ public class UserCtl extends HttpServlet
 		data.leaseac(reg, lessee, owner, aircraft[0].getLocation());
 	}	
 	
-	void doBankBalance(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doBankBalance(HttpServletRequest req) throws DataError
 	{
-		String error = null;
-		int uid = 0;
+		int uid;
 
 		String sId = req.getParameter("uid");
 		if(sId == null)
@@ -515,11 +561,9 @@ public class UserCtl extends HttpServlet
 				}				
 			}
 		}
-		
-		req.setAttribute("message", error);	
 	}
 	
-	void doEditFbo(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doEditFbo(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String sId = req.getParameter("id");
@@ -589,7 +633,7 @@ public class UserCtl extends HttpServlet
 		}
 	}
 
-	String doBuildPassenger(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	String doBuildPassenger(HttpServletRequest req) throws DataError
 	{
 		String returnToPage = null;
 		
@@ -601,7 +645,7 @@ public class UserCtl extends HttpServlet
 		if (!fbo.updateAllowed(user))
 			throw new DataError("Permission denied.");
 
-		boolean ptCreated = false;	
+		boolean ptCreated;
 		ptCreated = data.buildPassengerTerminal(fbo);
 			
 		if (ptCreated)
@@ -613,7 +657,7 @@ public class UserCtl extends HttpServlet
 		return returnToPage;
 	}
 	
-	void doBuildRepair(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doBuildRepair(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String sId = req.getParameter("id");
@@ -626,7 +670,7 @@ public class UserCtl extends HttpServlet
 		data.buildRepairShop(fbo);		
 	}
 	
-	void doEditFboFacility(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doEditFboFacility(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 
@@ -693,7 +737,7 @@ public class UserCtl extends HttpServlet
 		facility.setIcaoSet(pd_icaoset);
 		facility.setMinMaxUnitsPerTrip(0, "".equals(pd_maxUnitsPerTrip) ? 0 : Integer.parseInt(pd_maxUnitsPerTrip));
 		
-		int uiRent=0;
+		int uiRent;
 		boolean isDirtyRent = true;
 		
 		if (pd_rent != null) 
@@ -703,22 +747,23 @@ public class UserCtl extends HttpServlet
 				isDirtyRent=false;
 		}		
 		
-		List<Integer> rentersID = new ArrayList<Integer>();
+		List<Integer> rentersID = new ArrayList<>();
 		
 		if (renters != null)
 		{			
 			//adding notification to existing renter if something changes in facility settings			
-			for (int i = 0; i < renters.length; i++)
-			{
-				String prefix = "pr_" + renters[i].getId() + "_";
-				if (req.getParameter(prefix + "facilityId") != null)
-				{
-					String prx_allowRenew = req.getParameter(prefix + "allowRenew");
-					renters[i].setAllowRenew("true".equals(prx_allowRenew));
-					if (isDirtyRent) 
-						rentersID.add(renters[i].getOccupant());
-				}
-			}
+            for (FboFacilityBean renter : renters)
+            {
+                String prefix = "pr_" + renter.getId() + "_";
+                if (req.getParameter(prefix + "facilityId") != null)
+                {
+                    String prx_allowRenew = req.getParameter(prefix + "allowRenew");
+                    renter.setAllowRenew("true".equals(prx_allowRenew));
+
+                    if (isDirtyRent)
+                        rentersID.add(renter.getOccupant());
+                }
+            }
 
 			//now notify the owners that the price of the rent has changed
 			if (isDirtyRent && pd_rent != null) 
@@ -727,8 +772,7 @@ public class UserCtl extends HttpServlet
 				{	
 					try
 					{
-						List<String> renterEmails = new ArrayList<String>();
-						renterEmails = data.getEmailAddressForRenterIDs(rentersID);
+						List<String> renterEmails = data.getEmailAddressForRenterIDs(rentersID);
 						Emailer emailer = Emailer.getInstance();
 						
 						String messageText = "Rent price change ALERT! \n\n The price of rent at airport ICAO: " + facility.getLocation() +
@@ -754,7 +798,7 @@ public class UserCtl extends HttpServlet
 		} 
 	}
 		
-	void doUpdateXPlaneMD5(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doUpdateXPlaneMD5(HttpServletRequest req) throws DataError
 	{
 		String MD5 = req.getParameter("MD5");
 		String passcode = req.getParameter("passcode");
@@ -785,18 +829,18 @@ public class UserCtl extends HttpServlet
 			}
 	}
 	
-	void cancelFlight(HttpServletRequest req, HttpServletResponse resp)
+	void cancelFlight(HttpServletRequest req)
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		data.cancelFlight(user);
 	}
 	
-	void doLogout(HttpServletRequest req, HttpServletResponse resp)	
+	void doLogout(HttpServletRequest req)
 	{
 		req.getSession().invalidate();
 	}
 	
-	boolean doLogin(HttpServletRequest req, HttpServletResponse resp)
+	boolean doLogin(HttpServletRequest req)
 	{
 		String userName = req.getParameter("user");
 		String password = req.getParameter("password");
@@ -805,24 +849,23 @@ public class UserCtl extends HttpServlet
 		{
 			return false;
 		}
+
 		UserBean user = data.userExists(userName, password, true);
 		if (user == null)
 		{
 			return false;
 		}
-		//int offset = 0;
-		//if (sOffset != null && !sOffset.isEmpty())
-		//	offset = Integer.parseInt(sOffset);
-			
+
 		user.setTimeZone(TimeZone.getTimeZone("GMT" + sOffset));
 		user.setLoggedIn(true);
 		data.reloadMemberships(user);
 		HttpSession s = req.getSession();
-		s.setAttribute("user", user);			
+		s.setAttribute("user", user);
+
 		return true;
 	}
 	
-	void processAssignment(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void processAssignment(HttpServletRequest req) throws DataError
 	{
 		// id = assignment id - single record
 		// select = checkbox values - multiple records		
@@ -848,7 +891,7 @@ public class UserCtl extends HttpServlet
 				id[i] = Integer.parseInt(sId);	
 			
 			UserBean user = (UserBean) req.getSession().getAttribute("user");
-			if (user == null || user.isLoggedIn() == false)
+			if (user == null || !user.isLoggedIn())
 				return;
 			
 			String type = req.getParameter("type");
@@ -893,14 +936,14 @@ public class UserCtl extends HttpServlet
 		}
 	}
 	
-	void addAircraft(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void addAircraft(HttpServletRequest req) throws DataError
 	{
 		String sReg = req.getParameter("reg");
 		if (sReg == null)
 			return;
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (user == null || user.isLoggedIn() == false)
+		if (user == null || !user.isLoggedIn())
 			return;
 		
 		String type = req.getParameter("type");
@@ -914,13 +957,13 @@ public class UserCtl extends HttpServlet
 			data.releaseAircraft(sReg, user.getId());
 	}
 
-	void returnLeaseAircraft(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void returnLeaseAircraft(HttpServletRequest req) throws DataError
 	{
 		String reg = req.getParameter("reg");
 		if (reg == null)
 			return;
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (user == null || user.isLoggedIn() == false)
+		if (user == null || !user.isLoggedIn())
 			return;
 
 		AircraftBean[] ac = data.getAircraftByRegistration(reg);
@@ -930,7 +973,7 @@ public class UserCtl extends HttpServlet
 			throw new DataError("Unable to find leased aircraft!");
 	}
 	
-	void doRefuel(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doRefuel(HttpServletRequest req) throws DataError
 	{
 		String sId = req.getParameter("id");
 		String sProvider = req.getParameter("provider");
@@ -940,7 +983,7 @@ public class UserCtl extends HttpServlet
 			return;
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (user == null || user.isLoggedIn() == false)
+		if (user == null || !user.isLoggedIn())
 			return;
 		
 		String sFuel = req.getParameter("fuel");
@@ -948,7 +991,7 @@ public class UserCtl extends HttpServlet
 		data.refuelAircraft(sId, user.getId(), fuel, Integer.parseInt(sProvider), type);
 	}
 	
-	void market(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void market(HttpServletRequest req) throws DataError
 	{
 		String sId = req.getParameter("id");
 		String sAccount = req.getParameter("account");
@@ -959,7 +1002,7 @@ public class UserCtl extends HttpServlet
 		data.buyAircraft(sId, Integer.parseInt(sAccount), user);
 	}
 	
-	void marketfbo(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void marketfbo(HttpServletRequest req) throws DataError
 	{
 		String sId = req.getParameter("id");
 		String sAccount = req.getParameter("account");
@@ -970,7 +1013,7 @@ public class UserCtl extends HttpServlet
 		data.buyFbo(Integer.parseInt(sId), Integer.parseInt(sAccount), user);
 	}
 	
-	void doSell(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doSell(HttpServletRequest req) throws DataError
 	{
 		String sId = req.getParameter("registration");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
@@ -980,7 +1023,7 @@ public class UserCtl extends HttpServlet
 		data.sellAircraft(sId, user);
 	}	
 	
-	void newUser(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void newUser(HttpServletRequest req) throws DataError
 	{
 		String user = req.getParameter("user");
 		String email = req.getParameter("email");
@@ -1002,7 +1045,7 @@ public class UserCtl extends HttpServlet
 		req.setAttribute("message", "An account has been created.<br /><br /><strong>User:</strong> " + user + "<br /><strong>Email:</strong> " + email);	
 	}
 	
-	void updateUser(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void updateUser(HttpServletRequest req) throws DataError
 	{
 		String user = req.getParameter("user");
 		String newuser = req.getParameter("newuser");
@@ -1010,18 +1053,22 @@ public class UserCtl extends HttpServlet
 		String Sexposure = req.getParameter("exposure");
 		String password = req.getParameter("password");
 		int exposure = Integer.parseInt(Sexposure);
+
 		if (user == null || email == null)
 			return;
-		if (user != newuser) {
-		if (!data.accountNameIsUnique(newuser))
-			throw new DataError("There is already an account with that name.");
+
+		if (!user.equals(newuser))
+        {
+		    if (!data.accountNameIsUnique(newuser))
+			    throw new DataError("There is already an account with that name.");
 		}
+
 		data.updateAccount(user, newuser, email, exposure, password);
 		req.setAttribute("message", "Account (" + user + ") updated successfully");
 	}
 	
 	//This is used for both new accounts and resetting passwords!
-	void newPassword(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void newPassword(HttpServletRequest req) throws DataError
 	{
 		String user = req.getParameter("user");
 		String email = req.getParameter("email");
@@ -1044,7 +1091,7 @@ public class UserCtl extends HttpServlet
 		}
 	}
 	
-	void changePassword(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void changePassword(HttpServletRequest req) throws DataError
 	{
 		String password = req.getParameter("password");
 		String newPassword = req.getParameter("newPassword");
@@ -1061,7 +1108,7 @@ public class UserCtl extends HttpServlet
 		req.setAttribute("message", "Your password was changed successfully. Please update the settings of the FSEconomy program to reflect your new password.");
 	}
 	
-	void lockAccount(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void lockAccount(HttpServletRequest req) throws DataError
 	{
 		String login = req.getParameter("login");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
@@ -1079,7 +1126,7 @@ public class UserCtl extends HttpServlet
 		}
 	}
 	
-	void unlockAccount(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void unlockAccount(HttpServletRequest req) throws DataError
 	{
 		String login = req.getParameter("login");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
@@ -1100,10 +1147,9 @@ public class UserCtl extends HttpServlet
 	/**
 	 * 
 	 * @param req - account to reset aircraft ban list
-	 * @param resp - action response message to user
 	 * @throws DataError
 	 */
-	void doResetBanList(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doResetBanList(HttpServletRequest req) throws DataError
 	{
 		String account = req.getParameter("accountname");
 		//this is freaking weird.  Why would they use an array when they will always do an exact match query and only ever have 1 max result?
@@ -1117,7 +1163,7 @@ public class UserCtl extends HttpServlet
 		req.setAttribute("message", "The " + account + " aircraft rental ban list has been reset to empty string.");
 	}
 	
-	void doPayGroup(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doPayGroup(HttpServletRequest req) throws DataError
 	{
 		String sAmount = req.getParameter("amount");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
@@ -1145,7 +1191,7 @@ public class UserCtl extends HttpServlet
 		data.doPayGroup(user.getId(), account.getId(), amount, comment);			
 	}
 	
-	void doBankTransfer(HttpServletRequest req,HttpServletResponse resp) throws DataError
+	void doBankTransfer(HttpServletRequest req) throws DataError
 	{
 		String sAmount = req.getParameter("amount");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
@@ -1188,7 +1234,7 @@ public class UserCtl extends HttpServlet
 		data.doPayGroup(srcAccount.getId(), dstAccount.getId(), amount, comment);		
 	}
 	
-	void doBank(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doBank(HttpServletRequest req) throws DataError
 	{
 		String deposit = req.getParameter("deposit");
 		String withdraw = req.getParameter("withdraw");
@@ -1238,7 +1284,7 @@ public class UserCtl extends HttpServlet
 		data.doBanking(id, total);
 	}
 	
-	void doMappings(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doMappings(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		if (user == null || user.getLevel() < UserBean.LEV_MODERATOR)
@@ -1261,14 +1307,13 @@ public class UserCtl extends HttpServlet
 				int newMapping = Integer.parseInt(value);
 				data.setMapping(mapId, newMapping);
 			} 
-			catch (NumberFormatException e)
+			catch (NumberFormatException ignored)
 			{
-				continue;
-			}			
+			}
 		}
 	}
 	
-	void doJoinGroup(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doJoinGroup(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
@@ -1280,7 +1325,7 @@ public class UserCtl extends HttpServlet
 		data.joinGroup(user, groupId, "member");
 	}
 	
-	void doCancelGroup(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doCancelGroup(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
@@ -1294,7 +1339,7 @@ public class UserCtl extends HttpServlet
 		data.cancelGroup(user, groupId);
 	}
 	
-	void doKickGroup(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doKickGroup(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
@@ -1314,7 +1359,7 @@ public class UserCtl extends HttpServlet
 		data.cancelGroup(member, intgroupId);
 	}
 	
-	void doDeleteGroup(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doDeleteGroup(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
@@ -1328,7 +1373,7 @@ public class UserCtl extends HttpServlet
 		data.deleteGroup(user, groupId);
 	}
 	
-	void doInvitation(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doInvitation(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
@@ -1343,7 +1388,7 @@ public class UserCtl extends HttpServlet
 		data.doInvitation(user, groupId, accept);
 	}
 	
-	void doMemberLevel(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doMemberLevel(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
@@ -1411,7 +1456,7 @@ public class UserCtl extends HttpServlet
 		data.changeMembership(userId, groupId, level);
 	}
 	
-	void doMaintenance(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doMaintenance(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String reg = req.getParameter("reg");
@@ -1444,7 +1489,7 @@ public class UserCtl extends HttpServlet
 		data.doMaintenance(aircraft[0], type, user, selectedFbo);
 	}
 	
-	void doEquipment(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doEquipment(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String reg = req.getParameter("reg");
@@ -1475,7 +1520,7 @@ public class UserCtl extends HttpServlet
 		data.doEquipment(aircraft[0], type, selectedFbo);
 	}
 	
-	void doFlyForGroup(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doFlyForGroup(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String sId = req.getParameter("id");
@@ -1488,7 +1533,7 @@ public class UserCtl extends HttpServlet
 		data.flyForGroup(user, id);
 	}	
 	
-	void doBuySellGoods(HttpServletRequest req, HttpServletResponse resp, boolean isBuy) throws DataError
+	void doBuySellGoods(HttpServletRequest req, boolean isBuy) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String location = req.getParameter("icao");
@@ -1519,25 +1564,26 @@ public class UserCtl extends HttpServlet
 		goods = data.getGoodsAtAirport(airport.getIcao(), airport.getSize(), 0, 0);
 		
 		int checkid = isBuy ? from : to;
-		
-		for(int i=0;i<goods.length;i++)
-		{
-			if(goods[i].getOwner() == checkid && goods[i].getType() == type)
-			{
-				boolean checkamount = isBuy ? goods[i].getAmountForSale() == -1 || goods[i].getAmountForSale() > amount : goods[i].getAmountAccepted() == -1 || goods[i].getAmountAccepted() > amount;
-				if(!checkamount)
-					throw new DataError("Error, not enough goods.");
-				found = true;
-				break;
-			}
-		}
-		if(found != true)
+
+        for (GoodsBean good : goods)
+        {
+            if (good.getOwner() == checkid && good.getType() == type)
+            {
+                boolean checkamount = isBuy ? good.getAmountForSale() == -1 || good.getAmountForSale() > amount : good.getAmountAccepted() == -1 || good.getAmountAccepted() > amount;
+                if (!checkamount)
+                    throw new DataError("Error, not enough goods.");
+
+                found = true;
+                break;
+            }
+        }
+		if(!found)
 			throw new DataError("No Goods Found!");
 		
 		data.transferGoods(from, to, account, location, type, amount);
 	}
 
-	void doDeleteFbo(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doDeleteFbo(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String sId = req.getParameter("id");
@@ -1552,7 +1598,7 @@ public class UserCtl extends HttpServlet
 		data.deleteFbo(fboId, user);
 	}
 	
-	void doUpgradeFbo(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doUpgradeFbo(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String sId = req.getParameter("id");
@@ -1567,7 +1613,7 @@ public class UserCtl extends HttpServlet
 		data.upgradeFbo(fboId, user);
 	}
 	
-	void doRentFboFacility(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doRentFboFacility(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		int facilityId = Integer.parseInt(req.getParameter("facilityId"));
@@ -1576,7 +1622,7 @@ public class UserCtl extends HttpServlet
 		
 		data.rentFboFacility(user, occupantId, facilityId, blocks);
 	}
-	void doDeleteFboFacility(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doDeleteFboFacility(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		int facilityId = Integer.parseInt(req.getParameter("facilityId"));
@@ -1584,7 +1630,7 @@ public class UserCtl extends HttpServlet
 		data.deleteFboFacility(user, facilityId);
 	}
 	
-	void doUpdateAircraft(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doUpdateAircraft(HttpServletRequest req) throws DataError
 	{
 		String registration = req.getParameter("registration");
 		String newreg = req.getParameter("newreg");
@@ -1606,14 +1652,14 @@ public class UserCtl extends HttpServlet
 			sellPrice = Integer.parseInt(req.getParameter("sellPrice"));
 		
 		String advertiseFerry = req.getParameter("advertiseFerry");
-		int advertise = 0;
+		int advertise;
 		if (advertiseFerry == null)
 			advertise = 0;
 		else
 			advertise = 1;
 		
 		String allowRepair = req.getParameter("allowRepair");
-		int repair = 0;
+		int repair;
 		if (allowRepair == null)
 			repair = 0;
 		else
@@ -1653,7 +1699,7 @@ public class UserCtl extends HttpServlet
 		data.updateAircraft4Admins(aircraft[0], newreg);
 	}
 	
-	void doAdjustGoods(HttpServletRequest req, HttpServletResponse resp) throws DataError
+	void doAdjustGoods(HttpServletRequest req) throws DataError
 	{
 		int owner = Integer.parseInt(req.getParameter("owner"));
 		UserBean account = data.getAccountById(owner);
@@ -1672,7 +1718,7 @@ public class UserCtl extends HttpServlet
 		req.setAttribute("message", "Completed - Adjusted " + goods + " by " + amount + "kg to " + ownername + "'s inventory @ " + location );
 	}
 	
-	void doBulkFuelPurchase(HttpServletRequest req, HttpServletResponse resp, boolean isBuy) throws DataError
+	void doBulkFuelPurchase(HttpServletRequest req) throws DataError
 	{
 		int fboID = Integer.parseInt(req.getParameter("fboID"));			
 		int amount100ll = Integer.parseInt(req.getParameter("amount100ll"));
