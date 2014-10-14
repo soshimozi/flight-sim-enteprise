@@ -24,10 +24,13 @@
             <module name="org.slf4j"/>
             <module name="net.sf.ehcache"/>
             <module name="nl.captcha.simplecaptcha"/>
+            <module name="javax.api"/>
             <system>
                 <paths>
                     <path name="com/sun/rowset" />
                     <path name="com/sun/rowset/providers" />
+                    <path name="org/xml/sax"/>
+                    <path name="org/xml/sax/helpers"/>
                 </paths>
             </system>
         </dependencies>
