@@ -17,7 +17,7 @@
     if(issubmit !=null && "true".contains(issubmit))
     {
         String event = request.getParameter("event");
-        if(event=="ResetFilter")
+        if(event.equals("ResetFilter"))
             net.fseconomy.servlets.FullFilter.updateFilter(data.dalHelper);
     }
 %>
