@@ -1,18 +1,12 @@
 package net.fseconomy.data;
+
 import java.io.Serializable;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
-/**
- * @author Marty
- *
- * To change this generated comment edit the template variable "typecomment":
- * Window>Preferences>Java>Templates.
- * To enable and disable the creation of type comments go to
- * Window>Preferences>Java>Code Generation.
- */
+
 public class AssignmentBean implements Serializable
 {
 	private static final long serialVersionUID = 1L;
@@ -88,20 +82,25 @@ public class AssignmentBean implements Serializable
 		rs.updateString("location", getLocation());
 		rs.updateFloat("distance", getDistance());
 		rs.updateFloat("bearing", getBearing());
+
 		if (comment == null)
 			rs.updateNull("comment");
 		else
 			rs.updateString("comment", comment);
+
 		rs.updateTimestamp("creation", getCreation());
 		rs.updateTimestamp("expires", getExpires());
+
 		if (isGroup())
 			rs.updateInt("groupId", getGroupId());
 		else
 			rs.updateNull("groupId");
+
 		if (commodity == null)
 			rs.updateNull("commodity");
 		else
 			rs.updateString("commodity", getCommodity());
+
 		rs.updateInt("pilotFee", getPilotFee());
 		rs.updateInt("amount", getAmount());
 		rs.updateInt("commodityId", getCommodityId());
@@ -110,9 +109,10 @@ public class AssignmentBean implements Serializable
 		rs.updateDouble("pay", getPay());
 	}
 	
-	public void updateData(Data data, Connection conn)
+	public void updateData(Data data)
 	{
 		double distanceBearing[] = data.getDistanceBearing(getFrom(), getTo());
+
 		setDistance((int)Math.round(distanceBearing[0]));
 		setBearing((int)Math.round(distanceBearing[1]));
 	}
@@ -142,8 +142,6 @@ public class AssignmentBean implements Serializable
 	{
 		return commodity;
 	}
-
-
 
 	/**
 	 * Returns the from.
@@ -218,19 +216,14 @@ public class AssignmentBean implements Serializable
 		this.from = from.toUpperCase();
 	}
 	
-	/**
-	 * @return
-	 */
 	public AirportBean getFromAirport(Data data)
 	{
 		if (fromAirport == null)
 			setFromAirport(data.getAirport(from));
+
 		return fromAirport;
 	}
 
-	/**
-	 * @param bean
-	 */
 	public void setFromAirport(AirportBean bean)
 	{
 		fromAirport = bean;
@@ -338,7 +331,7 @@ public class AssignmentBean implements Serializable
 	public String getExpiresGMTDate()
 	{
 		Calendar cal = GregorianCalendar.getInstance();
-		String result = "";
+		String result;
 		
 		boolean moved = !from.equals(location);
 		boolean locked = (userlock > 0) || (groupId > 0);
@@ -378,6 +371,7 @@ public class AssignmentBean implements Serializable
 		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
 		
 		result = dateFormatGmt.format(cal.getTime());
+
 		return result;
 	}
 	
@@ -385,6 +379,7 @@ public class AssignmentBean implements Serializable
 	{
 		if (expires == null)
 			return "never";
+
 		boolean moved = !from.equals(location);
 		boolean locked = (userlock > 0) || (groupId > 0);
 		String note = "";
@@ -427,17 +422,19 @@ public class AssignmentBean implements Serializable
 		boolean expired = expiry < 0;
 		if (expiry < 0)
 			expiry = -expiry;
+
 		int minutes = (int)(expiry/(60 * 1000));
 		int hours = (int)(expiry/(3600 * 1000));
-		int days = (int)(hours/24);
-		String Duration = "";
+		int days = hours/24;
+		String Duration;
+
 		if (days > 0)
 			Duration = days + " days";	
 		else if (hours > 0)
 			Duration = hours + " hours";
 		else
 			Duration = minutes + " minutes";
-		
+
 		if (expired)
 			return "expired (" + Duration + ")";
 		else
@@ -527,16 +524,10 @@ public class AssignmentBean implements Serializable
 		return actualBearing;
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getBearing() {
 		return bearing;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setBearing(int i) {
 		bearing = i;
 	}
@@ -570,9 +561,7 @@ public class AssignmentBean implements Serializable
 		else
 			return getCommodity() + " " + amount + getSUnits();
 	}
-	/**
-	 * @return
-	 */
+
 	public boolean isGroup() {
 		return group;
 	}
@@ -581,44 +570,32 @@ public class AssignmentBean implements Serializable
 		return ptAssignment;
 	}
 
-	/**
-	 * @return
-	 */
+
 	public int getGroupId() {
 		return groupId;
 	}
 
-	/**
-	 * @param b
-	 */
+
 	public void setGroup(boolean b) {
 		group = b;
 	}
 
-	/**
-	 * @param i
-	 */
+
 	public void setGroupId(int i) {
 		groupId = i;
 	}
 
-	/**
-	 * @return
-	 */
+
 	public int getPilotFee() {
 		return pilotFee;
 	}
 
-	/**
-	 * @param i
-	 */
+
 	public void setPilotFee(int i) {
 		pilotFee = i;
 	}
 
-	/**
-	 * @return
-	 */
+
 	public int getUnits() {
 		return units;
 	}
@@ -637,12 +614,10 @@ public class AssignmentBean implements Serializable
 			case UNIT_KG:
 				return "kg";
 		}
+
 		return null;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setUnits(int i) {
 		units = i;
 	}
@@ -655,14 +630,12 @@ public class AssignmentBean implements Serializable
 			return AssignmentBean.UNIT_KG;
 	
 	}
+
 	public void setUnits(String s)
 	{
 		setUnits(AssignmentBean.unitsId(s));
 	}
 
-	/**
-	 * @return
-	 */
 	public AirportBean getDestinationAirport(Data data)
 	{
 		if (destinationAirport == null)
@@ -670,107 +643,69 @@ public class AssignmentBean implements Serializable
 		return destinationAirport;
 	}
 
-	/**
-	 * @param bean
-	 */
 	public void setDestinationAirport(AirportBean bean)
 	{
 		destinationAirport = bean;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isCreatedByUser()
 	{
 		return createdByUser;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getLocation()
 	{
 		return location;
 	}
 
-	/**
-	 * @param string
-	 */
 	public void setLocation(String string)
 	{
 		location = string;
 	}
 
-	/**
-	 * @return
-	 */
 	public AirportBean getLocationAirport(Data data)
 	{
 		if (locationAirport == null)
 			setLocationAirport(data.getAirport(location));
+
 		return locationAirport;
 	}
 
-	/**
-	 * @param bean
-	 */
 	public void setLocationAirport(AirportBean bean)
 	{
 		locationAirport = bean;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getComment()
 	{
 		return comment == null ? "" : comment;
 	}
 
-	/**
-	 * @param string
-	 */
 	public void setComment(String string)
 	{
 		comment = "".equals(string) ? null : Data.clearHtml(string);
 	}
 
-	/**
-	 * @return
-	 */
 	public int getCommodityId()
 	{
 		return commodityId;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setCommodityId(int i)
 	{
 		commodityId = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getOwner()
 	{
 		return owner;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setOwner(int i)
 	{
 		owner = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public double getPay()
 	{
 		return pay;
@@ -780,18 +715,22 @@ public class AssignmentBean implements Serializable
 	{
 		return fromTemplate;
 	}
+
 	public int getFromFboTemplate()
 	{
 		return fromFboTemplate;
 	}
+
 	public int getmptTax()
 	{
 		return mptTax;
 	}
+
 	public int getDaysClaimedActive()
 	{
 		return daysClaimedActive;
 	}
+
 	public void setDaysClaimedActive(int i)
 	{
 		daysClaimedActive = i;
@@ -811,12 +750,16 @@ public class AssignmentBean implements Serializable
  * 
  */
  	public boolean isSystem() 	{	return !createdByUser; 	}
+
  	public boolean isFerry() 	{	return createdByUser && commodityId == 0;	}
+
  	public boolean isGoods() 	{	return createdByUser && commodityId != 0; 	}
+
  	public boolean groupAuthority(UserBean who)
  	{
  		return groupId != 0 && who.groupMemberLevel(groupId) >= UserBean.GROUP_STAFF;
  	}
+
  	public boolean authorityOverGoods(UserBean who)
  	{
  		return isGoods() && (owner == who.getId() || who.groupMemberLevel(owner) >= UserBean.GROUP_STAFF);
@@ -826,41 +769,42 @@ public class AssignmentBean implements Serializable
 	{
 		return isFerry() && groupAuthority(who);
 	}
-	public boolean editToAllowed(UserBean who)
+
+    public boolean editToAllowed(UserBean who)
 	{
 		return (isFerry() && groupAuthority(who)) ||
 				(isGoods() && authorityOverGoods(who));
 	}
-	public boolean editAmountAllowed(UserBean who)
+
+    public boolean editAmountAllowed(UserBean who)
 	{
 		return isGoods() && authorityOverGoods(who);
 	}
-	public boolean editPayAllowed(UserBean who)
+
+    public boolean editPayAllowed(UserBean who)
 	{
 		return isGoods() && authorityOverGoods(who);
 	}
-	public boolean editPilotFeeAllowed(UserBean who)
+
+    public boolean editPilotFeeAllowed(UserBean who)
 	{
 		return groupAuthority(who);
 	}
-	public boolean editCommentAllowed(UserBean who)
+
+    public boolean editCommentAllowed(UserBean who)
 	{
 		return groupAuthority(who);
 	}
-	public boolean deleteAllowed(UserBean who)
+
+    public boolean deleteAllowed(UserBean who)
 	{
 		return (isGoods() && authorityOverGoods(who)) ||
 			(isGroup() && groupAuthority(who));
 	}
 
-	
-	/**
-	 * @param b
-	 */
 	public void setCreatedByUser(boolean b)
 	{
 		createdByUser = b;
 	}
-
 }
 

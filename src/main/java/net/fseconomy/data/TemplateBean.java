@@ -124,185 +124,107 @@ public class TemplateBean implements Serializable
 		rs.updateInt("speedTo", getSpeedTo());
 	}
 	
-	/**
-	 * @return
-	 */
 	public String getComment() {
 		return comment;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getCommodity() {
 		return commodity;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getDistanceDev() {
 		return distanceDev;
 	}
 
-	/**
-	 * @return
-	 */
 	public float getFrequency()
 	{
 		return frequency;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getId() {
 		return id;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getMatchMaxSize() {
 		return matchMaxSize;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getMatchMinSize() {
 		return matchMinSize;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getTargetAmount() {
 		return targetAmount;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getPayDev() {
 		return payDev;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getTargetDistance() {
 		return targetDistance;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getTargetKeepAlive() {
 		return targetKeepAlive;
 	}
 
-	/**
-	 * @return
-	 */
 	public float getTargetPay() {
 		return targetPay;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getTypeOfPay() {
 		return typeOfPay;
 	}
 
-	/**
-	 * @param string
-	 */
 	public void setComment(String string) {
 		comment = string;
 	}
 
-	/**
-	 * @param string
-	 */
 	public void setCommodity(String string) {
 		commodity = string;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setDistanceDev(int i) {
 		distanceDev = i;
 	}
 
-	/**
-	 * @param d
-	 */
 	public void setFrequency(float d) {
 		frequency = d;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setId(int i) {
 		id = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setMatchMaxSize(int i) {
 		matchMaxSize = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setMatchMinSize(int i) {
 		matchMinSize = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setTargetAmount(int i) {
 		targetAmount = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setPayDev(int i) {
 		payDev = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setTargetDistance(int i) {
 		targetDistance = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setTargetKeepAlive(int i) {
 		targetKeepAlive = i;
 	}
 
-	/**
-	 * @param d
-	 */
 	public void setTargetPay(float d) {
 		targetPay = d;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setTypeOfPay(int i) {
 		typeOfPay = i;
 	}
@@ -325,62 +247,40 @@ public class TemplateBean implements Serializable
 		}
 		return null;
 	}
-	/**
-	 * @return
-	 */
+
 	public String getIcaoSet1() {
 		return icaoSet1;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getIcaoSet2() {
 		return icaoSet2;
 	}
 
-	/**
-	 * @param string
-	 */
 	public void setIcaoSet1(String string) {
 		icaoSet1 = string;
 	}
 
-	/**
-	 * @param string
-	 */
 	public void setIcaoSet2(String string) {
 		icaoSet2 = string;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getAmountDev() {
 		return amountDev;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setAmountDev(int i) {
 		amountDev = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getUnits() {
 		return units;
 	}
+
 	public String getSUnits()
 	{
 		return AssignmentBean.getSUnits(getUnits());
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setUnits(int i) {
 		units = i;
 	}
@@ -394,9 +294,6 @@ public class TemplateBean implements Serializable
 		return seatsFrom;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setSeatsFrom(int i) {
 		seatsFrom = i;
 	}
@@ -405,9 +302,6 @@ public class TemplateBean implements Serializable
 		return seatsTo;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setSeatsTo(int i) {
 		seatsTo = i;
 	}
@@ -416,9 +310,6 @@ public class TemplateBean implements Serializable
 		return speedFrom;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setSpeedFrom(int i) {
 		speedFrom = i;
 	}
@@ -427,13 +318,7 @@ public class TemplateBean implements Serializable
 		return speedTo;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setSpeedTo(int i) {
 		speedTo = i;
 	}
-	
-	
-
 }

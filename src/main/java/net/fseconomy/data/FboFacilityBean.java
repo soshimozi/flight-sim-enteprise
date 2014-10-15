@@ -1,4 +1,3 @@
-
 /*
  * FS Economy
  * Copyright (C) 2005  Marty Bochane
@@ -17,8 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-
 
 package net.fseconomy.data;
 
@@ -81,11 +78,13 @@ public class FboFacilityBean implements Serializable
 		rent = rs.getInt("rent");
 		renew = rs.getBoolean("renew");
 		allowRenew = rs.getBoolean("allowRenew");
-		
 		name = rs.getString("name");
 		String s = rs.getString("units");
-		if (s == null) s = "";
-		units = AssignmentBean.unitsId(rs.getString("units"));
+		if (s == null)
+            s = "";
+
+		units = AssignmentBean.unitsId(s);
+
 		setMinMaxUnitsPerTrip(rs.getInt("minUnitsPerTrip"), rs.getInt("maxUnitsPerTrip"));
 		commodity = rs.getString("commodity");
 		allowWater = rs.getBoolean("allowWater");
@@ -130,98 +129,122 @@ public class FboFacilityBean implements Serializable
 	{
 		return id;
 	}
+
 	public String getLocation()
 	{
 		return location;
 	}
+
 	public void setLocation(String s)
 	{
 		location = s;
 	}
+
 	public int getFboId()
 	{
 		return fboId;
 	}
+
 	public void setFboId(int i)
 	{
 		fboId = i;
 	}
+
 	public int getOccupant()
 	{
 		return occupant;
 	}
+
 	public void setOccupant(int i)
 	{
 		occupant = i;
 	}
+
 	public int getReservedSpace()
 	{
 		return reservedSpace;
 	}
+
 	public void setReservedSpace(int i)
 	{
 		reservedSpace = i;
 	}
+
 	public boolean getIsDefault()
 	{
 		return isDefault;
 	}
+
 	public int getSize()
 	{
 		return size;
 	}
+
 	public void setSize(int i)
 	{
 		size = i;
 	}
+
 	public int getRent()
 	{
 		return rent;
 	}
+
 	public void setRent(int i)
 	{
 		rent = i;
 	}
+
 	public boolean getRenew()
 	{
 		return renew;
 	}
+
 	public void setRenew(boolean b)
 	{
 		renew = b;
 	}
+
 	public boolean getAllowRenew()
 	{
 		return allowRenew;
 	}
+
 	public void setAllowRenew(boolean b)
 	{
 		allowRenew = b;
 	}
+
 	public String getName()
 	{
 		return name;
 	}
+
 	public void setName(String s)
 	{
 		name = Data.clearHtml(s);
 	}
+
 	public int getUnits()
 	{
 		return units;
 	}
+
 	public String getSUnits()
 	{
 		return AssignmentBean.getSUnits(units);
 	}
+
 	public int getMinUnitsPerTrip()
 	{
 		return minUnitsPerTrip;
 	}
+
 	public int getMaxUnitsPerTrip()
 	{
 		return maxUnitsPerTrip;
 	}
+
 	public void setMinMaxUnitsPerTrip(int min, int max)
 	{
 		maxUnitsPerTrip = max;
@@ -233,58 +256,73 @@ public class FboFacilityBean implements Serializable
 	{
 		if (commodity == null || "".equals(commodity.trim()))
 			return null;
-		String items[] = commodity.trim().split(",\\ *");
+
+        String items[] = commodity.trim().split(",\\ *");
 		String item;
 		List dowMatchList = new ArrayList();
 		List noDowMatchList = new ArrayList();
 		int wd = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-		wd -= 1;
+
+        wd -= 1;
 		if (wd == 0) // Mon..Sun instead of Sun..Sat
 			wd = 7;
-		String dow = Integer.toString(wd);
-		for (int c = 0; c < items.length; c++)
-		{
-			item = items[c];
-			String[] params = item.trim().split(";\\ *");
-			// Name; weight; weekdays
-			String name = params[0].trim();
-			int weight = 1;
-			String weekdays = "1234567";
-			if (params.length > 1)
-			{
-				try
-				{
-					weight = Integer.parseInt(params[1].trim());
-					if (weight > 10) weight = 10;
-					else if (weight < 1) weight = 1;
-				}
-				catch (NumberFormatException e) {}
-				finally {}
-			}
-			if (params.length > 2)
-			{
-				weekdays = params[2].trim();
-			}
-			boolean dowmatch = false;
-			if (weekdays.indexOf(dow) > -1)
-			{
-				dowmatch = true;
-			}
-			for (int i = 0; i < weight; i++)
-			{
-				if (dowmatch)
-					dowMatchList.add(name);
-				noDowMatchList.add(name);
-			}
-		}
-		String[] result;
-		if (dowMatchList.size() > 0)
-			result = (String[]) dowMatchList.toArray(new String[0]);
+
+        String dow = Integer.toString(wd);
+
+        for (String item1 : items)
+        {
+            item = item1;
+            String[] params = item.trim().split(";\\ *");
+
+            // Name; weight; weekdays
+            String name = params[0].trim();
+            int weight = 1;
+            String weekdays = "1234567";
+
+            if (params.length > 1)
+            {
+                try
+                {
+                    weight = Integer.parseInt(params[1].trim());
+
+                    if (weight > 10)
+                        weight = 10;
+                    else if (weight < 1)
+                        weight = 1;
+                }
+                catch (NumberFormatException ignored)
+                {
+                }
+            }
+
+            if (params.length > 2)
+            {
+                weekdays = params[2].trim();
+            }
+
+            boolean dowmatch = false;
+
+            if (weekdays.contains(dow))
+            {
+                dowmatch = true;
+            }
+
+            for (int i = 0; i < weight; i++)
+            {
+                if (dowmatch)
+                    dowMatchList.add(name);
+
+                noDowMatchList.add(name);
+            }
+        }
+
+        if (dowMatchList.size() > 0)
+			return (String[]) dowMatchList.toArray(new String[dowMatchList.size()]);
 		else
-			result = (String[]) noDowMatchList.toArray(new String[0]);
-		return result;
+			return (String[]) noDowMatchList.toArray(new String[noDowMatchList.size()]);
 	}
-	public String getRandomCommodity(int quantity)
+
+    public String getRandomCommodity(int quantity)
 	{
 		String result = null;
 		String[] commodities = FboFacilityBean.makeCommodityList(commodity);
@@ -304,69 +342,84 @@ public class FboFacilityBean implements Serializable
 			result = result.substring(0, 45).trim();
 		return result;
 	}
-	public String getCommodity()
+
+    public String getCommodity()
 	{
 		return commodity;
 	}
-	public void setCommodity(String s)
+
+    public void setCommodity(String s)
 	{
 		commodity = Data.clearHtml(s);
 	}
-	public boolean getAllowWater()
+
+    public boolean getAllowWater()
 	{
 		return allowWater;
 	}
-	public void setAllowWater(boolean b)
+
+    public void setAllowWater(boolean b)
 	{
 		allowWater = b;
 	}
-	public int getMinDistance()
+
+    public int getMinDistance()
 	{
 		return minDistance;
 	}
-	public int getMaxDistance()
+
+    public int getMaxDistance()
 	{
 		return maxDistance;
 	}
-	public void setMinMaxDistance(int min, int max)
+
+    public void setMinMaxDistance(int min, int max)
 	{
 		maxDistance = Math.min(max, MAX_ASSIGNMENT_DISTANCE);
 		if (min >= maxDistance)
 			min = 0;
 		minDistance = min;
 	}
-	public int getMatchMinSize()
+
+    public int getMatchMinSize()
 	{
 		return matchMinSize;
 	}
-	public void setMatchMinSize(int i)
+
+    public void setMatchMinSize(int i)
 	{
 		matchMinSize = i;
 	}
-	public int getMatchMaxSize()
+
+    public int getMatchMaxSize()
 	{
 		return matchMaxSize;
 	}
-	public void setMatchMaxSize(int i)
+
+    public void setMatchMaxSize(int i)
 	{
 		matchMaxSize = i;
 	}
-	public String getIcaoSet()
+
+    public String getIcaoSet()
 	{
 		return icaoset;
 	}
-	public void setIcaoSet(String s)
+
+    public void setIcaoSet(String s)
 	{
 		if (s != null)
 			icaoset = s.trim();
 		else
 			icaoset = null;
 	}
-	public boolean getPublicByDefault()
+
+    public boolean getPublicByDefault()
 	{
 		return publicByDefault;
 	}
-	public void setPublicByDefault(boolean b)
+
+    public void setPublicByDefault(boolean b)
 	{
 		publicByDefault = b;
 	}
@@ -375,15 +428,18 @@ public class FboFacilityBean implements Serializable
 	{
 		return daysActive;
 	}
-	public void setDaysActive(int i)
+
+    public void setDaysActive(int i)
 	{
 		daysActive = i;
 	}
-	public int getDaysClaimedActive()
+
+    public int getDaysClaimedActive()
 	{
 		return daysClaimedActive;
 	}
-	public void setDaysClaimedActive(int i)
+
+    public void setDaysClaimedActive(int i)
 	{
 		daysClaimedActive = i;
 	}
@@ -418,10 +474,9 @@ public class FboFacilityBean implements Serializable
 		double degree = 0.3;
 		int maxfare = 1000;
 		double crit_dist = 25.0;
-		double pay = 0;
-		int odistance = distance;
-		
-		//Added PRD - Limit 1,2,3 pax to 300 mile pay - This is also in AssignmentBean.calcpay()
+		double pay;
+
+        //Added PRD - Limit 1,2,3 pax to 300 mile pay - This is also in AssignmentBean.calcpay()
 		//if (amount < 4 && distance > 300)
 			//distance = 300;
 			
@@ -437,7 +492,8 @@ public class FboFacilityBean implements Serializable
 		return pay / distance * 100;
 	
 	}
-	public boolean updateAllowed(UserBean who)
+
+    public boolean updateAllowed(UserBean who)
 	{
 		return who.getId() == occupant || who.groupMemberLevel(occupant) >= UserBean.GROUP_STAFF;
 	}
@@ -446,9 +502,10 @@ public class FboFacilityBean implements Serializable
 	{
 		return who.getId() == occupant || who.groupMemberLevel(occupant) >= UserBean.GROUP_OWNER;
 	}
-	public String getParametersDesc()
+
+    public String getParametersDesc()
 	{
-		String result = "";
+		String result;
 		if (icaoset == null || "".equals(icaoset))
 		{
 			result = minDistance + "-" + maxDistance + " NM, ";

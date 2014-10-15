@@ -1,4 +1,3 @@
-
 /*
  * FS Economy
  * Copyright (C) 2005  Marty Bochane
@@ -18,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 package net.fseconomy.data;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -516,77 +515,47 @@ public class LogBean implements Serializable
 		this.nightBonus = nightBonus;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getGroupId() {
 		return groupId;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getPilotFee() {
 		return pilotFee;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setGroupId(int i) {
 		groupId = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setPilotFee(int i) {
 		pilotFee = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getSubType()
 	{
 		return subType;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setSubType(int i)
 	{
 		subType = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public float getMaintenanceCost()
 	{
 		return maintenanceCost;
 	}
 
-	/**
-	 * @param f
-	 */
 	public void setMaintenanceCost(float f)
 	{
 		maintenanceCost = f;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getFbo()
 	{
 		return fbo;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setFbo(int i)
 	{
 		fbo = i;
@@ -602,34 +571,26 @@ public class LogBean implements Serializable
 		fboAssignmentFee = f;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setAgeECost(int i)
 	{
 		ageECost = i;
 	}
-	/**
-	 * @param i
-	 */
+
 	public void setAgeAvCost(int i)
 	{
 		ageAvCost = i;
 	}
-	/**
-	 * @param i
-	 */
+
 	public void setAgeAfCost(int i)
 	{
 		ageAfCost = i;
 	}
-	/**
-	 * @param i
-	 */
+
 	public void setAgeAdwCost(int i)
 	{
 		ageAdwCost = i;
 	}
+
 	public float getmptTax()
 	{
 		return mpttax;

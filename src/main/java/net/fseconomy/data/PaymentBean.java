@@ -1,4 +1,3 @@
-
 /*
  * FS Economy
  * Copyright (C) 2005  Marty Bochane
@@ -18,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 package net.fseconomy.data;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -99,19 +98,19 @@ public class PaymentBean implements Serializable
 	
 	/**
 	 * Normalize transaction, to amount is always positive
-	 * @return
 	 */
 	public PaymentBean normalize()
 	{
 		if (amount > 0)
 			return this;
+
 		int backup = otherParty;
 		otherParty = user;
 		user = backup;
 		amount *= -1;
+
 		return this;
 	}
-	
 
 	public String getSReason()
 	{
@@ -150,6 +149,7 @@ public class PaymentBean implements Serializable
 			default: return "Unknown";
 		}
 	}
+
 	public float getAmount() {
 		return amount;
 	}
@@ -193,6 +193,4 @@ public class PaymentBean implements Serializable
 	public String getComment() {
 		return comment;
 	}
-
-	
 }

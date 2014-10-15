@@ -3000,7 +3000,7 @@ public class Datafeed extends HttpServlet
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(locname));
             buffer.append(aircraft.getHome());
             buffer.appendMoney(aircraft.getSellPrice());
-            buffer.appendMoney(aircraft.getMinimumPrice(modelBean));
+            buffer.appendMoney(aircraft.getMinimumPrice());
             buffer.append(aircraft.getSEquipment());
             buffer.appendMoney(aircraft.getRentalPriceDry());
             buffer.appendMoney(aircraft.getRentalPriceWet());
@@ -3083,7 +3083,7 @@ public class Datafeed extends HttpServlet
             buffer.append("LocationName", Converters.XMLHelper.protectSpecialCharacters(locname));
             buffer.append("Home", aircraft.getHome());
             buffer.appendMoney("SalePrice", aircraft.getSellPrice());
-            buffer.appendMoney("SellbackPrice", aircraft.getMinimumPrice(modelBean));
+            buffer.appendMoney("SellbackPrice", aircraft.getMinimumPrice());
             buffer.append("Equipment", aircraft.getSEquipment());
             buffer.appendMoney("RentalDry", aircraft.getRentalPriceDry());
             buffer.appendMoney("RentalWet", aircraft.getRentalPriceWet());

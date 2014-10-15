@@ -3,14 +3,6 @@ package net.fseconomy.data;
 import java.io.Serializable;
 import java.sql.*;
 
-/**
- * @author Marty
- *
- * To change this generated comment edit the template variable "typecomment":
- * Window>Preferences>Java>Templates.
- * To enable and disable the creation of type comments go to
- * Window>Preferences>Java>Code Generation.
- */
 public class AirportBean implements Serializable
 {
 	private static final long serialVersionUID = 1L;
@@ -81,11 +73,9 @@ public class AirportBean implements Serializable
 
 	public boolean hasServices(Data data)
 	{
-		if(size >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE)
-			return true;
-		
-		return data.hasRepairShop(icao);
-	}
+        return size >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE
+                || data.hasRepairShop(icao);
+    }
 	
 	public boolean hasGoodsForSale(Data data)
 	{
@@ -93,8 +83,10 @@ public class AirportBean implements Serializable
 			return true;
 		
 		for (int c = 0; c < data.commodities.length; c++)
-			if (data.commodities[c] != null && size > data.commodities[c].getMinAirportSize())
-				return true;
+        {
+            if (data.commodities[c] != null && size > data.commodities[c].getMinAirportSize())
+                return true;
+        }
 
 		return data.hasSuppliesForSale(icao);
 	}
@@ -108,6 +100,7 @@ public class AirportBean implements Serializable
 	{
 		if (icao != null && icao.length() > 4)
 			icao = null;
+
 		this.icao = icao;	
 	}
 	
@@ -125,6 +118,7 @@ public class AirportBean implements Serializable
 	{
 		if (state != null && !state.equals(""))
 			return city + ", " + state;
+
 		return city;
 	}
 
@@ -244,15 +238,15 @@ public class AirportBean implements Serializable
 	{
 		if (type == TYPE_WATER)
 			return "Seaplane base";
+
 		String add = type == TYPE_MILITARY ? "military " : "";
 		
 		if (size < MIN_SIZE_MED)
-		{
 			return type == TYPE_MILITARY ? "Military airstrip" : "Airstrip";
-		}
 		else if (size < MIN_SIZE_BIG)
 			return "Small " + add + "airport";
-		else return "Large " + add + "airport";
+
+        return "Large " + add + "airport";
 	}
 	
 	public String getDescriptiveImage(FboBean[] fbos)
@@ -274,8 +268,8 @@ public class AirportBean implements Serializable
 					base = "airstrip";
 				else if (size < MIN_SIZE_BIG)
 					base = "small-airport";
-				else
-					base = "large-airport";
+
+				base = "large-airport";
 		}
 		if (hasFbo)
 			ext = "-fbo";
@@ -291,22 +285,29 @@ public class AirportBean implements Serializable
 			return 1;
 		else if (size < MIN_SIZE_BIG)
 			return 2;
-		else
-			return 3;
+
+    	return 3;
 	}
 
 	public void setType(int i)
 	{
 		type = i;
 	}
+
 	public void setType(String i)
 	{
-		if (i.equals("civil"))
-			type = TYPE_CIVIL;
-		else if (i.equals("military"))
-			type = TYPE_MILITARY;
-		else
-			type = TYPE_WATER;
+        switch (i)
+        {
+            case "civil":
+                type = TYPE_CIVIL;
+                break;
+            case "military":
+                type = TYPE_MILITARY;
+                break;
+            default:
+                type = TYPE_WATER;
+                break;
+        }
 	}
 
 	public int getSize()
@@ -358,7 +359,7 @@ public class AirportBean implements Serializable
 	
 	public static String bucketList(double lat, double lon)
 	{
-		StringBuffer returnValue = new StringBuffer("(");
+		StringBuilder returnValue = new StringBuilder("(");
 		int bucket;
 		
 		bucket = bucket(lat - 2, lon);
@@ -383,6 +384,7 @@ public class AirportBean implements Serializable
 		returnValue.append(bucket + 1);
 		
 		returnValue.append(")");
+
 		return returnValue.toString();
 	}
 
@@ -411,5 +413,4 @@ public class AirportBean implements Serializable
 	{
 		return jeta;
 	}
-
 }

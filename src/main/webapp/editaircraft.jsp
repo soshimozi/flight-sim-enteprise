@@ -18,8 +18,8 @@
 	AircraftBean aircraft = result[0];
 	
     ModelBean[] models = data.getModelById(aircraft.getModelId());
-	mPrice = Formatters.currency.format(aircraft.getMinimumPrice(models[0]));
-	iPrice = Integer.toString(aircraft.getMinimumPrice(models[0]));
+	mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
+	iPrice = Integer.toString(aircraft.getMinimumPrice());
 	
 	int userlock = aircraft.getUserLock();
 	if (!aircraft.changeAllowed(user)) 

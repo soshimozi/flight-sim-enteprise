@@ -69,7 +69,7 @@ public class GoodsBean implements Serializable
 		this.amount = -1;
 		this.sell = true;
 		this.buy = true; 			
-		this.priceBuy = commodity.getKgBuyPrice(0, airportSize, fuelPrice, overstock, JetAPrice);
+		this.priceBuy = commodity.getKgBuyPrice(airportSize, fuelPrice, overstock, JetAPrice);
 		this.priceSell = commodity.getKgSalePrice(0, airportSize, fuelPrice, overstock, JetAPrice);
 		this.maxDiscount = commodity.getDiscount();
 		this.maxDiscountAmount = commodity.getMaxDiscountAmount();
@@ -104,21 +104,18 @@ public class GoodsBean implements Serializable
 	
 	public boolean changeAllowed(UserBean who)
 	{
-		if (who == null)
-			return false;
-		if (who.getId() == owner)
-			return true;
-		if (who.groupMemberLevel(owner) >= UserBean.GROUP_STAFF)
-			return true;
-		return false;
-	}
+        return who != null
+                && (who.getId() == owner || who.groupMemberLevel(owner) >= UserBean.GROUP_STAFF);
+    }
 	
 	public int getAmountForSale()
 	{
 		if (owner == 0)					// owner 0 always has an infinite amount
 			return -1;
+
 		if (!sell)
-			return 0;			
+			return 0;
+
 		return amount > retain ? (amount - retain) : 0; 
 	}
 	
@@ -126,117 +123,81 @@ public class GoodsBean implements Serializable
 	{
 		if (owner == 0 || max == 0)					// owner 0 always has an infinite amount
 			return -1;
+
 		if (!buy)
-			return 0;			
+			return 0;
+
 		return amount < max ? (max - amount) : 0; 
 	}
 		
-	/**
-	 * @return
-	 */
 	public int getAmount()
 	{
 		return amount;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getLocation()
 	{
 		return location;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getOwner()
 	{
 		return owner;
 	}
 
-	/**
-	 * @return
-	 */
 	public double getPriceBuy()
 	{
 		return priceBuy;
 	}
 
-
-	/**
-	 * @return
-	 */
 	public int getRetain()
 	{
 		return retain;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getType()
 	{
 		return type;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setAmount(int i)
 	{
 		amount = i;
 	}
 
-	/**
-	 * @param string
-	 */
 	public void setLocation(String string)
 	{
 		location = string;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setOwner(int i)
 	{
 		owner = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setRetain(int i)
 	{
 		retain = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setType(int i)
 	{
 		type = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getSaleFlag()
 	{
 		int saleFlag = 0;
+
 		if (sell)
 			saleFlag |= SALEFLAG_SELL;
+
 		if (buy)
 			saleFlag |= SALEFLAG_BUY;
 			
 		return saleFlag;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setSaleFlag(int i)
 	{
 		this.sell = (i & SALEFLAG_SELL) > 0;
@@ -248,108 +209,68 @@ public class GoodsBean implements Serializable
 		return (buy && sell) ? "Buy/Sell" : buy ? "Buy" : sell ? "Sell" : "";
 	}
 
-	/**
-	 * @return
-	 */
 	public double getPriceSell()
 	{
 		return priceSell;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getCommodity()
 	{
 		return commodity;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isBuy()
 	{
 		return buy;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isSell()
 	{
 		return sell;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getMax()
 	{
 		return max;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getMaxDiscount()
 	{
 		return maxDiscount;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getOwnerName()
 	{
 		return ownerName == null ? "[Local Market]" : ownerName;
 	}
 
-	/**
-	 * @param b
-	 */
 	public void setBuy(boolean b)
 	{
 		buy = b;
 	}
 
-	/**
-	 * @param b
-	 */
 	public void setSell(boolean b)
 	{
 		sell = b;
 	}
 
-	/**
-	 * @param d
-	 */
 	public void setPriceBuy(double d)
 	{
 		priceBuy = d;
 	}
 
-	/**
-	 * @param d
-	 */
 	public void setPriceSell(double d)
 	{
 		priceSell = d;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setMax(int i)
 	{
 		max = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getMaxDiscountAmount()
 	{
 		return maxDiscountAmount;
 	}
-
 }

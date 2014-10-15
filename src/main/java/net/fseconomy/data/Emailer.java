@@ -1,5 +1,23 @@
-package net.fseconomy.data;
+/*
+ * FS Economy
+ * Copyright (C) 2005, 2006, 2007  Marty Bochane
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 
+package net.fseconomy.data;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
@@ -15,27 +33,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-/*
- * FS Economy
- * Copyright (C) 2005, 2006, 2007  Marty Bochane
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
-
 /**
- * author: gurka
  * purpose: general purpose Emailer class to send emails from the fseconomy platform
  * - will use GMail as the SMTP service provider
  * - this class implements the Singleton pattern
@@ -46,9 +44,8 @@ public class Emailer
 	
 	private Properties mailProperties;
 	private Session session;
-	private MimeMessage message;
-	
-	public static final String ADDRESS_TO = "TO";
+
+    public static final String ADDRESS_TO = "TO";
 	public static final String ADDRESS_BCC = "BCC";
 	
 	//constructor protected so cannot be used - use getInstance() only
@@ -111,7 +108,7 @@ public class Emailer
 		
 		try 
 		{
-			message = new MimeMessage(session);
+            MimeMessage message = new MimeMessage(session);
 			
 			message.setFrom(new InternetAddress(fromAddress, fromName));
 			InternetAddress reply[] = new InternetAddress[1];
@@ -134,29 +131,22 @@ public class Emailer
 					message.addRecipient(Message.RecipientType.BCC, toAddress[0]);
 				else
 					message.addRecipient(Message.RecipientType.TO, toAddress[0]);
-				
-				toAddress=null;
-			}			
+            }
 			
 			message.saveChanges();
 			Transport.send(message);
-			message = null;			
-		} 
-		catch (UnsupportedEncodingException e) 
+        }
+		catch (UnsupportedEncodingException | MessagingException e)
 		{			
 			e.printStackTrace();
 			throw new DataError("Error while transmitting: " + e.getMessage());			
-		} 
-		catch (MessagingException e) 
-		{
-			e.printStackTrace();
-			throw new DataError("Error while transmitting: " + e.getMessage());
-		}		
-	}
+		}
+    }
 
 	public static boolean isValidEmailAddress(String aEmailAddress)
 	{
-	    if (aEmailAddress == null) return false;
+	    if (aEmailAddress == null)
+            return false;
 	    
 	    boolean result = true;
 	    try 
@@ -169,6 +159,5 @@ public class Emailer
 	    }
 	    
 	    return result;
-	  }
-
+    }
 }

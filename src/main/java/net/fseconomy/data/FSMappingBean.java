@@ -1,4 +1,3 @@
-
 /*
  * FS Economy
  * Copyright (C) 2005  Marty Bochane
@@ -18,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 package net.fseconomy.data;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,7 +48,6 @@ public class FSMappingBean implements Serializable
 		setCapacity(new int[] {rs.getInt("fcapCenter"), rs.getInt("fcapLeftMain"), rs.getInt("fcapLeftAux"), rs.getInt("fcapLeftTip"),
 			rs.getInt("fcapRightMain"), rs.getInt("fcapRightAux"), rs.getInt("fcapRightTip"), rs.getInt("fcapCenter2"), rs.getInt("fcapCenter3"),
 			rs.getInt("fcapExt1"), rs.getInt("fcapExt2")});
-		
 	}
 	
 	/**

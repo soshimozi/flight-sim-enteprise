@@ -81,221 +81,138 @@ public class ServiceProviderBean implements Serializable
 		rs.updateString("notes", notes);
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getId()
 	{
 		return id;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getOwner()
 	{
 		return owner;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setOwner(int newowner, String newownername)
 	{
 		owner = newowner;
 		setOwnerName(newownername);
 	}
 
-	/**
-	 * @return
-	 */
 	public String getOwnerName()
 	{
 		return ownerName;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setOwnerName(String name)
 	{
 		ownerName = name;
 	}
 
-	/**
-	 * @return
-	 */
-	public int getAlternate()
+    public int getAlternate()
 	{
 		return alternate;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setAlternate(int newalt, String newaltname)
 	{
 		alternate = newalt;
 		setAlternateName(newaltname);
 	}
 
-	/**
-	 * @return
-	 */
 	public String getAlternateName()
 	{
 		return alternateName;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setAlternateName(String name)
 	{
 		alternateName = name;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getName()
 	{
 		return name;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setName(String newname)
 	{
 		name = newname;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getIP()
 	{
 		return ip;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setIP(String newip)
 	{
 		ip = newip;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getUrl()
 	{
 		return url;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setUrl(String newurl)
 	{
 		url = newurl;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getDescription()
 	{
 		return description;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setDescription(String newdesc)
 	{
 		description = newdesc;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getStatus()
 	{
 		return status;
 	}
 
-	/**
-	 * @return
-	 */
 	public void setStatus(int newstatus) // throws DataError
 	{
-		//if the new status is outside the proper values, ignore it!!
-		//if(newstatus < STATUS_PENDING || newstatus > STATUS_BANNED)
-		//	throw new DataError("setStatus: new status invalid");
-		
 		status = newstatus;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getStatusString()
 	{
-		String result = "Unknown Value";
 		switch(status)
 		{
 		case STATUS_PENDING:
-			result = "Pending";
-			break;
+            return "Pending";
 		case STATUS_ACTIVE:
-			result = "Active";
-			break;
+			return "Active";
 		case STATUS_DISABLED:
-			result = "Disabled";
-			break;
+			return "Disabled";
 		case STATUS_REJECTED:
-			result = "Rejected";
-			break;
+			return "Rejected";
 		case STATUS_BANNED:
-			result = "Banned";
-			break;
+			return "Banned";
+        default:
+            return "Unknown Value";
 		}
-		return result;
 	}
 
 
-	/**
-	 * @return
-	 */
 	public String getKey()
 	{
 		return key;
 	}
 	
-	/**
-	 * @return
-	 */
 	public void setKey(String newkey)
 	{
-		//truncate the new key to the max of 10 characters!
-		
 		key = newkey.substring(0, 9);
 	}
 	
-	/**
-	 * @return
-	 */
 	public String getNotes()
 	{
 		return notes;
 	}
 	
-	/**
-	 * @return
-	 */
 	public void setNotes(String newnotes)
 	{
 		notes = newnotes;

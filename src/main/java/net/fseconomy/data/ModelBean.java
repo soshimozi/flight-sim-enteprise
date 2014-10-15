@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 package net.fseconomy.data;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,7 +62,7 @@ public class ModelBean implements Serializable
 		public static final int Center3 = 8;
 		public static final int Ext1 = 9;
 		public static final int Ext2 = 10;
-	};
+	}
 	
 	String make;
 	String model;
@@ -108,7 +108,7 @@ public class ModelBean implements Serializable
 		setFueltype(rs.getInt("fueltype"));
 		setRental(rs.getInt("rentalPrice"));
 		setPrice(rs.getInt("price"));		
-		setSAccounting(rs.getString("accounting"));
+		setSAccounting();
 		setMaxRentTime(rs.getInt("maxRentTime"));
 		setBonus(rs.getInt("bonus"));
 		setMinAirportSize(rs.getInt("minAirportSize"));
@@ -171,10 +171,8 @@ public class ModelBean implements Serializable
 		rs.updateInt("fcaptotal", this.getTotalCapacity());
 		rs.updateInt("numSell", getNumSell());
 		
-		//Added for Aircraft Shipping - Airboss 12-24-10 
-		rs.updateBoolean("canShip", getCanShip()==1 ? true : false);
-		//Added for refueling limitation to system only - Airboss 7-7-12 
-		rs.updateBoolean("fuelSystemOnly", getFuelSystemOnly()==1 ? true : false);
+		rs.updateBoolean("canShip", getCanShip() == 1);
+		rs.updateBoolean("fuelSystemOnly", getFuelSystemOnly() == 1);
 	}
 	public void setCenter(int cap)
 	{
@@ -511,7 +509,7 @@ public class ModelBean implements Serializable
 	{
 		this.accounting = accounting;
 	}
-	public void setSAccounting(String accounting)
+	public void setSAccounting()
 	{
 		this.accounting = AircraftBean.ACC_HOUR;		
 	}
@@ -556,23 +554,14 @@ public class ModelBean implements Serializable
 		this.equipment = equipment;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getMaxWeight() {
 		return maxWeight;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setMaxWeight(int i) {
 		maxWeight = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getEmptyWeight() {
 		return emptyWeight;
 	}
@@ -582,87 +571,55 @@ public class ModelBean implements Serializable
 		return (int) Math.round(maxWeight - emptyWeight - getTotalCapacity() * Data.GALLONS_TO_KG);
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setEmptyWeight(int i) {
 		emptyWeight = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getEnginePrice()
 	{
 		return enginePrice;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getEngines()
 	{
 		return engines;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getNumSell()
 	{
 		return numSell;
 	}
-	/**
-	 * @param i
-	 */
+
 	public void setEnginePrice(int i)
 	{
 		enginePrice = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setEngines(int i)
 	{
 		engines = i;
 	}
 	
-	/**
-	 * @param i
-	 */
 	public void setNumSell(int i)
 	{
 		numSell = i;
 	}
 	
-	/**
-	 * @param i
-	 */
 	public void setCanShip(int i)
 	{
 		canShip = i;
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getCanShip()
 	{
 		return canShip;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setFuelSystemOnly(int i)
 	{
 		fuelSystemOnly = i;
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getFuelSystemOnly()
 	{
 		return fuelSystemOnly;
@@ -671,10 +628,10 @@ public class ModelBean implements Serializable
 	public int getTotalCapacity()
 	{
 		int totalCapacity = 0;
-		for (int count = 0; count< capacity.length; count++)
-			totalCapacity+=capacity[count];	
+
+        for (int aCapacity : capacity)
+            totalCapacity += aCapacity;
 
 		return totalCapacity;
 	}
-
 }

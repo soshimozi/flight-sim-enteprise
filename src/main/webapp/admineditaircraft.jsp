@@ -156,7 +156,7 @@ else if (request.getParameter("submit") != null)
 		<tr>
 <%
 	    ModelBean[] models = data.getModelById(aircraft.getModelId());
-	    String mPrice = Formatters.currency.format(aircraft.getMinimumPrice(models[0]));
+	    String mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
 %>
 			<td>On sale for</td><td>$ <input name="sellPrice" type="text" class="textarea" value="<%= aircraft.getSellPrice() == 0 ? "" : (""+aircraft.getSellPrice()) %>" size="6"/></td>
 		</tr>

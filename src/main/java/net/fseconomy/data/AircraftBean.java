@@ -2,7 +2,6 @@ package net.fseconomy.data;
 
 import java.io.Serializable;
 import java.sql.*;
-import java.text.DecimalFormat;
 import java.util.Date;
 
 import net.fseconomy.util.Formatters;
@@ -68,7 +67,7 @@ public class AircraftBean implements Serializable
 	int lastFix;
 	int fueltype;
 	
-	//Added for aircraft shipping - Airboss 12/20/10
+	//Added for aircraft shipping
 	boolean canShip;
 	int shippingState;
 	Timestamp shippingStateNext;
@@ -103,7 +102,7 @@ public class AircraftBean implements Serializable
 		setInitialFuel(rs.getFloat("aircraft.initialFuel"));
 		setSellPrice(rs.getInt("sellPrice"));		
 		setMaxRentTime(rs.getString("aircraft.maxRentTime") == null ? rs.getInt("models.maxRentTime") : rs.getInt("aircraft.maxRentTime"));
-		setAccounting(rs.getString("aircraft.accounting") == null ? rs.getString("models.accounting") : rs.getString("aircraft.accounting"));
+		setAccounting();
 		setDepartedFrom(rs.getString("departedFrom"));
 		setBonus(rs.getString("aircraft.bonus") == null ? rs.getInt("models.bonus") : rs.getInt("aircraft.bonus"));
 		setOwner(rs.getInt("owner"));
@@ -192,6 +191,7 @@ public class AircraftBean implements Serializable
 		
 		int MAXREGISTRATIONSIZE = 20;	
 		int maxLength = (reg.length() < MAXREGISTRATIONSIZE) ? reg.length() : MAXREGISTRATIONSIZE;
+
 		return reg.substring(0, maxLength);
 	}
 	
@@ -202,6 +202,7 @@ public class AircraftBean implements Serializable
 		
 		int MAXCOMMENTSIZE = 255;	
 		int maxLength = (comment.length() < MAXCOMMENTSIZE) ? comment.length() : MAXCOMMENTSIZE;
+
 		return comment.substring(0, maxLength);
 	}
 	
@@ -358,14 +359,17 @@ public class AircraftBean implements Serializable
 		double togo = amount - getTotalFuel();
 		if (togo <= 0)
 			return;
+
 		togo -= equalizeTanks(1, 4, togo);
 		togo -= equalizeTanks(2, 5, togo);
 		togo -= equalizeTanks(3, 6, togo);
 		togo -= equalizeTanks(9, 10, togo);          // pa30 twin comanche
+
 		if (capacity[4] == 0)                        // A26 has no right main tank
 			togo -= addTank(1, togo);
 		else
 			togo -= addTanks(1, 4, togo);
+
 		togo -= addTanks(2, 5, togo);
 		togo -= addTanks(3, 6, togo);
 		togo -= addTanks(9, 10, togo);                // pa30 twin comanche
@@ -373,7 +377,7 @@ public class AircraftBean implements Serializable
 		togo -= addTank(7, togo);
 		togo -= addTank(8, togo);
 		togo -= addTank(9, togo);
-		togo -= addTank(10, togo);
+		addTank(10, togo);
 	}
 	
 	public int getMaintenancePrice(int type, FboBean fbo)
@@ -388,7 +392,7 @@ public class AircraftBean implements Serializable
 			case AircraftMaintenanceBean.MAINT_100HOUR:
 				return (int)(0.05/1.25 * engines * enginePrice);
 			case AircraftMaintenanceBean.MAINT_REPLACEENGINE:
-				return (int)( engines * enginePrice);		// was 0.8/1.25
+				return engines * enginePrice;		// was 0.8/1.25
 			case AircraftMaintenanceBean.MAINT_FIXAIRCRAFT:
 				return 0;
 		}
@@ -399,19 +403,21 @@ public class AircraftBean implements Serializable
 	 * Description: Additional maintenance cost due to aircraft age.  (Digital parsing code modified from Neal Ziring)
 	 * @param aircraft
 	 * @return int[]
-	 * @author PRD
 	 */
 	public int[] getConditionPrice(AircraftBean aircraft, int type)
 	{
+        //TODO huh?? Why are we passing in aircraft and not doing anything?
 		int acCondition = this.getCondition();
 		int[] acConditionArray;	
 		acConditionArray = new int[5]; //set to 5 right now - increase here and in getCondition as needed		
 		addedPriceArray = new int[4];	
 
        int num, digit, digits, divisor, i;
+
        // convert the input argument to an integer
        num = acCondition;
        i=0;
+
        // compute number of digits-1
        digits = (int)Math.floor(Math.log10(num));
        
@@ -421,12 +427,14 @@ public class AircraftBean implements Serializable
 
        // get each digit and print it, by dividing by
        // successively smaller powers of ten.
-	       while(divisor > 0) {
-	           digit = (num / divisor) % 10;
-	           divisor = divisor / 10;
-	           acConditionArray[i]=digit;
-				i++;
+	   while(divisor > 0)
+       {
+           digit = (num / divisor) % 10;
+           divisor = divisor / 10;
+           acConditionArray[i]=digit;
+            i++;
        }
+
 		switch (type)
 		{
 			case AircraftMaintenanceBean.MAINT_100HOUR:
@@ -434,16 +442,15 @@ public class AircraftBean implements Serializable
 				int airframe = this.getAirframe();
 				int basePrice = (int) Math.round(0.05/1.25 * engines * enginePrice);
 				for (i = 0; i < acConditionArray.length-1; i++)			
-				{ 
-
-					if(i==0) //read array. Use engine hours in first and airframe hours in the rest. 
-						addedPriceArray[i] = (int) Math.round((engine/3600 * .01 * basePrice * engines * ((double)((double)acConditionArray[0]+ ((double)(acConditionArray[1])/10))/DIVISOR)));
+				{
+                    //read array. Use engine hours in first and airframe hours in the rest.
+					if(i==0)
+						addedPriceArray[i] = (int) Math.round((engine/3600 * .01 * basePrice * engines * (((double)acConditionArray[0]+ ((double)(acConditionArray[1])/10)) /DIVISOR)));
 					else
-						addedPriceArray[i] = (int) Math.round((airframe/3600 * .01 * basePrice * ((double)((double)acConditionArray[0]+ ((double)(acConditionArray[i+1])/10))/DIVISOR)));
-//System.out.println("Condition["+i+"] " + (double)((double)acConditionArray[0]+((double)(acConditionArray[i+1])/10)));
-//System.out.println("Condition Price $" + addedPriceArray[i]);
+						addedPriceArray[i] = (int) Math.round((airframe/3600 * .01 * basePrice * (((double)acConditionArray[0]+ ((double)(acConditionArray[i+1])/10)) /DIVISOR)));
 				}
-				return addedPriceArray;			
+				return addedPriceArray;
+
 			case AircraftMaintenanceBean.MAINT_REPLACEENGINE:
 				for (i = 0; i < addedPriceArray.length; i++)	
 				{
@@ -458,6 +465,7 @@ public class AircraftBean implements Serializable
 				}
 				return addedPriceArray;
 		}
+
 		return addedPriceArray;	
 	}
 	
@@ -509,7 +517,7 @@ public class AircraftBean implements Serializable
 				break;
 			case AircraftMaintenanceBean.MAINT_FIXAIRCRAFT:				
 				AircraftMaintenanceBean mb3 = new AircraftMaintenanceBean(this, type, fbo);
-				cost += mb3.doRepair(damage, maintenance, logId);
+				cost += mb3.doRepair(maintenance, logId);
 				break;
 		}
 		return cost;
@@ -521,11 +529,9 @@ public class AircraftBean implements Serializable
 			return false;
 		if (who.getId() == owner)
 			return true;
-		if (who.groupMemberLevel(owner) >= UserBean.GROUP_STAFF)
-			return true;
 
-		return false;
-	}
+        return who.groupMemberLevel(owner) >= UserBean.GROUP_STAFF;
+    }
 	
 	public boolean canAlwaysRent(UserBean who)
 	{
@@ -535,12 +541,9 @@ public class AircraftBean implements Serializable
 		
 		if (who.getId() == owner)
 			return true;
-		
-		if (who.groupMemberLevel(owner) >= UserBean.GROUP_MEMBER)
-			return true;
-		
-		return false;
-	}
+
+        return who.groupMemberLevel(owner) >= UserBean.GROUP_MEMBER;
+    }
 	
 	public int maxPayloadWeight()
 	{
@@ -549,7 +552,7 @@ public class AircraftBean implements Serializable
 	
 	public boolean fitsAboard(AssignmentBean assignment)
 	{
-		int weight = 0;
+		int weight;
 		int crewSeats = 1;
 		if (crew > 0)  // Additional Crew
 			crewSeats = 2;
@@ -578,14 +581,12 @@ public class AircraftBean implements Serializable
 	/**
 	 * return an string 00:00 formatted HoursSinceLastCheck value
 	 * @return String
-	 * @author airboss
-	 */	
+	 */
 	public String getHoursSinceLastCheckString()
 	{
 		int minutes = (int)(getHoursSinceLastCheck() * 60.0);
-		String s = Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
-		
-		return s;
+
+        return Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
 	}
 	
 	public double getEngineHours()
@@ -607,28 +608,22 @@ public class AircraftBean implements Serializable
 	/**
 	 * return an string 00:00 formatted EngineHour value
 	 * @return String
-	 * @author airboss
-	 */	
+	 */
 	public String getEngineHoursString()
 	{
-		DecimalFormat digits = new DecimalFormat("00");
-		
 		int minutes = (int)(getEngineHours() * 60.0);
-		String s = Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
-		
-		return s;
+
+        return Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
 	}
 	
 	// TBO and Condition added PRD
 	public boolean getCanFlyAssignments(ModelBean model)
-	{
-		if (owner > 0 )
-			
-			return ((getHoursSinceLastCheck() < 100) && (totalEngineTime < (model.fueltype==0 ? TBO_RECIP : TBO_JET)) && !isBroken());
-		else
-			return true;		
-		}
-	
+    {
+        if (owner == 0)
+            return true;
+
+        return ((getHoursSinceLastCheck() < 100) && (totalEngineTime < (model.fueltype == 0 ? TBO_RECIP : TBO_JET)) && !isBroken());
+    }
 	/**
 	 * Returns the brand.
 	 * @return String
@@ -808,9 +803,8 @@ public class AircraftBean implements Serializable
 
 	/**
 	 * Sets the accounting.
-	 * @param accounting The accounting to set
-	 */
-	public void setAccounting(String accounting)
+     */
+	public void setAccounting()
 	{
 		this.accounting = ACC_HOUR;
 	}
@@ -916,7 +910,6 @@ public class AircraftBean implements Serializable
 	/**
 	 * returns fueltype 0=avgas 1=jeta
 	 * @return int fueltype
-	 * @author JustPara
 	 */
 	public int getFuelType()
 	{
@@ -968,11 +961,9 @@ public class AircraftBean implements Serializable
 
 	public boolean canRent()
 	{
-		if(rentalPriceDry > 0 || rentalPriceWet > 0)
-			return true;
-		
-		return false;
-	}
+        return rentalPriceDry > 0 || rentalPriceWet > 0;
+
+    }
 	/**
 	 * Returns the rentalPriceDry.
 	 * @return int
@@ -1081,7 +1072,6 @@ public class AircraftBean implements Serializable
 	/**
 	 * sets fuel type 0 = avgas 1 = jeta
 	 * @param FuelType
-	 * @author JustPara
 	 */
 	public void setFuelType(int FuelType)
 	{
@@ -1188,7 +1178,7 @@ public class AircraftBean implements Serializable
 	{
 		Timestamp diffns;
 		double hours;
-		String state = "";
+		String state;
 		switch( this.shippingState)
 		{
 		case 0: state = "Active";
@@ -1350,12 +1340,6 @@ public class AircraftBean implements Serializable
 		return getMinimumPrice(1.0, true);
 	}
 	
-	//No need to pass a ModelBean, but left this for those that are calling it the old way.
-	public int getMinimumPrice(ModelBean mb)
-	{
-		return getMinimumPrice();
-	}
-
 	public int getMinimumPrice()
 	{
 		return getMinimumPrice(BASESELLBACKPERCENT, false);
@@ -1411,23 +1395,14 @@ public class AircraftBean implements Serializable
 		return broken;
 	}
 
-	/**
-	 * @return int
-	 */
 	public int getBearing() {
 		return bearing;
 	}
 
-    /**
-     * @param i
-     */
 	public void setBearing(int i) {
 		bearing = i;
 	}
 
-    /**
-     * @return int
-     */
 	public int getBearingImage()
 	{
 		if (bearing == -1)
@@ -1436,78 +1411,47 @@ public class AircraftBean implements Serializable
 		return (int)Math.round(getBearing()/45.0)%8;
 	}
 
-	/**
-	 * @return int
-	 */
 	public int getMaxWeight() {
 		return maxWeight;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setMaxWeight(int i) {
 		maxWeight = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getEmptyWeight() {
 		return emptyWeight;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setEmptyWeight(int i) {
 		emptyWeight = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getLastCheck()
 	{
 		return lastCheck;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setLastCheck(int i)
 	{
 		lastCheck = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getTotalEngineTime()
 	{
 		return totalEngineTime;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setTotalEngineTime(int i)
 	{
 		totalEngineTime = i;
 	}
 
-	/**
-	 * @return
-	 */
-	
 	public void setAirframe(int i)
 	{
 		airframe = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getAirframe()
 	{
 		return airframe;
@@ -1520,9 +1464,8 @@ public class AircraftBean implements Serializable
 	public String getAirframeHoursString()
 	{
 		int minutes = (int)(getAirframe() / 60.0);
-		String s = Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
-		
-		return s;
+
+        return Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
 	}
 	
 	public void setCondition(int i) 
@@ -1530,9 +1473,6 @@ public class AircraftBean implements Serializable
 		condition = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getCondition()
 	{		
        return condition;		
@@ -1543,125 +1483,76 @@ public class AircraftBean implements Serializable
 		lastFix = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getLastFix()
 	{		
        return lastFix;		
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getEnginePrice()
 	{
 		return enginePrice;
 	}
 
-	/**
-	 * @return  int
-	 */
 	public int getEngines()
 	{
 		return engines;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setEnginePrice(int i)
 	{
 		enginePrice = i;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setEngines(int i)
 	{
 		engines = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getGph()
 	{
 		return gph;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setGph(int i)
 	{
 		gph = i;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getCruise()
 	{
 		return cruise;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setCruise(int i)
 	{
 		cruise = i;
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getCrew()
 	{
 		return crew;
 	}
 	
-	/**
-	 * @param i
-	 */
 	public void setCrew(int i)
 	{
 		crew = i;
 	}
-	
-
-	
 
 	public boolean isAdvertiseFerry()
 	{
 		return advertiseFerry;
 	}
 
-	/**
-	 * @param b
-	 */
 	public void setAdvertiseFerry(boolean b)
 	{
 		advertiseFerry = b;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getAdvertise()
 	{
-		int advertise = 0;
-		if (advertiseFerry)
-			advertise |= AircraftBean.ADV_FERRY;
-			
-		return advertise;
+        return advertiseFerry ? AircraftBean.ADV_FERRY : 0;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setAdvertise(int i)
 	{
 		if ((i & AircraftBean.ADV_FERRY) > 0)
@@ -1673,9 +1564,6 @@ public class AircraftBean implements Serializable
 		return allowRepair;
 	}
 	
-	/**
-	 * @param b
-	 */
 	public void setAllowRepair(boolean b)
 	{
 		allowRepair = b;
@@ -1683,33 +1571,23 @@ public class AircraftBean implements Serializable
 	
 	public int getAllowFix()
 	{
-		int allowFix = 0;
 		if (allowRepair)
-			allowFix |= AircraftBean.ALLOW_REPAIR;
-			
-		return allowFix;
+			return AircraftBean.ALLOW_REPAIR;
+		else
+		    return 0;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setAllowFix(int i)
 	{
 		if ((i & AircraftBean.ALLOW_REPAIR) > 0)
 			allowRepair = true;
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getDistance()
 	{
 		return distance;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setDistance(int i)
 	{
 		distance = i;
@@ -1720,8 +1598,7 @@ public class AircraftBean implements Serializable
 	 * @param t1
 	 * @param t2
 	 * @return String
-	 * @author airboss
-	 */	
+	 */
 	public static Timestamp diffTimestamps(Date t1, Date t2)
 	{     
 		Boolean signNeg = false;

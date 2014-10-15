@@ -1754,6 +1754,6 @@ public class UserCtl extends HttpServlet
 		String icao = req.getParameter("icao");
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		data.registerBulkFuelOrder(user, fboID, amount100ll, amountJetA, daysOut, accountToPay, location, price, icao);
+		data.registerBulkFuelOrder(user, fboID, amount100ll, amountJetA, daysOut, accountToPay, location, icao);
 	}
 }

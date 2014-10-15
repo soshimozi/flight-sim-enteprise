@@ -300,72 +300,61 @@ public class UserBean implements Serializable
 		if (memberships == null)
 			return -1;
 		
-		Data.groupMemberData data = (Data.groupMemberData) memberships.get(new Integer(group));
+		Data.groupMemberData data = memberships.get(new Integer(group));
 		
 		return data == null ? -1 : data.memberLevel;
 	}
 	
 	public Data.groupMemberData[] getStaffGroups()
 	{
-		ArrayList<groupMemberData> returnValue = new ArrayList<groupMemberData>();
+		ArrayList<groupMemberData> returnValue = new ArrayList<>();
 		if (memberships == null)
 			return new Data.groupMemberData[0];
+
+        for (groupMemberData item : memberships.values())
+        {
+            if (item.memberLevel >= UserBean.GROUP_STAFF)
+                returnValue.add(item);
+        }
 		
-		Iterator<groupMemberData> iterator = memberships.values().iterator();
-		while (iterator.hasNext())
-		{
-			Data.groupMemberData item = (Data.groupMemberData) iterator.next();
-			if (item.memberLevel >= UserBean.GROUP_STAFF)
-				returnValue.add(item);
-		}
-		
-		return (Data.groupMemberData[]) returnValue.toArray(new Data.groupMemberData[0]);
+		return returnValue.toArray(new groupMemberData[returnValue.size()]);
 	}
 	
-	/**
-	 * @return
-	 */
-	public String getComment() 
+	public String getComment()
 	{
 		return comment == null ? "" : comment;
 	}
 
-	/**
-	 * @param string
-	 */
-	public void setComment(String string) 
+	public void setComment(String string)
 	{
 		comment = TruncateComment(Data.clearHtml(string));
 	}
 
-	/**
-	 * @return
-	 */
-	public Map<Integer, groupMemberData> getMemberships() 
+	public Map<Integer, groupMemberData> getMemberships()
 	{
 		return memberships;
 	}
 
-	/**
-	 * @param map
-	 */
-	public void setMemberships(Map<Integer, groupMemberData> map) 
+	public void setMemberships(Map<Integer, groupMemberData> map)
 	{
 		memberships = map;
 	}
 	
 	public static int getGroupLevel(String s)
 	{
-		if (s.equals("member"))
-			return GROUP_MEMBER;
-		else if (s.equals("staff"))
-			return GROUP_STAFF;
-		else if (s.equals("owner"))
-			return GROUP_OWNER;
-		else if (s.equals("invited"))
-			return GROUP_INVITED;
-		else
-			return -1;
+        switch (s)
+        {
+            case "member":
+                return GROUP_MEMBER;
+            case "staff":
+                return GROUP_STAFF;
+            case "owner":
+                return GROUP_OWNER;
+            case "invited":
+                return GROUP_INVITED;
+            default:
+                return -1;
+        }
 	}
 	
 	public static String getGroupLevelName(int level)
@@ -573,16 +562,14 @@ public class UserBean implements Serializable
 		StringTokenizer st =new StringTokenizer(banList);	
 		
 		//loop through each item in the list and put into a unique Collection
-		Set<String> renters = new HashSet<String>();
+		Set<String> renters = new HashSet<>();
 		while (st.hasMoreTokens())
 			renters.add(st.nextToken().toLowerCase());
 		
 		//if renter account ID exists in our collection return true
-		if (renters.contains(renter.toLowerCase()))
-			return true;
-    
-		return false;
-	}
+        return renters.contains(renter.toLowerCase());
+
+    }
 	
 	public void setReadAccessKey(String s)
 	{

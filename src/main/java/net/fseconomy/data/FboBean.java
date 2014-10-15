@@ -1,4 +1,3 @@
-
 /*
  * FS Economy
  * Copyright (C) 2005  Marty Bochane
@@ -18,16 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
-
 package net.fseconomy.data;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 public class FboBean implements Serializable
@@ -163,7 +158,6 @@ public class FboBean implements Serializable
 	 * gets fuel price at an FBO by type 0=avgas 1=jeta
 	 * @param d - fueltype returned by aircraft.getFuelType()
 	 * @return double - either price of 100LL or JetA
-	 * @author JustPara
 	 */
 	public double getFuelByType(int d)
 	{
@@ -175,83 +169,55 @@ public class FboBean implements Serializable
 		}
 	}
 	
-	/**
-	 * @return
-	 */
 	public double getFuel100LL()
 	{
 		return fuel100LL;
 	}
+
 	/**
 	 * for getting jeta price
 	 * @return double
-	 * @author JustPara
 	 */
 	public double getFueljeta()
 	{
 		return fueljeta;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getLocation()
 	{
 		return location;
 	}
 
-	/**
-	 * @return
-	 */
 	public String getName()
 	{
 		return name == null ? "" : name;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getOwner()
 	{
 		return owner;
 	}
 
-	/**
-	 * @return
-	 */
 	public boolean isActive()
 	{
 		return active;
 	}
 
-	/**
-	 * @param d
-	 */
 	public void setFuel100LL(double d)
 	{
 		fuel100LL = d;
 	}
-	/**
-	 * sets price of jeta
-	 * @param d
-	 * @author JustPara
-	 */
+
 	public void setFueljeta(double d)
 	{
 		fueljeta = d;
 	}
 
-	/**
-	 * @param string
-	 */
 	public void setName(String string)
 	{
 		name = Data.clearHtml(string);
 	}
 
-	/**
-	 * @return
-	 */
 	public int getServices()
 	{
 		return services;
@@ -261,17 +227,12 @@ public class FboBean implements Serializable
 	{
 		return repairShopMargin + "% / " + equipmentInstallMargin + "%";
 	}
-	/**
-	 * @return
-	 */
+
 	public int getRepairShopMargin()
 	{
 		return repairShopMargin;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setRepairShopMargin(int i)
 	{
 		repairShopMargin = i;
@@ -279,17 +240,11 @@ public class FboBean implements Serializable
 			repairShopMargin = 0;
 	}
 
-	/**
-	 * @return
-	 */
 	public int getEquipmentInstallMargin()
 	{
 		return equipmentInstallMargin;
 	}
 
-	/**
-	 * @param i
-	 */
 	public void setEquipmentInstallMargin(int i)
 	{
 		equipmentInstallMargin = i;
@@ -297,9 +252,6 @@ public class FboBean implements Serializable
 			equipmentInstallMargin = 0;
 	}
 	
-	/**
-	 * @return
-	 */
 	public int getId()
 	{
 		return id;

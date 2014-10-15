@@ -7,9 +7,8 @@ import java.text.SimpleDateFormat;
  */
 public final class Validate
 {
-	private static final long serialVersionUID = 1L;
-	
-	// Suppress default constructor for noninstantiability 
+
+    // Suppress default constructor for noninstantiability
     private Validate() 
     { 
         throw new AssertionError(); 
@@ -17,7 +16,7 @@ public final class Validate
 	
 	//Validates that an IP address has 4 octets and valid ranges
 	//http://www.tek-tips.com/viewthread.cfm?qid=1379040
-	public final static boolean IPAddress( String  ipAddress )
+	public static boolean IPAddress( String  ipAddress )
 	{
 	    String[] parts = ipAddress.split( "\\." );
 
@@ -39,7 +38,7 @@ public final class Validate
 	    return true;
 	}
 	
-	public final static boolean isValidDate(String inDate) 
+	public static boolean isValidDate(String inDate)
 	{
 		String DATE_FORMAT = "yyyy-MM-dd";	
 		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
