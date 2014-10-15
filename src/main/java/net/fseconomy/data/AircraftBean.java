@@ -1179,7 +1179,7 @@ public class AircraftBean implements Serializable
 		Timestamp diffns;
 		double hours;
 		String state;
-		switch( this.shippingState)
+		switch(this.shippingState)
 		{
 		case 0: state = "Active";
 			break;

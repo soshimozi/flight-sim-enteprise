@@ -130,6 +130,13 @@ public class UserCtl extends HttpServlet
 		throws ServletException, IOException
 	{
 		String action = req.getParameter("event");
+
+        if(action == null)
+        {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No action specified");
+            return;
+        }
+
 		String returnToPage = req.getParameter("returnpage");
 		String returnToPageOverride = null;
 				

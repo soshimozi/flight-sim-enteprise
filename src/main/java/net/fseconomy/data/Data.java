@@ -906,6 +906,9 @@ public class Data implements Serializable
 		
 		try
 		{
+            if(usertype == null)
+                usertype = "";
+
             switch (usertype)
             {
                 case "flying":
@@ -941,6 +944,9 @@ public class Data implements Serializable
 		int result=0;
 		try
 		{
+            if(usertype == null)
+                usertype = "";
+
 			String qry;
             switch (usertype)
             {

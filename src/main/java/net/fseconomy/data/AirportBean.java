@@ -255,6 +255,7 @@ public class AirportBean implements Serializable
 		String ext="";
 		boolean hasFbo = fbos.length > 0;
 		boolean hasFuel = isAvgas();
+
 		switch (type)
 		{
 			case TYPE_WATER:
@@ -271,6 +272,7 @@ public class AirportBean implements Serializable
 
 				base = "large-airport";
 		}
+
 		if (hasFbo)
 			ext = "-fbo";
 		else if (hasFuel)
@@ -294,9 +296,12 @@ public class AirportBean implements Serializable
 		type = i;
 	}
 
-	public void setType(String i)
+	public void setType(String apType)
 	{
-        switch (i)
+        if(apType == null)
+            apType = "";
+
+        switch (apType)
         {
             case "civil":
                 type = TYPE_CIVIL;

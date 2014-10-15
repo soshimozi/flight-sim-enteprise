@@ -696,50 +696,64 @@ public class MaintenanceCycle implements Runnable
 				Set<String> icaoSet1, icaoSet2;
 				StringBuffer where = new StringBuffer();
 
-                switch (icaos1)
+                if(icaos1 == null)
                 {
-                    case "$FBO":
-                        icaoSet1 = icaosetFBO;
-                        where = whereSetFBO;
-                        frequency = frequency * icaoSet1.size();
-                        break;
-                    case "$MILITARY":
-                        icaoSet1 = icaosetMilitary;
-                        where = whereSetMILITARY;
-                        frequency = frequency * icaoSet1.size();
-                        break;
-                    default:
-                        icaoSet1 = parseIcaoSet(icaos1, true);
+                    icaoSet1 = null;
+                }
+                else
+                {
+                    switch (icaos1)
+                    {
+                        case "$FBO":
+                            icaoSet1 = icaosetFBO;
+                            where = whereSetFBO;
+                            frequency = frequency * icaoSet1.size();
+                            break;
+                        case "$MILITARY":
+                            icaoSet1 = icaosetMilitary;
+                            where = whereSetMILITARY;
+                            frequency = frequency * icaoSet1.size();
+                            break;
+                        default:
+                            icaoSet1 = parseIcaoSet(icaos1, true);
 
-                        if (icaoSet1 != null)
-                        {
-                            String tempicaos[] = icaoSet1.toArray(new String[icaoSet1.size()]);
-                            for (String tempicao : tempicaos)
+                            if (icaoSet1 != null)
                             {
-                                if (where.length() > 0)
-                                    where.append(", ");
+                                String tempicaos[] = icaoSet1.toArray(new String[icaoSet1.size()]);
+                                for (String tempicao : tempicaos)
+                                {
+                                    if (where.length() > 0)
+                                        where.append(", ");
 
-                                where.append("'").append(tempicao).append("'");
+                                    where.append("'").append(tempicao).append("'");
+                                }
+                                if (icaos1.contains("$"))
+                                    frequency = frequency * icaoSet1.size();
                             }
-                            if (icaos1.contains("$"))
-                                frequency = frequency * icaoSet1.size();
-                        }
-                        break;
+                            break;
+                    }
                 }
 
-                switch (icaos2)
+                if(icaos2 == null)
                 {
-                    case "$FBO":
-                        icaoSet2 = icaosetFBO;
-                        break;
-                    case "$MILITARY":
-                        icaoSet2 = icaosetMilitary;
-                        break;
-                    default:
-                        icaoSet2 = parseIcaoSet(icaos2, true);
-                        break;
+                    icaoSet2 = null;
                 }
-				
+                else
+                {
+                    switch (icaos2)
+                    {
+                        case "$FBO":
+                            icaoSet2 = icaosetFBO;
+                            break;
+                        case "$MILITARY":
+                            icaoSet2 = icaosetMilitary;
+                            break;
+                        default:
+                            icaoSet2 = parseIcaoSet(icaos2, true);
+                            break;
+                    }
+                }
+
 				String query;
 				String needed;
 				if (icaoSet1 == null && icaoSet2 == null)

@@ -340,9 +340,12 @@ public class UserBean implements Serializable
 		memberships = map;
 	}
 	
-	public static int getGroupLevel(String s)
+	public static int getGroupLevel(String role)
 	{
-        switch (s)
+        if(role == null)
+            role = "";
+
+        switch (role)
         {
             case "member":
                 return GROUP_MEMBER;

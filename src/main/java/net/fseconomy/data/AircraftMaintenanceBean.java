@@ -194,7 +194,9 @@ public class AircraftMaintenanceBean implements Serializable
 			int value = rs.getInt("value");
 			if (engine > engineData.length)
 				continue;
+
 			engine--;
+
 			switch (rs.getInt("type"))
 			{
 				case MAINT_MARGIN:
