@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
-<web-app id="WebApp">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
     <display-name>fseconomy</display-name>
 
     <filter>
@@ -16,57 +16,71 @@
 
     <servlet>
         <servlet-name>UserCtl</servlet-name>
-        <display-name>UserCtl</display-name>
         <servlet-class>net.fseconomy.servlets.UserCtl</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
         <servlet-name>FSagent</servlet-name>
-        <display-name>FSagent</display-name>
         <servlet-class>net.fseconomy.servlets.FSagent</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>Image</servlet-name>
-        <display-name>Image</display-name>
         <servlet-class>net.fseconomy.servlets.Image</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>Datafeed</servlet-name>
-        <display-name>Datafeed</display-name>
         <servlet-class>net.fseconomy.servlets.Datafeed</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>AutoLogon</servlet-name>
-        <display-name>Auto Logon</display-name>
         <servlet-class>net.fseconomy.servlets.Autologon</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FSagentFSX</servlet-name>
-        <display-name>FSagent for FSX</display-name>
         <servlet-class>net.fseconomy.servlets.FSagentFSX</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>FSagentXPlane</servlet-name>
-        <display-name>FSagent for X-Plane</display-name>
         <servlet-class>net.fseconomy.servlets.FSagentFSX</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>StickyCaptcha</servlet-name>
-        <display-name>StickyCaptcha</display-name>
         <servlet-class>nl.captcha.servlet.StickyCaptchaServlet</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>SigServer</servlet-name>
-        <display-name>SigServer</display-name>
         <servlet-class>net.fseconomy.servlets.SigServer</servlet-class>
     </servlet>
 
     <servlet>
         <servlet-name>JsonServer</servlet-name>
-        <display-name>JsonServer</display-name>
         <servlet-class>net.fseconomy.servlets.jsonServlet</servlet-class>
     </servlet>
+
+    <servlet>
+        <servlet-name>Resteasy</servlet-name>
+        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Resteasy</servlet-name>
+        <url-pattern>/rs/*</url-pattern>
+    </servlet-mapping>
+
+    <context-param>
+        <param-name>javax.ws.rs.Application</param-name>
+        <param-value>net.fseconomy.servlets.resteasyServletApp</param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>resteasy.servlet.mapping.prefix</param-name>
+        <param-value>/rs</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
+    </listener>
 
     <servlet-mapping>
         <servlet-name>JsonServer</servlet-name>
@@ -110,7 +124,6 @@
         <servlet-name>StickyCaptcha</servlet-name>
         <url-pattern>/stickyImg</url-pattern>
     </servlet-mapping>
-
 
     <session-config>
         <session-timeout>600</session-timeout>
