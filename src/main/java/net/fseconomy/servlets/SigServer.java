@@ -74,7 +74,7 @@ public class SigServer extends HttpServlet
         String requestedImage = request.getPathInfo().toLowerCase();
 
         // Check if file name is actually supplied to the request URI.
-        if (!requestedImage.equals(""))
+        if (requestedImage.equals(""))
         {
             // Throw an exception, or send 404, or show default/warning image, or just ignore it.
             response.sendError(HttpServletResponse.SC_NOT_FOUND); // 404.
