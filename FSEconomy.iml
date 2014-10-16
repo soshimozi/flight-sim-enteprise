@@ -42,6 +42,24 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: commons-io-2.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: simplecaptcha-1.2.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: slf4j-api-1.7.7" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: resteasy-jackson-provider-3.0.8.Final" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: jackson-core-asl-1.9.12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: jackson-mapper-asl-1.9.12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: jackson-jaxrs-1.9.12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: jackson-xc-1.9.12" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: resteasy-jaxrs-3.0.8.Final" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: cdi-api-1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: jboss-annotations-api_1.1_spec-1.0.1.Final" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: jboss-json-api_1.0_spec-1.0.0.Final" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: jaxrs-api-3.0.8.Final" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: javax.inject-1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: httpclient-4.2.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: jcip-annotations-1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: javax.el-api-3.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: javax.interceptor-api-1.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: httpcore-4.2.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: commons-logging-1.1.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: commons-codec-1.6" level="project" />
   </component>
 </module>
 

@@ -1,3 +1,22 @@
+/*
+ * FS Economy
+ * Copyright (C) 2005  Marty Bochane
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 package net.fseconomy.servlets;
 
 import java.io.IOException;
@@ -16,25 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.fseconomy.data.*;
-
-/*
- * FS Economy
- * Copyright (C) 2005  Marty Bochane
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
 
 public class FSagentFSX extends HttpServlet
 {	
@@ -314,6 +314,7 @@ public class FSagentFSX extends HttpServlet
 		List currentAirport = new ArrayList();
 		List alternativeAircraft = new ArrayList();
 		String modelName = data.probeAircraft(aircraftTitle, airport, airportList, currentAirport, alternativeAircraft);
+
 		if (modelName == null)
 			result.append("<aircraftUnknown/>");
 		else
@@ -325,17 +326,13 @@ public class FSagentFSX extends HttpServlet
 		if (airportList.size() > 0)
         {
             for (Object anAirportList : airportList)
-            {
                 result.append(closeAirportToXml((Data.closeAirport) anAirportList));
-            }
         }
 
 		if (alternativeAircraft.size() > 0)
         {
             for (Object anAlternativeAircraft : alternativeAircraft)
-            {
                 result.append(aircraftToXml((AircraftBean) anAlternativeAircraft));
-            }
         }
 
 		return result.toString();
@@ -358,37 +355,27 @@ public class FSagentFSX extends HttpServlet
 		
 		// If either are null, bad data, exit
 		if (FSAircraft == null || closest == null)
-		{
 			throw new DataError("Invalid Aircraft name, or Departing ICAO received, flight aborted.");
-		}
-		
+
 		// Lets get the users current aircraft
 		AircraftBean[] aircraft = data.getAircraftForUser(user.getId());
 		
 		// If there is no rented aircraft or the aircraft is not at the same location, exit
 		if (aircraft.length == 0 || !closest.icao.equals(aircraft[0].getLocation()))
-		{
 			throw new DataError("You have no rented aircraft at " + closest.icao);
-		}
-		
+
 		// Check the aircraft name mapping to make sure we have a match, if not, exit
 		if (!data.aircraftOk(aircraft[0], FSAircraft))
-		{
 			throw new DataError(FSAircraft + " is not compatible with your rented " + aircraft[0].getMakeModel());
-		}
-		
+
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit
 		if(data.checkAllInAircraftWithOutAssigment(aircraft[0]))
-		{
 			throw new DataError(aircraft[0].getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
-		}		
-		
+
 		// Check the number of hours the user has flown, if over 30 hours, exit
 		if (data.getNumberOfHours(user.getName(), 48) > 30)
-		{
 			throw new DataError("Maximum pilot hours in a 48 hour period reached");
-		}
-		
+
 		// Lets put together our aircraft data
 		
 		// Get the aircraft data

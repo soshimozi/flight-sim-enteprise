@@ -272,7 +272,7 @@ public class FboFacilityBean implements Serializable
         for (String item1 : items)
         {
             item = item1;
-            String[] params = item.trim().split(";\\ *");
+            String[] params = item.trim().split("; *");
 
             // Name; weight; weekdays
             String name = params[0].trim();

@@ -1,4 +1,5 @@
 package net.fseconomy.data;
+
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
@@ -531,7 +532,7 @@ public class MaintenanceCycle implements Runnable
 		if (icaos == null)
 			return null;
 		
-		String items[] = icaos.toUpperCase().trim().split(",\\ *");
+		String items[] = icaos.toUpperCase().trim().split(", *");
 		
 		if (items.length == 0)
 			return null;

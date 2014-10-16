@@ -1,3 +1,22 @@
+/*
+ * FS Economy
+ * Copyright (C) 2005  Marty Bochane
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 package net.fseconomy.servlets;
 
 import java.io.File;
@@ -23,25 +42,6 @@ import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-/*
- * FS Economy
- * Copyright (C) 2005  Marty Bochane
- * 
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */ 
 
 public class UserCtl extends HttpServlet
 {
@@ -1068,7 +1068,7 @@ public class UserCtl extends HttpServlet
 
         user.setEmail(email);
         user.setDateFormat(selectedTimeZone.contains("1") ? 1 : 0);
-        user.setShowPaymentsToSelf(showPaymentsToSelf.contains("1") ? true : false);
+        user.setShowPaymentsToSelf(showPaymentsToSelf.contains("1"));
         user.setBanList(banList);
 
         data.updateUser(user);
@@ -1076,28 +1076,6 @@ public class UserCtl extends HttpServlet
         req.setAttribute("message", "Account (" + user.getName() + ") updated successfully");
     }
 
-    void updateUser(HttpServletRequest req) throws DataError
-	{
-		String user = req.getParameter("user");
-		String newuser = req.getParameter("newuser");
-		String email = req.getParameter("email");
-		String Sexposure = req.getParameter("exposure");
-		String password = req.getParameter("password");
-		int exposure = Integer.parseInt(Sexposure);
-
-		if (user == null || email == null)
-			return;
-
-		if (!user.equals(newuser))
-        {
-		    if (!data.accountNameIsUnique(newuser))
-			    throw new DataError("There is already an account with that name.");
-		}
-
-		data.updateAccount(user, newuser, email, exposure, password);
-		req.setAttribute("message", "Account (" + user + ") updated successfully");
-	}
-	
 	//This is used for both new accounts and resetting passwords!
 	void newPassword(HttpServletRequest req) throws DataError
 	{
@@ -1757,7 +1735,6 @@ public class UserCtl extends HttpServlet
 		int daysOut = Integer.parseInt(req.getParameter("daysOut"));
 		int accountToPay = Integer.parseInt(req.getParameter("accountToPay"));
 		int location = Integer.parseInt(req.getParameter("location"));
-		double price = Double.parseDouble(req.getParameter("price"));
 		String icao = req.getParameter("icao");
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
