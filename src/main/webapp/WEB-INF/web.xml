@@ -54,11 +54,6 @@
     </servlet>
 
     <servlet>
-        <servlet-name>JsonServer</servlet-name>
-        <servlet-class>net.fseconomy.servlets.jsonServlet</servlet-class>
-    </servlet>
-
-    <servlet>
         <servlet-name>Resteasy</servlet-name>
         <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
     </servlet>
@@ -81,11 +76,6 @@
     <listener>
         <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
     </listener>
-
-    <servlet-mapping>
-        <servlet-name>JsonServer</servlet-name>
-        <url-pattern>/api/*</url-pattern>
-    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>SigServer</servlet-name>

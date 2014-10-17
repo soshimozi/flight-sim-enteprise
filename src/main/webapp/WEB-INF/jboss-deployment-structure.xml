@@ -16,13 +16,14 @@
             <!--<module name="org.slf4j.impl" />-->
         <!--</exclusions>-->
 
-
         <dependencies>
             <module name="com.google.code.gson"/>
             <module name="org.apache.commons.fileupload"/>
             <module name="org.apache.commons.lang3"/>
             <module name="net.sf.ehcache"/>
             <module name="nl.captcha.simplecaptcha"/>
+            <!--<module name="org.slf4j" slot="1.7.7"/>-->
+            <!--<module name="ch.qos.logback"/>-->
 
             <system>
                 <paths>
