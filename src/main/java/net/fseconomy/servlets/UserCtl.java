@@ -73,7 +73,7 @@ public class UserCtl extends HttpServlet
 		maintenanceObject = new MaintenanceCycle(data);			
 		
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-		
+
 		if(Boolean.getBoolean("Debug"))
 		{
 			//5 minute cycles if Debug set on command line
@@ -117,7 +117,7 @@ public class UserCtl extends HttpServlet
 	{
 		Data.logger.info("UserCtl destroy() called");
 		
-		future.cancel(true);
+		future.cancel(false);
 	}
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
