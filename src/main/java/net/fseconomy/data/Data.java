@@ -2557,9 +2557,11 @@ public class Data implements Serializable
 		//get the margins
 		departMargin = fromfbo.getRepairShopMargin();
 		destMargin = tofbo.getRepairShopMargin();
-		
+
+        AircraftBean acShippingInfo = getAircraftShippingInfoByRegistration(aircraft.getRegistration())[0];
+
 		//Compute total shipping costs
-		double[] shippingcost = aircraft.getShippingCosts(1);
+		double[] shippingcost = acShippingInfo.getShippingCosts(1);
 		
 		double totaldepartcost = shippingcost[0] * (1.0+(departMargin/100.0));
 		double totaldestcost = shippingcost[1] * (1.0+(destMargin/100.0));
@@ -2592,7 +2594,7 @@ public class Data implements Serializable
 			
 			//compute the time for disassembly
 			Date date = new Date();
-			Date shippingNext = new Date( date.getTime() + (aircraft.getShippingStateDelay()*1000)); 
+			Date shippingNext = new Date( date.getTime() + (acShippingInfo.getShippingStateDelay()*1000));
 			Timestamp ts = new Timestamp(shippingNext.getTime());
 			rs.updateTimestamp("shippingStateNext", ts );
 
