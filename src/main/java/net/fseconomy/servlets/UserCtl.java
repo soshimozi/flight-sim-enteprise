@@ -425,7 +425,6 @@ public class UserCtl extends HttpServlet
 		String registration = req.getParameter("registration");
 		AircraftBean[] result = data.getAircraftByRegistration(registration);
 		AircraftBean aircraft = result[0];
-		
 
 		if (!aircraft.changeAllowed(user)) 
 			throw new DataError("Permission Denied.");
@@ -438,8 +437,8 @@ public class UserCtl extends HttpServlet
 		if (newReg != null)
 			newReg = newReg.toUpperCase();
 		
-		if (newReg != null && (newReg.contains("\"") || newReg.contains("'")))
-			throw new DataError("Single and Double Quotes are not Allowed in Registration Number");
+		if (newReg != null && !newReg.matches("^[A-Z,0-9,-]*$"))
+			throw new DataError("You can only use [0-9][A-Z] and [-] in Registration Number");
 		
 		if(newReg != null && !data.isAircraftRegistrationUnique(newReg))
 			throw new DataError("Registration already in use!");

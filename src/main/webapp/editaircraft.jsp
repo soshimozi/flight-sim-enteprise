@@ -44,6 +44,8 @@
     
 	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
 
+    <script src="scripts/jquery.min.js"></script>
+
 	<script type="text/javascript">
 		function sellNow(price)
 		{
@@ -72,6 +74,14 @@
 %>
 			document.aircraftform.submit();
 		}
+
+        $(document).ready(function()
+        {
+            $(".regCheck").keypress(function (e) {
+                if (String.fromCharCode(e.keyCode).match(/[^0-9a-zA-Z\-]/g)) return false;
+            });
+        });
+
 	</script>
 </head>
 
@@ -105,7 +115,7 @@
 %>	
 					<tbody>
 					<tr>
-						<td>New registration</td><td><input name="newreg" type="text" class="textarea" size="8" /></td>
+						<td>New registration</td><td><input name="newreg" type="text" class="textarea regCheck" size="8" /></td>
 					</tr>	
 <%
 		}
