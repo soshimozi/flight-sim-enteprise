@@ -63,9 +63,8 @@
 				var fueltype = $("#type").val();
 				var amount = $("#amount").val();
 				$.ajax({
-					type: "POST",
-					url: "api/fuelquote",
-					data:   'icao='+icao+'&fueltype='+fueltype+'&amount='+amount,
+					type: "GET",
+					url: "/rs/fuelquote/"+fueltype+'/'+amount+'/'+icao,
 					dataType: "json",
 					success: function(response){
 						$("#fuelamt").html($("#amount option:selected").text());

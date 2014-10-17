@@ -57,14 +57,13 @@
 
 		$(document).ready(function() {
 			$("#getGoodsQuote").click(function(){
-				var location = $("#icao").val();
+				var icao = $("#icao").val();
 				var fueltype = $("#goodstype").val();
 				var amount = $("#amount").val();
 				var src = $("#owner").val();
 				$.ajax({
-					type: "POST",
-					url: "api/goodsquote/buy",
-					data:   'icao='+location+'&goodstype='+fueltype+'&amount='+amount+'&src='+src,
+					type: "GET",
+					url: "/rs/goodsquote/"+fueltype+'/'+amount+'/'+icao+'/'+src,
 					dataType: "json",
 					success: function(response){
 						$("#goodsamt").html($("#amount option:selected").text());
