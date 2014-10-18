@@ -14,9 +14,8 @@
 	boolean step1 = false;
 	boolean step2 = false;
 	boolean step3 = false;
-	boolean step4 = false;
-	
-	FboBean[] departfbos = null;
+
+	FboBean[] departfbos;
 	FboBean[] destfbos = null;
 	
 	int departSvc = -1;
@@ -27,24 +26,23 @@
 	String reg = request.getParameter("registration");
 	String shipto = request.getParameter("shipTo");
 	
-	AircraftBean [] aircraft = null;
+	AircraftBean [] aircraft;
 
 	aircraft = data.getAircraftShippingInfoByRegistration(reg);
 	
 	AirportBean departairport = data.getAirport(aircraft[0].getLocation());
 	departfbos = data.getFboForRepair( departairport );
 
-	boolean isRented = aircraft[0].getUserLock() == 0 ? false : true;
-	boolean isForSale = aircraft[0].getSellPrice() == 0 ? false : true;
+	boolean isRented = aircraft[0].getUserLock() != 0;
+	boolean isForSale = aircraft[0].getSellPrice() != 0;
 	boolean hasActiveShopDepart = false;
-	boolean hasActiveShopDest = false;
-	for (int c=0; c < departfbos.length; c++) 
-	{ 
-		if(departfbos[c].isActive() && (departfbos[c].getServices() & FboBean.FBO_REPAIRSHOP) > 0 )
-		{
-			hasActiveShopDepart = true;
-		}
-	}
+	boolean hasActiveShopDest;
+
+    for (FboBean departfbo : departfbos)
+    {
+        if (departfbo.isActive() && (departfbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0)
+            hasActiveShopDepart = true;
+    }
 
 	if(isRented)
 	{
@@ -63,9 +61,9 @@
 	}	
 	else if ("step1".equals(request.getParameter("submit")))
 	{
-		if( shipto != null )
-			shipto = shipto.toUpperCase();
-			
+        if (shipto != null)
+            shipto = shipto.toUpperCase();
+
 		//check that we can find the destination airfield
 		AirportBean destairport = data.getAirport(shipto);
 		if( destairport == null )
@@ -84,13 +82,12 @@
 			destfbos = data.getFboForRepair( destairport );		
 
 			hasActiveShopDest = false;
-			for (int c=0; c < destfbos.length; c++) 
-			{ 
-				if(destfbos[c].isActive() && (destfbos[c].getServices() & FboBean.FBO_REPAIRSHOP) > 0 )
-				{
-					hasActiveShopDest = true;
-				}
-			}
+            for (FboBean destfbo : destfbos)
+            {
+                if (destfbo.isActive() && (destfbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0)
+                    hasActiveShopDest = true;
+            }
+
 			if(!hasActiveShopDest)
 			{
 				step2 = false;
@@ -106,29 +103,25 @@
 		String dest = request.getParameter("destService");
 
 		if( depart == null )
-		{
-			error = "Unable to ship aircraft as there is no active repair services available at " + aircraft[0].getLocation(); 
-		}
-		
+			error = "Unable to ship aircraft as there is no active repair services available at " + aircraft[0].getLocation();
+
 		if( dest == null )
 		{
-			if(error == null)
-				error = "Unable to ship aircraft as there is no active repair services available at " + shipto;
-			else 
-				error = error + "<br/>Unable to ship aircraft as there is no active repair services available at " + shipto;
+            if (error == null)
+                error = "Unable to ship aircraft as there is no active repair services available at " + shipto;
+            else
+                error = error + "<br/>Unable to ship aircraft as there is no active repair services available at " + shipto;
 		}
 		
 		if( depart.contains("-1"))
-		{
-			error = "You did not select a repair shop at departure!"; 
-		}
-		
+			error = "You did not select a repair shop at departure!";
+
 		if( dest.contains("-1"))
 		{
-			if(error == null)
-				error = " You did not select a repair shop at the destination!"; 
-			else 
-				error = error + "<br/>You did not select a repair shop at the destination!";
+            if (error == null)
+                error = " You did not select a repair shop at the destination!";
+            else
+                error = error + "<br/>You did not select a repair shop at the destination!";
 		}
 		
 		if( error != null )
@@ -153,8 +146,8 @@
 
 			FboBean fromfbo = data.getFbo(departSvc);
 			FboBean tofbo = data.getFbo(destSvc);
-			
-			departMargin = departSvc == 0 ?	departMargin = 25 : fromfbo.getRepairShopMargin();
+
+            departMargin = departSvc == 0 ?	departMargin = 25 : fromfbo.getRepairShopMargin();
 			destMargin = destSvc == 0 ?	destMargin = 25 : tofbo.getRepairShopMargin();
 			
 			double[] shippingcost = aircraft[0].getShippingCosts(1);
@@ -187,8 +180,7 @@
 	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
 	
 </head>
-
-
+<body>
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
 
@@ -243,7 +235,7 @@
 				<table class="form">
 					<tr><td>From</td><td><%= aircraft[0].getLocation() %></td></tr>
 					<tr><td>To</td><td><input type="text" class="textarea" name="shipTo" size="4" value=""/></td></tr>
-					<tr><td/><td/></tr>
+					<tr><td></td><td></td></tr>
 					<tr><td><input class="button" type="submit" value="Next"/></td></tr>	
 				</table>
 			</div>
@@ -270,15 +262,17 @@
 							<select name="departService" class="formselect">
 								<option class="formselect" value="-1">Please Select an FBO</option>
 <%
-				for (int c=0; c < departfbos.length; c++) 
-				{ 
-					if(departfbos[c].isActive() && (departfbos[c].getServices() & FboBean.FBO_REPAIRSHOP) > 0 )
-					{
+            for (FboBean departfbo : departfbos)
+            {
+                if (departfbo.isActive() && (departfbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0)
+                {
 %>
-								<option class="formselect" value="<%= departfbos[c].getId() %>"><%= departfbos[c].getName() + " " + departfbos[c].getSServices()  %></option>
+                                <option class="formselect"
+                                        value="<%= departfbo.getId() %>"><%= departfbo.getName() + " " + departfbo.getSServices()  %>
+                                </option>
 <%
-					} 
-				}
+                }
+            }
 %>
 							</select>
 						</td>
@@ -290,15 +284,17 @@
 							<select name="destService" class="formselect">
 								<option class="formselect" value="-1">Please Select an FBO</option>
 <%
-				for (int c=0; c < destfbos.length; c++) 
-				{ 
-					if(destfbos[c].isActive() && (destfbos[c].getServices() & FboBean.FBO_REPAIRSHOP) > 0 )
-					{
+                                for (FboBean destfbo : destfbos)
+                                {
+                                    if (destfbo.isActive() && (destfbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0)
+                                    {
 %>
-								<option class="formselect" value="<%= destfbos[c].getId() %>"><%= destfbos[c].getName() + " " + destfbos[c].getSServices()  %></option>
-<%
-					} 
-				}
+                                <option class="formselect"
+                                        value="<%= destfbo.getId() %>"><%= destfbo.getName() + " " + destfbo.getSServices()  %>
+                                </option>
+                                <%
+                                        }
+                                    }
 %>
 							</select>
 						</td>
