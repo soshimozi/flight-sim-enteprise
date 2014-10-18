@@ -2526,16 +2526,11 @@ public class Data implements Serializable
 
 			if (fbos.length == 0)
 				throw new DataError("Unable to find a repair shop!");
-			
-			Arrays.sort(fbos, (o1, o2) -> {
-                int v1 = o1.getRepairShopMargin();
-                int v2 = o2.getRepairShopMargin();
 
-                return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
-            });
+			Arrays.sort(fbos, (o1, o2) -> Integer.compare(o2.getRepairShopMargin(), o1.getRepairShopMargin()));
 			fromfbo = fbos[0]; //return the cheapest
 		}
-		
+
 		if(tofbo == null)
 		{
 			// Get a Default FBO if none is specified
@@ -2543,20 +2538,15 @@ public class Data implements Serializable
 			FboBean[] fbos = this.getFboForRepair(airport);
 
 			if (fbos.length == 0)
-				throw new DataError("Unable to find a repair shop!");	
+				throw new DataError("Unable to find a repair shop!");
 
-			Arrays.sort(fbos, (o1, o2) -> {
-                int v1 = o1.getRepairShopMargin();
-                int v2 = o2.getRepairShopMargin();
-
-                return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
-            });
+			Arrays.sort(fbos, (o1, o2) -> Integer.compare(o2.getRepairShopMargin(), o1.getRepairShopMargin()));
 			tofbo = fbos[0]; //return the cheapest
 		}
 
 		//get the margins
-		departMargin = fromfbo.getRepairShopMargin();
-		destMargin = tofbo.getRepairShopMargin();
+        departMargin = departSvc == 0 ?	departMargin = 25 : fromfbo.getRepairShopMargin();
+        destMargin = destSvc == 0 ?	destMargin = 25 : tofbo.getRepairShopMargin();
 
         AircraftBean acShippingInfo = getAircraftShippingInfoByRegistration(aircraft.getRegistration())[0];
 
@@ -6132,20 +6122,14 @@ public class Data implements Serializable
 				return;
 			
 			//Sort by owner, bank will be first and should be available
-			Arrays.sort(fbos, new Comparator<FboBean>() {
-				public int compare(FboBean o1, FboBean o2)
-				{
-					int v1 = o1.getOwner();
-					int v2 = o2.getOwner();
-					return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
-				}
-			});
+			Arrays.sort(fbos, (o1, o2) -> Integer.compare(o2.getOwner(), o1.getOwner()));
+
 			fbo = fbos[0];
 		}
 			
 		try
 		{
-			int logId = 0;
+			int logId;
 			
 			conn = dalHelper.getConnection();
 			
@@ -7283,13 +7267,16 @@ public class Data implements Serializable
 	
 	public FboBean getFbo(int id)
 	{
+        if(id == 0)
+            return null;
+
 		FboBean[] result = getFboSql("SELECT * FROM fbo WHERE id=" + id);
 		return result.length == 0 ? null : result[0];
 	}
 	
 	public FboBean[] getFboSql(String qry)
 	{
-		ArrayList<FboBean> result = new ArrayList<FboBean>();
+		ArrayList<FboBean> result = new ArrayList<>();
 
 		try
 		{
