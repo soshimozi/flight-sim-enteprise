@@ -176,6 +176,10 @@ public class UserCtl extends HttpServlet
                         updateAcct(req);
                         req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
+                    case "editUser":
+                        editUser(req);
+                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        return;
                     case "password":
                         newPassword(req);
                         req.getRequestDispatcher(returnToPage).forward(req, resp);
@@ -1073,6 +1077,32 @@ public class UserCtl extends HttpServlet
         data.updateUser(user);
 
         req.setAttribute("message", "Account (" + user.getName() + ") updated successfully");
+    }
+
+    void editUser(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (!Data.needLevel(user, UserBean.LEV_CSR) && !Data.needLevel(user, UserBean.LEV_MODERATOR))
+            throw new DataError("You do not have permission.");
+
+        String suser = req.getParameter("user");
+        String newuser = req.getParameter("newuser");
+        String email = req.getParameter("email");
+        String sExposure = req.getParameter("exposure");
+        String password = req.getParameter("password");
+
+        int exposure = Integer.parseInt(sExposure);
+        if (user == null || email == null)
+            return;
+
+        if (!suser.equals(newuser))
+        {
+            if (!data.accountNameIsUnique(newuser))
+                throw new DataError("There is already an account with that name.");
+        }
+
+        data.updateAccount(suser, newuser, email, exposure, password);
+        req.setAttribute("message", "Account (" + suser + ") updated successfully");
     }
 
 	//This is used for both new accounts and resetting passwords!
