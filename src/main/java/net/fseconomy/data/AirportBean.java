@@ -269,8 +269,8 @@ public class AirportBean implements Serializable
 					base = "airstrip";
 				else if (size < MIN_SIZE_BIG)
 					base = "small-airport";
-
-				base = "large-airport";
+                else
+				    base = "large-airport";
 		}
 
 		if (hasFbo)
