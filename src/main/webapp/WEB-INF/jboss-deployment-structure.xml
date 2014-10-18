@@ -2,9 +2,9 @@
     <deployment>
         <!-- exclude-subsystem prevents a subsystems deployment unit processors running on a deployment -->
         <!-- which gives basically the same effect as removing the subsystem, but it only affects single deployment -->
-        <!--<exclude-subsystems>-->
-            <!--<subsystem name="logging" />-->
-        <!--</exclude-subsystems>-->
+        <exclude-subsystems>
+            <subsystem name="logging" />
+        </exclude-subsystems>
         <!--<exclusions>-->
             <!--<module name="org.apache.commons.logging" />-->
             <!--<module name="org.apache.log4j" />-->
