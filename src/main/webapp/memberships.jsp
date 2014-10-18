@@ -78,7 +78,7 @@
 	<input type="hidden" name="level" />
 	<input type="hidden" name="id"/>
 	<input type="hidden" name="groupId" value="<%= groupId %>"/>
-	<input type="hidden" name="return" value="memberships.jsp?groupId=<%= groupId %>" />
+	<input type="hidden" name="returnpage" value="memberships.jsp?groupId=<%= groupId %>" />
 <div class="dataTable">		
 	<table>
 	<caption>Group memberships</caption>
