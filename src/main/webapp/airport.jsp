@@ -314,7 +314,7 @@
 			if (thisForm.dest.value == null || thisForm.dest.value =="")
 			{
 				window.alert("Please enter the ICAO of the destination airport");
-				thisForm.icaod.focus();
+				thisForm.dest.focus();
 				return false;
 			}
 		}
