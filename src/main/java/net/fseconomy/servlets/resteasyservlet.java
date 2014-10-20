@@ -3,6 +3,8 @@ package net.fseconomy.servlets;
 import net.fseconomy.data.Data;
 import net.fseconomy.util.Formatters;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -10,9 +12,13 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.Provider;
 import java.util.List;
 
 /**
@@ -22,8 +28,8 @@ import java.util.List;
  * @author gbrey@redhat.com
  *
  */
-
 @Path("/")
+@PreMatching
 public class resteasyServlet
 {
 
@@ -31,10 +37,29 @@ public class resteasyServlet
     {
     }
 
+    @RolesAllowed({"Read"})
+    @GET
+    @Path("/balance/{type}/{account}")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response getBalance(@PathParam("type") final String type, @PathParam("account") final int account)
+    {
+        //Get the selected balance
+        double amount = Data.getInstance().getPilotStatus();
+        CacheControl NoCache = new CacheControl();
+        NoCache.setNoCache(true);
+
+        return Response
+                .status(200)
+                .cacheControl(NoCache)
+                .header("Access-Control-Allow-Origin","*")
+                .entity(list).build();
+    }
+
+    @PermitAll
     @GET
     @Path("/pilotstatus")
     @Produces({ "application/json;charset=UTF-8" })
-    public Response getHelloWorldJSON()
+    public Response getPilotStatus()
     {
         //This is called A LOT.
         //The PilotStat class uses single character labels to reduce traffic.
@@ -49,6 +74,7 @@ public class resteasyServlet
                 .entity(list).build();
     }
 
+    @PermitAll
     @GET
     @Path("/fuelquote/{fueltype}/{amount}/{icao}")
     @Produces({ "application/json;charset=UTF-8" })
@@ -68,6 +94,7 @@ public class resteasyServlet
                 .entity(price).build();
     }
 
+    @PermitAll
     @GET
     @Path("/goodsquote/{goodstype}/{amount}/{icao}/{src}")
     @Produces({ "application/json;charset=UTF-8" })
