@@ -2,8 +2,12 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<%
+    Data data = (Data)application.getAttribute("data");
+
+    String returnPage = request.getRequestURI();
+%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -41,10 +45,8 @@
 
 <body>
 <jsp:include flush="true" page="top.jsp" />
+<jsp:include flush="true" page="menu.jsp"></jsp:include>
 <div id="wrapper">
-<jsp:include flush="true" page="menu.jsp">
-</jsp:include>
-
 <div class="content">
 <div class="dataTable">	
 <%
@@ -55,11 +57,11 @@
 	<input type="hidden" name="event" value="MarketFbo"/>
 	<input type="hidden" name="id">
 	<input type="hidden" name="account" value="<%= user.getId() %>"/>
-	<input type="hidden" name="return" value="marketfbo.jsp" />
+	<input type="hidden" name="returnpage" value="marketfbo.jsp" />
 
 	<table id="sortableTable0" class="sortable">
 	<caption>FBOs for sale  
-	<a href="#" onclick="gmapfs.setSize(690,535);gmapfs.setUrl('<%= response.encodeURL("gmapmarketfbo.jsp") %>');gmapfs.showPopup('gmapfs');return false;" name="gmapfs" id="gmapfs"><img src="img/wmap.gif" width="50" height="32" border="0" align="absmiddle" /></a>
+	<a href="#" onclick="gmapfs.setSize(690,535);gmapfs.setUrl('<%= response.encodeURL("gmapmarketfbo.jsp") %>');gmapfs.showPopup('gmapfs');return false;" id="gmapfs"><img src="img/wmap.gif" width="50" height="32" border="0" align="absmiddle" /></a>
 	</caption>
 	<thead>
 	<tr>
