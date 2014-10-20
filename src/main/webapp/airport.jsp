@@ -675,26 +675,24 @@
 %>
                 </td>
             </tr>
-        </table>
-    </div>
 <%
         }
 
 		int slotsAvailable = data.getAirportFboSlotsAvailable(airport.getIcao());
 		String realEstate;
 
-    if (slotsAvailable == 1)
-    {
-        realEstate = "There is " + slotsAvailable + " lot remaining for FBO construction at this airport.";
-    }
-    else if (slotsAvailable > 1)
-    {
-        realEstate = "There are " + slotsAvailable + " lots remaining for FBO construction at this airport.";
-    }
-    else
-    {
-        realEstate = "There is no room for FBO construction at this airport.";
-    }
+        if (slotsAvailable == 1)
+        {
+            realEstate = "There is " + slotsAvailable + " lot remaining for FBO construction at this airport.";
+        }
+        else if (slotsAvailable > 1)
+        {
+            realEstate = "There are " + slotsAvailable + " lots remaining for FBO construction at this airport.";
+        }
+        else
+        {
+            realEstate = "There is no room for FBO construction at this airport.";
+        }
 %>
             <tr>
 		        <td><span class="small"><i><%= realEstate %></i></span></td>
@@ -730,9 +728,10 @@
             <tr>
               <td class="footer">View detailed maps by clicking on any Airport Icon.<br/>Sort columns by clicking the header, Shift-Click to sort Multiple columns. Control-click to reset.</td>
             </tr>
-
-
-<%		AircraftBean[] aircraft;
+        </table>
+    </div>
+<%
+        AircraftBean[] aircraft;
 		AssignmentBean[] assignments;
 		GoodsBean[] goods = data.getGoodsAtAirport(airport.getIcao(), airport.getSize(), fuelPrice, jetaPrice);
 
