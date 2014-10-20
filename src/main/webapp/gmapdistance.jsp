@@ -58,7 +58,7 @@ div.infowindow-content {
 	// End -->
 	</script>
 </form>
-<font color="red"><%=depart.toUpperCase()%></font> to <font color="red"><%=dest.toUpperCase()%></font>&nbsp;&nbsp;&nbsp;&nbsp;Distance: <font color='red'><%=distance%> NM </font>&nbsp;&nbsp;&nbsp;&nbsp;Bearing: <font color='red'><%=bearing%>&#186;</font>;
+<span style="color: red"><%=depart.toUpperCase()%></span> to <span style="color: red"><%=dest.toUpperCase()%></span>&nbsp;&nbsp;&nbsp;&nbsp;Distance: <span style="color: red"><%=distance%> NM </span>&nbsp;&nbsp;&nbsp;&nbsp;Bearing: <span style="color: red"><%=bearing%>&#186;</span>;
 <div id="map" style="width: 640px; height: 480px;"></div>
   <script type="text/javascript">
     var locations = 
