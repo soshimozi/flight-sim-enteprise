@@ -33,6 +33,7 @@ import com.google.gson.Gson;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import ch.qos.logback.classic.LoggerContext;
 //import ch.qos.logback.core.util.StatusPrinter;
@@ -97,8 +98,8 @@ public class Data implements Serializable
 	
 	public static String DataFeedUrl = "";
 	public enum SimType {FSUIPC, FSX, XP}
-	
-	public static Logger logger = null;
+
+    public final static Logger logger = LoggerFactory.getLogger(Data.class);
 
 	private static Data singletonInstance = null;
 	public DALHelper dalHelper = null;
@@ -108,9 +109,8 @@ public class Data implements Serializable
 		return singletonInstance;
 	}
 	
-	public Data(Logger theLogger, DALHelper dalhelper)
+	public Data()
 	{
-		logger = theLogger;
 		// assume SLF4J is bound to logback in the current environment
 	    //LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 	    
@@ -119,7 +119,7 @@ public class Data implements Serializable
 		
 		logger.info("Data constructor called");
 
-		dalHelper = dalhelper;
+		dalHelper = DALHelper.getInstance();
 		
 		Locale.setDefault(Locale.US);
 		
@@ -249,8 +249,23 @@ public class Data implements Serializable
 		public String aircraft;
 		public String params;
 	}
-	
-	class LatLonSize
+
+    public List<LatLonCount> FlightSummaryList = new ArrayList<>();
+    public class LatLonCount
+    {
+        double a;
+        double b;
+        int c;
+
+        public LatLonCount(double latitude, double longitude, int cnt)
+        {
+            a = latitude;
+            b = longitude;
+            c = cnt;
+        }
+    }
+
+    class LatLonSize
 	{
 		double lat;
 		double lon;
@@ -4507,7 +4522,11 @@ public class Data implements Serializable
 					float value = (float)assignment.calcPay();
 					int owner = assignment.getOwner();
 					int mptTaxRate = assignment.getmptTax();
-	
+
+                    //log template jobs
+                    if(assignment.getFromTemplate() > 0)
+                        logTemplateAssignment(assignment, payAssignmentToAccount);
+
 					// Pay assignment to operator of flight
 					doPayment(owner, payAssignmentToAccount, value, PaymentBean.ASSIGNMENT, 0, -1, location.icao, aircraft[0].getRegistration(), "", false);
 
@@ -4760,7 +4779,20 @@ public class Data implements Serializable
 		return -1;	
 	}
 
-	public boolean aircraftOk(AircraftBean bean, String aircraft)
+    public void logTemplateAssignment(AssignmentBean assignment, int payee)
+    {
+        try
+        {
+            String qry = "INSERT INTO templatelog (created, expires, templateid, fromicao, toicao, pay, payee) VALUES (?,?,?,?,?,?,?)";
+            dalHelper.ExecuteUpdate(qry, assignment.getCreation(), assignment.getExpires(),assignment.getFromTemplate(), assignment.getFrom(), assignment.getTo(), assignment.calcPay(), payee);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean aircraftOk(AircraftBean bean, String aircraft)
 	{
 		boolean result = false;
 		try
@@ -9076,4 +9108,30 @@ public class Data implements Serializable
 		
 		return toList;
 	}
+
+    public List<LatLonCount> getFlightSummary()
+    {
+        List<LatLonCount> toList = new ArrayList<LatLonCount>();
+
+        try
+        {
+            Date date = new Date(System.currentTimeMillis()-(60*60*1000*24));
+
+            String qry = "select lat, lon, count from (select `to`, count(`to`) as count from ( select `to` from log where type='flight' AND  `time` > '" + Formatters.dateyyyymmddhhmmss.format(date) + "') b group by `to`) a join airports ap on ap.icao=`to`";
+            ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
+
+            while(rs.next())
+            {
+                LatLonCount llc = new LatLonCount(rs.getDouble("lat"), rs.getDouble("lon"), rs.getInt("count"));
+                toList.add(llc);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return toList;
+    }
+
 }

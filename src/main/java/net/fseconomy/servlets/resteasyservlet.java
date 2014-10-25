@@ -1,50 +1,76 @@
 package net.fseconomy.servlets;
 
 import net.fseconomy.data.Data;
+import net.fseconomy.services.serviceData;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.RestResponses;
 
 import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.*;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Provider;
 import java.util.List;
 
-/**
- * A simple REST service which is able to say hello to someone using HelloService Please take a look at the web.xml where JAX-RS
- * is enabled
- *
- * @author gbrey@redhat.com
- *
- */
 @Path("/")
 @PreMatching
 public class resteasyServlet
 {
-
-    public void init()
+    @GET
+    @Path("/account/bank/{account}")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response getBalanceBank(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account)
     {
+        serviceData.PermissionCategory category = serviceData.PermissionCategory.BANK;
+
+        if(!serviceData.hasPermission(servicekey, account, category, serviceData.PermissionSet.READ))
+            return RestResponses.ACCESS_DENIED;
+
+        //Get the selected balance response
+        return serviceData.getBalance(category, account);
     }
 
-    @RolesAllowed({"Read"})
     @GET
-    @Path("/balance/{type}/{account}")
+    @Path("/account/cash/{account}")
     @Produces({ "application/json;charset=UTF-8" })
-    public Response getBalance(@PathParam("type") final String type, @PathParam("account") final int account)
+    public Response getBalanceCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account)
     {
-        //Get the selected balance
-        double amount = Data.getInstance().getPilotStatus();
+        serviceData.PermissionCategory category = serviceData.PermissionCategory.CASH;
+
+        if(!serviceData.hasPermission(servicekey, account, category, serviceData.PermissionSet.READ))
+            return RestResponses.ACCESS_DENIED;
+
+        //Get the selected balance response
+        return serviceData.getBalance(category, account);
+    }
+
+    @PermitAll
+    @POST
+    @Path("/account/search/name")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response getAccountId(@HeaderParam("servicekey") String servicekey, @FormParam("accountname")String name)
+    {
+        return serviceData.getAccountId(name);
+    }
+
+    @PermitAll
+    @POST
+    @Path("/account/search/id")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response getAccountId(@HeaderParam("servicekey") String servicekey, @FormParam("id") final int id)
+    {
+        return serviceData.getAccountName(id);
+    }
+
+    @PermitAll
+    @GET
+    @Path("/pilotstatus")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response getPilotStatus()
+    {
+        //This is called A LOT.
+        //The PilotStat class uses single character labels to reduce traffic.
+        List<Data.PilotStatus> list = Data.getInstance().getPilotStatus();
         CacheControl NoCache = new CacheControl();
         NoCache.setNoCache(true);
 
@@ -57,13 +83,13 @@ public class resteasyServlet
 
     @PermitAll
     @GET
-    @Path("/pilotstatus")
+    @Path("/flightsummary")
     @Produces({ "application/json;charset=UTF-8" })
-    public Response getPilotStatus()
+    public Response getFlightSummary()
     {
         //This is called A LOT.
         //The PilotStat class uses single character labels to reduce traffic.
-        List<Data.PilotStatus> list = Data.getInstance().getPilotStatus();
+        List<Data.LatLonCount> list = Data.getInstance().FlightSummaryList;
         CacheControl NoCache = new CacheControl();
         NoCache.setNoCache(true);
 

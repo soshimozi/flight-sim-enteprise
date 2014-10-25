@@ -32,16 +32,23 @@ import java.math.BigDecimal;
 
 import net.fseconomy.fixes.FixedCachedRowSetImpl;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DALHelper
 {
 	private static DataSource dataSource = null;
 
-	private static Logger logger = null;
-	
-	public DALHelper(Logger theLogger)
+    public final static Logger logger = LoggerFactory.getLogger(Data.class);
+
+    //Singleton pattern
+	private static DALHelper singleton = new DALHelper();
+    public static DALHelper getInstance()
+    {
+        return singleton;
+    }
+
+	public DALHelper()
 	{
-		logger = theLogger;
 		logger.info("DALHelper constructor called");
 
         try

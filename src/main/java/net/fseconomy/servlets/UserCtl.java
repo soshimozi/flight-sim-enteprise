@@ -51,23 +51,21 @@ public class UserCtl extends HttpServlet
 	private static ScheduledFuture<?> future = null;
 	public static MaintenanceCycle maintenanceObject = null;	
 
-	public final static Logger logger = LoggerFactory.getLogger(Data.class);
+	public final static Logger logger = LoggerFactory.getLogger(UserCtl.class);
 	
 	public void init()
 	{		
 		//This is called after we know data 
 		logger.info("UserCtl init() called");
 
-		dalHelper = new DALHelper(logger);
-
 		//This provides access to the DATA class in the jsp pages
 		data = (Data) getServletContext().getAttribute("data");
 		if (data == null)
-			getServletContext().setAttribute("data", data = new Data(logger, dalHelper));
+			getServletContext().setAttribute("data", data = new Data());
 
 		data.setPathToWeb(getServletContext().getRealPath(File.separator));
 
-		FullFilter.updateFilter(dalHelper);
+		FullFilter.updateFilter(DALHelper.getInstance());
 		
 		//do last as this kicks off the timer
 		maintenanceObject = new MaintenanceCycle(data);			
@@ -83,7 +81,7 @@ public class UserCtl extends HttpServlet
 		{
 			long delay = minutesToNextHalfHour();			
 			
-			Data.logger.info("Restart: Main cycle starts in (minutes): " + delay);
+			logger.info("Restart: Main cycle starts in (minutes): " + delay);
 
 			//if delay is 4 minutes or greater then run the cycle now to update stats
 			if(delay > 3)
@@ -115,7 +113,7 @@ public class UserCtl extends HttpServlet
 	
 	public void destroy()
 	{
-		Data.logger.info("UserCtl destroy() called");
+		logger.info("UserCtl destroy() called");
 		
 		future.cancel(false);
 	}
