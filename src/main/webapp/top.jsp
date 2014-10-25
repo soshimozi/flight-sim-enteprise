@@ -2,11 +2,17 @@
 	import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
+<%
+    Data data = (Data)application.getAttribute("data");
+    boolean isTestServer = request.getRequestURL().toString().contains("8080");
+%>
 
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <div class="header">
+    <div style="background-color: lightcoral; color: #ffffff; display: <%=isTestServer ? "block" : "none"%>">
+        Test Server!!
+    </div>
 <div id="login-block">
 <%
 	if (!user.isLoggedIn())

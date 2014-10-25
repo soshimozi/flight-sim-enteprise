@@ -166,7 +166,7 @@
 <%	
 	}
 %>		
-			<li>Read the <a onclick="this.target='_blank'" href="http://www.fseconomy.net/user-guide">Manual</a></li>
+			<li>Read the <a onclick="this.target='_blank'" href="https://sites.google.com/site/fseoperationsguide/">Manual</a></li>
 			<li>Go to the <a onclick="this.target='_blank'" href="http://www.fseconomy.net">FSE Community</a>.</li>
 			<li><a href="<%= "FSeconomy.zip"%>">Download</a> the FS2004 Client </li>
 			<li> <a href="fsxclient/publish.htm" onclick="this.target='_blank'">Download</a> the FSX Client </li>
