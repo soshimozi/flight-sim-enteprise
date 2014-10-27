@@ -6,14 +6,14 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 @ApplicationPath("/rs")
-public class resteasyServletApp extends Application
+public class RestServletApp extends Application
 {
     private Set<Object> singletons = new HashSet<Object>();
     private Set<Class<?>> empty = new HashSet<Class<?>>();
 
-    public resteasyServletApp()
+    public RestServletApp()
     {
-        singletons.add(new resteasyServlet());
+        singletons.add(new RestServlet());
     }
 
     @Override

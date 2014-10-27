@@ -3,7 +3,6 @@ package net.fseconomy.servlets;
 import net.fseconomy.data.Data;
 import net.fseconomy.services.serviceData;
 import net.fseconomy.util.Formatters;
-import net.fseconomy.util.RestResponses;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
@@ -12,19 +11,22 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import static net.fseconomy.services.serviceData.*;
+import static net.fseconomy.services.common.*;
+
 @Path("/")
 @PreMatching
-public class resteasyServlet
+public class RestServlet
 {
     @GET
     @Path("/account/bank/{account}")
     @Produces({ "application/json;charset=UTF-8" })
     public Response getBalanceBank(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account)
     {
-        serviceData.PermissionCategory category = serviceData.PermissionCategory.BANK;
+        PermissionCategory category = PermissionCategory.BANK;
 
-        if(!serviceData.hasPermission(servicekey, account, category, serviceData.PermissionSet.READ))
-            return RestResponses.ACCESS_DENIED;
+        if(!hasPermission(servicekey, account, category, PermissionSet.READ))
+            return ResponseAccessDenied();
 
         //Get the selected balance response
         return serviceData.getBalance(category, account);
@@ -35,13 +37,55 @@ public class resteasyServlet
     @Produces({ "application/json;charset=UTF-8" })
     public Response getBalanceCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account)
     {
-        serviceData.PermissionCategory category = serviceData.PermissionCategory.CASH;
+        PermissionCategory category = PermissionCategory.CASH;
 
-        if(!serviceData.hasPermission(servicekey, account, category, serviceData.PermissionSet.READ))
-            return RestResponses.ACCESS_DENIED;
+        if(!hasPermission(servicekey, account, category, PermissionSet.READ))
+            return ResponseAccessDenied();
 
         //Get the selected balance response
         return serviceData.getBalance(category, account);
+    }
+
+    @POST
+    @Path("/account/withdraw/{account}")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response getWithdrawIntoCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("amount") final String amount)
+    {
+        PermissionCategory category = PermissionCategory.BANK;
+
+        if(!hasPermission(servicekey, account, category, PermissionSet.WITHDRAW))
+            return ResponseAccessDenied();
+
+        //Get the selected balance response
+        return serviceData.WithdrawIntoCash(account, new Double(amount));
+    }
+
+    @POST
+    @Path("/account/deposit/{account}")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response getDepositIntoBank(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("amount") final String amount)
+    {
+        PermissionCategory category = PermissionCategory.BANK;
+
+        if(!hasPermission(servicekey, account, category, PermissionSet.DEPOSIT))
+            return ResponseAccessDenied();
+
+        //Get the selected balance response
+        return serviceData.DepositIntoBank(account, new Double(amount));
+    }
+
+    @POST
+    @Path("/account/transfer/{account}")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response getTransferFromCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("transferto") final int transferto, @FormParam("amount") final String amount)
+    {
+        PermissionCategory category = PermissionCategory.CASH;
+
+        if(!hasPermission(servicekey, account, category, PermissionSet.TRANSFER))
+            return ResponseAccessDenied();
+
+        //Get the selected balance response
+        return serviceData.TransferCashToAccount(servicekey, account, new Float(amount), transferto);
     }
 
     @PermitAll

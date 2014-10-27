@@ -19,135 +19,165 @@
 
 package net.fseconomy.services;
 
+import static net.fseconomy.services.common.*;
+
 import net.fseconomy.data.DALHelper;
 import net.fseconomy.util.Formatters;
-import net.fseconomy.util.RestResponses;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
+import java.sql.*;
+
 
 public class serviceData
 {
-    public enum PermissionCategory
+
+    public static Response getBalance(PermissionCategory type, int account)
     {
-        CASH,
-        BANK,
-        AIRCRAFT,
-        FBO,
-        GOODS
-    }
+        double balance;
 
-    public enum PermissionSet
-    {
-        READ(1), WITHDRAW(2), DEPOSIT(4), TRANSFER(8), SELL(16), PURCHASE(32), LEASE(64);
-
-        public static final EnumSet<PermissionSet> ALL_OPTS = EnumSet.allOf(PermissionSet.class);
-
-        private final int id;
-        PermissionSet(int id) { this.id = id; }
-        public int getValue() { return id; }
-        public static List<PermissionSet> parsePermissionSet(int val)
-        {
-            List<PermissionSet> apList = new ArrayList<>();
-            for (PermissionSet ap : values())
-            {
-                if ((val & ap.getValue()) != 0)
-                    apList.add(ap);
-            }
-            return apList;
-        }
-    }
-
-    public static boolean hasPermission(String servicekey, int account, PermissionCategory check, PermissionSet required)
-    {
-        int permissions = getPermissions(servicekey, account, check);
-
-        List<PermissionSet> list = PermissionSet.parsePermissionSet(permissions);
-        for(PermissionSet val: list)
-        {
-            if (val.equals(required))
-                return true;
-        }
-
-        return false;
-    }
-
-    private static int getPermissions(String servicekey, int account, PermissionCategory check)
-    {
         try
         {
-            String qry = "SELECT sa.* FROM serviceaccess sa, serviceproviders sp WHERE sa.serviceid=sp.id AND sp.key = ? AND sa.accountid=?";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, servicekey, account);
-            if(rs.next())
-                return rs.getInt(check.name());
+            balance = getBalanceAmount(type, account);
+
+            return createSuccessResponse(200, null, null, Formatters.twoDecimals.format(balance));
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(400, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
+            return createErrorResponse(500, "System Error",  "Unable to fulfill the request.");
         }
-
-        return 0; //no permissions
     }
 
-    static ResponseContainer createResponse(String status, String error, String info, Object data)
-    {
-        ResponseContainer rc = new ResponseContainer();
-        rc.getMeta().setCode(status);
-        rc.getMeta().setError(error);
-        rc.getMeta().setInfo(info);
-        rc.setData(data);
-
-        return rc;
-    }
-
-    public static Response getBalance(PermissionCategory type, int account)
+    static double getBalanceAmount(PermissionCategory type, int account) throws SQLException
     {
         String qry = "";
-        double balance;
 
         if(type == PermissionCategory.BANK)
             qry = "SELECT bank as balance FROM accounts WHERE id = ?";
         else if(type == PermissionCategory.CASH)
             qry = "SELECT money as balance FROM accounts WHERE id = ?";
 
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, account);
+
+            if(rs.next())
+                return rs.getDouble("balance");
+
+        throw new BadRequestException("Account not found!");
+    }
+
+    static boolean checkAccountExists(int account) throws SQLException
+    {
+        String qry = "SELECT IFNULL(id, 0) FROM accounts WHERE id = ?";
+
+        return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), account);
+    }
+
+    public static Response WithdrawIntoCash(int account, double amount)
+    {
+        String qry;
+
         CacheControl NoCache = new CacheControl();
         NoCache.setNoCache(true);
 
         try
         {
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, account);
-            if(rs.next())
-            {
-                return Response.status(200)
-                        .cacheControl(NoCache)
-                        .header("Access-Control-Allow-Origin", "*")
-                        .entity(createResponse("200", null, null, Formatters.twoDecimals.format(rs.getDouble("balance"))))
-                        .build();
-            }
-            else
-            {
-                return Response.status(400)
-                        .cacheControl(NoCache)
-                        .header("Access-Control-Allow-Origin", "*")
-                        .entity(createResponse("400", "Bad Request", "No records found.", null))
-                        .build();
-            }
+            //is there enough bank balance?
+            double balance = getBalanceAmount(PermissionCategory.BANK, account);
+
+            //if not, return error
+            if(balance < amount)
+                return createErrorResponse(400, "Bad Request", "Balance less than amount. Services cannot take out loans.");
+
+            qry = "UPDATE accounts set bank = bank - ?, money = money + ? WHERE id = ?;";
+            DALHelper.getInstance().ExecuteNonQuery(qry, amount, amount, account);
+
+            return createSuccessResponse(200, null, null, "Withdrawal successful.");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(400, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
+            return createErrorResponse(500, "System Error", "Unable to fulfill the request.");
+        }
+    }
 
-            return Response
-                    .status(500)
-                    .cacheControl(NoCache)
-                    .header("Access-Control-Allow-Origin", "*")
-                    .entity(createResponse("400", "System Error", "Unable to fullfill the request.", null)).build();
+    public static Response DepositIntoBank(int account, double amount)
+    {
+        String qry;
+
+        CacheControl NoCache = new CacheControl();
+        NoCache.setNoCache(true);
+
+        try
+        {
+            //is there enough bank balance?
+            double balance = getBalanceAmount(PermissionCategory.CASH, account);
+
+            //if not, return error
+            if(balance < amount)
+                return createErrorResponse(400, "Bad Request", "Balance less than amount. Services cannot take out loans.");
+
+            qry = "UPDATE accounts set bank = bank + ?, money = money - ? WHERE id = ?;";
+            DALHelper.getInstance().ExecuteNonQuery(qry, amount, amount, account);
+
+            return createSuccessResponse(200, null, null, "Deposit successful.");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(400, "Bad Request", "No records found.");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            return createErrorResponse(500, "System Error", "Unable to fulfill the request.");
+        }
+    }
+
+    public static Response TransferCashToAccount(String servicekey, int account, float amount, int transferto)
+    {
+        CacheControl NoCache = new CacheControl();
+        NoCache.setNoCache(true);
+
+        try
+        {
+            //is there enough bank balance?
+            double balance = getBalanceAmount(PermissionCategory.CASH, account);
+
+            //if not, return error
+            if(balance < amount)
+                return createErrorResponse(400, "Bad Request", "Balance less than amount to transfer.");
+
+            //check that transferto exists
+            if(!checkAccountExists(transferto))
+                return createErrorResponse(400, "Bad Request", "Transfer account does not exist.");
+
+            int serviceid = getServiceId(servicekey);
+            String qry = "{call TransferCash(?,?,?,?,?)}";
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, account, amount, transferto, "Service: " + serviceid);
+
+            if(success)
+                return createSuccessResponse(200, null, null, "Transfer successful.");
+            else
+                return createErrorResponse(500, "System Error",  "Database error has occurred. Transaction terminated");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(400, "Bad Request", "No records found.");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            return createErrorResponse(500, "System Error", "Unable to fulfill the request.");
         }
     }
 
@@ -161,32 +191,14 @@ public class serviceData
             String qry = "SELECT id FROM accounts WHERE name = ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, name);
             if(rs.next())
-            {
-                return Response
-                        .status(200)
-                        .cacheControl(NoCache)
-                        .header("Access-Control-Allow-Origin", "*")
-                        .entity(createResponse("200", "", "", rs.getInt("id")))
-                        .build();
-            }
+                return createSuccessResponse(200, null, null, rs.getInt("id"));
             else
-            {
-                return Response.status(400)
-                        .cacheControl(NoCache)
-                        .header("Access-Control-Allow-Origin", "*")
-                        .entity(createResponse("400", "Bad Request", "No records found.", null))
-                        .build();
-            }
+                return createErrorResponse(400, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-
-            return Response
-                    .status(500)
-                    .cacheControl(NoCache)
-                    .header("Access-Control-Allow-Origin", "*")
-                    .entity(createResponse("400", "System Error", "Unable to fullfill the request.", null)).build();
+            return createErrorResponse(500, "System Error", "Unable to fulfill the request.");
         }
     }
 
@@ -200,32 +212,14 @@ public class serviceData
             String qry = "SELECT name FROM accounts WHERE id = ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, id);
             if(rs.next())
-            {
-                return Response
-                        .status(200)
-                        .cacheControl(NoCache)
-                        .header("Access-Control-Allow-Origin", "*")
-                        .entity(createResponse("200", "", "", rs.getString("name")))
-                        .build();
-            }
+                return createSuccessResponse(200, null, null, rs.getString("name"));
             else
-            {
-                return Response.status(400)
-                        .cacheControl(NoCache)
-                        .header("Access-Control-Allow-Origin", "*")
-                        .entity(createResponse("400", "Bad Request", "No records found.", null))
-                        .build();
-            }
+                return createErrorResponse(400, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-
-            return Response
-                    .status(500)
-                    .cacheControl(NoCache)
-                    .header("Access-Control-Allow-Origin", "*")
-                    .entity(createResponse("400", "System Error", "Unable to fullfill the request.", null)).build();
+            return createErrorResponse(500, "System Error",  "Unable to fulfill the request.");
         }
     }
 }

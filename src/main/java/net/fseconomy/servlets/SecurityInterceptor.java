@@ -1,11 +1,7 @@
 package net.fseconomy.servlets;
 
-import net.fseconomy.data.Data;
-import net.fseconomy.services.serviceData;
-import net.fseconomy.util.RestResponses;
-import org.jboss.resteasy.annotations.interception.ServerInterceptor;
-import org.jboss.resteasy.core.Headers;
-import org.jboss.resteasy.core.ServerResponse;
+import static net.fseconomy.services.common.*;
+
 import org.jboss.resteasy.core.interception.PostMatchContainerRequestContext;
 
 import javax.annotation.security.DenyAll;
@@ -41,12 +37,12 @@ public class SecurityInterceptor implements ContainerRequestFilter
 
         //Access denied for all
         if(method.isAnnotationPresent(DenyAll.class))
-            ctx.abortWith(RestResponses.ACCESS_FORBIDDEN);
+            ctx.abortWith(ResponseAccessDenied());
 
         //get key
         String key = ctx.getHeaders().getFirst("servicekey");
         if(key == null)
-            ctx.abortWith(RestResponses.ACCESS_DENIED);
+            ctx.abortWith(ResponseAccessDenied());
 
          //check if correct permissions for method
 
