@@ -88,6 +88,34 @@ public class RestServlet
         return serviceData.TransferCashToAccount(servicekey, account, new Float(amount), transferto);
     }
 
+    @POST
+    @Path("/aircraft/purchase/{account}")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response PurchaseAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg)
+    {
+        PermissionCategory category = PermissionCategory.AIRCRAFT;
+
+        if(!hasPermission(servicekey, account, category, PermissionSet.PURCHASE))
+            return ResponseAccessDenied();
+
+        //Get the selected balance response
+        return serviceData.PurchaseAircraft(servicekey, account, reg);
+    }
+
+    @POST
+    @Path("/aircraft/lease/{account}")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response LeaseAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("leaseto") final int leaseto)
+    {
+        PermissionCategory category = PermissionCategory.AIRCRAFT;
+
+        if(!hasPermission(servicekey, account, category, PermissionSet.LEASE))
+            return ResponseAccessDenied();
+
+        //Get the selected balance response
+        return serviceData.LeaseAircraft(servicekey, account, reg, leaseto);
+    }
+
     @PermitAll
     @POST
     @Path("/account/search/name")

@@ -2,6 +2,7 @@ package net.fseconomy.services;
 
 import net.fseconomy.data.DALHelper;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import java.sql.ResultSet;
@@ -126,4 +127,35 @@ public class common
     {
         return createErrorResponse(401, "AccessDenied", "");
     }
+
+    static double getBalanceAmount(PermissionCategory type, int account) throws SQLException
+    {
+        String qry = "";
+
+        if(type == PermissionCategory.BANK)
+            qry = "SELECT bank as balance FROM accounts WHERE id = ?";
+        else if(type == PermissionCategory.CASH)
+            qry = "SELECT money as balance FROM accounts WHERE id = ?";
+
+        ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, account);
+
+        if(rs.next())
+            return rs.getDouble("balance");
+
+        throw new BadRequestException("Account not found!");
+    }
+
+    static boolean checkAccountExists(int account) throws SQLException
+    {
+        String qry = "SELECT IFNULL(id, 0) FROM accounts WHERE id = ?";
+
+        return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), account);
+    }
+
+    static boolean hasFundsRequired(int account, float amount) throws SQLException
+    {
+        double balance = getBalanceAmount(PermissionCategory.CASH, account);
+        return balance >= amount;
+    }
+
 }

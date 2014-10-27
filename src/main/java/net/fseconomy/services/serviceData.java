@@ -21,7 +21,7 @@ package net.fseconomy.services;
 
 import static net.fseconomy.services.common.*;
 
-import net.fseconomy.data.DALHelper;
+import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
 
 import javax.ws.rs.BadRequestException;
@@ -33,7 +33,6 @@ import java.sql.*;
 
 public class serviceData
 {
-
     public static Response getBalance(PermissionCategory type, int account)
     {
         double balance;
@@ -53,30 +52,6 @@ public class serviceData
             e.printStackTrace();
             return createErrorResponse(500, "System Error",  "Unable to fulfill the request.");
         }
-    }
-
-    static double getBalanceAmount(PermissionCategory type, int account) throws SQLException
-    {
-        String qry = "";
-
-        if(type == PermissionCategory.BANK)
-            qry = "SELECT bank as balance FROM accounts WHERE id = ?";
-        else if(type == PermissionCategory.CASH)
-            qry = "SELECT money as balance FROM accounts WHERE id = ?";
-
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, account);
-
-            if(rs.next())
-                return rs.getDouble("balance");
-
-        throw new BadRequestException("Account not found!");
-    }
-
-    static boolean checkAccountExists(int account) throws SQLException
-    {
-        String qry = "SELECT IFNULL(id, 0) FROM accounts WHERE id = ?";
-
-        return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), account);
     }
 
     public static Response WithdrawIntoCash(int account, double amount)
@@ -178,6 +153,88 @@ public class serviceData
         {
             e.printStackTrace();
             return createErrorResponse(500, "System Error", "Unable to fulfill the request.");
+        }
+    }
+
+    public static Response PurchaseAircraft(String servicekey, int account, String reg)
+    {
+        try
+        {
+            AircraftBean[] aircraft = Data.getInstance().getAircraftByRegistration(reg);
+
+            //if not, return error
+            if(aircraft.length != 1)
+                return createErrorResponse(400, "Bad Request", "Registration not found.");
+
+            if(!aircraft[0].isForSale())
+                return createErrorResponse(400, "Bad Request", "Aircraft not for sale.");
+
+            if (!hasFundsRequired(account, aircraft[0].getSellPrice()))
+                return createErrorResponse(400, "Bad Request", "Balance less than amount of purchase.");
+
+            int serviceid = getServiceId(servicekey);
+            String qry = "{call PurchaseAircraft(?,?,?,?)}";
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, account, "Service: " + serviceid);
+
+            if(success)
+                return createSuccessResponse(200, null, null, "Aircraft purchase successful.");
+            else
+                return createErrorResponse(500, "System Error",  "Database error has occurred. Transaction terminated");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(400, "Bad Request", "No records found.");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            return createErrorResponse(500, "System Error",  "Unable to fulfill the request.");
+        }
+    }
+
+    public static Response LeaseAircraft(String servicekey, int account, String reg, int leaseto)
+    {
+        boolean success = false;
+        String mode = "";
+
+        try
+        {
+            AircraftBean[] aircraft = Data.getInstance().getAircraftByRegistration(reg);
+
+            //if not, return error
+            if(aircraft.length != 1)
+                return createErrorResponse(400, "Bad Request", "Registration not found.");
+
+            int serviceid = getServiceId(servicekey);
+
+            if(aircraft[0].getLessor() == 0 && aircraft[0].getOwner() == account)
+            {
+                mode = "lease";
+                String qry = "{call AircraftLease(?,?,?,?)}";
+                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, leaseto, "Lease, Service: " + serviceid);
+            }
+            else if(aircraft[0].getLessor() == account) //return lease
+            {
+                mode = "unlease";
+                String qry = "{call AircraftUnlease(?,?,?)}";
+                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, "Lease return, Service: " + serviceid);
+            }
+            else
+                return createErrorResponse(400, "Bad Request", "Account not lessor.");
+
+            if (success)
+                return createSuccessResponse(200, null, null, "Aircraft " + mode + " successful.");
+            else
+                return createErrorResponse(500, "System Error", "Database error has occurred. Transaction terminated");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(400, "Bad Request", "No records found.");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            return createErrorResponse(500, "System Error",  "Unable to fulfill the request.");
         }
     }
 
