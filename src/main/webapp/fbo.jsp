@@ -272,11 +272,10 @@
 </head>
 
 <body>
-
 <jsp:include flush="true" page="top.jsp" />
-<div id="wrapper">
 <jsp:include flush="true" page="menu.jsp" />
 
+<div id="wrapper">
 <div class="content">
 	<form method="post" action="userctl" id="fboForm">
 	<div>

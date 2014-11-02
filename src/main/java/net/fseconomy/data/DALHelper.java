@@ -32,16 +32,23 @@ import java.math.BigDecimal;
 
 import net.fseconomy.fixes.FixedCachedRowSetImpl;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DALHelper
 {
 	private static DataSource dataSource = null;
 
-	private static Logger logger = null;
-	
-	public DALHelper(Logger theLogger)
+    public final static Logger logger = LoggerFactory.getLogger(Data.class);
+
+    //Singleton pattern
+	private static DALHelper singleton = new DALHelper();
+    public static DALHelper getInstance()
+    {
+        return singleton;
+    }
+
+	public DALHelper()
 	{
-		logger = theLogger;
 		logger.info("DALHelper constructor called");
 
         try
@@ -64,8 +71,17 @@ public class DALHelper
         
         return stmt;
 	}
-	
-	public void mapParams(PreparedStatement ps, Object... args)  throws SQLException
+
+    public CallableStatement createCallableStatement(Connection conn, String qry, Object... args) throws SQLException
+    {
+        CallableStatement stmt = conn.prepareCall(qry);
+
+        // Add SQL parameters
+        mapParams(stmt, args);
+        return stmt;
+    }
+
+    public void mapParams(PreparedStatement ps, Object... args)  throws SQLException
 	{
 		if(args == null) return;
 		
@@ -92,8 +108,29 @@ public class DALHelper
 	        	 throw new SQLException("mapParams error, unhandled parameter of " + arg.getClass().toString());
 	    }
 	}
-	
-	public boolean ExecuteNonQuery(String qry, Object... args) throws SQLException
+
+    public boolean ExecuteStoredProcedureWithStatus(String qry, Object... args) throws SQLException
+    {
+        Connection conn = null;
+        CallableStatement stmt = null;
+        try
+        {
+            conn = getConnection();
+
+            stmt = createCallableStatement(conn, qry, args);
+            stmt.registerOutParameter(args.length+1, Types.TINYINT);
+            stmt.execute();
+
+            return stmt.getBoolean(args.length+1);
+        }
+        finally
+        {
+            tryClose(stmt);
+            tryClose(conn);
+        }
+    }
+
+    public boolean ExecuteNonQuery(String qry, Object... args) throws SQLException
 	{
 		Connection conn = null;
 		PreparedStatement stmt = null;

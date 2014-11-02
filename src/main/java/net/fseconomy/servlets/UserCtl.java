@@ -22,11 +22,7 @@ package net.fseconomy.servlets;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -51,23 +47,21 @@ public class UserCtl extends HttpServlet
 	private static ScheduledFuture<?> future = null;
 	public static MaintenanceCycle maintenanceObject = null;	
 
-	public final static Logger logger = LoggerFactory.getLogger(Data.class);
+	public final static Logger logger = LoggerFactory.getLogger(UserCtl.class);
 	
 	public void init()
 	{		
 		//This is called after we know data 
 		logger.info("UserCtl init() called");
 
-		dalHelper = new DALHelper(logger);
-
 		//This provides access to the DATA class in the jsp pages
 		data = (Data) getServletContext().getAttribute("data");
 		if (data == null)
-			getServletContext().setAttribute("data", data = new Data(logger, dalHelper));
+			getServletContext().setAttribute("data", data = new Data());
 
 		data.setPathToWeb(getServletContext().getRealPath(File.separator));
 
-		FullFilter.updateFilter(dalHelper);
+		FullFilter.updateFilter(DALHelper.getInstance());
 		
 		//do last as this kicks off the timer
 		maintenanceObject = new MaintenanceCycle(data);			
@@ -83,7 +77,7 @@ public class UserCtl extends HttpServlet
 		{
 			long delay = minutesToNextHalfHour();			
 			
-			Data.logger.info("Restart: Main cycle starts in (minutes): " + delay);
+			logger.info("Restart: Main cycle starts in (minutes): " + delay);
 
 			//if delay is 4 minutes or greater then run the cycle now to update stats
 			if(delay > 3)
@@ -115,7 +109,7 @@ public class UserCtl extends HttpServlet
 	
 	public void destroy()
 	{
-		Data.logger.info("UserCtl destroy() called");
+		logger.info("UserCtl destroy() called");
 		
 		future.cancel(false);
 	}
@@ -319,6 +313,15 @@ public class UserCtl extends HttpServlet
                     case "editFuelPrices":
                         doEditFuelPrices(req);
                         break;
+                    case "addServiceProviderAccess":
+                        doAddServiceProviderAccess(req);
+                        break;
+                    case "deleteServiceProviderAccess":
+                        doDeleteServiceProviderAccess(req);
+                        break;
+                    case "updateServiceProviderAccess":
+                        doUpdateServiceProviderAccess(req);
+                        break;
                 }
 
 				if(returnToPageOverride != null)
@@ -343,8 +346,73 @@ public class UserCtl extends HttpServlet
 			req.getRequestDispatcher("error.jsp").forward(req, resp);
 		}
 	}
-	
-	void doEditFuelPrices(HttpServletRequest req) throws DataError
+
+    void doUpdateServiceProviderAccess(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        String sAccount = req.getParameter("account");
+        int accountId = Integer.parseInt(sAccount);
+
+        //check if adding to the user, or a group
+        if(accountId != user.getId() && !Data.getInstance().isGroupOwner(accountId, user.getId()))
+            throw new DataError("Permission denied.");
+
+        String sServiceId = req.getParameter("service");
+        int serviceId = Integer.parseInt(sServiceId);
+
+        String cash = req.getParameter("cash-read") != null ? "READ " : "";
+        cash += req.getParameter("cash-transfer") != null ? "TRANSFER" : "";
+
+        String bank = req.getParameter("bank-read") != null ? "READ " : "";
+        bank += req.getParameter("bank-deposit") != null ? "DEPOSIT " : "";
+        bank += req.getParameter("bank-withdraw") != null ? "WITHDRAW" : "";
+
+        String aircraft = req.getParameter("aircraft-purchase") != null ? "PURCHASE " : "";
+        aircraft += req.getParameter("aircraft-transfer") != null ? "TRANSFER " : "";
+        aircraft += req.getParameter("aircraft-lease") != null ? "LEASE" : "";
+
+        HashMap<String, String> map = new HashMap<>();
+        map.put("cash", cash);
+        map.put("bank", bank);
+        map.put("aircraft", aircraft);
+
+        Data.getInstance().updateServiceProviderAccess(accountId, serviceId, map);
+    }
+
+    void doDeleteServiceProviderAccess(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        String sServiceId = req.getParameter("service");
+        int serviceId = Integer.parseInt(sServiceId);
+        String sAccount = req.getParameter("account");
+        int accountId = Integer.parseInt(sAccount);
+
+        //check if adding to the user, or a group
+        if(accountId != user.getId() && !Data.getInstance().isGroupOwner(accountId, user.getId()))
+            throw new DataError("Permission denied.");
+
+        Data.getInstance().deleteServiceProviderAccess(accountId, serviceId);
+    }
+
+    void doAddServiceProviderAccess(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        String sServiceId = req.getParameter("services");
+        int serviceId = Integer.parseInt(sServiceId);
+        String sAccount = req.getParameter("account");
+        int accountId = Integer.parseInt(sAccount);
+
+        //check if adding to the user, or a group
+        if(accountId != user.getId() && !Data.getInstance().isGroupOwner(accountId, user.getId()))
+            throw new DataError("Permission denied.");
+
+        Data.getInstance().addServiceProviderAccess(accountId, serviceId);
+    }
+
+    void doEditFuelPrices(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		

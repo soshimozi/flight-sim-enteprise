@@ -21,7 +21,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
     <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 
 </head>
 <body>
@@ -76,6 +81,11 @@
             </div>
         </form>
 	</div>
+
+    <jsp:include flush="true" page="serviceaccess.jsp">
+        <jsp:param name="returnpage" value="<%=returnToPage%>" />
+    </jsp:include>
+
 </div>
 </div>
 </body>

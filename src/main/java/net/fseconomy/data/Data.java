@@ -33,6 +33,7 @@ import com.google.gson.Gson;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //import ch.qos.logback.classic.LoggerContext;
 //import ch.qos.logback.core.util.StatusPrinter;
@@ -97,8 +98,8 @@ public class Data implements Serializable
 	
 	public static String DataFeedUrl = "";
 	public enum SimType {FSUIPC, FSX, XP}
-	
-	public static Logger logger = null;
+
+    public final static Logger logger = LoggerFactory.getLogger(Data.class);
 
 	private static Data singletonInstance = null;
 	public DALHelper dalHelper = null;
@@ -108,9 +109,8 @@ public class Data implements Serializable
 		return singletonInstance;
 	}
 	
-	public Data(Logger theLogger, DALHelper dalhelper)
+	public Data()
 	{
-		logger = theLogger;
 		// assume SLF4J is bound to logback in the current environment
 	    //LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
 	    
@@ -119,7 +119,7 @@ public class Data implements Serializable
 		
 		logger.info("Data constructor called");
 
-		dalHelper = dalhelper;
+		dalHelper = DALHelper.getInstance();
 		
 		Locale.setDefault(Locale.US);
 		
@@ -249,8 +249,23 @@ public class Data implements Serializable
 		public String aircraft;
 		public String params;
 	}
-	
-	class LatLonSize
+
+    public List<LatLonCount> FlightSummaryList = new ArrayList<>();
+    public class LatLonCount
+    {
+        double a;
+        double b;
+        int c;
+
+        public LatLonCount(double latitude, double longitude, int cnt)
+        {
+            a = latitude;
+            b = longitude;
+            c = cnt;
+        }
+    }
+
+    class LatLonSize
 	{
 		double lat;
 		double lon;
@@ -3076,7 +3091,23 @@ public class Data implements Serializable
 		return result;
 	}
 
-	public int getUserGroupIdByReadAccessKey(String key)
+    public boolean isGroupOwner(int groupid, int userid)
+    {
+        boolean result = false;
+        try
+        {
+            String qry = "SELECT (count(groupid) > 0) AS found FROM groupmembership WHERE groupid = ? AND userid = ? AND level = 'owner'";
+            result = dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), groupid, userid);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public int getUserGroupIdByReadAccessKey(String key)
 	{
 		int result = -1;
 		try
@@ -3827,7 +3858,7 @@ public class Data implements Serializable
 	
 	public void moveAssignment(UserBean user, int id, int group) throws DataError
 	{
-		UserBean[] groups = getGroupById(group);		
+		UserBean[] groups = getGroupById(group);
 		if (groups.length == 0)
 			throw new DataError("Group not found.");
 			
@@ -4507,7 +4538,11 @@ public class Data implements Serializable
 					float value = (float)assignment.calcPay();
 					int owner = assignment.getOwner();
 					int mptTaxRate = assignment.getmptTax();
-	
+
+                    //log template jobs
+                    if(assignment.getFromTemplate() > 0)
+                        logTemplateAssignment(assignment, payAssignmentToAccount);
+
 					// Pay assignment to operator of flight
 					doPayment(owner, payAssignmentToAccount, value, PaymentBean.ASSIGNMENT, 0, -1, location.icao, aircraft[0].getRegistration(), "", false);
 
@@ -4760,7 +4795,20 @@ public class Data implements Serializable
 		return -1;	
 	}
 
-	public boolean aircraftOk(AircraftBean bean, String aircraft)
+    public void logTemplateAssignment(AssignmentBean assignment, int payee)
+    {
+        try
+        {
+            String qry = "INSERT INTO templatelog (created, expires, templateid, fromicao, toicao, pay, payee) VALUES (?,?,?,?,?,?,?)";
+            dalHelper.ExecuteUpdate(qry, assignment.getCreation(), assignment.getExpires(),assignment.getFromTemplate(), assignment.getFrom(), assignment.getTo(), assignment.calcPay(), payee);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean aircraftOk(AircraftBean bean, String aircraft)
 	{
 		boolean result = false;
 		try
@@ -6021,7 +6069,7 @@ public class Data implements Serializable
 	
 	public void flyForGroup(UserBean user, int group) throws DataError
 	{
-		UserBean[] groups = getGroupById(group);		
+		UserBean[] groups = getGroupById(group);
 		if (groups.length == 0)
 			throw new DataError("Group not found.");
 	
@@ -6031,7 +6079,7 @@ public class Data implements Serializable
 				throw new DataError("Permission denied.");
 				
 			String qry = "UPDATE assignments SET pilotFee=pay*amount*distance*0.01*?, groupId = ? WHERE userlock = ? and active <> 2";
-			dalHelper.ExecuteUpdate(qry, groups[0].getDefaultPilotFee()/100.0, group, user.getId());			
+			dalHelper.ExecuteUpdate(qry, groups[0].getDefaultPilotFee()/100.0, group, user.getId());
 		} 
 		catch (SQLException e)
 		{
@@ -9034,7 +9082,7 @@ public class Data implements Serializable
 	{
 		try
 		{	
-			String qry = "SELECT y=1) as found FROM aircraft, models where aircraft.model=models.id AND fuelSystemOnly=1 AND (rentalPrice is null OR rentalPrice=0) AND registration = ? AND location = ?";
+			String qry = "SELECT (fuelSystemOnly=1) as found FROM aircraft, models where aircraft.model=models.id AND fuelSystemOnly=1 AND (rentalPrice is null OR rentalPrice=0) AND registration = ? AND location = ?";
 			boolean isAllInAircraft = dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getRegistration(), aircraft.getLocation());			
 
 			if (isAllInAircraft && !hasAllInJobInQueue(aircraft.getUserLock()))
@@ -9076,4 +9124,140 @@ public class Data implements Serializable
 		
 		return toList;
 	}
+
+    public List<LatLonCount> getFlightSummary()
+    {
+        List<LatLonCount> toList = new ArrayList<>();
+
+        try
+        {
+            Date date = new Date(System.currentTimeMillis()-(60*60*1000*24));
+
+            String qry = "select lat, lon, count from (select `to`, count(`to`) as count from ( select `to` from log where type='flight' AND  `time` > '" + Formatters.dateyyyymmddhhmmss.format(date) + "') b group by `to`) a join airports ap on ap.icao=`to`";
+            ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
+
+            while(rs.next())
+            {
+                LatLonCount llc = new LatLonCount(rs.getDouble("lat"), rs.getDouble("lon"), rs.getInt("count"));
+                toList.add(llc);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return toList;
+    }
+
+    public ServiceAccessBean getServiceProviderAccess(int serviceId, int accountId)
+    {
+        ServiceAccessBean result = null;
+
+        try
+        {
+            String qry = "SELECT sa.*, sp.servicename FROM serviceaccess sa, serviceproviders sp WHERE sa.serviceid=sp.id AND serviceId = ? AND accountId = ?;";
+            CachedRowSet rs = dalHelper.ExecuteReadOnlyQuery(qry, serviceId, accountId);
+            if(rs.next())
+                result = new ServiceAccessBean(rs);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public ServiceAccessBean[] getCurrentServiceProviderAccess(int accountId)
+    {
+        ServiceAccessBean[] result = null;
+
+        try
+        {
+            String qry = "SELECT sa.*, sp.servicename FROM serviceaccess sa, serviceproviders sp WHERE sa.serviceid=sp.id AND accountId = ?;";
+            CachedRowSet rs = dalHelper.ExecuteReadOnlyQuery(qry, accountId);
+            result = getServiceAccessArray(rs);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    ServiceAccessBean[] getServiceAccessArray(CachedRowSet rs)
+    {
+        ArrayList<ServiceAccessBean> result = new ArrayList<>();
+        try
+        {
+            while (rs.next())
+            {
+                ServiceAccessBean item = new ServiceAccessBean(rs);
+                result.add(item);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return result.toArray(new ServiceAccessBean[result.size()]);
+    }
+
+    public void updateServiceProviderAccess(int accountId, int serviceId, HashMap<String, String> map)
+    {
+        try
+        {
+            String qry = "UPDATE serviceaccess Set cash=?, bank=?, aircraft=? WHERE serviceid=? AND accountid=?;";
+            dalHelper.ExecuteUpdate(qry, map.get("cash"), map.get("bank"), map.get("aircraft"), serviceId, accountId);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void addServiceProviderAccess(int accountId, int serviceId)
+    {
+        try
+        {
+            String qry = "INSERT INTO serviceaccess (serviceid, accountid) VALUES(?, ?);";
+            dalHelper.ExecuteUpdate(qry, serviceId, accountId);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteServiceProviderAccess(int accountId, int serviceId)
+    {
+        try
+        {
+            String qry = "DELETE FROM serviceaccess WHERE serviceId = ? AND accountId = ?;";
+            dalHelper.ExecuteUpdate(qry, serviceId, accountId);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public ServiceProviderBean[] getAccountAvailableServiceProviders(int accountId)
+    {
+        ServiceProviderBean[] result = null;
+
+        try
+        {
+            String qry = "SELECT s.id, s.owner, a1.name AS ownername, s.alternate, a2.name AS alternatename, s.servicename, s.ip, s.url, s.description, s.status, s.key, notes FROM serviceproviders AS s LEFT JOIN accounts AS a1 ON owner=a1.id LEFT JOIN accounts AS a2 on alternate=a2.id LEFT JOIN serviceaccess as sa on s.id=sa.serviceId AND sa.accountId=? where s.status=1 AND sa.serviceId is null";
+            CachedRowSet crs = dalHelper.ExecuteReadOnlyQuery(qry, accountId);
+            result = getServiceProviderArray(crs);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 }

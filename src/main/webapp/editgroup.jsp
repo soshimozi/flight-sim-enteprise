@@ -2,21 +2,22 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<jsp:useBean id="group" class="net.fseconomy.data.UserBean">
-    <jsp:setProperty name="group" property="*"/>
-</jsp:useBean>
 
 <%
+    Data data = (Data)application.getAttribute("data");
     String error = null;
 
-    //System.out.println("submit param = " + request.getParameter("submit"));
-    //System.out.println("newgroup param = " + request.getParameter("newgroup"));
+    //setup return page if action used
+    String sId = request.getParameter("id");
+    String groupParam = sId != null ? "?id="+sId : "";
+    String returnPage = request.getRequestURI() + groupParam;
+
+    int groupId = Integer.parseInt(sId);
+    UserBean group = data.getGroupById(groupId)[0];
+
     if (request.getParameter("submit") == null)
     {
-        UserBean[] result = data.getGroupById(group.getId());
-        group = result[0];
         if (user.groupMemberLevel(group.getId()) < UserBean.GROUP_OWNER)
         {
             // We are not a member of the group kick out to main menu.
@@ -51,7 +52,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
     <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 
 </head>
 <body>
@@ -100,6 +106,12 @@
 	</table>
 	</form>
 	</div>
+
+    <jsp:include flush="true" page="serviceaccess.jsp">
+        <jsp:param name="groupId" value="<%=group.getId()%>" />
+        <jsp:param name="returnpage" value="<%=returnPage%>" />
+    </jsp:include>
+
 </div>
 </div>
 </body>

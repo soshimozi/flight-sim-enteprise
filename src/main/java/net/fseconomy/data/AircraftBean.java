@@ -1665,5 +1665,10 @@ public class AircraftBean implements Serializable
 	public void setHoldRental(boolean b)
 	{
 		holdRental = b;
-	}	
+	}
+
+    public boolean isForSale()
+    {
+        return sellPrice > 0;
+    }
 }

@@ -2,16 +2,18 @@ package net.fseconomy.servlets;
 
 import java.util.Set;
 import java.util.HashSet;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-public class resteasyServletApp extends Application
+@ApplicationPath("/rs")
+public class RestServletApp extends Application
 {
     private Set<Object> singletons = new HashSet<Object>();
     private Set<Class<?>> empty = new HashSet<Class<?>>();
 
-    public resteasyServletApp()
+    public RestServletApp()
     {
-        singletons.add(new resteasyServlet());
+        singletons.add(new RestServlet());
     }
 
     @Override
