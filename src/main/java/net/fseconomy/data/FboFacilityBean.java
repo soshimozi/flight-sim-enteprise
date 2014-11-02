@@ -35,7 +35,7 @@ public class FboFacilityBean implements Serializable
 	//public static final int MAX_LOWPAX_DISTANCE = 250;
 	public static final int MIN_UNITSPERTRIP_CAP_PERCENT = 50;
 
-	public static final int MAX_LOWPAX_DISTANCE = 300;
+	//public static final int MAX_LOWPAX_DISTANCE = 300;
 	
 	public static String DEFAULT_COMMODITYNAME_PASSENGERS = "Air Taxi Passenger(s)";
 	

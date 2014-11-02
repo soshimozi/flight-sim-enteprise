@@ -1,8 +1,6 @@
 package net.fseconomy.data;
 import net.fseconomy.util.Formatters;
 
-import java.text.*;
-
 public class Money
 {
 	private static short scale = 100;
@@ -55,7 +53,7 @@ public class Money
 	}
 	public long getAsLong()
 	{
-		return (long)Math.round((double)value / scale);
+		return Math.round((double)value / scale);
 	}
 	
 	// Updates the value of this object with the result

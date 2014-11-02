@@ -26,7 +26,6 @@ public class AircraftBean implements Serializable
 	public static final int FUELTYPE_100LL = 0;
 	public static final int FUELTYPE_JETA = 1;
 
-
 	String make;
 	String model;
 	String registration;
@@ -187,7 +186,7 @@ public class AircraftBean implements Serializable
 	private String TruncateRegistration(String reg)
 	{
 		if(reg == null)
-			return reg;
+			return null;
 		
 		int MAXREGISTRATIONSIZE = 20;	
 		int maxLength = (reg.length() < MAXREGISTRATIONSIZE) ? reg.length() : MAXREGISTRATIONSIZE;
@@ -198,7 +197,7 @@ public class AircraftBean implements Serializable
 	private String TruncateComment(String comment)
 	{
 		if(comment == null)
-			return comment;
+			return null;
 		
 		int MAXCOMMENTSIZE = 255;	
 		int maxLength = (comment.length() < MAXCOMMENTSIZE) ? comment.length() : MAXCOMMENTSIZE;
@@ -401,7 +400,7 @@ public class AircraftBean implements Serializable
 	
 	/**
 	 * Description: Additional maintenance cost due to aircraft age.  (Digital parsing code modified from Neal Ziring)
-	 * @param aircraft
+	 * @param aircraft AircraftBean
 	 * @return int[]
 	 */
 	public int[] getConditionPrice(AircraftBean aircraft, int type)
@@ -416,7 +415,7 @@ public class AircraftBean implements Serializable
 
        // convert the input argument to an integer
        num = acCondition;
-       i=0;
+       i = 0;
 
        // compute number of digits-1
        digits = (int)Math.floor(Math.log10(num));
@@ -525,24 +524,12 @@ public class AircraftBean implements Serializable
 	
 	public boolean changeAllowed(UserBean who)
 	{
-		if (who == null)
-			return false;
-		if (who.getId() == owner)
-			return true;
-
-        return who.groupMemberLevel(owner) >= UserBean.GROUP_STAFF;
+        return who != null && (who.getId() == owner || who.groupMemberLevel(owner) >= UserBean.GROUP_STAFF);
     }
 	
 	public boolean canAlwaysRent(UserBean who)
 	{
-		
-		if (who == null)
-			return false;
-		
-		if (who.getId() == owner)
-			return true;
-
-        return who.groupMemberLevel(owner) >= UserBean.GROUP_MEMBER;
+        return who != null && (who.getId() == owner || who.groupMemberLevel(owner) >= UserBean.GROUP_MEMBER);
     }
 	
 	public int maxPayloadWeight()
@@ -619,10 +606,9 @@ public class AircraftBean implements Serializable
 	// TBO and Condition added PRD
 	public boolean getCanFlyAssignments(ModelBean model)
     {
-        if (owner == 0)
-            return true;
+        int tbo = model.fueltype == 0 ? TBO_RECIP : TBO_JET;
 
-        return ((getHoursSinceLastCheck() < 100) && (totalEngineTime < (model.fueltype == 0 ? TBO_RECIP : TBO_JET)) && !isBroken());
+        return (owner == 0) || ((getHoursSinceLastCheck() < 100) && (totalEngineTime < tbo) && !isBroken());
     }
 	/**
 	 * Returns the brand.
@@ -1071,7 +1057,7 @@ public class AircraftBean implements Serializable
 	
 	/**
 	 * sets fuel type 0 = avgas 1 = jeta
-	 * @param FuelType
+	 * @param FuelType int
 	 */
 	public void setFuelType(int FuelType)
 	{
@@ -1106,7 +1092,7 @@ public class AircraftBean implements Serializable
 	
 	/**
 	 * Sets the aircraft shipping state change delay in seconds.
-	 * @param statedelay
+	 * @param statedelay int
 	 */
 	public void setShippingStateDelay(int statedelay)
 	{
@@ -1120,7 +1106,7 @@ public class AircraftBean implements Serializable
 	
 	/**
 	 * Sets the aircraft shipping cost per kg
-	 * @param statecostperkg
+	 * @param statecostperkg double
 	 */
 	public void setShippingCostPerKg(double statecostperkg)
 	{
@@ -1134,7 +1120,7 @@ public class AircraftBean implements Serializable
 	
 	/**
 	 * Sets the aircraft shipping cost per crate
-	 * @param statecostpercrate
+	 * @param statecostpercrate int
 	 */
 	public void setShippingCostPerCrate(int statecostpercrate)
 	{
@@ -1148,7 +1134,7 @@ public class AircraftBean implements Serializable
 	
 	/**
 	 * Sets the aircraft shipping cost for disposal
-	 * @param statecostdisposal
+	 * @param statecostdisposal int
 	 */
 	public void setShippingCostDisposal(int statecostdisposal)
 	{
@@ -1203,7 +1189,7 @@ public class AircraftBean implements Serializable
 		
 	/**
 	 * Sets the aircraft shipping state next event time.
-	 * @param date
+	 * @param date Timestamp
 	 */
 	public void setShippingStateNext(Timestamp date)
 	{
@@ -1231,7 +1217,7 @@ public class AircraftBean implements Serializable
 	
 	/**
 	 * Sets the aircraft shipping to location
-	 * @param icao
+	 * @param icao String
 	 */
 	public void setShippingTo(String icao)
 	{
@@ -1595,8 +1581,8 @@ public class AircraftBean implements Serializable
 	
 	/**
 	 * return a +/- timestamp value showing difference between two dates
-	 * @param t1
-	 * @param t2
+	 * @param t1 Date
+	 * @param t2 Date
 	 * @return String
 	 */
 	public static Timestamp diffTimestamps(Date t1, Date t2)

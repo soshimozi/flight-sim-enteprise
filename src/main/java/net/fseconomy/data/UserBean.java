@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-
 package net.fseconomy.data;
 
 import java.io.Serializable;
@@ -26,7 +25,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -145,7 +143,7 @@ public class UserBean implements Serializable
 	private String TruncateName(String name)
 	{
 		if(name == null)
-			return name;
+			return null;
 		
 		int MAXNAMESIZE = 45;	
 		int maxLength = (name.length() < MAXNAMESIZE) ? name.length() : MAXNAMESIZE;
@@ -155,7 +153,7 @@ public class UserBean implements Serializable
 	private String TruncateComment(String comment)
 	{
 		if(comment == null)
-			return comment;
+			return null;
 		
 		int MAXCOMMENTSIZE = 255;	
 		int maxLength = (comment.length() < MAXCOMMENTSIZE) ? comment.length() : MAXCOMMENTSIZE;
@@ -300,7 +298,7 @@ public class UserBean implements Serializable
 		if (memberships == null)
 			return -1;
 		
-		Data.groupMemberData data = memberships.get(new Integer(group));
+		Data.groupMemberData data = memberships.get(group);
 		
 		return data == null ? -1 : data.memberLevel;
 	}

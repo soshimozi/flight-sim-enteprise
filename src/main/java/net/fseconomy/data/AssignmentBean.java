@@ -491,6 +491,7 @@ public class AssignmentBean implements Serializable
 	{
 		if(amount < 4 && distance > 300 && ptAssignment)
 			distance = 300;
+
 		return distance;
 	}
 	

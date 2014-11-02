@@ -64,14 +64,9 @@ public class Data implements Serializable
 	public double currJetAMultiplier = 1.0;
 	
 	static final int MAX_MODEL_TITLE_LENGTH = 128;
-	static final int MAX_CONNECTION_POOL_SIZE = 5;
-	
+
 	final int MAX_FLIGHT_ASSIGNMENTS = 60;
 
-	final long MSEC_ONE_MINUTE = 60*1000;
-	final long MSEC_FIVE_MINUTES = 5*60*1000;
-	final long MSEC_TEN_MINUTES = 10*60*1000;
-	final long MSEC_THIRTY_MINUTES = 30*60*1000;
 	public long MILLISECS_PER_HOUR = (60*60*1000);
 	
 	public static final int ACCT_TYPE_ALL = 1;
