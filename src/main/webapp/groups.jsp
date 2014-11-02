@@ -151,7 +151,7 @@
 		{ 
 			if (memberLevel == UserBean.GROUP_OWNER ) 
 			{
-%>				<a class="link" href="javascript:doSubmit2(<%= id %>)">Edit</a>
+%>				<a class="link" href="editgroup.jsp?id=<%= id %>">Edit</a>
 				<a class="link" href="javascript:doSubmit(<%= id %>, 'deletegroup', <%= "'" + Converters.escapeJavaScript(name.replaceAll("\"" , "''")) + "'" %>)">Delete</a>
 <%  		} 
 			else 

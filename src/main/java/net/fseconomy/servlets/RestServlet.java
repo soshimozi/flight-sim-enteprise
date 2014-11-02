@@ -11,7 +11,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-import static net.fseconomy.services.serviceData.*;
 import static net.fseconomy.services.common.*;
 
 @Path("/")
@@ -28,7 +27,6 @@ public class RestServlet
         if(!hasPermission(servicekey, account, category, PermissionSet.READ))
             return ResponseAccessDenied();
 
-        //Get the selected balance response
         return serviceData.getBalance(category, account);
     }
 
@@ -42,7 +40,6 @@ public class RestServlet
         if(!hasPermission(servicekey, account, category, PermissionSet.READ))
             return ResponseAccessDenied();
 
-        //Get the selected balance response
         return serviceData.getBalance(category, account);
     }
 
@@ -56,7 +53,6 @@ public class RestServlet
         if(!hasPermission(servicekey, account, category, PermissionSet.WITHDRAW))
             return ResponseAccessDenied();
 
-        //Get the selected balance response
         return serviceData.WithdrawIntoCash(account, new Double(amount));
     }
 
@@ -70,7 +66,6 @@ public class RestServlet
         if(!hasPermission(servicekey, account, category, PermissionSet.DEPOSIT))
             return ResponseAccessDenied();
 
-        //Get the selected balance response
         return serviceData.DepositIntoBank(account, new Double(amount));
     }
 
@@ -84,7 +79,6 @@ public class RestServlet
         if(!hasPermission(servicekey, account, category, PermissionSet.TRANSFER))
             return ResponseAccessDenied();
 
-        //Get the selected balance response
         return serviceData.TransferCashToAccount(servicekey, account, new Float(amount), transferto);
     }
 
@@ -98,8 +92,23 @@ public class RestServlet
         if(!hasPermission(servicekey, account, category, PermissionSet.PURCHASE))
             return ResponseAccessDenied();
 
-        //Get the selected balance response
         return serviceData.PurchaseAircraft(servicekey, account, reg);
+    }
+
+    @POST
+    @Path("/aircraft/transfer/{account}")
+    @Produces({ "application/json;charset=UTF-8" })
+    public Response TransferAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("transferto") final int transferto)
+    {
+        PermissionCategory category = PermissionCategory.AIRCRAFT;
+
+        if(!hasPermission(servicekey, account, category, PermissionSet.TRANSFER))
+            return ResponseAccessDenied();
+
+        if(transferto == 0) //no transfers to bank
+            return createErrorResponse(400, "Bad Request", "No transfer account specified.");
+
+        return serviceData.TransferAircraft(servicekey, reg, transferto);
     }
 
     @POST
@@ -112,7 +121,6 @@ public class RestServlet
         if(!hasPermission(servicekey, account, category, PermissionSet.LEASE))
             return ResponseAccessDenied();
 
-        //Get the selected balance response
         return serviceData.LeaseAircraft(servicekey, account, reg, leaseto);
     }
 
@@ -143,14 +151,8 @@ public class RestServlet
         //This is called A LOT.
         //The PilotStat class uses single character labels to reduce traffic.
         List<Data.PilotStatus> list = Data.getInstance().getPilotStatus();
-        CacheControl NoCache = new CacheControl();
-        NoCache.setNoCache(true);
 
-        return Response
-                .status(200)
-                .cacheControl(NoCache)
-                .header("Access-Control-Allow-Origin","*")
-                .entity(list).build();
+        return createSuccessResponse(200, null, null, list);
     }
 
     @PermitAll
@@ -162,14 +164,8 @@ public class RestServlet
         //This is called A LOT.
         //The PilotStat class uses single character labels to reduce traffic.
         List<Data.LatLonCount> list = Data.getInstance().FlightSummaryList;
-        CacheControl NoCache = new CacheControl();
-        NoCache.setNoCache(true);
 
-        return Response
-                .status(200)
-                .cacheControl(NoCache)
-                .header("Access-Control-Allow-Origin","*")
-                .entity(list).build();
+        return createSuccessResponse(200, null, null, list);
     }
 
     @PermitAll
@@ -182,14 +178,7 @@ public class RestServlet
     {
         String price = Formatters.twoDecimals.format(Data.getInstance().quoteFuel(icao, fueltype, amount));
 
-        CacheControl NoCache = new CacheControl();
-        NoCache.setNoCache(true);
-
-        return Response
-                .status(200)
-                .cacheControl(NoCache)
-                .header("Access-Control-Allow-Origin","*")
-                .entity(price).build();
+        return createSuccessResponse(200, null, null, price);
     }
 
     @PermitAll
@@ -208,11 +197,6 @@ public class RestServlet
         CacheControl NoCache = new CacheControl();
         NoCache.setNoCache(true);
 
-        return Response
-                .status(200)
-                .cacheControl(NoCache)
-                .header("Access-Control-Allow-Origin","*")
-                .entity(price).build();
+        return createSuccessResponse(200, null, null, price);
     }
-
 }

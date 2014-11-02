@@ -3091,7 +3091,23 @@ public class Data implements Serializable
 		return result;
 	}
 
-	public int getUserGroupIdByReadAccessKey(String key)
+    public boolean isGroupOwner(int groupid, int userid)
+    {
+        boolean result = false;
+        try
+        {
+            String qry = "SELECT (count(groupid) > 0) AS found FROM groupmembership WHERE groupid = ? AND userid = ? AND level = 'owner'";
+            result = dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), groupid, userid);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public int getUserGroupIdByReadAccessKey(String key)
 	{
 		int result = -1;
 		try
@@ -3842,7 +3858,7 @@ public class Data implements Serializable
 	
 	public void moveAssignment(UserBean user, int id, int group) throws DataError
 	{
-		UserBean[] groups = getGroupById(group);		
+		UserBean[] groups = getGroupById(group);
 		if (groups.length == 0)
 			throw new DataError("Group not found.");
 			
@@ -6053,7 +6069,7 @@ public class Data implements Serializable
 	
 	public void flyForGroup(UserBean user, int group) throws DataError
 	{
-		UserBean[] groups = getGroupById(group);		
+		UserBean[] groups = getGroupById(group);
 		if (groups.length == 0)
 			throw new DataError("Group not found.");
 	
@@ -6063,7 +6079,7 @@ public class Data implements Serializable
 				throw new DataError("Permission denied.");
 				
 			String qry = "UPDATE assignments SET pilotFee=pay*amount*distance*0.01*?, groupId = ? WHERE userlock = ? and active <> 2";
-			dalHelper.ExecuteUpdate(qry, groups[0].getDefaultPilotFee()/100.0, group, user.getId());			
+			dalHelper.ExecuteUpdate(qry, groups[0].getDefaultPilotFee()/100.0, group, user.getId());
 		} 
 		catch (SQLException e)
 		{
@@ -9066,7 +9082,7 @@ public class Data implements Serializable
 	{
 		try
 		{	
-			String qry = "SELECT y=1) as found FROM aircraft, models where aircraft.model=models.id AND fuelSystemOnly=1 AND (rentalPrice is null OR rentalPrice=0) AND registration = ? AND location = ?";
+			String qry = "SELECT (fuelSystemOnly=1) as found FROM aircraft, models where aircraft.model=models.id AND fuelSystemOnly=1 AND (rentalPrice is null OR rentalPrice=0) AND registration = ? AND location = ?";
 			boolean isAllInAircraft = dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getRegistration(), aircraft.getLocation());			
 
 			if (isAllInAircraft && !hasAllInJobInQueue(aircraft.getUserLock()))
@@ -9111,7 +9127,7 @@ public class Data implements Serializable
 
     public List<LatLonCount> getFlightSummary()
     {
-        List<LatLonCount> toList = new ArrayList<LatLonCount>();
+        List<LatLonCount> toList = new ArrayList<>();
 
         try
         {
@@ -9134,4 +9150,114 @@ public class Data implements Serializable
         return toList;
     }
 
+    public ServiceAccessBean getServiceProviderAccess(int serviceId, int accountId)
+    {
+        ServiceAccessBean result = null;
+
+        try
+        {
+            String qry = "SELECT sa.*, sp.servicename FROM serviceaccess sa, serviceproviders sp WHERE sa.serviceid=sp.id AND serviceId = ? AND accountId = ?;";
+            CachedRowSet rs = dalHelper.ExecuteReadOnlyQuery(qry, serviceId, accountId);
+            if(rs.next())
+                result = new ServiceAccessBean(rs);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public ServiceAccessBean[] getCurrentServiceProviderAccess(int accountId)
+    {
+        ServiceAccessBean[] result = null;
+
+        try
+        {
+            String qry = "SELECT sa.*, sp.servicename FROM serviceaccess sa, serviceproviders sp WHERE sa.serviceid=sp.id AND accountId = ?;";
+            CachedRowSet rs = dalHelper.ExecuteReadOnlyQuery(qry, accountId);
+            result = getServiceAccessArray(rs);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    ServiceAccessBean[] getServiceAccessArray(CachedRowSet rs)
+    {
+        ArrayList<ServiceAccessBean> result = new ArrayList<>();
+        try
+        {
+            while (rs.next())
+            {
+                ServiceAccessBean item = new ServiceAccessBean(rs);
+                result.add(item);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return result.toArray(new ServiceAccessBean[result.size()]);
+    }
+
+    public void updateServiceProviderAccess(int accountId, int serviceId, HashMap<String, String> map)
+    {
+        try
+        {
+            String qry = "UPDATE serviceaccess Set cash=?, bank=?, aircraft=? WHERE serviceid=? AND accountid=?;";
+            dalHelper.ExecuteUpdate(qry, map.get("cash"), map.get("bank"), map.get("aircraft"), serviceId, accountId);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void addServiceProviderAccess(int accountId, int serviceId)
+    {
+        try
+        {
+            String qry = "INSERT INTO serviceaccess (serviceid, accountid) VALUES(?, ?);";
+            dalHelper.ExecuteUpdate(qry, serviceId, accountId);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteServiceProviderAccess(int accountId, int serviceId)
+    {
+        try
+        {
+            String qry = "DELETE FROM serviceaccess WHERE serviceId = ? AND accountId = ?;";
+            dalHelper.ExecuteUpdate(qry, serviceId, accountId);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public ServiceProviderBean[] getAccountAvailableServiceProviders(int accountId)
+    {
+        ServiceProviderBean[] result = null;
+
+        try
+        {
+            String qry = "SELECT s.id, s.owner, a1.name AS ownername, s.alternate, a2.name AS alternatename, s.servicename, s.ip, s.url, s.description, s.status, s.key, notes FROM serviceproviders AS s LEFT JOIN accounts AS a1 ON owner=a1.id LEFT JOIN accounts AS a2 on alternate=a2.id LEFT JOIN serviceaccess as sa on s.id=sa.serviceId AND sa.accountId=? where s.status=1 AND sa.serviceId is null";
+            CachedRowSet crs = dalHelper.ExecuteReadOnlyQuery(qry, accountId);
+            result = getServiceProviderArray(crs);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 }

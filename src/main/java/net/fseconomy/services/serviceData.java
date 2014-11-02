@@ -56,11 +56,6 @@ public class serviceData
 
     public static Response WithdrawIntoCash(int account, double amount)
     {
-        String qry;
-
-        CacheControl NoCache = new CacheControl();
-        NoCache.setNoCache(true);
-
         try
         {
             //is there enough bank balance?
@@ -70,7 +65,7 @@ public class serviceData
             if(balance < amount)
                 return createErrorResponse(400, "Bad Request", "Balance less than amount. Services cannot take out loans.");
 
-            qry = "UPDATE accounts set bank = bank - ?, money = money + ? WHERE id = ?;";
+            String qry = "UPDATE accounts set bank = bank - ?, money = money + ? WHERE id = ?;";
             DALHelper.getInstance().ExecuteNonQuery(qry, amount, amount, account);
 
             return createSuccessResponse(200, null, null, "Withdrawal successful.");
@@ -88,11 +83,6 @@ public class serviceData
 
     public static Response DepositIntoBank(int account, double amount)
     {
-        String qry;
-
-        CacheControl NoCache = new CacheControl();
-        NoCache.setNoCache(true);
-
         try
         {
             //is there enough bank balance?
@@ -102,7 +92,7 @@ public class serviceData
             if(balance < amount)
                 return createErrorResponse(400, "Bad Request", "Balance less than amount. Services cannot take out loans.");
 
-            qry = "UPDATE accounts set bank = bank + ?, money = money - ? WHERE id = ?;";
+            String qry = "UPDATE accounts set bank = bank + ?, money = money - ? WHERE id = ?;";
             DALHelper.getInstance().ExecuteNonQuery(qry, amount, amount, account);
 
             return createSuccessResponse(200, null, null, "Deposit successful.");
@@ -118,11 +108,8 @@ public class serviceData
         }
     }
 
-    public static Response TransferCashToAccount(String servicekey, int account, float amount, int transferto)
+    public static Response TransferCashToAccount(String serviceKey, int account, float amount, int transferto)
     {
-        CacheControl NoCache = new CacheControl();
-        NoCache.setNoCache(true);
-
         try
         {
             //is there enough bank balance?
@@ -136,7 +123,8 @@ public class serviceData
             if(!checkAccountExists(transferto))
                 return createErrorResponse(400, "Bad Request", "Transfer account does not exist.");
 
-            int serviceid = getServiceId(servicekey);
+            int serviceid = getServiceId(serviceKey);
+
             String qry = "{call TransferCash(?,?,?,?,?)}";
             boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, account, amount, transferto, "Service: " + serviceid);
 
@@ -156,7 +144,7 @@ public class serviceData
         }
     }
 
-    public static Response PurchaseAircraft(String servicekey, int account, String reg)
+    public static Response PurchaseAircraft(String serviceKey, int account, String reg)
     {
         try
         {
@@ -172,7 +160,8 @@ public class serviceData
             if (!hasFundsRequired(account, aircraft[0].getSellPrice()))
                 return createErrorResponse(400, "Bad Request", "Balance less than amount of purchase.");
 
-            int serviceid = getServiceId(servicekey);
+            int serviceid = getServiceId(serviceKey);
+
             String qry = "{call PurchaseAircraft(?,?,?,?)}";
             boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, account, "Service: " + serviceid);
 
@@ -192,10 +181,41 @@ public class serviceData
         }
     }
 
-    public static Response LeaseAircraft(String servicekey, int account, String reg, int leaseto)
+    public static Response TransferAircraft(String serviceKey, String reg, int transferto)
     {
-        boolean success = false;
-        String mode = "";
+        try
+        {
+            AircraftBean[] aircraft = Data.getInstance().getAircraftByRegistration(reg);
+
+            //if not, return error
+            if(aircraft.length != 1)
+                return createErrorResponse(400, "Bad Request", "Registration not found.");
+
+            int serviceid = getServiceId(serviceKey);
+
+            String qry = "{call AircraftTransfer(?,?,?,?)}";
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, transferto, "Transfer, Service: " + serviceid);
+
+            if (success)
+                return createSuccessResponse(200, null, null, "Aircraft transfer successful.");
+            else
+                return createErrorResponse(500, "System Error", "Database error has occurred. Transaction terminated");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(400, "Bad Request", "No records found.");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            return createErrorResponse(500, "System Error",  "Unable to fulfill the request.");
+        }
+    }
+
+    public static Response LeaseAircraft(String serviceKey, int account, String reg, int leaseto)
+    {
+        boolean success;
+        String mode;
 
         try
         {
@@ -205,7 +225,7 @@ public class serviceData
             if(aircraft.length != 1)
                 return createErrorResponse(400, "Bad Request", "Registration not found.");
 
-            int serviceid = getServiceId(servicekey);
+            int serviceid = getServiceId(serviceKey);
 
             if(aircraft[0].getLessor() == 0 && aircraft[0].getOwner() == account)
             {
@@ -240,13 +260,11 @@ public class serviceData
 
     public static Response getAccountId(String name)
     {
-        CacheControl NoCache = new CacheControl();
-        NoCache.setNoCache(true);
-
         try
         {
             String qry = "SELECT id FROM accounts WHERE name = ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, name);
+
             if(rs.next())
                 return createSuccessResponse(200, null, null, rs.getInt("id"));
             else
@@ -261,13 +279,11 @@ public class serviceData
 
     public static Response getAccountName(int id)
     {
-        CacheControl NoCache = new CacheControl();
-        NoCache.setNoCache(true);
-
         try
         {
             String qry = "SELECT name FROM accounts WHERE id = ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, id);
+
             if(rs.next())
                 return createSuccessResponse(200, null, null, rs.getString("name"));
             else
