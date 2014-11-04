@@ -1,12 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.* "
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.* "
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     boolean showFbo = request.getParameter("fboCheck")!= null;
     boolean showFuel = request.getParameter("fuelCheck") != null;
     boolean showRepair = request.getParameter("repairCheck") != null;
@@ -34,7 +35,7 @@
     if (name != null && name.equals(""))
         name = null;
 
-    AirportBean[] airports = null;
+    List<AirportBean> airports = null;
     String message = null;
 
     try
@@ -46,6 +47,7 @@
         message = "Error: " + e.getMessage();
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,19 +76,23 @@
 
 </head>
 <body text="#000080" bgcolor="#FFFFFF" background="">
+
 <%
-if (message != null) 
-{
-%>	<div class="message"><%= message %></div>
+    if (message != null)
+    {
+%>
+        <div class="message"><%= message %></div>
 <%
-}
+    }
 %>
 <form name="fboForm" id="fboForm" method="post" action="userctl">
-	<%=airports.length%> Airports found
-	<script type="text/javascript">
-		document.write('Your map data took <span id="endTime">0.0</span> seconds to load.');
-		var loopTime=setInterval("currentTime()",100);
-	</script>
+	<%=airports.size()%> Airports found
+
+<script type="text/javascript">
+    document.write('Your map data took <span id="endTime">0.0</span> seconds to load.');
+    var loopTime=setInterval("currentTime()",100);
+</script>
+
 	<br />
  	<img src="img/iconac.gif"/>&nbsp;Airport &nbsp;&nbsp;&nbsp;&nbsp;
 	<img src="img/icondest.gif"/>&nbsp;Services Available &nbsp;&nbsp;&nbsp;&nbsp;
@@ -102,25 +108,25 @@ if (message != null)
         [
 <%
 
-for (int c=0; c < airports.length; c++)
-{
-	AirportBean airport = data.getAirport(airports[c].getIcao());
-	double lat = airport.getLat();
-	double lon = airport.getLon();
-	String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
-	
-	boolean hasServices = airport.hasServices(data);
-	boolean hasGoodsForSale = airport.hasGoodsForSale(data);
-	
-	int iconToUse = hasGoodsForSale ? 2 : hasServices ? 1 : 0; 
-	StringBuilder sb = new StringBuilder();
-	sb.append("<div class=\"infowindow-content\">");
-	sb.append(airportLink);
-	sb.append("</div>");
+    for (AirportBean airport : airports)
+    {
+        double lat = airport.getLat();
+        double lon = airport.getLon();
+
+        String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
+
+        boolean hasServices = airport.hasServices(data);
+        boolean hasGoodsForSale = airport.hasGoodsForSale(data);
+
+        int iconToUse = hasGoodsForSale ? 2 : hasServices ? 1 : 0;
+        StringBuilder sb = new StringBuilder();
+        sb.append("<div class=\"infowindow-content\">");
+        sb.append(airportLink);
+        sb.append("</div>");
 %>
 			[<%=lat%>, <%=lon%>, <%=iconToUse%>, '<%=sb.toString()%>'], 
 <%
-}
+    }
 %>
         ];
 

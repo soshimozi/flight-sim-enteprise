@@ -2,20 +2,20 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.* "
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="template" class="net.fseconomy.data.TemplateBean">
-	<jsp:setProperty name="template" property="*"/>
+    <jsp:setProperty name="template" property="*"/>
 </jsp:useBean>
-<% 
-	if (!Data.needLevel(user, UserBean.LEV_MODERATOR)) 
+
+<%
+    Data data = (Data)application.getAttribute("data");
+
+	if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
 	{
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+		out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
 		return; 
 	}
-
 	String error = null;
 
 	if (request.getParameter("submit") == null)
@@ -31,8 +31,7 @@
 		} 
 		else
 		{
-			TemplateBean[] result = data.getTemplateById(template.getId());
-			template = result[0];
+			template = data.getTemplateById(template.getId());
 		}
 	} 
 	else if (error == null)
@@ -41,7 +40,7 @@
 		{
 			data.updateTemplate(template, user);
 %>
-			<jsp:forward page="templates.jsp"></jsp:forward>
+			<jsp:forward page="/admin/templates.jsp"></jsp:forward>
 <%		
 		} 
 		catch (DataError e)
@@ -68,6 +67,7 @@
 		return result.toString();
 	}
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,12 +77,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <% 	
@@ -96,7 +98,7 @@
 	int keepAlive = template.getTargetKeepAlive();
 %>
 	<div class="form" style="width: 500px">
-		<form method="post" action="edittemplate.jsp">
+		<form method="post" action="/admin/templateedit.jsp">
 			<input type="hidden" name="submit" value="true"/>
 			<input type="hidden" name="event" value="editTemplate"/>
 			<input type="hidden" name="id" value="<%= template.getId() %>"/>

@@ -1,18 +1,20 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.* "
+        import="java.util.List, net.fseconomy.data.* "
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="airport" class="net.fseconomy.data.AirportBean">
-	<jsp:setProperty name="airport" property="icao"/>
+    <jsp:setProperty name="airport" property="icao"/>
 </jsp:useBean>
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	String icao="";
 	String icaod="";
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,13 +22,13 @@
 	<meta name="GENERATOR" content="IBM WebSphere Studio" />
 	<meta http-equiv="Content-Style-Type" content="text/css" />
 	
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 	
 	<title>FS Economy Terminal</title>
 
 
-	<script src="scripts/AnchorPosition.js"></script>
-	<script src="scripts/PopupWindow.js"></script>
+	<script src="/scripts/AnchorPosition.js"></script>
+	<script src="/scripts/PopupWindow.js"></script>
 
 	<script type="text/javascript">
 		var gmapfbo = new PopupWindow();
@@ -49,33 +51,36 @@
 		
 		}
 	</script>
-</head>
 
+</head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp">
 	<jsp:param name="open" value="fbo"/>
 </jsp:include>
+
 <%
 	String state = null;
 	String airports = null;
-	String[] noDupeStates = null;
-	String[] noDupeCountries = null;
+	List<String> noDupeStates = null;
+	List<String> noDupeCountries = null;
 	
-	String[] regions = data.getSearchRegions();
+	List<String> regions = data.getSearchRegions();
 	
 	try
 	{
-		noDupeStates = data.getDistinctData("state", "airports");
+		noDupeStates = data.getDistinctColumnData("state", "airports");
 	} catch (DataError e)
 	{
 %>
 		<div class="error"><%= e.getMessage() %></div>
 <%
 	}
+
 	try
 	{
-		noDupeCountries = data.getDistinctData("country", "airports");
+		noDupeCountries = data.getDistinctColumnData("country", "airports");
 	} catch (DataError e)
 	{
 %>
@@ -110,20 +115,26 @@
 				In Country: 
 				<select name="country" class="formselect">
 					<option class="formselect" value=""></option>
-					<%
-					for (int c=0; c< noDupeCountries.length; c++)
-					{ %>
-					<option class="formselect" value="<%= noDupeCountries[c]%>"><%= noDupeCountries[c]%></option>
-					<%}%>		
+<%
+	for (String country : noDupeCountries)
+	{
+%>
+					<option class="formselect" value="<%= country %>"><%= country %></option>
+<%
+    }
+%>
 				</select>
 				&nbsp;State:
 				<select name="state" class="formselect">
 					<option class="formselect" value=""></option>
-					<%
-					for (int c=0; c< noDupeStates.length; c++)
-					{ %>
-					<option class="formselect" value="<%= noDupeStates[c]%>"><%= noDupeStates[c]%></option>
-					<%}%>		
+<%
+	for (String states : noDupeStates)
+	{
+%>
+					<option class="formselect" value="<%= states %>"><%= states %></option>
+<%
+    }
+%>
 				</select>
 			</div>
 			<div class="formgroup">
@@ -131,10 +142,10 @@
 				<select name="region" class="formselect">
 				    <option value=""></option>
 <%      
-		for (int c=0; c< regions.length; c++) 
+		for (String region : regions)
 		{
 %>
-					<option value="<%= regions[c]%>"><%= regions[c]%></option>
+					<option value="<%= region %>"><%= region %></option>
 <%      
 		}
 %>

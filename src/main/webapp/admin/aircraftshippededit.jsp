@@ -1,16 +1,17 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     //check that we have right permissions, toss to index if not
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
@@ -23,14 +24,13 @@
 
         reassemToFrom = Integer.parseInt(request.getParameter("reassemtofrom"));
 
-        AircraftBean[] ac = data.getAircraftByRegistration(reg);
-
         if( reassemToFrom == 0 )
             data.finalizeAircraftShipment(reg, true, true);   // process aircraft back to its original location
         else
             data.finalizeAircraftShipment(reg, false, true); // process aircraft back to the shipped to location
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,13 +40,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/AnchorPosition.js"></script>
-    <script src="scripts/PopupWindow.js"></script>
-    <script type='text/javascript' src='scripts/common.js'></script>
-    <script type='text/javascript' src='scripts/css.js'></script>
-    <script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>
+    <script src="/scripts/AnchorPosition.js"></script>
+    <script src="/scripts/PopupWindow.js"></script>
+    <script type='text/javascript' src='/scripts/common.js'></script>
+    <script type='text/javascript' src='/scripts/css.js'></script>
+    <script type='text/javascript' src='/scripts/standardista-table-sorting.js'></script>
     <script type="text/javascript">
 
         function doSubmit(id)
@@ -78,13 +78,14 @@
 </head>
 
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<div id="wrapper">
-<jsp:include flush="true" page="menu.jsp" />
 
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
+<div id="wrapper">
 <div class="content">
 <div class="dataTable">	
-	<form method="post" action="admineditshippedaircraft.jsp" name="aircraftForm">
+	<form method="post" action="/admin/aircraftshippededit.jsp" name="aircraftForm">
 	<input type="hidden" name="submit" value="true"/>
 	
 	<table id="sortableTableAC0" class="sortable">
@@ -108,55 +109,52 @@
 	<tbody>
 <%
 	// Get all currently shipped aircraft for display
-	AircraftBean[] aircraft = data.getShippedAircraft();
+	List<AircraftBean> aircraftList = data.getShippedAircraft();
 	
-	for (int c=0; c < aircraft.length; c++)
+	for (AircraftBean aircraft : aircraftList)
 	{
-		boolean shipped;
-	
-    	ModelBean[] Models = data.getModelById(aircraft[c].getModelId());
-    	UserBean ownerbean = data.getAccountById(aircraft[c].getOwner());
-    	UserBean shipbybean = data.getAccountById(aircraft[c].getShippedBy());
+    	UserBean ownerbean = data.getAccountById(aircraft.getOwner());
+    	UserBean shipbybean = data.getAccountById(aircraft.getShippedBy());
 %>
-	<tr <%= Data.oddLine(c) %>>
+	<tr>
 
-	<td><a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft[c].getRegistration()) %>"><%= aircraft[c].getRegistration() %></a>
+	<td><a class="normal" href="<%= response.encodeURL("/aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>"><%= aircraft.getRegistration() %></a>
 <% 
-		if (aircraft[c].isBroken())
+		if (aircraft.isBroken())
         {
 %>              
-        	<img src='img/repair.gif' border = 0 align = 'absmiddle'>
+        	<img src='../img/repair.gif' border = 0 align = 'absmiddle'>
 <%
 		} 
 %>    
     </td>
-	<td><%= aircraft[c].getMakeModel() %></td>
+	<td><%= aircraft.getMakeModel() %></td>
 	<td>
 <% 		
-		if (aircraft[c].getLocation() != null) 
+		if (aircraft.getLocation() != null) 
 		{ 
 %>
-	    	<a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft[c].getLocation()) %>"><%= aircraft[c].getSLocation() %></a>
+	    	<a class="normal" href="<%= response.encodeURL("/airport.jsp?icao=" + aircraft.getLocation()) %>"><%= aircraft.getSLocation() %></a>
 <%		} 
 		else 
 		{ 
 %>
-		    <%= aircraft[c].getSLocation() %>
+		    <%= aircraft.getSLocation() %>
 <%
 		}
 %>	
 	</td>
 	<td><%= ownerbean.getName() %></td>
-	<td><%= aircraft[c].getShippingStateString() %></td>
-	<td><%= aircraft[c].getShippingState() == 1 || aircraft[c].getShippingState() == 3 ? Formatters.dateyyyymmddhhmmzzz.format(aircraft[c].getShippingStateNext()) : "N/A" %></td>
+	<td><%= aircraft.getShippingStateString() %></td>
+	<td><%= aircraft.getShippingState() == 1 || aircraft.getShippingState() == 3 ? Formatters.dateyyyymmddhhmmzzz.format(aircraft.getShippingStateNext()) : "N/A" %></td>
 	<td><%= shipbybean.getName() %></td>
-    <td><%= aircraft[c].getShippingTo() %></td>
+    <td><%= aircraft.getShippingTo() %></td>
 	
 		<td>
 		<select name="Actionbox" class = "formselect" onchange = "doSubmit3(this)" >
 		<option value="0">Select Action</option>
-		<option value="<%= response.encodeURL("admineditshippedaircraft.jsp?registration=" + aircraft[c].getRegistration() + "&reassemtofrom=0") %>">Reassemble at Depart</option>
-		<option value="<%= response.encodeURL("admineditshippedaircraft.jsp?registration=" + aircraft[c].getRegistration() + "&reassemtofrom=1") %>">Reassemble at Dest</option>
+		<option value="<%= response.encodeURL("/admin/aircraftshippededit.jsp?registration=" + aircraft.getRegistration() + "&reassemtofrom=0") %>">Reassemble at Depart</option>
+		<option value="<%= response.encodeURL("/admin/aircraftshippededit.jsp?registration=" + aircraft.getRegistration() + "&reassemtofrom=1") %>">Reassemble at Dest</option>
 		</select>	
 		</td>
 	</tr>

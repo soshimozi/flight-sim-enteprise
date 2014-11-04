@@ -1,15 +1,17 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.*, java.text.*, net.fseconomy.data.*, java.net.*"%>
+        import="java.text.*, net.fseconomy.data.*, java.net.*"
+ %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     String sGroup = request.getParameter("groupId");
 
-    String groupName = "";
-    String mapViewer = "";
+    String groupName;
+    String mapViewer;
     String selector;
     boolean groupPage = sGroup != null;
     SimpleDateFormat dateFormat = user.getDateFormat();
@@ -20,16 +22,18 @@
     {
         selector = "pilot " + user.getName();
         mapViewer = "pilot=" + user.getName();
-    } else
+    }
+    else
     {
         groupId = Integer.parseInt(sGroup);
-        UserBean[] group = data.getGroupById(groupId);
-        if (group.length > 0)
-            groupName = group[0].getName();
+        UserBean group = data.getGroupById(groupId);
+
+        groupName = group.getName();
         selector = "group " + groupName;
-        mapViewer = "group=" + group[0].getId();
+        mapViewer = "group=" + group.getId();
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,46 +43,110 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body class="yui-skin-sam">
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
-<div id="wrapper">
 
+<jsp:include flush="true" page="top.jsp" />
+
+
+<div id="wrapper">
 <div class="content">
 	<div id="panel">
 		<div class="hd"></div>
 		<div class="bd">
 			<table class="flightLog">
 			<tbody>
-				<tr><td class="logHead" id="logDate"></td><td class="logHead cost" id="logFromTo"></td></tr>
-				<tr><td class="space"></td><td></td></tr>
-				<tr><td class="type">Income</td><td class="cost" id="logIncome"></td></tr>
-				<tr><td class="space"></td><td></td></tr>
-				<tr><td class="type">Rental</td><td class="cost"></td></tr>
-				<tr><td class="type indent">Amount</td><td class="cost" id="logRentalUnits"></td></tr>
-				<tr><td class="type indent">Cost per unit</td><td class="cost ul" id="logRentalPrice"></td></tr>
-				<tr><td class="type">Total rental cost</td><td class="cost total" id="logRentalCost"></td></tr>
-				<tr><td class="space"></td><td></td></tr>
-				<tr><td class="type">Additional cost</td><td class="cost"></td></tr>
-				<tr><td class="type indent">Fuel</td><td class="cost" id="logFuelCost"></td></tr>
-				<tr><td class="type indent">Landing Fee</td><td class="cost" id="logLandingFee"></td></tr>
 				<tr>
-				  <td class="type indent">Additional Crew </td>
-				  <td class="cost" id="logCrewCost"></td></tr>
+                    <td class="logHead" id="logDate"></td>
+                    <td class="logHead cost" id="logFromTo"></td>
+                </tr>
 				<tr>
-				  <td class="type indent">Ground Crew Fee</td><td class="cost ul" id="logFboAssignmentFee"></td></tr>
-				<tr><td class="type">Total additional cost</td><td class="cost total" id="logAdditionalCost"></td></tr>
-				<tr><td class="space"></td><td></td></tr>
-				<tr><td class="type">Distance bonus</td><td class="cost total" id="logBonus"></td></tr>	
-				<tr class="total"><td class="type">Earnings this flight</td><td class="cost total" id="logTotal"></td></tr>
+                    <td class="space"></td>
+                    <td></td>
+                </tr>
+				<tr>
+                    <td class="type">Income</td>
+                    <td class="cost" id="logIncome"></td>
+                </tr>
+				<tr>
+                    <td class="space"></td>
+                    <td></td>
+                </tr>
+				<tr>
+                    <td class="type">Rental</td>
+                    <td class="cost"></td>
+                </tr>
+				<tr>
+                    <td class="type indent">Amount</td>
+                    <td class="cost" id="logRentalUnits"></td>
+                </tr>
+				<tr>
+                    <td class="type indent">Cost per unit</td>
+                    <td class="cost ul" id="logRentalPrice"></td>
+                </tr>
+				<tr>
+                    <td class="type">Total rental cost</td>
+                    <td class="cost total" id="logRentalCost"></td>
+                </tr>
+				<tr>
+                    <td class="space"></td>
+                    <td></td>
+                </tr>
+				<tr>
+                    <td class="type">Additional cost</td>
+                    <td class="cost"></td>
+                </tr>
+				<tr>
+                    <td class="type indent">Fuel</td>
+                    <td class="cost" id="logFuelCost"></td>
+                </tr>
+				<tr>
+                    <td class="type indent">Landing Fee</td>
+                    <td class="cost" id="logLandingFee"></td>
+                </tr>
+				<tr>
+				    <td class="type indent">Additional Crew </td>
+				    <td class="cost" id="logCrewCost"></td>
+                </tr>
+				<tr>
+				    <td class="type indent">Ground Crew Fee</td>
+                    <td class="cost ul" id="logFboAssignmentFee"></td>
+                </tr>
+				<tr>
+                    <td class="type">Total additional cost</td>
+                    <td class="cost total" id="logAdditionalCost"></td>
+                </tr>
+				<tr>
+                    <td class="space"></td>
+                    <td></td>
+                </tr>
+				<tr>
+                    <td class="type">Distance bonus</td>
+                    <td class="cost total" id="logBonus"></td>
+                </tr>
+				<tr class="total">
+                    <td class="type">Earnings this flight</td>
+                    <td class="cost total" id="logTotal"></td>
+                </tr>
 		
-				<tr><td class="space"></td><td></td></tr>
-				<tr id="group1"><td class="type total" id="logGroupName"></td><td class="cost total" id="logPaidToGroup"></td></tr>
-				<tr id="group2"><td class="type total">Paid to pilot</td><td class="cost total" id="logPaidToPilot"></td></tr>
-				<tr><td class="space"></td><td></td></tr>
+				<tr>
+                    <td class="space"></td>
+                    <td></td>
+                </tr>
+				<tr id="group1">
+                    <td class="type total" id="logGroupName"></td>
+                    <td class="cost total" id="logPaidToGroup"></td>
+                </tr>
+				<tr id="group2">
+                    <td class="type total">Paid to pilot</td>
+                    <td class="cost total" id="logPaidToPilot"></td>
+                </tr>
+				<tr>
+                    <td class="space"></td>
+                    <td></td>
+                </tr>
 		
 			</tbody>
 			</table>
@@ -89,8 +157,12 @@
 	String resultElement = groupPage ? "groupLog" : "userLog";
 %>
 	<h3>All flights for <%= selector %></h3>
-	<div id="dataTable"></div>
-	<div id="paging"></div>
+	<div id="dataTable">
+
+	</div>
+	<div id="paging">
+
+	</div>
 	<a class="link" href="javascript:void(window.open('<%= response.encodeURL("logviewer.jsp?" + mapViewer) %>','LogViewer','status=no,toolbar=n,height=750,width=680'))">[View maps]</a>
 	<script type="text/javascript">
 		var myPanel = new YAHOO.widget.Panel("panel", {

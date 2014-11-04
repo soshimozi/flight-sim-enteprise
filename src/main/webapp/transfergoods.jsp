@@ -1,13 +1,14 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.* "
+        import="net.fseconomy.data.*, java.util.List"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="goods" class="net.fseconomy.data.GoodsBean" scope="session" />
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	String fromICAO = request.getParameter("fromICAO");
 	int owner = Integer.parseInt(request.getParameter("owner"));
 	int commodityId = Integer.parseInt(request.getParameter("commodityId"));
@@ -17,13 +18,13 @@
 	UserBean owneraccount = null;
 	owneraccount = data.getAccountById(owner);
 	
-	GoodsBean goodsbean[] = data.getGoodsForAccountAvailable(owner);
+	List<GoodsBean> goodslist = data.getGoodsForAccountAvailable(owner);
 	
-	int gb = -1;
-	for(int i=0; i<goodsbean.length; i++)
+	GoodsBean gb = null;
+	for(GoodsBean good : goodslist)
 	{
-		if(goodsbean[i].getType() == commodityId && goodsbean[i].getLocation().equals(fromICAO))
-			gb = i;
+		if(good.getType() == commodityId && good.getLocation().equals(fromICAO))
+			gb = good;
 	}		
 	
 	String buyer = request.getParameter("buyer");
@@ -33,7 +34,7 @@
 		error = "You must select an account to transfer too.";
 	else if( amount != null && !amount.matches("[0-9]+"))
 		error = "Amount to transfer Invalid";		
-	else if( amount != null && (Integer.parseInt(amount) > goodsbean[gb].getAmount()))
+	else if( amount != null && (Integer.parseInt(amount) > gb.getAmount()))
 		error = "Amount entered > amount available";
 	else if( buyer == null && "true".equals(request.getParameter("submit")) )
 		error = "You must select an account to transfer too.";
@@ -41,7 +42,7 @@
 	if( "true".equals(request.getParameter("submit")) && error == null)
 	{					
 
-		if( !goodsbean[gb].changeAllowed(owneraccount) )
+		if( !gb.changeAllowed(owneraccount) )
 		{
 			error = "Permission denied";
 		}
@@ -61,8 +62,6 @@
 			}	
 		}	
 	}
-	
-	UserBean Accounts[] = data.getExposedAccounts();
 %>
 
 <!DOCTYPE html>
@@ -74,12 +73,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css" />
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-	<script src="scripts/jquery.min.js"></script>
-	<script src="scripts/jquery-ui.min.js"></script>
-	<script src="scripts/AutoComplete.js"></script>
+	<script src="/scripts/jquery.min.js"></script>
+	<script src="/scripts/jquery-ui.min.js"></script>
+	<script src="/scripts/AutoComplete.js"></script>
 
 	<script type="text/javascript">
 	
@@ -92,8 +91,10 @@
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 	<div class="content">
 <%
@@ -113,10 +114,10 @@
 			  	<input type="hidden" name="commodityId" value="<%=commodityId%>"/>
 			  	<input type="hidden" name="fromICAO" value="<%=fromICAO%>"/>
 			
-				<strong>Goods Type:</strong> <%=goodsbean[gb].getCommodity() %>
+				<strong>Goods Type:</strong> <%=gb.getCommodity() %>
 			  	<br />
 			  	<br />
-			  	<strong>Amount available:</strong> <%=goodsbean[gb].getAmount() %>
+			  	<strong>Amount available:</strong> <%=gb.getAmount() %>
 			  	<br />
 			  	<br />
 				Amount to transfer: <input type="text" class="textarea" name="amount" size="10" value=""/>

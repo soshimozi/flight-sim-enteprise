@@ -1,18 +1,20 @@
 <%@ page language="java"
-	import="net.fseconomy.data.*"
+         contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.List, net.fseconomy.data.*"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
-<%	
+<%
+    Data data = (Data)application.getAttribute("data");
+
 	String returnPage =  request.getHeader("referer");
 
 	int facilityId = Integer.parseInt(request.getParameter("facilityId"));		
 	FboFacilityBean facility = data.getFboFacility(facilityId);
 
 	String error = null;
-	FboFacilityBean[] renters = null;
+	List<FboFacilityBean> renters = null;
 	FboFacilityBean landlord = null;
 	FboBean fbo = null;
 	AirportBean airport = null;
@@ -44,6 +46,7 @@
 		error = "Permission denied.";
 	}
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,7 +56,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 	
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />	
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
@@ -142,7 +145,7 @@
 				<td colspan="3"><i><span class="small">This is global. If unchecked, no renters will be able to renew.</span></i></td>
 			</tr>
 <%		
-		if (renters.length > 0)
+		if (renters.size() > 0)
 		{
 %>			
 			<tr>
@@ -157,19 +160,19 @@
 				<td>Carrier, Commodity</td>
 			</tr>
 <%			
-			for (int i = 0; i < renters.length; i++)
+			for (FboFacilityBean renter : renters)
 			{
 %>			
 			<tr>
 				<td>
-					<input type="hidden" name="pr_<%= renters[i].getId() %>_facilityId" value="<%= renters[i].getId() %>"/>
-					<input name="pr_<%= renters[i].getId() %>_allowRenew" type="checkbox" value="true" <%= renters[i].getAllowRenew() ? "checked" :"" %> />
+					<input type="hidden" name="pr_<%= renter.getId() %>_facilityId" value="<%= renter.getId() %>"/>
+					<input name="pr_<%= renter.getId() %>_allowRenew" type="checkbox" value="true" <%= renter.getAllowRenew() ? "checked" :"" %> />
 				</td>
 				<td>
-					<%= renters[i].getSize() %> gates
+					<%= renter.getSize() %> gates
 				</td>
 				<td>
-					<%= renters[i].getName() %>, <%= renters[i].getCommodity() %> 
+					<%= renter.getName() %>, <%= renter.getCommodity() %>
 				</td>
 			</tr>
 <%			

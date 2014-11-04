@@ -2,9 +2,13 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="userMap" class="java.util.HashMap" scope="session" />
+
+<%
+    Data data = (Data)application.getAttribute("data");
+%>
 <%!
     String getUser(int id, Map<Integer, String> userMap, Data data)
     {
@@ -97,17 +101,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/PopupWindow.js"></script>
+    <script src="/scripts/PopupWindow.js"></script>
     <script type="text/javascript">
         var gmap = new PopupWindow();
     </script>
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%
@@ -234,8 +240,8 @@
     else
     {
 		int amount = data.getAmountPaymentsForUser(account, fboId, aircraft, user.getShowPaymentsToSelf());	
-		PaymentBean[] logs = data.getPaymentsForUser(account, from, Data.stepSize, fboId, aircraft, user.getShowPaymentsToSelf());
-		if (logs.length > 0)
+		List<PaymentBean> logs = data.getPaymentsForUser(account, from, Data.stepSize, fboId, aircraft, user.getShowPaymentsToSelf());
+		if (logs.size() > 0)
 		{
 			GregorianCalendar now = new GregorianCalendar();
 			String monthly = "paymentlog.jsp?" + linkOptions + "month=" + (now.get(Calendar.MONTH)+1) + "&year=" + now.get(Calendar.YEAR);
@@ -259,9 +265,8 @@
             </thead>
             <tbody>
 <%
-                for (int c=0; c< logs.length; c++)
+                for (PaymentBean log : logs)
                 {
-                    PaymentBean log = logs[c].normalize();
                     AirportBean airport = data.getAirport(log.getLocation());
                     FboBean fbo = data.getFbo(log.getFboId());
                     AirportBean fboAirport = null;
@@ -269,7 +274,7 @@
                         fboAirport = data.getAirport(fbo.getLocation());
 
 %>
-                <tr <%= Data.oddLine(c) %>>
+                <tr>
                     <td><%= Formatters.getUserTimeFormat(user).format(log.getTime()) %></td>
                     <td><%= getUser(log.getOtherParty(), userMap, data) %></td>
                     <td><%= getUser(log.getUser(), userMap, data) %></td>

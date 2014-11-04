@@ -183,10 +183,12 @@ public class UserCtl extends HttpServlet
                         break;
                     case "lockAccount":
                         lockAccount(req);
-                        break;
+                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        return;
                     case "unlockAccount":
                         unlockAccount(req);
-                        break;
+                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        return;
                     case "Assignment":
                         processAssignment(req);
                         break;
@@ -418,9 +420,9 @@ public class UserCtl extends HttpServlet
 		
 		String sId = req.getParameter("owner");
 		int owner = Integer.parseInt(sId);
-		FboBean[] fbos = data.getFboByOwner(owner, "location");
+		List<FboBean> fbos = data.getFboByOwner(owner, "location");
 
-		if (!fbos[0].updateAllowed(user))
+		if (!fbos.get(0).updateAllowed(user))
 			throw new DataError("Permission denied.");		
 
 		String sPrice100ll = req.getParameter("price100ll");
@@ -455,8 +457,10 @@ public class UserCtl extends HttpServlet
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
 		String registration = req.getParameter("registration");
-		AircraftBean[] result = data.getAircraftByRegistration(registration);
-		AircraftBean aircraft = result[0];
+		AircraftBean aircraft = data.getAircraftByRegistration(registration);
+
+        if (aircraft == null)
+            throw new DataError("Aircraft not found.");
 
 		if (!aircraft.changeAllowed(user)) 
 			throw new DataError("Permission Denied.");
@@ -482,9 +486,12 @@ public class UserCtl extends HttpServlet
 		int ibuyer = Integer.parseInt(req.getParameter("buyer"));
 		String reg = req.getParameter("reg");
 		
-		AircraftBean aircraft = data.getAircraftByRegistration(reg)[0];
-		
-		if (!aircraft.changeAllowed(user)) 
+		AircraftBean aircraft = data.getAircraftByRegistration(reg);
+
+        if (aircraft == null)
+            throw new DataError("Aircraft not found.");
+
+        if (!aircraft.changeAllowed(user)) 
 			throw new DataError("Permission Denied.");
 
 		data.transferac(reg, ibuyer, aircraft.getOwner(), aircraft.getLocation());
@@ -495,8 +502,10 @@ public class UserCtl extends HttpServlet
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
 		String registration = req.getParameter("registration");
-		AircraftBean[] result = data.getAircraftByRegistration(registration);
-		AircraftBean aircraft = result[0];
+        AircraftBean aircraft = data.getAircraftByRegistration(registration);
+ 
+        if (aircraft == null)
+            throw new DataError("Aircraft not found.");
 
 		if (!aircraft.changeAllowed(user)) 
 			throw new DataError("Permission Denied.");
@@ -571,12 +580,15 @@ public class UserCtl extends HttpServlet
 		int owner = Integer.parseInt(req.getParameter("owner"));
 		String reg = req.getParameter("reg");
 		
-		AircraftBean[] aircraft = data.getAircraftByRegistration(reg);
+		AircraftBean aircraft = data.getAircraftByRegistration(reg);
+
+        if (aircraft == null)
+            throw new DataError("Aircraft not found.");
 		
-		if (!aircraft[0].changeAllowed(user)) 
+		if (!aircraft.changeAllowed(user)) 
 			throw new DataError("Permission Denied.");
 
-		data.leaseac(reg, lessee, owner, aircraft[0].getLocation());
+		data.leaseac(reg, lessee, owner, aircraft.getLocation());
 	}	
 	
 	void doBankBalance(HttpServletRequest req) throws DataError
@@ -758,7 +770,7 @@ public class UserCtl extends HttpServlet
 		if (!facility.updateAllowed(user))
 			throw new DataError("Permission denied.");
 
-		FboFacilityBean[] renters = null;
+		List<FboFacilityBean> renters = null;
 		FboBean fbo = data.getFbo(facility.getFboId());
 
 		if (facility.getIsDefault())
@@ -846,7 +858,7 @@ public class UserCtl extends HttpServlet
 			//now notify the owners that the price of the rent has changed
 			if (isDirtyRent && pd_rent != null) 
 			{
-				if (renters.length > 0) 
+				if (renters.size() > 0)
 				{	
 					try
 					{
@@ -1044,9 +1056,13 @@ public class UserCtl extends HttpServlet
 		if (user == null || !user.isLoggedIn())
 			return;
 
-		AircraftBean[] ac = data.getAircraftByRegistration(reg);
-		if(ac != null)
-			data.leasereturnac(reg, ac[0].getOwner(), ac[0].getLessor(), ac[0].getLocation());
+		AircraftBean aircraft = data.getAircraftByRegistration(reg);
+
+        if (aircraft == null)
+            throw new DataError("Aircraft not found.");
+
+        if(aircraft != null)
+			data.leasereturnac(reg, aircraft.getOwner(), aircraft.getLessor(), aircraft.getLocation());
 		else
 			throw new DataError("Unable to find leased aircraft!");
 	}
@@ -1216,10 +1232,14 @@ public class UserCtl extends HttpServlet
 	
 	void lockAccount(HttpServletRequest req) throws DataError
 	{
-		String login = req.getParameter("login");
+        String sAccountName = req.getParameter("username");
+		String sAccountId = req.getParameter("user");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (login == null)
+
+        if (sAccountId == null)
 			return;
+
+        int accountId = Integer.parseInt(sAccountId);
 		
 		if (user.getLevel() != UserBean.LEV_MODERATOR)
 		{
@@ -1227,29 +1247,34 @@ public class UserCtl extends HttpServlet
 		}
 		else
 		{
-			data.lockAccount(login);
-			req.setAttribute("message", "The " + login + " account was locked.");
+			data.lockAccount(accountId);
+			req.setAttribute("message", "Account: " + sAccountName + ", was locked.");
 		}
 	}
 	
 	void unlockAccount(HttpServletRequest req) throws DataError
 	{
-		String login = req.getParameter("login");
-		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (login == null)
-			return;
-		
-		if (user.getLevel() != UserBean.LEV_MODERATOR)
+        String sAccountName = req.getParameter("username");
+        String sAccountId = req.getParameter("user");
+
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        if (sAccountId == null)
+            return;
+
+        int accountId = Integer.parseInt(sAccountId);
+
+        if (user.getLevel() != UserBean.LEV_MODERATOR)
 		{
 			throw new DataError("Permission denied");
 		}
 		else
 		{
-			data.unlockAccount(login);
-			req.setAttribute("message", "The " + login + " account was unlocked.");
+			data.unlockAccount(accountId);
+			req.setAttribute("message", "Account: " + sAccountName + ", was unlocked.");
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param req - account to reset aircraft ban list
@@ -1259,12 +1284,12 @@ public class UserCtl extends HttpServlet
 	{
 		String account = req.getParameter("accountname");
 		//this is freaking weird.  Why would they use an array when they will always do an exact match query and only ever have 1 max result?
-		UserBean user[] = data.getAccountGroupOrUserByName(account);
-		if (user.length == 0)
+		UserBean user = data.getAccountGroupOrUserByName(account);
+		if (user == null)
 			throw new DataError("Unknown user.");
 		
-		user[0].setBanList("");	//wipe out the list
-		data.updateUserOrGroup(user[0]);
+		user.setBanList("");	//wipe out the list
+		data.updateUserOrGroup(user);
 		
 		req.setAttribute("message", "The " + account + " aircraft rental ban list has been reset to empty string.");
 	}
@@ -1282,11 +1307,10 @@ public class UserCtl extends HttpServlet
 			
 		UserBean account;
 		id = Integer.parseInt(sId);
-		UserBean accounts[] = data.getGroupById(id);
-		if (accounts.length == 0)
+		account = data.getGroupById(id);
+		if (account == null)
 			throw new DataError("Group not found");
 		
-		account = accounts[0];
 		amount = Float.parseFloat(sAmount);
 		if (amount < 0)
 			throw new DataError("Cannot pay negative amount.");
@@ -1363,12 +1387,10 @@ public class UserCtl extends HttpServlet
 			if (user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
 				throw new DataError("Permission denied");
 			
-			UserBean accounts[] = data.getGroupById(id);
-			if (accounts.length == 0)
+			account = data.getGroupById(id);
+			if (account == null)
 				throw new DataError("Group not found");
-			
-			account = accounts[0];
-		} 
+		}
 		else
 		{
 			account = user;
@@ -1517,10 +1539,12 @@ public class UserCtl extends HttpServlet
 		{
 			if (user.groupMemberLevel(groupId) < UserBean.GROUP_STAFF)
 				throw new DataError("Permission denied.");
-			UserBean[] account = data.getAccountByName(invitation);
-			if (account.length == 0)
+			UserBean account = data.getAccountByName(invitation);
+			if (account == null)
 				throw new DataError("Unknown user.");
-			data.joinGroup(account[0], groupId, "invited");
+
+			data.joinGroup(account, groupId, "invited");
+
 			return;
 		}
 		
@@ -1574,13 +1598,13 @@ public class UserCtl extends HttpServlet
 
 		int type = Integer.parseInt(maintenanceType);
 		int fbo = Integer.parseInt(sFbo);
-		AircraftBean aircraft[] = data.getAircraftByRegistration(reg);
-		if (aircraft.length == 0)
+		AircraftBean aircraft = data.getAircraftByRegistration(reg);
+		if (aircraft == null)
 			throw new DataError("Aircraft not found");
 		
 		if (type != AircraftMaintenanceBean.MAINT_FIXAIRCRAFT) 
 		{
-			if (!aircraft[0].changeAllowed(user))
+			if (!aircraft.changeAllowed(user))
 				throw new DataError("Permission denied");
 		}
 		FboBean selectedFbo = null;
@@ -1592,7 +1616,7 @@ public class UserCtl extends HttpServlet
 				throw new DataError("Fbo not found");
 		}
 		
-		data.doMaintenance(aircraft[0], type, user, selectedFbo);
+		data.doMaintenance(aircraft, type, user, selectedFbo);
 	}
 	
 	void doEquipment(HttpServletRequest req) throws DataError
@@ -1607,11 +1631,12 @@ public class UserCtl extends HttpServlet
 		
 		int type = Integer.parseInt(equipmentType);
 		int fbo = Integer.parseInt(sFbo);
-		AircraftBean aircraft[] = data.getAircraftByRegistration(reg);
-		if (aircraft.length == 0)
+		AircraftBean aircraft = data.getAircraftByRegistration(reg);
+		
+        if (aircraft == null)
 			throw new DataError("Aircraft not found");
 		
-		if (!aircraft[0].changeAllowed(user))
+		if (!aircraft.changeAllowed(user))
 			throw new DataError("Permission denied");	
 		
 		FboBean selectedFbo = null;
@@ -1623,7 +1648,7 @@ public class UserCtl extends HttpServlet
 				throw new DataError("Fbo not found");
 		}
 		
-		data.doEquipment(aircraft[0], type, selectedFbo);
+		data.doEquipment(aircraft, type, selectedFbo);
 	}
 	
 	void doFlyForGroup(HttpServletRequest req) throws DataError
@@ -1665,9 +1690,8 @@ public class UserCtl extends HttpServlet
 		
 		boolean found = false;
 		AirportBean airport = data.getAirport(location);
-		GoodsBean[] goods;
-		
-		goods = data.getGoodsAtAirport(airport.getIcao(), airport.getSize(), 0, 0);
+
+		List<GoodsBean> goods = data.getGoodsAtAirport(airport.getIcao(), airport.getSize(), 0, 0);
 		
 		int checkid = isBuy ? from : to;
 
@@ -1777,32 +1801,33 @@ public class UserCtl extends HttpServlet
 		if (newreg != null)
 			newreg = newreg.toUpperCase();
 		
-		AircraftBean[] aircraft = data.getAircraftByRegistration(registration);
-		if (aircraft.length == 0)
-			throw new DataError("Aircraft " + registration + " Not Found");
+		AircraftBean aircraft = data.getAircraftByRegistration(registration);
 
-		aircraft[0].setHome(home);
-		aircraft[0].setOwner(owner);
-		aircraft[0].setLocation(location);
-		aircraft[0].setUserLock(userlock);
-		aircraft[0].setBonus(bonus);
-		aircraft[0].setAccounting(accounting);
-		aircraft[0].setRentalPriceDry(rentalDry);
-		aircraft[0].setRentalPriceWet(rentalWet);
-		aircraft[0].setMaxRentTime(maxRentTime);
-		aircraft[0].setSellPrice(sellPrice);
+        if (aircraft == null)
+            throw new DataError("Aircraft not found.");
+
+		aircraft.setHome(home);
+		aircraft.setOwner(owner);
+		aircraft.setLocation(location);
+		aircraft.setUserLock(userlock);
+		aircraft.setBonus(bonus);
+		aircraft.setAccounting(accounting);
+		aircraft.setRentalPriceDry(rentalDry);
+		aircraft.setRentalPriceWet(rentalWet);
+		aircraft.setMaxRentTime(maxRentTime);
+		aircraft.setSellPrice(sellPrice);
 		
 		if (advertise == 0)
-			aircraft[0].setAdvertiseFerry(false);
+			aircraft.setAdvertiseFerry(false);
 		else
-			aircraft[0].setAdvertiseFerry(true);
+			aircraft.setAdvertiseFerry(true);
 		
 		if (repair == 0)
-			aircraft[0].setAllowRepair(false);
+			aircraft.setAllowRepair(false);
 		else
-			aircraft[0].setAllowRepair(true);
+			aircraft.setAllowRepair(true);
 		
-		data.updateAircraft4Admins(aircraft[0], newreg);
+		data.updateAircraft4Admins(aircraft, newreg);
 	}
 	
 	void doAdjustGoods(HttpServletRequest req) throws DataError

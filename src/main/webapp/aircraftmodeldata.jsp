@@ -2,15 +2,19 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	String sId = request.getParameter("id");
 	if(sId == null)
 	{
 		out.print("Invalid Model Id!");
 		return;
 	}
+
 	int id = Integer.parseInt(sId);
 	Data.aircraftConfigs acconfig = data.getAircraftConfigs(id);
 	
@@ -24,6 +28,7 @@
 	
 	NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
 %>
+
 <style type="text/css">
 .mysection {
 	margin: 10px;
@@ -113,6 +118,7 @@
 }
 
 </style>
+
 <div class="container">
 	<div>
 		<div style="width: 400px; text-align: center; font-size: 14pt; font-weight: bold;"><%=acconfig.makemodel %></div>

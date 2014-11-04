@@ -2,18 +2,21 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
 
     if (!Data.needLevel(user, UserBean.LEV_CSR) && !Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
     String returnPage = request.getRequestURI();
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,12 +26,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/jquery-ui.min.js"></script>
-    <script src="scripts/AutoComplete.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
+    <script src="/scripts/jquery-ui.min.js"></script>
+    <script src="/scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -41,8 +44,10 @@
 
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%
@@ -63,7 +68,7 @@
         <form method="post">
             <div>
                 <input type="hidden" name="submit" value="true"/>
-                <input type="hidden" name="return" value="admineditaccount.jsp"/>
+                <input type="hidden" name="return" value="/admin/accountedit.jsp"/>
             </div>
             <tr>
                 <td>
@@ -100,10 +105,10 @@
 %>		<h2>Edit User Account</h2>
 	
 	    <div class="form" style="width: 600px">
-		<form method="post" action="userctl">
+		<form method="post" action="/userctl">
             <div>
                 <input type="hidden" name="event" value="editUser"/>
-                <input type="hidden" name="return" value="admineditaccount.jsp"/>
+                <input type="hidden" name="return" value="/admin/accountedit.jsp"/>
                 <input type="hidden" name="user" value="<%=edituser.getName()%>"/>
                 <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
             </div>

@@ -1,11 +1,13 @@
 <%@page language="java"
-	    import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
 	String returnPage = "";
 	UserBean account = null;
 	boolean showActions = true;
@@ -33,8 +35,9 @@
 	if (account == null)
 		account = user;
 	
-	AircraftBean[] aircraft = data.getAircraftOwnedByUser(account.getId());
+	List<AircraftBean> aircraftList = data.getAircraftOwnedByUser(account.getId());
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,17 +46,17 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link rel="stylesheet" type="text/css" href="theme/Master.css" />
-	<link rel="stylesheet" type="text/css" href="theme/tablesorter-style.css" />
+	<link rel="stylesheet" type="text/css" href="/theme/Master.css" />
+	<link rel="stylesheet" type="text/css" href="/theme/tablesorter-style.css" />
 
-	<script src="scripts/jquery.min.js"></script>
+	<script src="/scripts/jquery.min.js"></script>
 	
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
-	<script src="scripts/PopupWindow.js"></script>
+	<script src="/scripts/PopupWindow.js"></script>
 	
 	<script type="text/javascript">
 		var gmapac = new PopupWindow();
@@ -117,10 +120,11 @@
 	</script>
 
 </head>
-
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	<form method="post" action="userctl" id="aircraftForm">
@@ -135,7 +139,7 @@
 	<caption>
 	Aircraft owned by <%= account.getName() %> 
 <% 
-	if(aircraft.length > 0) 
+	if(aircraftList.size() > 0) 
 	{
 %>
 		<a href="#" onclick="gmapac.setSize(620,520);gmapac.setUrl('<%= response.encodeURL("gmapac.jsp?Id=" + account.getId()) %>');gmapac.showPopup('gmapac');return false;" id="gmapac"><img src="img/wmap.gif" style="border-style: none; vertical-align:middle;" /></a>	
@@ -159,12 +163,11 @@
 	</thead>
 	<tbody>
 <%
-	for (int c=0; c < aircraft.length; c++)
+	for (AircraftBean aircraft : aircraftList)
 	{
-		int priceDry= aircraft[c].getRentalPriceDry();
-		int priceWet= aircraft[c].getRentalPriceWet();
-        ModelBean[] Models = data.getModelById(aircraft[c].getModelId());
-        int tbo = Models[0].getFueltype()==0 ? AircraftBean.TBO_RECIP/3600 : AircraftBean.TBO_JET/3600;		
+		int priceDry= aircraft.getRentalPriceDry();
+		int priceWet= aircraft.getRentalPriceWet();
+        int tbo = aircraft.getFuelType()==0 ? AircraftBean.TBO_RECIP/3600 : AircraftBean.TBO_JET/3600;
 		String price = "";
 		
 		if (priceDry > 0)
@@ -173,59 +176,59 @@
 		if (priceWet > 0)
 			price = price + ((priceDry > 0) ? "/" : "") + "$" + priceWet + " Wet";
 			
-		price = price + (aircraft[c].getAccounting() == AircraftBean.ACC_TACHO ? " [Tacho]" : " [Hour]");
-		int minutes = (aircraft[c].getTotalEngineTime() - aircraft[c].getLastCheck())/60;
+		price = price + (aircraft.getAccounting() == AircraftBean.ACC_TACHO ? " [Tacho]" : " [Hour]");
+		int minutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck())/60;
 		int hours = minutes / 60;
 		String lastCheck = (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
-		minutes = (aircraft[c].getTotalEngineTime())/60;
+		minutes = (aircraft.getTotalEngineTime())/60;
         int ehours = minutes / 60;
 		String engineTotal= (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
 %>
-	<tr <%= Data.oddLine(c) %>>
+	<tr>
 
-	<td><a href="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft[c].getRegistration()) %>"><%= aircraft[c].getRegistration() %></a>
-        <% if (aircraft[c].isBroken())
+	<td><a href="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>"><%= aircraft.getRegistration() %></a>
+        <% if (aircraft.isBroken())
               {%>              
               <img src='img/repair.gif' style="border-style: none; vertical-align:middle;" />
             <%} %>    
     </td>
-	<td><%= aircraft[c].getMakeModel() %></td>
+	<td><%= aircraft.getMakeModel() %></td>
 	<td>
 <% 		
-		if (aircraft[c].getLocation() != null) 
+		if (aircraft.getLocation() != null) 
 		{ 
 %>
-	        <a href="<%= response.encodeURL("airport.jsp?icao=" + aircraft[c].getLocation()) %>"><%= aircraft[c].getSLocation() %></a>
+	        <a href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getLocation()) %>"><%= aircraft.getSLocation() %></a>
 <%		
 		} 
 		else
 		{ 
 %>
-		    <%= aircraft[c].getSLocation() %>
+		    <%= aircraft.getSLocation() %>
 <%
 		} 
 %>	
 	</td>
-	<td><a href="<%= response.encodeURL("airport.jsp?icao=" + aircraft[c].getHome()) %>"><%= aircraft[c].getHome() %></a></td>
+	<td><a href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getHome()) %>"><%= aircraft.getHome() %></a></td>
 <%
-		if(aircraft[c].getLessor() == 0)
+		if(aircraft.getLessor() == 0)
 		{
 %>			
-			<td class="numeric"><%= aircraft[c].getSellPrice() == 0? "Not for sale" : Formatters.currency.format(aircraft[c].getSellPrice()) %></td>
+			<td class="numeric"><%= aircraft.getSellPrice() == 0? "Not for sale" : Formatters.currency.format(aircraft.getSellPrice()) %></td>
 <%
 		}
 		else
 		{
-			if( account.getId() == aircraft[c].getLessor()) //this is the real owner
+			if( account.getId() == aircraft.getLessor()) //this is the real owner
 			{
-				UserBean displayName = data.getAccountById(aircraft[c].getOwner());
+				UserBean displayName = data.getAccountById(aircraft.getOwner());
 %>
 			<td class="numeric">Leased to: <%=displayName.getName()%></td>
 <%
 			}
 			else
 			{
-				UserBean displayName = data.getAccountById(aircraft[c].getLessor());
+				UserBean displayName = data.getAccountById(aircraft.getLessor());
 %>
 			<td class="numeric">Leased from: <%=displayName.getName()%></td>
 <%
@@ -235,44 +238,44 @@
     <td class="numeric" <%= ehours >= tbo ? " style=\"color: red;\"" : "" %>><%= engineTotal %></td>  
 	<td class="numeric" <%= hours >= 90 ? " style=\"color: red;\"" : "" %>><%= lastCheck %></td>
 	<td class="numeric"><%= price %></td>
-	<td class="numeric"><%= Formatters.currency.format(aircraft[c].getBonus()) %></td>
+	<td class="numeric"><%= Formatters.currency.format(aircraft.getBonus()) %></td>
 <%		
-		if(aircraft[c].getShippingState() == 0 && aircraft[c].getLessor() != account.getId())
+		if(aircraft.getShippingState() == 0 && aircraft.getLessor() != account.getId())
 		{
 			if (showActions)  
 			{ 
 %>
 	<td>
-	<select id="actionSelect" onchange="actions(this);">
+	<select onchange="actions(this);">
 	<option value="0">Select Action</option>
-	<option value="<%= response.encodeURL("editaircraft.jsp?registration=" + aircraft[c].getRegistration()) %>">Edit</option>
-	<option value="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft[c].getRegistration()) %>">Log</option>
-	<option value="<%= response.encodeURL("maintenance.jsp?registration=" + aircraft[c].getRegistration()) %>">Maintenance</option>
-	<option value="<%= response.encodeURL("transferac.jsp?registration=" + aircraft[c].getRegistration()) %>">Transfer</option>
+	<option value="<%= response.encodeURL("editaircraft.jsp?registration=" + aircraft.getRegistration()) %>">Edit</option>
+	<option value="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>">Log</option>
+	<option value="<%= response.encodeURL("maintenance.jsp?registration=" + aircraft.getRegistration()) %>">Maintenance</option>
+	<option value="<%= response.encodeURL("transferac.jsp?registration=" + aircraft.getRegistration()) %>">Transfer</option>
 <%
-				if(aircraft[c].getLessor() == 0)
+				if(aircraft.getLessor() == 0)
 				{
 %>
-					<option value="<%= response.encodeURL("leaseac.jsp?registration=" + aircraft[c].getRegistration()) %>">Lease</option>
+					<option value="<%= response.encodeURL("leaseac.jsp?registration=" + aircraft.getRegistration()) %>">Lease</option>
 <%
-					if (aircraft[c].getCanShip()) 
+					if (aircraft.getCanShip()) 
 					{ 
 %>
-						<option value="<%= response.encodeURL("shipaircraft.jsp?registration=" + aircraft[c].getRegistration()) %>">Ship</option>
+						<option value="<%= response.encodeURL("shipaircraft.jsp?registration=" + aircraft.getRegistration()) %>">Ship</option>
 <% 		
 					} 
 				}
 				else
 				{
 %>	
-					<option value="LeaseReturn:<%=aircraft[c].getRegistration()%>">Return Lease</option>
+					<option value="LeaseReturn:<%=aircraft.getRegistration()%>">Return Lease</option>
 <%
 				}
 
 				if (priceDry > 0) 
 				{ 
 %>
-					<option value="<%= aircraft[c].getRegistration() %>,dry">Rent Dry</option>
+					<option value="<%= aircraft.getRegistration() %>,dry">Rent Dry</option>
 <% 
 				} 
 %>
@@ -280,15 +283,15 @@
 				if (priceWet > 0) 
 				{ 
 %>
-					<option value="<%= aircraft[c].getRegistration() %>,wet">Rent Wet</option>
+					<option value="<%= aircraft.getRegistration() %>,wet">Rent Wet</option>
 <% 
 				} 
 %>
 <% 	
-				if (priceDry + priceWet == 0 && aircraft[c].canAlwaysRent(user)) 
+				if (priceDry + priceWet == 0 && aircraft.canAlwaysRent(user)) 
 				{ 
 %>
-					<option value="<%= aircraft[c].getRegistration() %>,wet">Rent</option>
+					<option value="<%= aircraft.getRegistration() %>,wet">Rent</option>
 <% 
 				} 
 %>
@@ -306,7 +309,7 @@
 				if (priceDry > 0) 
 				{ 
 %>
-					<option value="<%= aircraft[c].getRegistration() %>,dry">Rent Dry</option>
+					<option value="<%= aircraft.getRegistration() %>,dry">Rent Dry</option>
 <% 
 				} 
 %>
@@ -314,15 +317,15 @@
 				if (priceWet > 0) 
 				{ 
 %>
-					<option value="<%= aircraft[c].getRegistration() %>,wet">Rent Wet</option>
+					<option value="<%= aircraft.getRegistration() %>,wet">Rent Wet</option>
 <% 
 				} 
 %>
 <% 	
-				if (priceDry + priceWet == 0 && aircraft[c].canAlwaysRent(user)) 
+				if (priceDry + priceWet == 0 && aircraft.canAlwaysRent(user)) 
 				{ 
 %>
-					<option value="<%= aircraft[c].getRegistration() %>,wet">Rent</option>
+					<option value="<%= aircraft.getRegistration() %>,wet">Rent</option>
 <% 
 				} 
 %>
@@ -333,19 +336,19 @@
 		}
 		else
 		{
-			if(aircraft[c].getShippingState() != 0)
+			if(aircraft.getShippingState() != 0)
 			{
 %>
-				<td><%=aircraft[c].getShippingStateString()%></td>
+				<td><%=aircraft.getShippingStateString()%></td>
 <%
 			}
-			if(aircraft[c].getLessor() != 0 && showActions)
+			if(aircraft.getLessor() != 0 && showActions)
 			{
 %>
 				<td>
 				<select name="actionSelect" class = "formselect" onchange = "actions(this)" >
 					<option value="0">Select Action</option>
-					<option value="LeaseReturn:<%=aircraft[c].getRegistration()%>">Return Lease</option>
+					<option value="LeaseReturn:<%=aircraft.getRegistration()%>">Return Lease</option>
 				</select>
 				</td>	
 <%		

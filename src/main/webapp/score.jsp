@@ -2,12 +2,12 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, net.fseconomy.util.*, java.util.*"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     String type = request.getParameter("type");
     boolean group = type != null && type.equals("groups");
 %>
@@ -21,13 +21,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css" />
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
-    <link href="theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery.min.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
     <script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-    <script src="scripts/jquery.tablesorter.widgets.js"></script>
+    <script src="/scripts/jquery.tablesorter.widgets.js"></script>
     <script type='text/javascript' src='scripts/parser-timeHrMin.js'></script>
 
     <script type="text/javascript">
@@ -45,8 +45,10 @@
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	<table class="statsTable tablesorter-default tablesorter">
@@ -83,7 +85,7 @@
 			int minutes = entry.totalFlightTime/60;
 			String time = (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
 %>
-			<tr <%= Data.oddLine(c) %>>
+			<tr>
 			<td><%= stats[c].accountName  %></td>
 <% 			if (group) 
 			{ 

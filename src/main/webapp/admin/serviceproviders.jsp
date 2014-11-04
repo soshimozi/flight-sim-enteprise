@@ -1,16 +1,16 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*,java.util.*,java.text.*"
+        import="net.fseconomy.data.*,java.util.*, net.fseconomy.util.Formatters"
 %>
-<%@ page import="net.fseconomy.util.Formatters" %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
@@ -18,8 +18,8 @@
 
     Date date = new Date();
 
-    int id = -1;
-    String action = "";
+    int id;
+    String action;
     if(request.getParameter("id") != null)
     {
         id = Integer.parseInt(request.getParameter("id"));
@@ -56,14 +56,15 @@
         {
             error = e.getMessage();
         }
-        out.print("<script type=\"text/javascript\">document.location.href=\"admindatafeedservices.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/admin/serviceprovidersedit.jsp\"</script>");
         return;
     }
     //setup for display
     //get the current service providers
     //presorted by status, owner
-    ServiceProviderBean[] services = data.getServiceProviders();
+    List<ServiceProviderBean> services = data.getServiceProviders();
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,7 +74,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
     <script type="text/javascript">
         function doAction(form)
@@ -85,14 +86,14 @@
 
             if( action == "edit")
             {
-                var url = "admindatafeedserviceedit.jsp?id=" + id;
+                var url = "/admin/serviceprovidersedit.jsp?id=" + id;
                 location.href = url;
             }
             else if( action == "approve")
             {
                 if (window.confirm("Are you sure you want to APPROVE this request?"))
                 {
-                    var url = "admindatafeedservices.jsp?id=" + id + "&action=approve";
+                    var url = "/admin/serviceprovidersedit.jsp?id=" + id + "&action=approve";
                     location.href = url;
                 }
             }
@@ -100,7 +101,7 @@
             {
                 if (window.confirm("Are you sure you want to DISABLE this service?"))
                 {
-                    var url = "admindatafeedservices.jsp?id=" + id + "&action=disable";
+                    var url = "/admin/serviceprovidersedit.jsp?id=" + id + "&action=disable";
                     location.href = url;
                 }
             }
@@ -108,7 +109,7 @@
             {
                 if (window.confirm("Are you sure you want to REJECT this request?"))
                 {
-                    var url = "admindatafeedservices.jsp?id=" + id + "&action=reject";
+                    var url = "/admin/serviceprovidersedit.jsp?id=" + id + "&action=reject";
                     location.href = url;
                 }
             }
@@ -116,17 +117,19 @@
             {
                 if (window.confirm("Are you sure you want to BAN this service?"))
                 {
-                    var url = "admindatafeedservices.jsp?id=" + id + "&action=ban";
+                    var url = "/admin/serviceprovidersedit.jsp?id=" + id + "&action=ban";
                     location.href = url;
                 }
             }
         }
     </script>
-</head>
 
+</head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
 <div id="wrapper">
 <%
 	if (error != null) 
@@ -160,34 +163,34 @@
 			</tr>
 		</thead>
 <%
-		for (int c=0; c< services.length; c++)
+		for (ServiceProviderBean service : services)
 		{ 
 %>
 		<tr>
 			<td>
 				<select name="primarycontact" class="formselect"  onchange = "doAction(this)">
 					<option value="" >Choose an action </option>
-					<option value="edit|<%=services[c].getId() %>" >View/Edit</option>
-					<option value="approve|<%=services[c].getId() %>" >Approve</option>
-					<option value="reject|<%=services[c].getId() %>" >Reject</option>
-					<option value="disable|<%=services[c].getId() %>" >Disable</option>
-					<option value="ban|<%=services[c].getId() %>" >Ban</option>
+					<option value="edit|<%=service.getId() %>" >View/Edit</option>
+					<option value="approve|<%=service.getId() %>" >Approve</option>
+					<option value="reject|<%=service.getId() %>" >Reject</option>
+					<option value="disable|<%=service.getId() %>" >Disable</option>
+					<option value="ban|<%=service.getId() %>" >Ban</option>
 				</select>
 			</td>
 			<td>
-				<%=services[c].getStatusString()%>
+				<%=service.getStatusString()%>
 			</td>
 			<td>
-				<%=services[c].getName()%>
+				<%=service.getName()%>
 			</td>
 			<td>
-				<%=services[c].getOwnerName()%>
+				<%=service.getOwnerName()%>
 			</td>
 			<td>
-				<%=services[c].getAlternateName()%>
+				<%=service.getAlternateName()%>
 			</td>
 			<td>
-				<%=services[c].getKey()%>
+				<%=service.getKey()%>
 			</td>
 		</tr>
 <%

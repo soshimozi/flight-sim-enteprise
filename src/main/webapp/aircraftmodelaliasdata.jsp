@@ -1,12 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, java.util.*, net.fseconomy.data.*"
+        import="net.fseconomy.data.*"
  %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
 	String sId = request.getParameter("id");
 	if(sId == null)
 	{
@@ -17,6 +18,7 @@
 	int id = Integer.parseInt(sId);
 	Data.ModelAliases aliases = data.getModelAliases(id);
 %>
+
 <style type="text/css">
 .myaliassection {
 	margin: 10px;
@@ -47,7 +49,5 @@
 %>			
 		</ol>
 		</div>
-
 	</div>
-
 </div>

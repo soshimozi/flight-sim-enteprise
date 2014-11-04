@@ -1352,14 +1352,14 @@ public class MaintenanceCycle implements Runnable
 					expires.add(GregorianCalendar.HOUR, (int)(Math.random() * 72));  // was 24
 
 					String reg = toSellRS.getString("registration");
-					AircraftBean[] aircraft = data.getAircraftByRegistration(reg);
+					AircraftBean aircraft = data.getAircraftByRegistration(reg);
 
-					int sellPrice = aircraft[0].getSystemSellPrice(); //includes raw equipment costs
+					int sellPrice = aircraft.getSystemSellPrice(); //includes raw equipment costs
 					sellPrice = (int) Math.round(sellPrice * (1 + Math.random() * 0.4 - 0.2));
 					
 					qry = "UPDATE aircraft SET sellPrice = ?, markettimeOut = ? where registration = ?";
 					data.dalHelper.ExecuteUpdate(qry, sellPrice,  new Timestamp(expires.getTime().getTime()), reg);
-					Data.logger.info("Selling aircraft: " + aircraft[0].getMakeModel() + ", " + reg + ", Price = " + sellPrice + ", expires = " + expires.getTime().toString());
+					Data.logger.info("Selling aircraft: " + aircraft.getMakeModel() + ", " + reg + ", Price = " + sellPrice + ", expires = " + expires.getTime().toString());
 					
 					//remove any AllIn assignments that might be attached to this aircraft
 					qry = "DELETE FROM assignments WHERE aircraft = ?";
@@ -1517,7 +1517,7 @@ public class MaintenanceCycle implements Runnable
 						data.dalHelper.ExecuteUpdate(qry, rs.getString("registration"));
 						
 						//Needed to get the aircraft empty weight
-						AircraftBean[] aircraft = data.getAircraftByRegistration(rs.getString("registration"));
+						AircraftBean aircraft = data.getAircraftByRegistration(rs.getString("registration"));
 						
 						AssignmentBean assignment;
 						assignment = new AssignmentBean();
@@ -1528,7 +1528,7 @@ public class MaintenanceCycle implements Runnable
 						assignment.setUnits(AssignmentBean.UNIT_KG);
 						
 						
-						assignment.setAmount(aircraft[0].getEmptyWeight());
+						assignment.setAmount(aircraft.getEmptyWeight());
 						assignment.editAmountAllowed(null);
 						assignment.setGroup(false);
 						assignment.setCommodityId(99);

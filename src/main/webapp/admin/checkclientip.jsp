@@ -2,17 +2,20 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.text.*, net.fseconomy.data.*, java.util.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<% 
+
+<%
 	Data data = (Data)application.getAttribute("data");
 
 
 	if (!Data.needLevel(user, UserBean.LEV_CSR) && !Data.needLevel(user, UserBean.LEV_MODERATOR)) 
 	{
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+		out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
 		return; 
 	}
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,12 +25,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css" />
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-	<script src="scripts/jquery.min.js"></script>
-	<script src="scripts/jquery-ui.min.js"></script>
-	<script src="scripts/AutoComplete.js"></script>
+	<script src="/scripts/jquery.min.js"></script>
+	<script src="/scripts/jquery-ui.min.js"></script>
+	<script src="/scripts/AutoComplete.js"></script>
 
 	<script type="text/javascript">
 	
@@ -40,12 +43,11 @@
 </head>
 
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<div id="wrapper">
-<jsp:include flush="true" page="menu.jsp">
-	<jsp:param name="open" value="home"/>
-</jsp:include>
 
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
+<div id="wrapper">
 <div class="content">
 <%
 	String message = (String) request.getAttribute("message");
@@ -93,7 +95,7 @@
 	else if (searchby != null) 
 	{
 		List<String> list = null;
-		UserBean[] inputuser = null;
+		UserBean inputuser = null;
 			
 		if("account".equals(searchby))
 		{
@@ -102,7 +104,7 @@
 				searchfor = request.getParameter("username");
 			inputuser = data.getAccountByName(searchfor);
 			
-			if (inputuser.length == 0) 
+			if (inputuser == null)
 			{
 				message = "User Not Found";
 			}
@@ -110,7 +112,7 @@
 			{	
 				try
 				{
-					list = data.getClientRequestCountsByAccountId(inputuser[0].getId());
+					list = data.getClientRequestCountsByAccountId(inputuser.getId());
 				}
 				catch(DataError e)
 				{
@@ -148,11 +150,11 @@
 			if (Data.needLevel(user, UserBean.LEV_MODERATOR))
 			{
 %>		
-				<a href="admin.jsp">Return to Admin Page</a><br/><br/>
+				<a href="index.jsp">Return to Admin Page</a><br/><br/>
 <%
 			}
 %>
-		<a href="adminclientipchecks.jsp">Select new account or IP</a><br/>
+		<a href="/admin/checkclientip.jsp">Select new account or IP</a><br/>
 		<table id="sortableTableStats" class="sortable">
 			<thead>
 			<tr>
@@ -181,12 +183,12 @@
 			{
 				String[] s = list.get(c).split("\\|");
 %>
-				<tr <%= Data.oddLine(c) %>>
+				<tr>
 					<td>
-						<a href="adminclientipchecks.jsp?searchby=<%="ip".equals(searchby) ? "account" : "ip"%>&searchfor=<%=s[0]%>"><%= s[0] %></a>
+						<a href="/admin/checkclientip.jsp?searchby=<%="ip".equals(searchby) ? "account" : "ip"%>&searchfor=<%=s[0]%>"><%= s[0] %></a>
 					</td>
 					<td>
-						<a href="adminclientipchecklisting.jsp?searchby=<%="ip".equals(searchby) ? "account" : "ip"%>&searchfor=<%=s[0]%>"><%= s[1] %></a>
+						<a href="/admin/checkclientiplisting.jsp?searchby=<%="ip".equals(searchby) ? "account" : "ip"%>&searchfor=<%=s[0]%>"><%= s[1] %></a>
 					</td>
 				</tr>
 <%		
@@ -202,11 +204,11 @@
 			if (Data.needLevel(user, UserBean.LEV_MODERATOR))
 			{
 %>		
-				<a href="admin.jsp">Return to Admin Page</a><br/><br/>
+				<a href="/admin/index.jsp">Return to Admin Page</a><br/><br/>
 <%
 			}
 %>
-		<a href="adminclientipchecks.jsp">Select new account or IP</a><br/><br/>
+		<a href="/admin/checkclientip.jsp">Select new account or IP</a><br/><br/>
 		<h2>No Entries found.</h2>
 <%
 		}

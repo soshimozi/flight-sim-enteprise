@@ -1,18 +1,19 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     String sId = request.getParameter("Id");
     int Id = Integer.parseInt(sId);
 
-    AircraftBean[] aircraft = data.getAircraftOwnedByUser(Id);
+    List<AircraftBean> aircraftList = data.getAircraftOwnedByUser(Id);
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,8 +42,9 @@
 
 </head>
 <body text="#000080" bgcolor="#FFFFFF" background="">
+
 <form name="fboForm" id="fboForm" method="post" action="userctl">
-	<%=aircraft.length%> aircraft meet your criteria.  &nbsp;&nbsp;
+	<%=aircraftList.size()%> aircraft meet your criteria.  &nbsp;&nbsp;
 	<script type="text/javascript">
 	<!-- Begin
 	document.write('Your map data took <span id="endTime">0.0</span> seconds to load.');
@@ -55,12 +57,12 @@
     var locations = 
         [
 <%
-    for (int c=0; c < aircraft.length; c++)
+    for (AircraftBean aircraft : aircraftList)
     {
-        if(aircraft[c].getLocation() == null)
+        if(aircraft.getLocation() == null)
             continue;
 
-        AirportBean airport = data.getAirport(aircraft[c].getLocation());
+        AirportBean airport = data.getAirport(aircraft.getLocation());
         double lat = airport.getLat();
         double lon = airport.getLon();
         String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
@@ -68,32 +70,32 @@
         sb.append("<div class=\"infowindow-content\">");
         sb.append(airportLink);
         sb.append("<br>");
-        sb.append(data.getAccountNameById(aircraft[c].getOwner()));
+        sb.append(data.getAccountNameById(aircraft.getOwner()));
         sb.append("<br>");
-        sb.append(aircraft[c].getRegistration());
+        sb.append(aircraft.getRegistration());
         sb.append("<br>");
-        sb.append(aircraft[c].getMakeModel());
+        sb.append(aircraft.getMakeModel());
         sb.append("<br>");
-        sb.append(Formatters.oneDecimal.format(aircraft[c].getAirframeHours()));
+        sb.append(Formatters.oneDecimal.format(aircraft.getAirframeHours()));
         sb.append(" hrs Airframe");
         sb.append("<br>");
-        sb.append(Formatters.oneDecimal.format(aircraft[c].getEngineHours()));
+        sb.append(Formatters.oneDecimal.format(aircraft.getEngineHours()));
         sb.append(" hrs Engine Time");
         sb.append("<br>");
-        sb.append(Formatters.oneDecimal.format(aircraft[c].getHoursSinceLastCheck()));
+        sb.append(Formatters.oneDecimal.format(aircraft.getHoursSinceLastCheck()));
         sb.append(" hrs Since 100hr");
         sb.append("<br>");
-        sb.append(Formatters.oneDecimal.format(aircraft[c].getTotalFuel()));
+        sb.append(Formatters.oneDecimal.format(aircraft.getTotalFuel()));
         sb.append(" of ");
-        sb.append(Formatters.oneDecimal.format(aircraft[c].getTotalCapacity()));
+        sb.append(Formatters.oneDecimal.format(aircraft.getTotalCapacity()));
         sb.append(" Gallons");
         sb.append("<br>");
-        sb.append(aircraft[c].getSEquipment());
+        sb.append(aircraft.getSEquipment());
         sb.append("<br>");
-        sb.append(Formatters.currency.format(aircraft[c].getSellPrice()));
+        sb.append(Formatters.currency.format(aircraft.getSellPrice()));
         sb.append(" Sell Price");
         sb.append("<br>");
-        sb.append(Formatters.currency.format(aircraft[c].getMinimumPrice()));
+        sb.append(Formatters.currency.format(aircraft.getMinimumPrice()));
         sb.append(" Buyback Price");
         sb.append("</div>");
 %>

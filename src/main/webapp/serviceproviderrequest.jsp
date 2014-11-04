@@ -1,16 +1,20 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="java.util.List, net.fseconomy.data.*"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
     if(user == null || !user.isLoggedIn())
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,13 +24,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
-
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%	
@@ -94,7 +99,8 @@
 	}
 	if(desc == null || desc.isEmpty())
 		desc = "Please replace this text with a general description of your service.";
-	UserBean Accounts[] = data.getAccounts(true);
+
+	List<UserBean> accounts = data.getAccounts(true);
 %>
 	<h2>Service Provider Key Request</h2>
 	<div class="textarea" style="width: 800px">
@@ -134,12 +140,12 @@
 				<select name="alternate" class="formselect">
 					<option class="formselect" value= >Choose an account </option>
 <%
-		for (int c=0; c< Accounts.length; c++)
+		for (UserBean account : accounts)
 		{
-			if(altid == Accounts[c].getId())
-				out.print("<option class=\"formselect\" selected=\"selected\" value=\"" + Accounts[c].getId() + "\">" + Accounts[c].getName() + "</option>");
+			if(altid == account.getId())
+				out.print("<option class=\"formselect\" selected=\"selected\" value=\"" + account.getId() + "\">" + account.getName() + "</option>");
 			else
-				out.print("<option class=\"formselect\" value=\"" + Accounts[c].getId() + "\">" + Accounts[c].getName() + "</option>");
+				out.print("<option class=\"formselect\" value=\"" + account.getId() + "\">" + account.getName() + "</option>");
 		}
 %>		
 		    	</select>

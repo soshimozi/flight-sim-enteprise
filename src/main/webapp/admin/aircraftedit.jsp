@@ -1,24 +1,22 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.*"
+        import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<%@ page import="net.fseconomy.util.Formatters" %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<jsp:useBean id="aircraft" class="net.fseconomy.data.AircraftBean" >
-    <jsp:setProperty name="aircraft" property="*"/>
-</jsp:useBean>
-<%
+
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
     UserBean owner = null;
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,12 +26,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/jquery-ui.min.js"></script>
-    <script src="scripts/AutoComplete.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
+    <script src="/scripts/jquery-ui.min.js"></script>
+    <script src="/scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -46,8 +44,10 @@
 
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%
@@ -74,7 +74,7 @@ if (request.getParameter("submit") == null && (message == null))
 	<td>
 	<input type="submit" class="button" value="GO" />
 	<input type="hidden" name="submit" value="true"/>
-	<input type="hidden" name="return" value="admineditaircraft.jsp"/>
+	<input type="hidden" name="return" value="/admin/aircraftedit.jsp"/>
 	</td>
 	</tr>
 	</table>
@@ -85,14 +85,13 @@ if (request.getParameter("submit") == null && (message == null))
 else if (request.getParameter("submit") != null) 
 {
 	String registration = request.getParameter("registration");
-	AircraftBean[] result = data.getAircraftByRegistration(registration);
-	if (result.length == 0) 
+	AircraftBean aircraft = data.getAircraftByRegistration(registration);
+	if (aircraft == null)
 	{
 		message = "Aircraft Not Found";
 	} 
 	else
 	{
-		aircraft = result[0];
 		owner = data.getAccountById(aircraft.getOwner());
 	}
 	
@@ -101,14 +100,14 @@ else if (request.getParameter("submit") != null)
 %>	<div class="message"><%= message %></div>
 <%	}
 	
-	if (result.length != 0) 
+	if (aircraft != null)
 	{ 
 %>		<h2>Edit Aircraft Data</h2>
 
 	    <div class="form" style="width: 600px">
-		<form method="post" action="userctl">
+		<form method="post" action="/userctl">
 		<table>
-		<caption><%= result[0].getRegistration() %></caption>
+		<caption><%= aircraft.getRegistration() %></caption>
 		<tr><td colspan="3"><b>User Fields</b></td></tr>
 		<tr>
 			<td>New registration</td><td><input name="newreg" type="text" class="textarea" size="8" /></td>
@@ -154,10 +153,6 @@ else if (request.getParameter("submit") != null)
 			
 		</tr>
 		<tr>
-<%
-	    ModelBean[] models = data.getModelById(aircraft.getModelId());
-	    String mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
-%>
 			<td>On sale for</td><td>$ <input name="sellPrice" type="text" class="textarea" value="<%= aircraft.getSellPrice() == 0 ? "" : (""+aircraft.getSellPrice()) %>" size="6"/></td>
 		</tr>
 		<tr>
@@ -189,7 +184,7 @@ else if (request.getParameter("submit") != null)
 				<input type="submit" class="button" value="Update"/>
 				<input type="hidden" name="event" value="updateAircraft"/>
 				<input type="hidden" name="registration" value="<%= aircraft.getRegistration()%>"/>
-				<input type="hidden" name="return" value="admineditaircraft.jsp"/>
+				<input type="hidden" name="returnpage" value="/admin/aircraftedit.jsp"/>
 			</td>
 		</tr>
 		

@@ -1,19 +1,24 @@
 <%@page language="java"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        contentType="text/html; charset=ISO-8859-1"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	//setup return page if action used
 	String returnPage = request.getHeader("referer");
 
 	String message = null;
+    
 	String aircraft = request.getParameter("registration");
-	AircraftBean[] aircraftData = data.getAircraftByRegistration(aircraft);
-	ModelBean[] modelData = data.getModelById(aircraftData[0].getModelId());
+    
+	AircraftBean aircraftData = data.getAircraftByRegistration(aircraft);
+	ModelBean modelData = data.getModelById(aircraftData.getModelId());
 
-    if (aircraftData[0].getLocation() == null)
+    if (aircraftData.getLocation() == null)
         message = "Flight in Progress! Refueling Not Allowed.";
 
     if (message != null)
@@ -24,18 +29,18 @@
         return;
     }
 
-    FboBean[] fbo = data.getFboByLocation(aircraftData[0].getLocation());
-    AirportBean airport = data.getAirport(aircraftData[0].getLocation());
-    int fueltype = aircraftData[0].getFuelType();
+    List<FboBean> fbos = data.getFboByLocation(aircraftData.getLocation());
+    AirportBean airport = data.getAirport(aircraftData.getLocation());
+    int fueltype = aircraftData.getFuelType();
 
-    GoodsBean fuelDrums = data.getGoods(aircraftData[0].getLocation(), user.getId(), GoodsBean.GOODS_FUEL100LL);
+    GoodsBean fuelDrums = data.getGoods(aircraftData.getLocation(), user.getId(), GoodsBean.GOODS_FUEL100LL);
 
     if (fueltype > 0)
-        fuelDrums = data.getGoods(aircraftData[0].getLocation(), user.getId(), GoodsBean.GOODS_FUELJETA);
+        fuelDrums = data.getGoods(aircraftData.getLocation(), user.getId(), GoodsBean.GOODS_FUELJETA);
 
     data.fillAirport(airport);
 
-    boolean defuelAllowed = aircraftData[0].changeAllowed(user);
+    boolean defuelAllowed = aircraftData.changeAllowed(user);
 %>
 
 <!DOCTYPE html>
@@ -47,17 +52,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 	<div class="content">
 		<div class="dataTable">
 <%		
-		if(!defuelAllowed && !airport.isAvgas() && fbo.length == 0 && fuelDrums == null && modelData[0].getFuelSystemOnly() == 0)  
+		if(!defuelAllowed && !airport.isAvgas() && fbos.size() == 0 && fuelDrums == null && modelData.getFuelSystemOnly() == 0)  
 		{ 
 %>
 			<div class="message">No fuel available</div>
@@ -88,27 +95,27 @@
 				</thead>
 				<tbody>
 <%
-			for (int c=0; c < fbo.length; c++)
+			for (FboBean fbo : fbos)
 			{ 
 				int fuelQty = 0;
 				if (fueltype > 0)
 				{
-					fuelQty = data.getGoodsQty(fbo[c], GoodsBean.GOODS_FUELJETA);
+					fuelQty = data.getGoodsQty(fbo, GoodsBean.GOODS_FUELJETA);
 				} 
 				else 
 				{
-					fuelQty = data.getGoodsQty(fbo[c], GoodsBean.GOODS_FUEL100LL);
+					fuelQty = data.getGoodsQty(fbo, GoodsBean.GOODS_FUEL100LL);
 				}
 %>
 				<tr>
-					<td><%= fbo[c].getName() %></td>
+					<td><%= fbo.getName() %></td>
 					<td><%= (int)Math.floor(fuelQty / Data.GALLONS_TO_KG) %> Gallons</td>
-					<td><%= fueltype > 0 ? Formatters.currency.format(fbo[c].getFueljeta()) : Formatters.currency.format(fbo[c].getFuel100LL()) %></td>
+					<td><%= fueltype > 0 ? Formatters.currency.format(fbo.getFueljeta()) : Formatters.currency.format(fbo.getFuel100LL()) %></td>
 				</tr>
 <%	 		
 			}
 	
-			if (airport.isAvgas() || modelData[0].getFuelSystemOnly() == 1) 
+			if (airport.isAvgas() || modelData.getFuelSystemOnly() == 1)
 			{ 
 %>
 				<tr>
@@ -135,16 +142,16 @@
 		
 		<div class="dataTable">
 <%
-			int fuelquarter = (int)Math.floor(aircraftData[0].getTotalCapacity()* .25); 
-			int fuelhalf = (int)Math.floor(aircraftData[0].getTotalCapacity()* .5); 
-			int fueltquarter = (int)Math.floor(aircraftData[0].getTotalCapacity()* .75); 
-			int fuelfull = (int)Math.floor(aircraftData[0].getTotalCapacity());
+			int fuelquarter = (int)Math.floor(aircraftData.getTotalCapacity()* .25);
+			int fuelhalf = (int)Math.floor(aircraftData.getTotalCapacity()* .5);
+			int fueltquarter = (int)Math.floor(aircraftData.getTotalCapacity()* .75);
+			int fuelfull = (int)Math.floor(aircraftData.getTotalCapacity());
 %>
 			<table>
 				<caption>Refuel Aircraft</caption>
 				<tbody>
 					<tr><td>Registration</td><td><%= aircraft %></td></tr>
-					<tr><td>Type</td><td><%= aircraftData[0].getMakeModel() %></td></tr>
+					<tr><td>Type</td><td><%= aircraftData.getMakeModel() %></td></tr>
 					<tr><td>Fuel Type</td><td><%= fueltype < 1 ? "100LL" : "JetA" %></td></tr>
 					<tr><td colspan="2">&nbsp;</td></tr>
 					<tr>
@@ -170,7 +177,7 @@
 					<tr><td> </td><td> </td></tr>
 					<tr>				
 			  			<td>Current Fuel</td>
-			  			<td><%= Formatters.oneDigit.format(aircraftData[0].getTotalFuel())%> Gallons</td>
+			  			<td><%= Formatters.oneDigit.format(aircraftData.getTotalFuel())%> Gallons</td>
 					</tr>
 				</tbody>
 			</table>
@@ -187,20 +194,20 @@
 						Buy from
 						<select name="provider" class="formselect">
 <%
-				ModelBean[] mb = data.getModelById(aircraftData[0].getModelId());
-				for (int c=0; c < fbo.length && mb[0].getFuelSystemOnly() == 0; c++) 
+				ModelBean mb = data.getModelById(aircraftData.getModelId());
+				for (int c=0; c < fbos.size() && mb.getFuelSystemOnly() == 0; c++)
 				{ 
 %>
-						<option class="formselect" value="<%= fbo[c].getId() %>"><%= fbo[c].getName() %></option>
+						<option class="formselect" value="<%= fbos.get(c).getId() %>"><%= fbos.get(c).getName() %></option>
 <%		 		
 				}
-				if (airport.isAvgas() || modelData[0].getFuelSystemOnly() == 1)  
+				if (airport.isAvgas() || modelData.getFuelSystemOnly() == 1)
 				{ 
 %>	
 						<option class="formselect" value="0">Local market</option>
 <% 				
 				} 
-				if (fuelDrums != null && mb[0].getFuelSystemOnly() == 0)
+				if (fuelDrums != null && mb.getFuelSystemOnly() == 0)
 				{ 
 %>		
 						<option class="formselect" value="-1">Local fuel drum</option>
@@ -208,7 +215,7 @@
 %>
 						<option class="formselect" value="" selected="selected">Choose Provider </option>
 <%				
-				if (defuelAllowed ||  mb[0].getFuelSystemOnly() == 1) 
+				if (defuelAllowed ||  mb.getFuelSystemOnly() == 1)
 				{
 %>			
 						<option class="formselect" value="-2">De-Fuel</option>

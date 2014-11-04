@@ -1,13 +1,16 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
 
-    FboBean[] fbos = data.getFboForSale();
+    List<FboBean> fbos = data.getFboForSale();
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,10 +36,12 @@
             min-width: 200px;
         }
     </style>
+
 </head>
 <body text="#000080" bgcolor="#FFFFFF" background="">
+
 <form name="fboForm" id="fboForm" method="post" action="userctl">
-	<%=fbos.length%> FBOs are for Sale.
+	<%=fbos.size()%> FBOs are for Sale.
 	<script type="text/javascript">
 		document.write('Your map data took <span id="endTime">0.0</span> seconds to load.');
 		var loopTime=setInterval("currentTime()",100);
@@ -52,13 +57,13 @@
     var locations = 
         [
 <%
-for (int c=0; c < fbos.length; c++)
+for (FboBean fbo : fbos)
 {
-	AirportBean airport = data.getAirport(fbos[c].getLocation());
+	AirportBean airport = data.getAirport(fbo.getLocation());
 	double lat = airport.getLat();
 	double lon = airport.getLon();
 	String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
-	int sizeIcon = fbos[c].getFboSize() - 1;
+	int sizeIcon = fbo.getFboSize() - 1;
 	
 	StringBuilder sb = new StringBuilder();
 	sb.append("<div class=\"infowindow-content\">");
@@ -69,9 +74,9 @@ for (int c=0; c < fbos.length; c++)
 	sb.append(", ");
 	sb.append(Converters.escapeJavaScript(airport.getCountry()));
 	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(data.getAccountNameById(fbos[c].getOwner())));
+	sb.append(Converters.escapeJavaScript(data.getAccountNameById(fbo.getOwner())));
 	sb.append("<br>");
-	sb.append(Formatters.currency.format(fbos[c].getPrice()));
+	sb.append(Formatters.currency.format(fbo.getPrice()));
 	sb.append("</div>");
 %>
 			[<%=lat%>, <%=lon%>, <%=sizeIcon%>, '<%=sb.toString()%>'], 

@@ -148,16 +148,16 @@ public class serviceData
     {
         try
         {
-            AircraftBean[] aircraft = Data.getInstance().getAircraftByRegistration(reg);
+            AircraftBean aircraft = Data.getInstance().getAircraftByRegistration(reg);
 
             //if not, return error
-            if(aircraft.length != 1)
+            if(aircraft == null)
                 return createErrorResponse(400, "Bad Request", "Registration not found.");
 
-            if(!aircraft[0].isForSale())
+            if(!aircraft.isForSale())
                 return createErrorResponse(400, "Bad Request", "Aircraft not for sale.");
 
-            if (!hasFundsRequired(account, aircraft[0].getSellPrice()))
+            if (!hasFundsRequired(account, aircraft.getSellPrice()))
                 return createErrorResponse(400, "Bad Request", "Balance less than amount of purchase.");
 
             int serviceid = getServiceId(serviceKey);
@@ -185,10 +185,10 @@ public class serviceData
     {
         try
         {
-            AircraftBean[] aircraft = Data.getInstance().getAircraftByRegistration(reg);
+            AircraftBean aircraft = Data.getInstance().getAircraftByRegistration(reg);
 
             //if not, return error
-            if(aircraft.length != 1)
+            if(aircraft == null)
                 return createErrorResponse(400, "Bad Request", "Registration not found.");
 
             int serviceid = getServiceId(serviceKey);
@@ -219,21 +219,21 @@ public class serviceData
 
         try
         {
-            AircraftBean[] aircraft = Data.getInstance().getAircraftByRegistration(reg);
+            AircraftBean aircraft = Data.getInstance().getAircraftByRegistration(reg);
 
             //if not, return error
-            if(aircraft.length != 1)
+            if(aircraft == null)
                 return createErrorResponse(400, "Bad Request", "Registration not found.");
 
             int serviceid = getServiceId(serviceKey);
 
-            if(aircraft[0].getLessor() == 0 && aircraft[0].getOwner() == account)
+            if(aircraft.getLessor() == 0 && aircraft.getOwner() == account)
             {
                 mode = "lease";
                 String qry = "{call AircraftLease(?,?,?,?)}";
                 success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, leaseto, "Lease, Service: " + serviceid);
             }
-            else if(aircraft[0].getLessor() == account) //return lease
+            else if(aircraft.getLessor() == account) //return lease
             {
                 mode = "unlease";
                 String qry = "{call AircraftUnlease(?,?,?)}";

@@ -1,13 +1,13 @@
-<%@ page language="java"
-	import="java.text.*, net.fseconomy.data.*"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.List, net.fseconomy.data.*"
 %>
 
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	//setup return page if action used
 	String returnPage = request.getRequestURI();
     response.addHeader("referer", request.getRequestURI());
@@ -29,9 +29,9 @@
 		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
 		return; 
 	}	
-	GoodsBean[] goods = data.getGoodsForAccountAvailable(account.getId());
-	NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
+	List<GoodsBean> goods = data.getGoodsForAccountAvailable(account.getId());
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,7 +41,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 	
 	<script type='text/javascript' src='scripts/common.js'></script>
 	<script type='text/javascript' src='scripts/css.js'></script>
@@ -89,15 +89,15 @@
 				</thead>
 				<tbody>
 <%
-	for (int c=0; c< goods.length; c++)
+	for (GoodsBean good : goods)
 	{
-		int commodity = goods[c].getType();
-		String location = goods[c].getLocation();
+		int commodity = good.getType();
+		String location = good.getLocation();
 %>
-				<tr <%= Data.oddLine(c) %>>
+				<tr>
 					<td><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + location) %>"><%= location %></a></td>
-					<td><%= goods[c].getCommodity() %></td>
-					<td class="numeric"><%= goods[c].getAmount() %> Kg</td>
+					<td><%= good.getCommodity() %></td>
+					<td class="numeric"><%= good.getAmount() %> Kg</td>
 					<td>
 						<a class="link" href="<%= response.encodeURL("sellgoods.jsp?icao=" + location + "&owner=" + account.getId() + "&type=" + commodity) %>">Sell</a>
 						<a class="link" href="<%= response.encodeURL("editassignment.jsp?from=" + location + "&owner=" + account.getId() + "&commodityId=" + commodity) %>">Create transfer assignment</a>

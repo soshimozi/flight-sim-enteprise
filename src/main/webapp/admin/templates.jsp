@@ -1,11 +1,19 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import=" java.util.List, net.fseconomy.data.*"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
+
+    if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
+    {
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+        return;
+    }
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,12 +24,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
-	<link href="theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
 
-	<script src="scripts/jquery.min.js"></script>
-	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script src="/scripts/jquery.min.js"></script>
+	<script type='text/javascript' src='/scripts/jquery.tablesorter.js'></script>
+	<script src="/scripts/jquery.tablesorter.widgets.js"></script>
 	
 	<script type="text/javascript">
 		$(function()
@@ -38,21 +46,22 @@
 		    });
 
 		    $("#newTemplateButton").click(function() {
-		            window.document.location = "edittemplate.jsp?newtemplate=1";
+		            window.document.location = "/admin/templateedit.jsp?newtemplate=1";
 		    });
 		});		
 	</script>
 
 </head>
-
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="../top.jsp" />
+<jsp:include flush="true" page="../menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <div class="dataTable">	
 <%
-	TemplateBean[] templates = data.getAllTemplates();
+	List<TemplateBean> templates = data.getAllTemplates();
 %>
 	<table class="templateTable tablesorter-default tablesorter">
 		<caption>Assignment Templates <input id="newTemplateButton" style="margin-left: 15px;" type="button" class="button" value="New Template"/></caption>
@@ -75,36 +84,36 @@
 <%
 	String type = null;
 
-	for (int c=0; c < templates.length; c++)
+	for (TemplateBean template : templates)
 	{		
-		type = templates[c].getSUnits().toLowerCase() == "kg" ? "Kg" : "Pax";
+		type = template.getSUnits().toLowerCase() == "kg" ? "Kg" : "Pax";
 
 		int amount = 0;
 		Integer[] statArray = new Integer[4];
 		if (MaintenanceCycle.assignmentsPerTemplate != null)
 		{
-			Integer[] tmpArray = (Integer[])MaintenanceCycle.assignmentsPerTemplate.get(new Integer(templates[c].getId()));
+			Integer[] tmpArray = (Integer[])MaintenanceCycle.assignmentsPerTemplate.get(new Integer(template.getId()));
 			if (tmpArray != null)
 				statArray = tmpArray;
 		}		
 %>
-			<tr class='clickableRow' data-url="edittemplate.jsp?id=<%= templates[c].getId() %>">
-				<td><%= templates[c].getId() %></td>
-				<td><%= templates[c].getComment() %></td>
-				<td><%= templates[c].getCommodity() %></td>
-				<td><%= templates[c].getFrequency() %></td>
+			<tr class='clickableRow' data-url="/admin/templateedit.jsp?id=<%= template.getId() %>">
+				<td><%= template.getId() %></td>
+				<td><%= template.getComment() %></td>
+				<td><%= template.getCommodity() %></td>
+				<td><%= template.getFrequency() %></td>
 				<td>
-					<%= templates[c].getTargetAmount() %> 
+					<%= template.getTargetAmount() %> 
 					<%= type %> 
-					<span style="color: gray; font-size: 12px;">(<%= templates[c].getAmountDev() %>%)</span>
+					<span style="color: gray; font-size: 12px;">(<%= template.getAmountDev() %>%)</span>
 				</td>
 				<td>
-					<%= templates[c].getTargetPay() %> 
-					<span style="color: gray; font-size: 12px;">(<%= templates[c].getPayDev() %>%)</span>
+					<%= template.getTargetPay() %> 
+					<span style="color: gray; font-size: 12px;">(<%= template.getPayDev() %>%)</span>
 				</td>
 				<td>
-					<%= templates[c].getTargetDistance() %> 
-					<span style="color: gray; font-size: 12px;">(<%= templates[c].getDistanceDev() %>%)</span>
+					<%= template.getTargetDistance() %> 
+					<span style="color: gray; font-size: 12px;">(<%= template.getDistanceDev() %>%)</span>
 				</td>
 				<td><span title="Max=<%= statArray[MaintenanceCycle.ASSGN_MAX] %>, Min=<%= statArray[MaintenanceCycle.ASSGN_MIN] %>, Avg=<%= statArray[MaintenanceCycle.ASSGN_AVG] %>"><%= statArray[MaintenanceCycle.ASSGN_COUNT] %></span></td>
 			</tr>

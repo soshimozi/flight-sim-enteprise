@@ -1,14 +1,16 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.*, java.util.*"%>
+        import="net.fseconomy.data.*, java.util.*"
+%>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
@@ -16,16 +18,16 @@
     String searchfor = request.getParameter("searchfor");
 
     if(searchby== null || searchfor == null)
-        response.sendRedirect("adminclientipcheck.jsp");
+        response.sendRedirect("/admin/checkclientip.jsp");
 
     List<Data.clientrequest> requests = null;
-    UserBean[] inputuser = null;
+    UserBean inputuser = null;
     String message = null;
 
     if("account".equals(searchby))
     {
         inputuser = data.getAccountByName(searchfor);
-        if (inputuser.length == 0)
+        if (inputuser == null)
         {
             message = "User Not Found";
         }
@@ -33,7 +35,7 @@
         {
             try
             {
-                requests = data.getClientRequestsByAccountId(inputuser[0].getId());
+                requests = data.getClientRequestsByAccountId(inputuser.getId());
             }
             catch(DataError e)
             {
@@ -53,6 +55,7 @@
         }
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,13 +65,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
-
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="../top.jsp" />
+<jsp:include flush="true" page="../menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%
@@ -82,9 +86,9 @@
 	{
 %>		
 		<div class="dataTable">	
-		<h2>User - <%= "account".equals(searchby) ? inputuser[0].getName() : request.getParameter("ip") %> - Client request log last 100 entries</h2><br/>
-		<a href="admin.jsp">Return to Admin Page</a><br/><br/>
-		<a href="adminclientipchecks.jsp">Select new account or IP</a><br/>
+		<h2>User - <%= "account".equals(searchby) ? inputuser.getName() : request.getParameter("ip") %> - Client request log last 100 entries</h2><br/>
+		<a href="index.jsp">Return to Admin Page</a><br/><br/>
+		<a href="/admin/checkclientiplisting.jsp">Select new account or IP</a><br/>
 		<table id="sortableTableStats" class="sortable">
 		<thead>
 		<tr>
@@ -105,7 +109,7 @@
 			for (int c=0; c < requests.size(); c++)
 			{
 				Data.clientrequest cr = requests.get(c);
-%>			<tr <%= Data.oddLine(c) %>>
+%>			<tr>
 			<td><%= cr.id %></td>
 			<td><%= cr.time %></td>
 			<td><%= cr.ip %></td>

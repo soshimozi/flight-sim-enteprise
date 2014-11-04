@@ -1,11 +1,13 @@
 <%@page language="java"
-    	import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        contentType="text/html; charset=ISO-8859-1"
+        import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	String returnPage = request.getHeader("referer");
 
 	String error = null;
@@ -14,10 +16,8 @@
 	String mPrice="";
 	String iPrice="";
 	
-	AircraftBean[] result = data.getAircraftByRegistration(registration);
-	AircraftBean aircraft = result[0];
-	
-    ModelBean[] models = data.getModelById(aircraft.getModelId());
+	AircraftBean aircraft = data.getAircraftByRegistration(registration);
+
 	mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
 	iPrice = Integer.toString(aircraft.getMinimumPrice());
 	
@@ -42,9 +42,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery.min.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
 
 	<script type="text/javascript">
 		function sellNow(price)
@@ -83,12 +83,13 @@
         });
 
 	</script>
-</head>
 
+</head>
 <body>
 
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 	<div class="content">
 <% 

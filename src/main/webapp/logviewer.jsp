@@ -2,11 +2,12 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, java.util.*, net.fseconomy.util.*"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     Object[] output = null;
 
     String sGroupId = request.getParameter("group");
@@ -28,6 +29,7 @@
     if (output == null)
     {
 %>
+
 <div class="error">No logs to view</div>
 <%
         return;
@@ -47,9 +49,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/wz_jsgraphics.js"></script>
+    <script src="/scripts/wz_jsgraphics.js"></script>
     <script type="text/javascript">
         var log = [ <%= array %>];
         var jg;

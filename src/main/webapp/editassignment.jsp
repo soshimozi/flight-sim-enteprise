@@ -3,10 +3,11 @@
         import="net.fseconomy.data.*, net.fseconomy.util.Formatters "
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     AssignmentBean assignment = null;
     String sId = request.getParameter("id");
     String from = request.getParameter("from");
@@ -55,10 +56,8 @@
     }
     else
     {
-
         id = Integer.parseInt(sId);
-        AssignmentBean[] result = data.getAssignmentById(id);
-        assignment = result[0];
+        assignment = data.getAssignmentById(id);
     }
 
     if (from != null)
@@ -159,6 +158,7 @@ else
         }
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -168,12 +168,14 @@ else
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <% 	

@@ -1,11 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.Calendar, net.fseconomy.data.*"
+        import="java.util.List, java.util.Calendar, net.fseconomy.data.*"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     if(user == null || !user.isLoggedIn())
     {
         out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
@@ -65,7 +67,7 @@
                 {
                     //group access key change
                     //verify that the current user is the owner of the selected group
-                    UserBean group = data.getGroupById(userid)[0];
+                    UserBean group = data.getGroupById(userid);
                     if(group.isGroup() && data.accountUltimateGroupOwner(userid) == user.getId())
                     {
                         //update the group access key
@@ -85,7 +87,7 @@
         else if( request.getParameter("submit").contentEquals("UpdateUrls") )
         {
             if(request.getParameter("isservice") != null)
-                isServiceKey = request.getParameter("isservice").equals("true") ? true : false;
+                isServiceKey = request.getParameter("isservice").equals("true");
 
             requestorKey = request.getParameter("requestorkey");
             accessKey = request.getParameter("key");
@@ -114,8 +116,9 @@
         }
     }
 %>
+
 <!DOCTYPE html>
-<html langs="">
+<html lang="en">
 <head>
 
     <title>FSEconomy terminal</title>
@@ -123,7 +126,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
     <script type="text/javascript">
         var isservice = <%=isServiceKey%>;
@@ -172,8 +175,10 @@
 </head>
 
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	<div class="form" style="width: 600px">
@@ -203,7 +208,7 @@
 <%
 	if(!servicecreated)
 	{
-		out.print("<font size=\"1\"><a href=\"datafeedservicekeyrequest.jsp\">Request Service key</a></font><br/><br/>");
+		out.print("<font size=\"1\"><a href=\"serviceproviderrequest.jsp\">Request Service Provider Key</a></font><br/><br/>");
 	}
 	else if(service.getStatus() == ServiceProviderBean.STATUS_ACTIVE)
 	{
@@ -255,25 +260,25 @@
 	try
 	{	
 		//
-		UserBean[] groups = data.getGroupsForUser(user.getId());
+		List<UserBean> groups = data.getGroupsForUser(user.getId());
 		if(groups != null)
-		for (int c=0; c < groups.length; c++)
+		for (UserBean group : groups)
 		{
-			int groupid = groups[c].getId();
+			int groupid = group.getId();
 			if(data.accountUltimateGroupOwner(groupid) == user.getId())
 			{
 %>
 				<tr>
 <%
-				if(accessKey != null && accessKey.equals(groups[c].getReadAccessKey())) 
+				if(accessKey != null && accessKey.equals(group.getReadAccessKey()))
 					checked = "checked";
 				else
 					checked = "";
 %>				
-					<td><input type="radio" name="accesskey" onclick="setKey('<%= groups[c].getReadAccessKey() %>')" <%= checked %> /></td>
-					<td><%= groups[c].getName() %></td>
-					<td><%= groups[c].getReadAccessKey() %></td>
-					<td>&nbsp;&nbsp;<input type="submit" value="Reset" onclick="doSubmit('ResetReadAccessKey', '<%= groups[c].getId() %>')"/></td>
+					<td><input type="radio" name="accesskey" onclick="setKey('<%= group.getReadAccessKey() %>')" <%= checked %> /></td>
+					<td><%= group.getName() %></td>
+					<td><%= group.getReadAccessKey() %></td>
+					<td>&nbsp;&nbsp;<input type="submit" value="Reset" onclick="doSubmit('ResetReadAccessKey', '<%= group.getId() %>')"/></td>
 				</tr>
 <%			
 			}
@@ -373,10 +378,8 @@
 	<div class="dataTable"> 
 	<table>
 	<caption>Data export</caption> 
-	<col width="25%" />
-	<col width="75%" />
 	<thead>
-	<tr> 
+	<tr>
 		<th>Export type</th>
 		<th>Example URL</th>
 	</tr>

@@ -2,12 +2,15 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.* "
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
     String sId = request.getParameter("id");
 
-    int id = 0;
+    int id;
     FboBean fbo;
     id = Integer.parseInt(sId);
     fbo = data.getFbo(id);
@@ -19,8 +22,10 @@
         int iseller = Integer.parseInt(request.getParameter("seller"));
         String icao = request.getParameter("icao");
         String goods = request.getParameter("transferGoods");
+
         if (goods == null)
             goods = "no";
+
         try
         {
             data.transferFbo(fbo, user, ibuyer, iseller, icao, true);
@@ -36,9 +41,8 @@
             error = e.getMessage();
         }
     }
-    UserBean account = null;
+    UserBean account;
     account = data.getAccountById(fbo.getOwner());
-    UserBean Accounts[] = data.getExposedAccounts();
 
     if (error != null)
     {
@@ -58,12 +62,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/jquery-ui.min.js"></script>
-    <script src="scripts/AutoComplete.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
+    <script src="/scripts/jquery-ui.min.js"></script>
+    <script src="/scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -76,8 +80,10 @@
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	<div class="form" style="width: 600px">

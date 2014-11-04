@@ -2,7 +2,9 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
     String error = null;
@@ -35,6 +37,7 @@
     StringBuilder trCurrentServiceProviders = new StringBuilder();
     ServiceAccessBean bean = Data.getInstance().getServiceProviderAccess(serviceId, accountId);
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,12 +49,12 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
-    <link href="theme/bootstrap-switch.min.css" rel="stylesheet" />
-    <link href="theme/Master.css" rel="stylesheet" />
+    <link href="/theme/bootstrap-switch.min.css" rel="stylesheet" />
+    <link href="/theme/Master.css" rel="stylesheet" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-    <script src="scripts/bootstrap-switch.min.js"></script>
+    <script src="/scripts/bootstrap-switch.min.js"></script>
 
     <script>
         $(document).ready(function() {
@@ -68,8 +71,10 @@
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
     <div class="content">
 <%

@@ -196,12 +196,11 @@ div.dataTable {
 	padding-right: 10px;
 	vertical-align: top;
 }
-.dataTable table tr.oddline {
+.dataTable tr.odd {
 	background-color:#cccccc;
 }
-
-tr.odd {
-	background-color:#cccccc;
+.dataTable table tr:nth-child(odd) {
+    background-color:#cccccc;
 }
 
 .dataTable table.nopad {
@@ -448,3 +447,4 @@ div.invoiceInset img {
 .top a:active {color:#66CCFF;}
 .top a:hover {background-color: #ffffff;	color:#ff0000;}
 .top a {text-decoration:none;}
+

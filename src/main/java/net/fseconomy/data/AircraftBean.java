@@ -602,14 +602,23 @@ public class AircraftBean implements Serializable
 
         return Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
 	}
-	
-	// TBO and Condition added PRD
-	public boolean getCanFlyAssignments(ModelBean model)
+
+    // TBO and Condition added PRD
+    public boolean getCanFlyAssignments(ModelBean model)
     {
         int tbo = model.fueltype == 0 ? TBO_RECIP : TBO_JET;
 
         return (owner == 0) || ((getHoursSinceLastCheck() < 100) && (totalEngineTime < tbo) && !isBroken());
     }
+
+    // TBO and Condition added PRD
+    public boolean getCanFlyAssignments(int fueltype)
+    {
+        int tbo = fueltype == 0 ? TBO_RECIP : TBO_JET;
+
+        return (owner == 0) || ((getHoursSinceLastCheck() < 100) && (totalEngineTime < tbo) && !isBroken());
+    }
+
 	/**
 	 * Returns the brand.
 	 * @return String

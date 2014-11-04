@@ -1,22 +1,22 @@
 <%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
 	    import="java.text.*, java.util.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
-	AssignmentBean[] assignments = null;
+    Data data = (Data)application.getAttribute("data");
+
+	List<AssignmentBean> assignments = null;
 	
 	boolean groupMode = false;
 		
 	String group = request.getParameter("groupId");
 	String transfer = request.getParameter("transfer");
-	String caption = null;
+	String caption;
 
 	Locale locale = request.getLocale();
-	NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
     NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 	int assignmentsTotalPay = 0;
 		
@@ -74,6 +74,7 @@
 	String groupParam = groupId != -1 ? "?groupId=" + groupId : "?transfer=" + transferId;
 	String returnPage = request.getRequestURI() + groupParam;
 %>
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -83,25 +84,25 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link rel="stylesheet" type="text/css" href="theme/Master.css" />
-	<link rel="stylesheet" type="text/css" href="theme/tablesorter-style.css" />
+	<link rel="stylesheet" type="text/css" href="/theme/Master.css" />
+	<link rel="stylesheet" type="text/css" href="/theme/tablesorter-style.css" />
 	<link rel="stylesheet" type="text/css" href="fancybox/jquery.fancybox-1.3.1.css" />
-	<link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
 	
 	<% //regressed jquery so that lightbox would work %>
-	<script src="scripts/jquery.min.js"></script>
-	<script src="scripts/jquery-ui.min.js"></script>
+	<script src="/scripts/jquery.min.js"></script>
+	<script src="/scripts/jquery-ui.min.js"></script>
 	<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
 	
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
 	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script src="scripts/PopupWindow.js"></script>
-	<script src="scripts/location-mapper.js"></script>
-	<script src="scripts/AutoComplete.js"></script>
+	<script src="/scripts/PopupWindow.js"></script>
+	<script src="/scripts/location-mapper.js"></script>
+	<script src="/scripts/AutoComplete.js"></script>
 	
 	<script type="text/javascript">
 	
@@ -241,8 +242,8 @@
 		var i = 0;
 		
 	</script>
-</head>
 
+</head>
 <body>
 
 <jsp:include flush="true" page="top.jsp" />
@@ -260,7 +261,7 @@
 	<input type="hidden" name="groupId" value="<%= groupId %>" />
 	<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
 <%	
-	if (assignments != null && assignments.length > 0) 
+	if (assignments != null && assignments.size() > 0)
 	{
 %>	
 		<table  class="assigmentTable tablesorter-default tablesorter">
@@ -286,12 +287,13 @@
 		</thead>
 		<tbody>
 <%
-		for (int c=0; c< assignments.length; c++)
+        int counter = 0;
+		for (AssignmentBean assignment : assignments)
 		{
-			String aircraftReg = assignments[c].getAircraft();
-			String image = "img/set2_" + assignments[c].getActualBearingImage(data) + ".gif";
+			String aircraftReg = assignment.getAircraft();
+			String image = "img/set2_" + assignment.getActualBearingImage(data) + ".gif";
 			String cargo;
-			AssignmentBean as = assignments[c];
+			AssignmentBean as = assignment;
 					  
 			AirportBean destination = as.getDestinationAirport(data);
 			AirportBean location = as.getLocationAirport(data);
@@ -347,11 +349,11 @@
 				
 			</script>
 			
-			<tr <%= Data.oddLine(c) %>>
+			<tr>
 			<td>
 				<div class="checkbox" >
-					<input class="css-checkbox" type="checkbox" id="mycheckbox<%=c%>" name="select" value="<%= as.getId() %>" <%=lockedBy!=null ? "disabled" : "" %>/>
-					<label class="css-label" for="mycheckbox<%=c%>"></label>
+					<input class="css-checkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= as.getId() %>" <%=lockedBy!=null ? "disabled" : "" %>/>
+					<label class="css-label" for="mycheckbox<%=counter%>"></label>
 				</div>
 			</td>
 			<td class="numeric"><%= Formatters.currency.format(as.calcPay()) %></td>
@@ -422,7 +424,8 @@
 %>
 			</td>
 		</tr>
-<% 	
+<%
+            counter++;
 		} 
 %>
 

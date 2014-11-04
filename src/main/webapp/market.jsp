@@ -1,13 +1,13 @@
-<%@ page language="java"
-	import="net.fseconomy.data.*, net.fseconomy.util.*"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	//setup return page if action used
 	String returnPage = request.getRequestURI();
 	response.addHeader("referer", request.getRequestURI());
@@ -42,8 +42,8 @@
 	
 	boolean isSubmit = request.getParameter("submit") != null;
 	boolean isSearch = (modelId != -1) || (lowPrice != -1) || (highPrice != -1) || (lowTime != -1) || (highTime != -1) || (distance != -1) || (lowPax != -1) || (highPax != -1) || (lowLoad != -1) || (highLoad != -1) || hasVfr || hasIfr || hasGps || hasAp || isSystemOwned || isPlayerOwned || equipment != "all";
-	
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,9 +53,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
-	<script src="scripts/AnchorPosition.js"></script>
-	<script src="scripts/PopupWindow.js"></script>
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<script src="/scripts/AnchorPosition.js"></script>
+	<script src="/scripts/PopupWindow.js"></script>
 	<script type='text/javascript' src='scripts/common.js'></script>
 	<script type='text/javascript' src='scripts/css.js'></script>
 	<script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>
@@ -201,16 +201,15 @@
 	</script>
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<div id="wrapper">
-<jsp:include flush="true" page="menu.jsp">
-	<jsp:param name="open" value="market"/>
-</jsp:include>
 
+<jsp:include flush="true" page="top.jsp" />
+<jsp:include flush="true" page="menu.jsp" />
+
+<div id="wrapper">
 <div class="content">
 <%
 	String error = null;
-	AircraftBean[] aircraft = null;
+	List<AircraftBean> aircraftList = null;
 	Data.groupMemberData[] staffGroups = user.getStaffGroups();
 	
 	if (isSubmit) 
@@ -219,7 +218,7 @@
 		{
 			try
 			{
-				aircraft = data.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
+                aircraftList = data.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
 			}
 			catch(DataError e)
 			{
@@ -228,7 +227,7 @@
 		}
 		else
 		{
-			aircraft = data.getAircraftForSale();
+            aircraftList = data.getAircraftForSale();
 		}			
 
 		if (error != null)
@@ -325,43 +324,43 @@
 		</thead>
 		<tbody>
 <%
-		for (int c=0; c < aircraft.length; c++)
+		for (AircraftBean aircraft : aircraftList)
 		{
-			String reg = aircraft[c].getRegistration();
+			String reg = aircraft.getRegistration();
 			String reg2 = "";
 			String acLocation = "In Flight";
 			String acICAO = acLocation;
-			String price = Formatters.currency.format(aircraft[c].getSellPrice());
-			if (aircraft[c].getLocation() != null)
+			String price = Formatters.currency.format(aircraft.getSellPrice());
+			if (aircraft.getLocation() != null)
 			{		
-				AirportBean location = data.getAirport(aircraft[c].getLocation()); 
+				AirportBean location = data.getAirport(aircraft.getLocation()); 
 				acLocation=location.getTitle();
-				acICAO=aircraft[c].getLocation();
+				acICAO=aircraft.getLocation();
 			}
 			
-			int owner=aircraft[c].getOwner();
+			int owner=aircraft.getOwner();
 			if (owner != 0)
 				reg2 = reg + "*";
 			else
 				reg2 = reg;	
 			
 			// Calculate the airframe time		
-			int afminutes = aircraft[c].getAirframe()/60;
+			int afminutes = aircraft.getAirframe()/60;
 			String afTime = Formatters.twoDigits.format(afminutes / 60) + ":" + Formatters.twoDigits.format(afminutes % 60);
 			
 			// If the last 100hr check was > 75 hours ago, calculate the time until the next one
-			int checkminutes = (aircraft[c].getTotalEngineTime() - aircraft[c].getLastCheck())/60;
+			int checkminutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck())/60;
 			if (checkminutes > (75 * 60)) 
 			{
 				int temp = 6000 - checkminutes;
 			    afTime += " (" + Formatters.twoDigits.format(temp / 60) + ":" + Formatters.twoDigits.format(temp % 60) + ")";
 			}
 %>
-		<tr <%= Data.oddLine(c) %>>
+		<tr>
 		<td><a class="normal" href="aircraftlog.jsp?registration=<%= reg %>"><%= reg2 %></a></td>
-		<td><%= aircraft[c].getMakeModel() %></td>
-		<td><%= aircraft[c].getSEquipment() %></td>
-		<td><a title="<%=acLocation%>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft[c].getLocation()) %>"><%= acICAO %></a></td>
+		<td><%= aircraft.getMakeModel() %></td>
+		<td><%= aircraft.getSEquipment() %></td>
+		<td><a title="<%=acLocation%>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getLocation()) %>"><%= acICAO %></a></td>
 		<td><%= price %></td>
 		<td><%= afTime %></td>
 		<td><a class="link" href="javascript:doSubmit('<%= reg %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
@@ -400,11 +399,11 @@
 					By model <select name="model" class="formselect">
 						<option class="formselect" value=""></option>						
 						<%
-							ModelBean[] models = data.getAllModels();
-							for (int c=0; c<models.length; c++)
+							List<ModelBean> models = data.getAllModels();
+							for (ModelBean model : models)
 							{
 						%>
-								<option class="formselect" value="<%= models[c].getId() %>" <%= models[c].getId() == modelId ? "selected" : ""%>><%= models[c].getMakeModel() %></option>
+								<option class="formselect" value="<%= model.getId() %>" <%= model.getId() == modelId ? "selected" : ""%>><%= model.getMakeModel() %></option>
 						<%		
 							}
 						%>

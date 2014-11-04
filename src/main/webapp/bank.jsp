@@ -1,16 +1,17 @@
-<%@ page language="java"
-	import="java.util.*, java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	//setup return page if action used
 	String returnPage = request.getRequestURI();
 	
-	UserBean account = null;
-	UserBean Accounts[] = data.getExposedAccounts();
+	UserBean account;
 	String sGroupId = request.getParameter("id");
 	String message = (String) request.getAttribute("message");
 
@@ -41,7 +42,8 @@
 	{
 		account = user;
 	}
-%>	
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,18 +53,20 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     
-	<link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css" />
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery.min.js"></script>
-	<script src="scripts/jquery-ui.min.js"></script>
-	<script src="scripts/AutoComplete.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
+	<script src="/scripts/jquery-ui.min.js"></script>
+	<script src="/scripts/AutoComplete.js"></script>
 	
-	<script type="text/javascript">	
+	<script type="text/javascript">
+
 		$(function() 
 		{
 			initAutoComplete("#accountname", "#account", <%= Data.ACCT_TYPE_ALL %>);
-		});	
+		});
+
 	</script>
 
 </head>

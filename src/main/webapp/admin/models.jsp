@@ -1,21 +1,23 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
-    ModelBean[] models = data.getAllModels();
-    FSMappingBean[] mappings = data.getRequestedMappings();
+    List<ModelBean> models = data.getAllModels();
+    List<FSMappingBean> mappings = data.getRequestedMappings();
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,16 +27,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script type='text/javascript' src='scripts/common.js'></script>
-    <script type='text/javascript' src='scripts/css.js'></script>
-    <script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>
+    <script type='text/javascript' src='/scripts/common.js'></script>
+    <script type='text/javascript' src='/scripts/css.js'></script>
+    <script type='text/javascript' src='/scripts/standardista-table-sorting.js'></script>
 
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <div class="dataTable">	
@@ -57,13 +61,12 @@
 	</thead>
 	<tbody>
 <%
-	for (int c=0; c < models.length; c++)
+	for (ModelBean model : models)
 	{
-		ModelBean model = models[c];
 		int minutes = model.getMaxRentTime()/60;
 		String rentTime = Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
 %>
-	<tr <%= Data.oddLine(c) %>>
+	<tr>
 	<td><%= model.getMakeModel() %></td>
 	<td><%= model.getCrew() %></td>
 	<td><%= model.getPrice() %></td>
@@ -75,7 +78,7 @@
 	<td><%= model.getNumSell() %></td>
 	<td><%= model.getMinAirportSize() %></td>	
 	<td>
-	<a class="link" href="editmodel.jsp?id=<%= model.getId() %>">Edit</a>
+	<a class="link" href="/admin/modeledit.jsp?id=<%= model.getId() %>">Edit</a>
 	</td>
 	<td></td>
 	</tr>
@@ -85,13 +88,14 @@
 	</tbody>
 	</table>
 	<div class="formgroup">
-	<form method="post" action="editmodel.jsp">
+	<form method="post" action="/admin/modeledit.jsp">
 	Create new model based on <select name="newmodel" class="formselect">
 	<option value=""></option>
 <%
-	for (int c=0; c < mappings.length; c++) {
+	for (FSMappingBean map : mappings)
+    {
 %>
-	<option class="formselect" value="<%= mappings[c].getId() %>"><%= mappings[c].getAircraft() %></option>
+	<option class="formselect" value="<%= map.getId() %>"><%= map.getAircraft() %></option>
 <%
 	}
 %>

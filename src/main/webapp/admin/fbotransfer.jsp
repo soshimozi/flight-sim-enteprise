@@ -1,21 +1,21 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.* "
-%>
-<%
-    Data data = (Data)application.getAttribute("data");
+        import="net.fseconomy.data.* "
 %>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
     String sId = request.getParameter("id");
 
-    int id = 0;
+    int id;
     FboBean fbo;
     id = Integer.parseInt(sId);
     fbo = data.getFbo(id);
@@ -34,7 +34,7 @@
         {
             data.transferFbo(fbo, user, ibuyer, iseller, icao, goods.equals("checkbox"));
 %>
-        <jsp:forward page="admin.jsp"></jsp:forward>
+        <jsp:forward page="/admin/index.jsp"></jsp:forward>
 <%
             return;
         }
@@ -44,6 +44,7 @@
         }
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,12 +54,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/jquery-ui.min.js"></script>
-    <script src="scripts/AutoComplete.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="/scripts/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -71,17 +72,16 @@
 
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<div id="wrapper">
-<jsp:include flush="true" page="menu.jsp" />
 
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
+<div id="wrapper">
 <div class="content">
 <%
-UserBean account = null;
+UserBean account;
 account = data.getAccountById(fbo.getOwner());
-UserBean Accounts[] = data.getAccounts();
-
-if (error != null) 
+if (error != null)
 {
 %>
 	<div class="error"><%= error %></div>
@@ -91,7 +91,7 @@ if (error != null)
 	<div class="form" style="width: 600px">
 	<h2>Transfer FBO</h2>
 	
-	<form method="post" action="admintransferfbo.jsp">
+	<form method="post" action="/admin/fbotransfer.jsp">
 	<div class="formgroup high">
 	<p>
 	<input type="hidden" name="submit" value="true"/>

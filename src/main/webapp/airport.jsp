@@ -1,16 +1,17 @@
-<%@ page language="java"
-	import="java.util.*, java.text.*, org.apache.commons.lang3.math.*, net.fseconomy.data.* "
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.*, org.apache.commons.lang3.math.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<%@ page import="net.fseconomy.util.Formatters" %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="airport" class="net.fseconomy.data.AirportBean">
-	<jsp:setProperty name="airport" property="icao"/>
+    <jsp:setProperty name="airport" property="icao"/>
 </jsp:useBean>
 
 <%
-	if(user == null || !user.isLoggedIn()) 
+    Data data = (Data)application.getAttribute("data");
+
+	if(user == null || !user.isLoggedIn())
 	{
 		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
 		return;
@@ -99,17 +100,16 @@
 
 	if (registration != null && !registration.equals("") && isSearch)
 	{
-		AircraftBean[] ac = data.getAircraftByRegistration(registration);
-        if (ac.length > 0)
-            airport.setIcao(ac[0].getLocation());
+		AircraftBean ac = data.getAircraftByRegistration(registration);
+        if (ac != null)
+            airport.setIcao(ac.getLocation());
 	}
 
     if (airport.getIcao() != null && Data.cachedAPs.containsKey(airport.getIcao().toUpperCase()))
         data.fillAirport(airport);
 
-	HashSet<String> aircraftList = new HashSet<>();
+	HashSet<String> assignmentAircraftList = new HashSet<>();
 %>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -120,21 +120,21 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>	
 	
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
-	<link href="theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
 	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
 
 	<% //regressed jquery so that lightbox would work %>
-	<script src="scripts/jquery.min.js"></script>
+	<script src="/scripts/jquery.min.js"></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script src="/scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
-	<script src="scripts/PopupWindow.js"></script>
+	<script src="/scripts/PopupWindow.js"></script>
 	
 	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script charset="iso-8859-1" src="scripts/js/highcharts.js"> </script>
+	<script charset="iso-8859-1" src="/scripts/js/highcharts.js"> </script>
 	
 	<script type="text/javascript">
 		
@@ -303,7 +303,7 @@
 		function checkNone()
 		{
 			var field = document.getElementById("airportForm").select;
-			for (i = 0; i < field.length; i++)
+			for (var i = 0; i < field.length; i++)
 				field[i].checked = false;
 			
 		    field.checked = false; // needed in case of only one row
@@ -352,10 +352,11 @@
 				widgets : ['zebra','columns']
 			});
 		
-			$('.goodsearchTable').tablesorter();		
+			$('.goodsearchTable').tablesorter();
 		});
-	
+
 	</script>
+
 </head>
 <body>
 
@@ -439,8 +440,8 @@
 		double lon1 = airport.getLon() - bound;
 		double lon2 = airport.getLon() + bound;
 		String box = lon1 + "," + lat1 + "," + lon2 + "," + lat2;
-		FboBean[] fbo = data.getFboByLocation(airport.getIcao());
-		FboBean[] fboinactive = data.getInactiveFboByLocation(airport.getIcao());		
+		List<FboBean> fbos = data.getFboByLocation(airport.getIcao());
+		List<FboBean> fboinactive = data.getInactiveFboByLocation(airport.getIcao());		
 %>
 	<div class="airportInfo">
         <table>
@@ -452,7 +453,7 @@
                             <h1><jsp:getProperty name="airport" property="icao" /></h1>
                         </td>
                         <td>
-                            <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= airport.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img style="border-style: none;" src="<%= airport.getDescriptiveImage(fbo) %>" /></a>
+                            <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= airport.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img style="border-style: none;" src="<%= airport.getDescriptiveImage(fbos) %>" /></a>
                         </td>
                         <td>
                             <a href="http://www.fscharts.com/?action=search&type=icao&term=<%= airport.getIcao() %>" onclick="this.target='_blank'"><img style="border-style: none;" src="img/fscharts.gif"/></a>
@@ -487,7 +488,7 @@
 		String jeta = Formatters.currency.format(jetaPrice);
 		
 		boolean hasRepairShop = airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE;
-		if (airport.isAvgas() || fbo.length > 0 || hasRepairShop || fboinactive.length > 0) 
+		if (airport.isAvgas() || fbos.size() > 0 || hasRepairShop || fboinactive.size() > 0) 
 		{
 			if (airport.isAvgas() || hasRepairShop)
 			{ 
@@ -503,7 +504,7 @@
 <%
             }
 
-            for (FboBean aFbo : fbo)
+            for (FboBean aFbo : fbos)
             {
                 GoodsBean fuelleft = data.getGoods(airport.getIcao(), aFbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
                 GoodsBean jetaleft = data.getGoods(airport.getIcao(), aFbo.getOwner(), GoodsBean.GOODS_FUELJETA);
@@ -552,10 +553,10 @@
                         </tr>
 <%
             }
-			if (fboinactive.length > 0) 
+			if (fboinactive.size() > 0) 
 			{
 				String inactiveStyle = ""; // " style=\"display: table-row;\" ";
-				if (fbo.length > 0) 
+				if (fbos.size() > 0) 
 				{
 					String inactiveForSaleFlag = "";
 					inactiveStyle = " style=\"display: none;\" ";
@@ -570,7 +571,7 @@
 %>
                         <tr>
                             <td class="disabledtext" colspan="4">
-                                <a href="javascript:showInactive()"><%= fboinactive.length %> closed <%= (fboinactive.length > 1 ? "FBOs" : "FBO") + inactiveForSaleFlag %></a>
+                                <a href="javascript:showInactive()"><%= fboinactive.size() %> closed <%= (fboinactive.size() > 1 ? "FBOs" : "FBO") + inactiveForSaleFlag %></a>
                             </td>
                         </tr>
 <%
@@ -633,8 +634,8 @@
                 </div>
                 <!-- END MAP SECTION -->
 <%
-		FboFacilityBean[] carriers = data.getFboFacilitiesForAirport(airport);
-		if (carriers.length > 0)
+		List<FboFacilityBean> carriers = data.getFboFacilitiesForAirport(airport);
+		if (carriers.size() > 0)
 		{
 			String airline;
 			boolean spaceAvailable = false;
@@ -731,9 +732,9 @@
         </table>
     </div>
 <%
-        AircraftBean[] aircraft;
-		AssignmentBean[] assignments;
-		GoodsBean[] goods = data.getGoodsAtAirport(airport.getIcao(), airport.getSize(), fuelPrice, jetaPrice);
+        List<AircraftBean> aircraftList;
+		List<AssignmentBean> assignments;
+		List<GoodsBean> goods = data.getGoodsAtAirport(airport.getIcao(), airport.getSize(), fuelPrice, jetaPrice);
 
 		AssignmentBean capableAssignment = null;
 
@@ -750,9 +751,9 @@
 			assignments = data.getAssignments(airport.getIcao(), minPax, maxPax, minKG, maxKG);
 
 		if (aircraftArea)
-			aircraft = data.getAircraftInArea(airport.getIcao(), airport.closestAirports);
+            aircraftList = data.getAircraftInArea(airport.getIcao(), airport.closestAirports);
 		else
-			aircraft = data.getAircraft(airport.getIcao());
+            aircraftList = data.getAircraft(airport.getIcao());
 
 		String URL = returnPage + "?icao=" + airport.getIcao();	
 		String sToAirport = "&toAirport=" + (toAirport?1:0);
@@ -789,16 +790,17 @@
                 </tr>
             </thead>
             <tbody>
-<%		if (assignments.length == 0)
+<%		if (assignments.size() == 0)
 		{			
 %> 			    <tr><td colspan="10">No assignments</td></tr>
 				<tr><td colspan="10">&nbsp;</td></tr>
 <%		} 
 		else 
 		{
-			for (int c=0; c< assignments.length; c++)
-			{	
-				AssignmentBean assignment = assignments[c];
+            int counter = 0;
+			for (AssignmentBean assignment : assignments)
+			{
+                counter++;
 				int id = assignment.getId();
 
                 if (id == capable)
@@ -807,10 +809,9 @@
 				String aircraftReg = assignment.getAircraft();
 
                 if (aircraftReg != null)
-                    aircraftList.add(aircraftReg);
+                    assignmentAircraftList.add(aircraftReg);
 
 				String image = "img/set2_" + assignment.getActualBearingImage(data) + ".gif";
-				String cargo;
 				AirportBean destination = assignment.getDestinationAirport(data);
 				AirportBean location = assignment.getLocationAirport(data);
 				
@@ -821,11 +822,11 @@
                 <tr>
                     <td>
                         <div class="checkbox" >
-                            <input class="css-checkbox" type="checkbox" id="mycheckbox<%=c%>" name="select" value="<%= id %>"/>
-                            <label class="css-label" for="mycheckbox<%=c%>"></label>
+                            <input class="css-checkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= id %>"/>
+                            <label class="css-label" for="mycheckbox<%=counter%>"></label>
                         </div>
                     </td>
-                    <td class="numeric"><%= Formatters.currency.format(assignments[c].calcPay()) %></td>
+                    <td class="numeric"><%= Formatters.currency.format(assignment.calcPay()) %></td>
 <% 				if (ap.equals(locap))
 				{
 %>					<td>
@@ -865,8 +866,8 @@
 				{
 %>					<td>
 						<img src="img/blankap.gif" style="vertical-align:middle;" />
-						<a class="normal" title="<%= destination.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + assignments[c].getTo()) %>">
-							<%= assignments[c].getTo() %>
+						<a class="normal" title="<%= destination.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>">
+							<%= assignment.getTo() %>
 						</a>
 					</td>
 <%				} 
@@ -876,8 +877,8 @@
 						<a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + location.getIcao()+"&icaod="+ destination.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
 							<img src="<%= destination.getDescriptiveImage(data.getFboByLocation(destination.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
 						</a>
-						<a class="normal" title="<%= destination.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + assignments[c].getTo()) %>">
-							<%= assignments[c].getTo() %>
+						<a class="normal" title="<%= destination.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>">
+							<%= assignment.getTo() %>
 						</a>
 					</td>
 <%				}
@@ -1045,7 +1046,7 @@
 	    </table>
 	</form>
 <%	
-		if (aircraft.length == 0)
+		if (aircraftList.size() == 0)
 		{
 %>
     <div class="message">No aircraft to rent</div>
@@ -1088,26 +1089,26 @@
 	    <tbody>
 
 <%
-        for (int c=0; c< aircraft.length; c++)
+        for (AircraftBean aircraft : aircraftList)
 		{
-            if (aircraft[c].getShippingState() != 0 ||
-                (capableAssignment != null && !aircraft[c].fitsAboard(capableAssignment)))
+            if (aircraft.getShippingState() != 0 ||
+                (capableAssignment != null && !aircraft.fitsAboard(capableAssignment)))
                 continue;
 
 			String reg2;
-			String reg = aircraft[c].getRegistration();
-			String saleprice = Formatters.currency.format(aircraft[c].getSellPrice());
-			int owner=aircraft[c].getOwner();
-			int sellprice=aircraft[c].getSellPrice();
+			String reg = aircraft.getRegistration();
+			String saleprice = Formatters.currency.format(aircraft.getSellPrice());
+			int owner=aircraft.getOwner();
+			int sellprice=aircraft.getSellPrice();
 
             if (owner != 0)
                 reg2 = reg + "*";
             else
                 reg2 = reg;
 
-			int priceDry= aircraft[c].getRentalPriceDry();
-			int priceWet= aircraft[c].getRentalPriceWet();
-			int image = aircraft[c].getBearingImage();
+			int priceDry= aircraft.getRentalPriceDry();
+			int priceWet= aircraft.getRentalPriceWet();
+			int image = aircraft.getBearingImage();
 			String sImage = "";
 
             if (image != -1)
@@ -1120,9 +1121,9 @@
             if (priceWet > 0)
                 price = price + ((priceDry > 0) ? "/" : "") + "$" + priceWet + " Wet";
 
-			price = price + (aircraft[c].getAccounting() == AircraftBean.ACC_TACHO ? " [Tacho]" : " [Hour]");	
+			price = price + (aircraft.getAccounting() == AircraftBean.ACC_TACHO ? " [Tacho]" : " [Hour]");	
 %>
-		    <tr <%= Data.oddLine(c) %>>
+		    <tr>
 		        <td>
 			        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + reg) %>"><%= reg2 %></a>
 <%			if (sellprice !=0)
@@ -1131,44 +1132,44 @@
 				    <img src="img/sale.gif" style="border-style: none;" title="<%=saleprice%>" />
 <%			
 			}
-			if (aircraft[c].isBroken())
+			if (aircraft.isBroken())
             {
-                if (aircraft[c].isAllowRepair())
+                if (aircraft.isAllowRepair())
                     out.print("<span style='background:green'>");
 %>
                     <img src="img/repair.gif" style="border-style: none; vertical-align:middle;" />
 <%
-                if (aircraft[c].isAllowRepair())
+                if (aircraft.isAllowRepair())
                     out.print("</span>");
             }
 %>
 		        </td>
-                <td><%= aircraft[c].getMakeModel() %></td>
-                <td><%= aircraft[c].getSEquipment() %></td>
+                <td><%= aircraft.getMakeModel() %></td>
+                <td><%= aircraft.getSEquipment() %></td>
 <% 			if (aircraftArea) 
 			{ 
-				if (aircraft[c].getLocation() == null) 
+				if (aircraft.getLocation() == null) 
 				{
 %>
-                <td><%= aircraft[c].getSLocation() %></td>
+                <td><%= aircraft.getSLocation() %></td>
 <%
                 }
 				else 
 				{ 
 %>
-                <td><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft[c].getLocation()) %>"><%= aircraft[c].getSLocation() %></a></td>
+                <td><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getLocation()) %>"><%= aircraft.getSLocation() %></a></td>
 <%
                 }
 			} 
 %>
-                <td><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft[c].getHome()) %>"><%= aircraft[c].getHome() %></a></td>
+                <td><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getHome()) %>"><%= aircraft.getHome() %></a></td>
                 <td class="numeric"><%= price %></td>
-                <td class="numeric"><%= aircraft[c].isAdvertiseFerry() ? "(F) ":"" %><%= Formatters.currency.format(aircraft[c].getBonus()) %> <%= sImage %></td>
+                <td class="numeric"><%= aircraft.isAdvertiseFerry() ? "(F) ":"" %><%= Formatters.currency.format(aircraft.getBonus()) %> <%= sImage %></td>
 		
 <% //All-In check to see if reg # is assigned to a plane in the jobs list up top - disable the rent option
-			if (!aircraftList.contains(aircraft[c].getRegistration())) 
+			if (!assignmentAircraftList.contains(aircraft.getRegistration())) 
 			{ 
-				if (aircraft[c].getUserLock() > 0) 
+				if (aircraft.getUserLock() > 0) 
 				{	
 %>
                 <td>[locked]</td>
@@ -1182,18 +1183,18 @@
                     if (priceDry > 0)
                     {
 %>
-                    <a class="link" href="javascript:doSubmit2('<%= aircraft[c].getRegistration() %>', 'dry')">Rent dry</a>
+                    <a class="link" href="javascript:doSubmit2('<%= aircraft.getRegistration() %>', 'dry')">Rent dry</a>
 <%					}
 					if (priceWet > 0)
 					{
 %>
-                    <%= priceDry > 0 ? " | " : "" %><a class="link" href="javascript:doSubmit2('<%= aircraft[c].getRegistration() %>', 'wet')">Rent wet</a>
+                    <%= priceDry > 0 ? " | " : "" %><a class="link" href="javascript:doSubmit2('<%= aircraft.getRegistration() %>', 'wet')">Rent wet</a>
 <%
                     }
-					if (priceDry + priceWet == 0 && aircraft[c].canAlwaysRent(user)) 
+					if (priceDry + priceWet == 0 && aircraft.canAlwaysRent(user)) 
 					{
 %>
-                    <a class="link" href="javascript:doSubmit2('<%= aircraft[c].getRegistration() %>', 'wet')">Rent</a>
+                    <a class="link" href="javascript:doSubmit2('<%= aircraft.getRegistration() %>', 'wet')">Rent</a>
 <%
                     }
 %>
@@ -1232,11 +1233,11 @@
 %>
 	
 <%
-    if (goods != null && goods.length > 0)
+    if (goods != null && goods.size() > 0)
 	{
 %>
     <div class="dataTable">
-        <table id="sortableTableAC2" class="sortable">
+        <table>
             <caption>Goods</caption>
             <thead>
                 <tr>
@@ -1252,25 +1253,25 @@
             </thead>
             <tbody>
 <%
-        for (int c=0; c<goods.length; c++)
+        for (GoodsBean good : goods)
 		{
             //Ignore aircraft being shipped
-            if (goods[c].getType() == 99)
+            if (good.getType() == 99)
                 continue;
 
-            String buyPrice = goods[c].isBuy() ? Formatters.currency.format(goods[c].getPriceBuy()) : "-";
-            String sellPrice = goods[c].isSell() ? Formatters.currency.format(goods[c].getPriceSell()) : "-";
-            int amount = goods[c].getAmountForSale();
-            int max = goods[c].getAmountAccepted();
-            int discount = goods[c].getMaxDiscount();
+            String buyPrice = good.isBuy() ? Formatters.currency.format(good.getPriceBuy()) : "-";
+            String sellPrice = good.isSell() ? Formatters.currency.format(good.getPriceSell()) : "-";
+            int amount = good.getAmountForSale();
+            int max = good.getAmountAccepted();
+            int discount = good.getMaxDiscount();
             String sAmount = amount == -1 ? "Unlimited" : ( amount + " Kg");
             String sLimit = max <0 ? "No limit" : (max + " Kg");
-            String sDiscount = discount == 0 ? "-" : (discount + "% at " + goods[c].getMaxDiscountAmount() + " Kg");
-            String buyUrl = "buygoods.jsp?icao=" + airport.getIcao() + "&owner=" + goods[c].getOwner() + "&type=" + goods[c].getType();
+            String sDiscount = discount == 0 ? "-" : (discount + "% at " + good.getMaxDiscountAmount() + " Kg");
+            String buyUrl = "buygoods.jsp?icao=" + airport.getIcao() + "&owner=" + good.getOwner() + "&type=" + good.getType();
 %>
-				<tr <%= Data.oddLine(c) %>>
-                    <td><%= goods[c].getCommodity()%></td>
-                    <td><%= goods[c].getOwnerName() %></td>
+				<tr>
+                    <td><%= good.getCommodity()%></td>
+                    <td><%= good.getOwnerName() %></td>
                     <td class="numeric"><%= sellPrice %></td>
                     <td class="numeric"><%= buyPrice %></td>
                     <td class="numeric"><%= sAmount %></td>
@@ -1323,7 +1324,7 @@ else
         if (distanceParam != null && !distanceParam.equals(""))
             distance = Integer.parseInt(distanceParam);
 
-        AirportBean[] airports = null;
+        List<AirportBean> airports = null;
         try
         {
             if (hasAssignments || hasFuel || hasJeta || hasRepair || hasFbo || hasAcForSale || ferry || modelId != -1 || commodity > 0 || (nameParam != null && !nameParam.equals("")) || (fromParam != null && !fromParam.equals("")))
@@ -1364,11 +1365,10 @@ else
             </thead>
             <tbody>
 <%
-            for (int c=0; c< airports.length; c++)
+            for (AirportBean ap : airports)
             {
-                AirportBean ap = airports[c];
 %>
-                <tr <%= Data.oddLine(c) %>>
+                <tr>
 <%
                 if (fromParam == null || fromAirport.getIcao().equals(ap.getIcao()))
                 {
@@ -1423,7 +1423,7 @@ else
         }
     }
 }
-	ModelBean[] models = data.getAllModels();
+	List<ModelBean> models = data.getAllModels();
 %>
 
     <div class="form" style="width: 500px">
@@ -1445,10 +1445,10 @@ else
                 <select name="model" class="formselect">
                     <option class="formselect" value=""></option>
 <%
-	for (int c=0; c<models.length; c++)
+	for (ModelBean model : models)
 	{
 %>
-                    <option class="formselect" value="<%= models[c].getId() %>" <%= models[c].getId() == modelId ? "selected" : ""%>><%= models[c].getMakeModel() %></option>
+                    <option class="formselect" value="<%= model.getId() %>" <%= model.getId() == modelId ? "selected" : ""%>><%= model.getMakeModel() %></option>
 <%
     }
 %>

@@ -1,13 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     String sFbo = request.getParameter("id");
     String sFrom = request.getParameter("from");
     int from = 0;
@@ -16,12 +16,13 @@
 
     int fbo = Integer.parseInt(sFbo);
     String linkOptions = "id=" + fbo + "&";
-    LogBean[] logs = data.getLogForFbo(fbo, from, Data.stepSize);
+    List<LogBean> logs = data.getLogForFbo(fbo, from, Data.stepSize);
     int amount = data.getAmountLogForFbo(fbo);
     FboBean fboinfo = data.getFbo(fbo);
     AirportBean airport = data.getAirport(fboinfo.getLocation());
     String paymentUrl = "paymentlog.jsp?groupId=" + fboinfo.getOwner() + "&fboId=" + fbo;
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,17 +30,18 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 <meta name="GENERATOR" content="IBM WebSphere Studio" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
-<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 <title>FSEconomy terminal</title>
 
-<script src="scripts/PopupWindow.js"></script>
+<script src="/scripts/PopupWindow.js"></script>
 <script type="text/javascript"> var gmap = new PopupWindow(); </script>
+
 </head>
-
-
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	
@@ -57,15 +59,14 @@
 		</thead>
 		<tbody>
 <%
-	AircraftBean[] aircraftData;
+	AircraftBean aircraft;
 	int fueltype;
-	for (int c=0; c < logs.length; c++)
+	for (LogBean log : logs)
 	{
-		LogBean log = logs[c];
 		String action = log.getType();
 		String reg = log.getAircraft();
-		aircraftData = data.getAircraftByRegistration(reg);
-		fueltype = aircraftData[0].getFuelType();
+		aircraft = data.getAircraftByRegistration(reg);
+		fueltype = aircraft.getFuelType();
 		float money = 0;
 		
 		if (action.equals("refuel"))
@@ -77,7 +78,7 @@
 			money = log.getMaintenanceCost();
 		}
 %>
-		<tr <%= Data.oddLine(c) %>>
+		<tr>
 			<td><%= Formatters.getUserTimeFormat(user).format(log.getTime()) %></td>
 			<td><a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + reg ) %>"><%= log.getAircraft() %></a></td>
 			<td><%=	log.getType() == "refuel" ? (fueltype < 1 ? log.getSType() + " 100LL" : log.getSType() + " JetA") : log.getSType()%></td>

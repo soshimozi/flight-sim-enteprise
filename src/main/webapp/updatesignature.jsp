@@ -1,17 +1,20 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.*, net.fseconomy.data.*, org.apache.commons.fileupload.*, java.io.File, java.io.IOException"%>
+        import="java.util.*, net.fseconomy.data.*, org.apache.commons.fileupload.*, java.io.File, java.io.IOException"
+%>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
-	if (!Data.needLevel(user, UserBean.LEV_MODERATOR)) 
+
+	if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
 	{
 		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
 		return; 
 	}
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +24,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 	
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 <%
 	String message = null;
@@ -81,6 +84,7 @@
 %>
 </head>
 <body>
+
 <%
 	if (message != null) 
 	{

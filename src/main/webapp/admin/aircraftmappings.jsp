@@ -1,34 +1,30 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="java.util.HashMap, java.util.List, net.fseconomy.data.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
 
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR) && !Data.needLevel(user, UserBean.LEV_ACA))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
     String returnPage = request.getRequestURI();
 
+    List<ModelBean> models = data.getAllModels();
+    HashMap<Integer, ModelBean> modelMap = new HashMap<>();
+
     String htmloptions = "<select><option value=\"\">[No change]</option><option value=\"0\">[Unmap]</option><option value=\"-1\">[Delete]</option>";
-    ModelBean[] indexedModels, models = data.getAllModels();
-    int max = 0;
 
-    for(ModelBean model1: models)
-    {
-        if (model1.getId() > max)
-            max = model1.getId();
-    }
-
-    indexedModels = new ModelBean[max + 1];
     for(ModelBean model: models)
     {
-        htmloptions += "<option value=\\\"" + model.getId() + "\\\">" + model.getMakeModel().replace("'","\\\'") + "</option>";
-        indexedModels[model.getId()] = model;
+        modelMap.put(model.getId(), model);
+        htmloptions += "<option value=\\\"" + model.getId() + "\\\">" + model.getMakeModel().replace("'", "\\\'") + "</option>";
     }
     htmloptions += "</select>";
 
@@ -38,20 +34,14 @@
     String targetParam = request.getParameter("target");
     boolean target = targetParam != null && !targetParam.equals("");
 
-    FSMappingBean[] mappings;
+    List<FSMappingBean> mappings;
 
     if (all)
-    {
         mappings = data.getFilteredMappings(allParam);
-    }
     else if (target)
-    {
         mappings = data.getMappingByFSAircraft(targetParam);
-    }
     else
-    {
         mappings = data.getRequestedMappings();
-    }
 %>
 
 <!DOCTYPE html>
@@ -63,7 +53,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
     <script type="text/javascript">
         var HTMLoptions = '<%=htmloptions%>';
@@ -80,7 +70,7 @@
 
         function onLoad()
         {
-            for (c = 0; c < <%= mappings.length %>; c++)
+            for (c = 0; c < <%= mappings.size() %>; c++)
             {
                 var obj = document.getElementById("map_" + c);
                 var name = firstChildElement(obj).name;
@@ -93,26 +83,27 @@
 
 </head>
 <body onload="onLoad()">
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
 
 <div id="wrapper">
 <div class="content">
 
-	<a href="<%= response.encodeURL("fsmappings.jsp") %>">Empty Mappings</a>&nbsp;&nbsp;
+	<a href="<%= response.encodeURL("/admin/aircraftmappings.jsp") %>">Empty Mappings</a>&nbsp;&nbsp;
 <%
-	String[] mappingfilters = data.getMappingsFilterList();
+	List<String> mappingfilters = data.getMappingsFilterList();
     for (String mappingfilter : mappingfilters)
     {
 %>
-        <a href="<%= response.encodeURL("fsmappings.jsp?all=" + mappingfilter) %>">
+        <a href="<%= response.encodeURL("/admin/aircraftmappings.jsp?all=" + mappingfilter) %>">
             <%= mappingfilter %>
         </a>&nbsp;&nbsp;
 <%
     }
 %>
     <div class="dataTable">
-        <form method="post" action="fsmappings.jsp">
+        <form method="post" action="/admin/aircraftmappings.jsp">
             <p>
                 Search for <input name="target" type="text" class="textarea">
                 in Flight Simulator ID
@@ -120,7 +111,7 @@
             </p>
         </form>
 	
-        <form method="post" action="userctl">
+        <form method="post" action="/userctl">
             <div>
                 <input type="hidden" name="event" value="mappings"/>
                 <input type="hidden" name="returnpage" value="<%=returnPage%>" />
@@ -138,28 +129,32 @@
                 </thead>
                 <tbody>
 <%
-	for (int c=0; c < mappings.length; c++)
+    int counter = 0;
+	for (FSMappingBean mappingBean : mappings)
 	{
 		String mapping;
-		int mappingId = mappings[c].getModel();
+		int mappingId = mappingBean.getModel();
 
-        if (indexedModels[mappingId] != null)
-            mapping = indexedModels[mappingId].getMakeModel();
+        ModelBean model = modelMap.get(mappingId);
+
+        if(model != null)
+            mapping = model.getMakeModel();
         else
             mapping = "";
 %>
-                    <tr <%= Data.oddLine(c) %>>
-                        <td><%= mappings[c].getAircraft() %></td>
+                    <tr>
+                        <td><%= mappingBean.getAircraft() %></td>
                         <td><%= mapping %></td>
                         <td>
-                            <div id="map_<%= c %>">
-                                <select name="<%= "map"+mappings[c].getId() %>" class="formselect">
+                            <div id="map_<%= counter %>">
+                                <select name="<%= "map"+mappingBean.getId() %>" class="formselect">
 
                                 </select>
                             </div>
                         </td>
                     </tr>
 <%
+        counter++;
 	}
 %>
 	            </tbody>

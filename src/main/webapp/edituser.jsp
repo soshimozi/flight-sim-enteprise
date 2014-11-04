@@ -2,16 +2,19 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.* "
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     String returnToPage = request.getRequestURI();
 
     int offset = user.getTimeZone().getRawOffset();
     String gmtOffset = String.format("%s%02d:%02d", offset >= 0 ? "+" : "", offset / 3600000, (offset / 60000) % 60);
 
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,15 +26,17 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%

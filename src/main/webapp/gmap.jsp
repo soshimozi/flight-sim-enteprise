@@ -1,12 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     boolean isDest = false;
     boolean isFBO = false;
     double latd=0;
@@ -15,8 +16,8 @@
     String icao = request.getParameter("icao");
     AirportBean airportd = data.getAirport(icao);
     AirportBean airportl = data.getAirport(icao);
-    AssignmentBean[] assignments;
-    FboBean[] fbo;
+    List<AssignmentBean> assignments;
+    List<FboBean> fboList;
     AssignmentBean assignment;
     AirportBean destination;
     AirportBean location;
@@ -43,6 +44,7 @@
         isDest = true;
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,8 +108,8 @@
      }
 
 </script>
-</head>
 
+</head>
 <body onload="load()" onunload="GUnload()" text="#000080" bgcolor="#FFFFFF" background="">
 
 <script type="text/javascript">
@@ -197,43 +199,47 @@ function load()
 		ap = "<font face='Verdana' size='1'><%=airportd.getIcao()%><br><%=airportd.getName()%><br><%=airportd.getCity()%>, <%=airportd.getCountry()%></font>";
 <%		assignments = data.getAssignments(icaod, -1, -1, -1, -1);	
 		
-		if (assignments.length != 0)
+		if (assignments.size() != 0)
 		{
-			jobs = new String[assignments.length];
-			for (int c=0; c< assignments.length; c++)
+		    int counter = 0;
+			jobs = new String[assignments.size()];
+			for (AssignmentBean bean : assignments)
 			{
-				assignment = assignments[c];
+				assignment = bean;
 				destination = assignment.getDestinationAirport(data);
 				location = assignment.getLocationAirport(data);
 				image = "<img src='img/set2_"+ assignment.getBearingImage() + ".gif'>";
 				type = assignment.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T";
-				jobs[c] = image+" | $"+assignment.calcPay()+" | "+destination.getIcao()+" | "+assignment.getDistance()+"nm | "+
+				jobs[counter] = image+" | $"+assignment.calcPay()+" | "+destination.getIcao()+" | "+assignment.getDistance()+"nm | "+
 				Converters.escapeJavaScript(assignment.getSCargo())+" | "+type+" | Ex: "+assignment.getSExpires();
-%>				jobstring+="<%=jobs[c]%>"+"<br>";
-<%		   	}
+%>				jobstring+="<%=jobs[counter]%>"+"<br>";
+<%
+                counter++;
+            }
 		}
 			
-		fbo = data.getFboByLocation(icaod);
+		fboList = data.getFboByLocation(icaod);
 		fuelprice = airportd.getFuelPrice();
 		String fuel = Formatters.currency.format(fuelprice);
-		fbos = new String[fbo.length];
-		isFBO = false; 	
+		//fbos = new String[fboList.size()];
+		isFBO = false;
 		
-		if(fbo.length!=0)
+		if(fboList.size() != 0)
 		{
 			isFBO = true;
-			for (int c=0; c < fbo.length; c++) 
+			for (FboBean fbo : fboList) 
 			{				
-				fuelleft = data.getGoods(fbo[c].getLocation(), fbo[c].getOwner(), GoodsBean.GOODS_FUEL100LL);
+		        String temp = "";
+				fuelleft = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
 				int fuelgallons = 0;
 				if (fuelleft != null)
 					fuelgallons = (int)Math.floor(fuelleft.getAmount()/Data.GALLONS_TO_KG);
 				
-				fbos[c] = Converters.escapeJavaScript(fbo[c].getName())+" |  Fuel: " + Formatters.currency.format(fbo[c].getFuel100LL())+" | "+ fuelgallons + " gals";
-				if ((fbo[c].getServices() & FboBean.FBO_REPAIRSHOP) > 0)
-					fbos[c]+=" | Repairs";
+				temp = Converters.escapeJavaScript(fbo.getName())+" |  Fuel: " + Formatters.currency.format(fbo.getFuel100LL())+" | "+ fuelgallons + " gals";
+				if ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0)
+					temp +=" | Repairs";
 %>
-				fbostring+="<%=fbos[c]%>"+"<br>";
+				fbostring+="<%= temp %>"+"<br>";
 <%			}
 		}
 		
@@ -249,15 +255,15 @@ function load()
 %>			fbostring+= " Repairs ";
 <%		}		 
 			
-		if( assignments.length > 0 && isFBO)
+		if( assignments.size() > 0 && isFBO)
 		{
 %>			var markerdest = createTabbedMarker(pointdest, [ap, "<font face='Verdana' size='1'>"+fbostring+"</font><br>", "<font face='Verdana' size='1'>"+jobstring+"</font><br>"],["Airport","FBOs","Jobs"]);
 <%		} 
-		else if( assignments.length == 0 && isFBO)
+		else if( assignments.size() == 0 && isFBO)
 		   {
 %>			var markerdest = createTabbedMarker(pointdest, [ap, "<font face='Verdana' size='1'>"+fbostring+"</font><br>"],["Airport","FBOs"]);
 <%		} 
-		else if( assignments.length > 0 && !isFBO)			
+		else if( assignments.size() > 0 && !isFBO)
 		{
 %>			var markerdest = createTabbedMarker(pointdest, [ap, "<font face='Verdana' size='1'>"+jobstring+"</font><br>"],["Airport","Jobs"]);
 <%		} 

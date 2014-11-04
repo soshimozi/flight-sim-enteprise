@@ -1,16 +1,19 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="model" class="net.fseconomy.data.ModelBean">
     <jsp:setProperty name="model" property="*"/>
 </jsp:useBean>
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 
@@ -26,17 +29,16 @@
             model.setId(-1);
             if(!newModel.contentEquals(""))
             {
-                FSMappingBean[] result = data.getMappingById(Integer.parseInt(newModel));
-                if (result.length > 0)
-                    model.setCapacity(result[0].getCapacity());
+                List<FSMappingBean> result = data.getMappingById(Integer.parseInt(newModel));
+                if (result.size() > 0)
+                    model.setCapacity(result.get(0).getCapacity());
             }
             model.setMake("");
             model.setModel("");
         }
         else
         {
-            ModelBean[] result = data.getModelById(model.getId());
-            model = result[0];
+            model = data.getModelById(model.getId());
         }
     }
     else if (error == null)
@@ -45,7 +47,7 @@
         {
             data.updateModel(model, user);
 %>
-<jsp:forward page="models.jsp"></jsp:forward>
+<jsp:forward page="/admin/models.jsp"></jsp:forward>
 <%
         }
         catch (DataError e)
@@ -54,27 +56,27 @@
         }
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-<meta name="GENERATOR" content="IBM WebSphere Studio" />
-<meta http-equiv="Content-Style-Type" content="text/css" />
-<link href="theme/Master.css" rel="stylesheet" type="text/css" />
-<title>FSEconomy terminal</title>
+    <title>FSEconomy terminal</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+
 </head>
 
 
 <body>
-<jsp:include flush="true" page="top.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
 <div id="wrapper">
-
-
-<jsp:include flush="true" page="menu.jsp">
-	<jsp:param name="open" value="aircraft"/>
-</jsp:include>
-
 <div class="content">
 <% 	if (error != null) 
 	{ 
@@ -83,7 +85,7 @@
 <%	} 
 %>
 	<div class="form" style="width: 700px">
-	<form method="post" action="editmodel.jsp">
+	<form method="post" action="/admin/modeledit.jsp">
 	<input type="hidden" name="submit" value="true"/>
 	<input type="hidden" name="event" value="editAircraft"/>
 	<input type="hidden" name="id" value="<%= model.getId() %>"/>

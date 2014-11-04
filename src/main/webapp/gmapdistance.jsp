@@ -1,12 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"%>
-<%
-    Data data = (Data)application.getAttribute("data");
+        import="net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     String depart = request.getParameter("depart");
     String dest = request.getParameter("dest");
 
@@ -46,8 +47,8 @@ div.infowindow-content {
     min-width: 200px;
 }
 </style>
-</head>
 
+</head>
 <body text="#000080" bgcolor="#FFFFFF" background="">
 
 <form name="fboForm" id="fboForm" method="post" action="userctl">

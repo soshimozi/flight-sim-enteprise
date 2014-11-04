@@ -2,15 +2,15 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="group" class="net.fseconomy.data.UserBean">
     <jsp:setProperty name="group" property="*"/>
 </jsp:useBean>
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     String error = null;
 
     //initial page load
@@ -54,10 +54,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
 

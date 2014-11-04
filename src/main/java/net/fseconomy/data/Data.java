@@ -35,9 +35,6 @@ import net.fseconomy.util.Formatters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import ch.qos.logback.classic.LoggerContext;
-//import ch.qos.logback.core.util.StatusPrinter;
-
 public class Data implements Serializable
 {
 	private static final long serialVersionUID = 3L;
@@ -65,6 +62,10 @@ public class Data implements Serializable
 	
 	static final int MAX_MODEL_TITLE_LENGTH = 128;
 
+    public final int FBO_ID = 0;
+    public final int FBO_REPAIR_MARGIN = 1;
+    public final int FBO_EQUIPMENT_MARGIN = 2;
+
 	final int MAX_FLIGHT_ASSIGNMENTS = 60;
 
 	public long MILLISECS_PER_HOUR = (60*60*1000);
@@ -76,9 +77,6 @@ public class Data implements Serializable
 	final int ASSIGNMENT_ACTIVE = 0;
 	final int ASSIGNMENT_ENROUTE = 1;
 	final int ASSIGNMENT_HOLD = 2;
-	
-	transient static Thread maintenanceThread;
-	transient Properties mailProperties = new Properties();
 	
 	long milesFlown;
 	long minutesFlown;
@@ -106,12 +104,6 @@ public class Data implements Serializable
 	
 	public Data()
 	{
-		// assume SLF4J is bound to logback in the current environment
-	    //LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-	    
-		// print logback's internal status
-	    //StatusPrinter.print(lc);
-		
 		logger.info("Data constructor called");
 
 		dalHelper = DALHelper.getInstance();
@@ -727,8 +719,24 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 	}
-	
-	public void unlockAccount(String login) throws DataError
+
+    public void lockAccount(int accountId) throws DataError
+    {
+        try
+        {
+            String qry = "UPDATE accounts SET email = concat('LockedAccount-', email), password = '*B2C37C48A693188842BC5F24929A4C99209652A5' where id = ?";
+            int count = dalHelper.ExecuteUpdate(qry, accountId);
+
+            if (count == 0)
+                throw new DataError("Account Lock Operation Failed.");
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void unlockAccount(String login) throws DataError
 	{
 		try
 		{
@@ -743,6 +751,23 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 	}
+
+    public void unlockAccount(int accountId) throws DataError
+    {
+        try
+        {
+            String qry = "UPDATE accounts SET email = trim(leading 'LockedAccount-' from email) where id = ?";
+            int count = dalHelper.ExecuteUpdate(qry, accountId);
+
+            if (count == 0)
+                throw new DataError("Account Unlock Operation Failed.");
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 	/**
 	* Update account table - user name and email
 	* @ param user = user name newuser = new user name email = email address
@@ -909,7 +934,7 @@ public class Data implements Serializable
 						"FSEconomy account details", message, emailTo, Emailer.ADDRESS_TO);
 	}
 	
-	public String[] getUsers(String usertype) throws DataError
+	public List<String> getUsers(String usertype) throws DataError
 	{
 		ArrayList<String> result = new ArrayList<>();
 		String qry;
@@ -946,7 +971,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new String[result.size()]);
+		return result;
 	}
 
 	public int getNumberOfUsers(String usertype) throws DataError
@@ -1000,7 +1025,7 @@ public class Data implements Serializable
 	}
 
 	//get pending hours will list when hours are coming available - need to format 48: to hours
-	public pendingHours[] getpendingHours(String user, int hours) throws DataError 
+	public List<pendingHours> getPendingHours(String user, int hours) throws DataError
 	{
 		ArrayList<pendingHours> result = new ArrayList<>();
 		try
@@ -1016,8 +1041,9 @@ public class Data implements Serializable
 		catch (SQLException e)
 		{
 			e.printStackTrace();
-		} 
-		return result.toArray(new pendingHours[result.size()]);
+		}
+
+		return result;
 	}
 	
 	public double getDistance(double lat1, double lon1, double lat2, double lon2)
@@ -1389,12 +1415,12 @@ public class Data implements Serializable
 		return returnValue;		
 	}
 	
-	public closeAirport[] closeAirportsWithAssignments(String id, boolean outbound)
+	public List<closeAirport> closeAirportsWithAssignments(String id, boolean outbound)
 	{
 		return closeAirportsWithAssignments(id, 0, 50, outbound);
 	}
 	
-	public closeAirport[] closeAirportsWithAssignments(String id, double minDistance, double maxDistance, boolean outbound)
+	public List<closeAirport> closeAirportsWithAssignments(String id, double minDistance, double maxDistance, boolean outbound)
 	{
 		ArrayList<closeAirport> result = new ArrayList<>();
 		try
@@ -1429,7 +1455,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 
-		return result.toArray(new closeAirport[result.size()]);
+		return result;
 	}
 	
 	/**
@@ -1443,8 +1469,8 @@ public class Data implements Serializable
 	{
 		if(id == null)
 			return null;
-		
-		ArrayList<closeAirport> result = new ArrayList<>();
+
+        ArrayList<closeAirport> result = new ArrayList<>();
 
 		String key;
 		LatLonSize value;
@@ -1496,7 +1522,7 @@ public class Data implements Serializable
 		return result.toArray(new closeAirport[result.size()]);
 	}
 	
-	public AirportBean[] getAirportsForFboConstruction(int owner)
+	public List<AirportBean> getAirportsForFboConstruction(int owner)
 	{
 		return getAirportSQL(
 				"SELECT a.* FROM airports a, goods g" +
@@ -1519,18 +1545,18 @@ public class Data implements Serializable
 		);
 	}
 	
-	public AirportBean[] getAirportsByBucket(String icao)
+	public List<AirportBean> getAirportsByBucket(String icao)
 	{
 		return getAirportSQL("SELECT * FROM airports WHERE bucket = (SELECT bucket from airports WHERE icao = '" + icao + "') order by name");
 	}
 	
 	public AirportBean getAirport(String icao)
 	{
-		AirportBean[] result = getAirportSQL("SELECT * FROM airports WHERE icao='" + Converters.escapeSQL(icao) + "'");
-		return result.length == 0 ? null : result[0];
+        List<AirportBean> result = getAirportSQL("SELECT * FROM airports WHERE icao='" + Converters.escapeSQL(icao) + "'");
+		return result.size() == 0 ? null : result.get(0);
 	}
 	
-	public AirportBean[] getAirportSQL(String sql)
+	public List<AirportBean> getAirportSQL(String sql)
 	{
 		ArrayList<AirportBean> result = new ArrayList<>();
 		try
@@ -1544,7 +1570,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 		
-		return result.toArray(new AirportBean[result.size()]);
+		return result;
 	}
 	
 	public int getAirportFboSlotsAvailable(String icao)
@@ -1650,17 +1676,20 @@ public class Data implements Serializable
 		try
 		{
 			//First we need to get all the FBO locations for the groupId passed in.
-			FboBean fbos[] = getFboByOwner(groupId);
+			List<FboBean> fbos = getFboByOwner(groupId);
 			
 			StringBuilder sb = new StringBuilder(4096);
-			if(fbos.length > 0)
+			if(fbos.size() > 0)
 			{
-				for(int i=0;i<fbos.length;i++)
+                boolean firstLoop = true;
+				for(FboBean fbo : fbos)
 				{
-					if(i > 0)
+					if(!firstLoop)
 						sb.append(", ");
+                    else
+                        firstLoop = false;
 						
-					sb.append("'").append(fbos[i].location).append("'");
+					sb.append("'").append(fbo.location).append("'");
 				}
 			
 				//get our records
@@ -1687,7 +1716,7 @@ public class Data implements Serializable
 	
 	public String getAirportOperationDataJSON(String icao)
 	{
-		FlightOp[] ops = new FlightOp[0];
+		List<FlightOp> ops = new ArrayList<>();
 		if(icao != null && cachedAPs.get(icao.toUpperCase()) != null)
 			ops = getAirportOperationData(icao);
 		
@@ -1699,13 +1728,13 @@ public class Data implements Serializable
 	 * Gets an array of FlightOps for the approximately the last 24 months
 	 * @param icao - ICAO of interest
 	 **/
-	public FlightOp[] getAirportOperationData(String icao)
+	public List<FlightOp> getAirportOperationData(String icao)
 	{
 		ArrayList<FlightOp> results = new ArrayList<>();
 		
 		//exit if icao does not exist
 		if(!cachedAPs.containsKey(icao.toUpperCase()))
-			return results.toArray(new FlightOp[results.size()]);
+			return results;
 		
 		//get the current year and month
 		Calendar cal = Calendar.getInstance();
@@ -1789,7 +1818,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 		
-		return results.toArray(new FlightOp[results.size()]);
+		return results;
 	}
 	
 	/**
@@ -1802,10 +1831,10 @@ public class Data implements Serializable
 		int average = 0;
 
 		//get the data
-		FlightOp[] ao = getAirportOperationData(icao);
+		List<FlightOp> ao = getAirportOperationData(icao);
 		
 		//if no data found, return 0
-		if(ao.length == 0)
+		if(ao.size() == 0)
 		{
 			result[0] = 0;
 			result[1] = 0;
@@ -1813,10 +1842,10 @@ public class Data implements Serializable
 		}
 		//only add up the last 12 months, skip current month
 		for(int i=1; i<=12; i++) //correction Airboss 8/1/2011
-			average += ao[i].ops;
+			average += ao.get(i).ops;
 		
 		//return the current, and the average
-		result[0] = ao[0].ops;
+		result[0] = ao.get(0).ops;
 		result[1] = average / 12;
 		return result;
 	}
@@ -1845,7 +1874,7 @@ public class Data implements Serializable
 		} 
 	}
 	
-	public AirportBean[] findAirports(boolean assignments, int modelId, String name, int distance, String from, boolean ferry, boolean buy, int commodity, int minAmount, boolean fuel, boolean jeta, boolean repair, boolean acForSale, boolean fbo, boolean isRentable) throws DataError
+	public List<AirportBean> findAirports(boolean assignments, int modelId, String name, int distance, String from, boolean ferry, boolean buy, int commodity, int minAmount, boolean fuel, boolean jeta, boolean repair, boolean acForSale, boolean fbo, boolean isRentable) throws DataError
 	{
 		ArrayList<AirportBean> result = new ArrayList<>();
 		String qry;
@@ -1971,7 +2000,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 		
-		return result.toArray(new AirportBean[result.size()]);
+		return result;
 	}
 	
 	public String getSearchRegionSQL(String region)
@@ -1998,7 +2027,7 @@ public class Data implements Serializable
 		return null;
 	}
 	
-	public String[] getSearchRegions()
+	public List<String> getSearchRegions()
 	{
 		ArrayList<String> result = new ArrayList<>();
 		
@@ -2007,10 +2036,10 @@ public class Data implements Serializable
 		result.add("Pacific Islands");
 		result.add("South America");
 		
-		return result.toArray(new String[result.size()]);
+		return result;
 	}
 	
-	public AirportBean[] findCertainAirports(String region, String state, String country, String icao, String name,
+	public List<AirportBean> findCertainAirports(String region, String state, String country, String icao, String name,
 			boolean fuel, boolean repair, boolean fbo, boolean fboInactive, boolean facilityPTRent, boolean facilityCTRent, int fboOwner) throws DataError
 	{
 		ArrayList<AirportBean> result = new ArrayList<>();
@@ -2118,10 +2147,10 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 
-		return result.toArray(new AirportBean[result.size()]);
+		return result;
 	}
 
-	public String[] getDistinctData(String field, String table)throws DataError
+	public List<String> getDistinctColumnData(String field, String table)throws DataError
 	{
 		ArrayList<String> result = new ArrayList<>();
 		String qry = "";
@@ -2144,7 +2173,7 @@ public class Data implements Serializable
 		if (result.size() == 0)
 			throw new DataError("Nothing to Return!");
 		
-		return result.toArray(new String[result.size()]);			
+		return result;
 	}
 	
 	public void doTransferFbo(FboBean fbo, int buyer, int owner, String icao, boolean goods) throws DataError
@@ -2374,7 +2403,7 @@ public class Data implements Serializable
 					qry = "SELECT CONCAT_WS(' ', make, model) FROM models WHERE id = ?";
                     result = dalHelper.ExecuteScalar(qry, new DALHelper.StringResultTransformer(), model);
 					
-					ModelBean mb = getModelById(model)[0];
+					ModelBean mb = getModelById(model);
 					int[] mcap = mb.getCapacity();
 					boolean mismatch = false;
 					for(int i = 0; i < ModelBean.fuelTank.NumTanks; i++)
@@ -2415,14 +2444,15 @@ public class Data implements Serializable
 		return result;
 	}
 	
-	public AircraftBean[] getAircraftForSale()
+	public List<AircraftBean> getAircraftForSale()
 	{
 		return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND sellPrice is not null ORDER BY models.make, models.model, sellPrice");
 	}	
 	
-	public AircraftBean[] getAircraftByRegistration(String reg)
+	public AircraftBean getAircraftByRegistration(String reg)
 	{
-		return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND registration='" + Converters.escapeSQL(reg) + "'");
+        List<AircraftBean> result = getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND registration='" + Converters.escapeSQL(reg) + "'");
+        return result.size() == 0 ? null : result.get(0);
 	}	
 	
 	public Boolean isAircraftRegistrationUnique(String reg)
@@ -2447,9 +2477,10 @@ public class Data implements Serializable
 	 * @param reg
 	 * Airboss 12/21/10
 	 **/
-	public AircraftBean[] getAircraftShippingInfoByRegistration(String reg)
+	public AircraftBean getAircraftShippingInfoByRegistration(String reg)
 	{
-		AircraftBean[] aircraft = getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND registration='" + Converters.escapeSQL(reg) + "'");
+		List<AircraftBean> aircraftList = getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND registration='" + Converters.escapeSQL(reg) + "'");
+        AircraftBean aircraft = aircraftList.get(0);
 
 		//Currently not used
 		//if no shipping size available then return without trying to set.
@@ -2459,13 +2490,9 @@ public class Data implements Serializable
 		try
 		{
 			String qry = "SELECT * FROM shippingConfigsAircraft WHERE minSize <= ? AND maxSize >= ?";
-			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, aircraft[0].getEmptyWeight(), aircraft[0].getEmptyWeight());
+			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, aircraft.getEmptyWeight(), aircraft.getEmptyWeight());
 			rs.next();
-			aircraft[0].setShippingConfigAircraft(
-					rs.getInt("shippingStateDelay"), 
-					rs.getDouble("costPerKg"), 
-					rs.getInt("costPerCrate"), 
-					rs.getInt("costDisposal"));
+			aircraft.setShippingConfigAircraft(rs.getInt("shippingStateDelay"), rs.getDouble("costPerKg"), rs.getInt("costPerCrate"), rs.getInt("costDisposal"));
 		} 
 		catch (SQLException e)
 		{
@@ -2477,9 +2504,9 @@ public class Data implements Serializable
 
 	/**
 	 * Gets the aircraft that are in a shipped state
-	 * @return AircraftBean[]
+	 * @return AircraftBean List
 	 **/
-	public AircraftBean[] getShippedAircraft()
+	public List<AircraftBean> getShippedAircraft()
 	{
         return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND ShippingState != 0");
 	}	
@@ -2532,33 +2559,31 @@ public class Data implements Serializable
 		if(fromfbo == null)
 		{
 			AirportBean airport = this.getAirport(aircraft.getLocation());
-			FboBean[] fbos = this.getFboForRepair(airport);
+			List<FboBean> fbos = this.getFboForRepair(airport, FBO_REPAIR_MARGIN);
 
-			if (fbos.length == 0)
+			if (fbos.size() == 0)
 				throw new DataError("Unable to find a repair shop!");
 
-			Arrays.sort(fbos, (o1, o2) -> Integer.compare(o2.getRepairShopMargin(), o1.getRepairShopMargin()));
-			fromfbo = fbos[0]; //return the cheapest
+			fromfbo = fbos.get(0); //return the cheapest
 		}
 
 		if(tofbo == null)
 		{
 			// Get a Default FBO if none is specified
 			AirportBean airport = this.getAirport(shipto);
-			FboBean[] fbos = this.getFboForRepair(airport);
+			List<FboBean> fbos = this.getFboForRepair(airport, FBO_REPAIR_MARGIN);
 
-			if (fbos.length == 0)
+			if (fbos.size() == 0)
 				throw new DataError("Unable to find a repair shop!");
 
-			Arrays.sort(fbos, (o1, o2) -> Integer.compare(o2.getRepairShopMargin(), o1.getRepairShopMargin()));
-			tofbo = fbos[0]; //return the cheapest
+			tofbo = fbos.get(0); //return the cheapest
 		}
 
 		//get the margins
         departMargin = departSvc == 0 ?	departMargin = 25 : fromfbo.getRepairShopMargin();
         destMargin = destSvc == 0 ?	destMargin = 25 : tofbo.getRepairShopMargin();
 
-        AircraftBean acShippingInfo = getAircraftShippingInfoByRegistration(aircraft.getRegistration())[0];
+        AircraftBean acShippingInfo = getAircraftShippingInfoByRegistration(aircraft.getRegistration());
 
 		//Compute total shipping costs
 		double[] shippingcost = acShippingInfo.getShippingCosts(1);
@@ -2623,18 +2648,19 @@ public class Data implements Serializable
 		}		
 	}
 	
-	public AircraftBean[] getAircraftForUser(int userId)
+	public AircraftBean getAircraftForUser(int userId)
 	{
-		return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND userlock="+userId);			
+		List<AircraftBean> result =  getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND userlock="+userId);
+        return result.size() == 0 ? null : result.get(0);
 	}
 	
 	//Modified to add Lessor by Airboss 5/8/11
-	public AircraftBean[] getAircraftOwnedByUser(int userId)
+	public List<AircraftBean> getAircraftOwnedByUser(int userId)
 	{
 		return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND (owner="+ userId + " OR lessor="+ userId + ") ORDER BY make,models.model");			
 	}	
 	
-	public AircraftBean[] getAircraftInArea(String location, closeAirport[] locations)
+	public List<AircraftBean> getAircraftInArea(String location, closeAirport[] locations)
 	{
 		StringBuilder where = new StringBuilder("'" + location + "'");
 
@@ -2644,7 +2670,7 @@ public class Data implements Serializable
 		return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND location in (" + where.toString() + ")");
 	}
 	
-	public AircraftBean[] getAircraftOfTypeInArea(String location, closeAirport[] locations, int type)
+	public List<AircraftBean> getAircraftOfTypeInArea(String location, closeAirport[] locations, int type)
 	{
 		StringBuilder where = new StringBuilder("'" + location + "'");
         for (closeAirport location1 : locations)
@@ -2653,7 +2679,7 @@ public class Data implements Serializable
 		return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND models.id = " + type + " AND location in (" + where.toString() + ")");
 	}
 	
-	public AircraftBean[] getAircraft(String location)
+	public List<AircraftBean> getAircraft(String location)
 	{
 		return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND location='" + location + "'" + "ORDER BY make,models.model");
 	}
@@ -2677,9 +2703,9 @@ public class Data implements Serializable
 	 * @param isSystemOwned
 	 * @param isPlayerOwned
 	 * @param equipment
-	 * @return AircraftBean[]
+	 * @return AircraftBean List
 	 */
-	public AircraftBean[] findAircraftForSale(int modelId, int lowPrice, int highPrice, int lowTime, int highTime, int lowPax, int highPax, int lowLoad, int highLoad, int distance, String fromParam, boolean hasVfr, boolean hasIfr, boolean hasAp, boolean hasGps, boolean isSystemOwned, boolean isPlayerOwned, String equipment) throws DataError
+	public List<AircraftBean> findAircraftForSale(int modelId, int lowPrice, int highPrice, int lowTime, int highTime, int lowPax, int highPax, int lowLoad, int highLoad, int distance, String fromParam, boolean hasVfr, boolean hasIfr, boolean hasAp, boolean hasGps, boolean isSystemOwned, boolean isPlayerOwned, String equipment) throws DataError
 	{
 		ArrayList<AircraftBean> result = new ArrayList<>();
 
@@ -2870,7 +2896,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new AircraftBean[result.size()]);
+		return result;
 	}
 	
 	/** 
@@ -2894,7 +2920,7 @@ public class Data implements Serializable
 		return count;
 	}
 	
-	public AircraftBean[] getAircraftSQL(String qry)
+	public List<AircraftBean> getAircraftSQL(String qry)
 	{		
 		ArrayList<AircraftBean> result = new ArrayList<>();
 		try
@@ -2911,20 +2937,22 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 
-		return result.toArray(new AircraftBean[result.size()]);
+		return result;
 	}
 	
-	public TemplateBean[] getAllTemplates()
+	public List<TemplateBean> getAllTemplates()
 	{
 		return getTemplateSQL("SELECT * FROM templates");
 	}
 	
-	public TemplateBean[] getTemplateById(int Id)
+	public TemplateBean getTemplateById(int Id)
 	{
-		return getTemplateSQL("SELECT * FROM templates WHERE id = " + Id);
+        List<TemplateBean> result = getTemplateSQL("SELECT * FROM templates WHERE id = " + Id);
+
+        return result.size() == 0 ? null : result.get(0);
 	}
 	
-	public TemplateBean[] getTemplateSQL(String qry)
+	public List<TemplateBean> getTemplateSQL(String qry)
 	{
 		ArrayList<TemplateBean> result = new ArrayList<>();
 		try
@@ -2941,7 +2969,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new TemplateBean[result.size()]);
+		return result;
 	}
 	
 	public void setAccountXmlKey(UserBean account)
@@ -2962,7 +2990,7 @@ public class Data implements Serializable
 		}
 	}
 	
-	public UserBean[] getGroupById(int id)
+	public UserBean getGroupById(int id)
 	{
 		return getAccountSQL("SELECT * FROM accounts WHERE type = 'group' AND id = " + id);
 	}
@@ -2998,10 +3026,9 @@ public class Data implements Serializable
 	    return retval;
 	}
 	  
-	 public UserBean getAccountById(int id)
+	public UserBean getAccountById(int id)
 	{
-		UserBean[] result = getAccountSQL("SELECT * FROM accounts WHERE id = " + id);
-		return result.length == 0 ? null : result[0];
+		return getAccountSQL("SELECT * FROM accounts WHERE id = " + id);
 	}
 
 	public String getAccountNameById(int id)
@@ -3021,53 +3048,53 @@ public class Data implements Serializable
 		return retval;
 	}
 
-	public UserBean[] getAccountByName(String name)
+	public UserBean getAccountByName(String name)
 	{
 		return getAccountSQL("SELECT * FROM accounts WHERE type = 'person' AND name = '" + name + "'");
 	}	
 	
 	//Added by Airboss 5/8/11
-	public UserBean[] getAccountGroupOrUserByName(String name)
+	public UserBean getAccountGroupOrUserByName(String name)
 	{
 		return getAccountSQL("SELECT * FROM accounts WHERE (type = 'person' OR type = 'group') AND name = '" + name + "'");
 	}
 	
-	public UserBean[] getGroupsThatInviteUser(int userId)
+	public List<UserBean> getGroupsThatInviteUser(int userId)
 	{
-		return getAccountSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND level = 'invited') ORDER BY name");
+		return getAccountsSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND level = 'invited') ORDER BY name");
 	}
 	
-	public UserBean[] getGroupsForUser(int userId)
+	public List<UserBean> getGroupsForUser(int userId)
 	{
-		return getAccountSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND level <> 'invited' ) ORDER BY name");
+		return getAccountsSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND level <> 'invited' ) ORDER BY name");
 	}
 	
-	public UserBean[] getAllExposedGroups()
+	public List<UserBean> getAllExposedGroups()
 	{
-		return getAccountSQL("SELECT * FROM accounts WHERE type = 'group' AND (exposure & " + UserBean.EXPOSURE_GROUPS + ") > 0  ORDER BY name");
+		return getAccountsSQL("SELECT * FROM accounts WHERE type = 'group' AND (exposure & " + UserBean.EXPOSURE_GROUPS + ") > 0  ORDER BY name");
 	}
 	
-	public UserBean[] getUsersForGroup(int groupId)
+	public List<UserBean> getUsersForGroup(int groupId)
 	{
-		return getAccountSQL("SELECT accounts.* FROM accounts, groupmembership WHERE type = 'person' AND userId = accounts.id AND groupId = " + groupId + " ORDER BY FIND_IN_SET(groupmembership.level, 'owner,staff,member'), name ");
+		return getAccountsSQL("SELECT accounts.* FROM accounts, groupmembership WHERE type = 'person' AND userId = accounts.id AND groupId = " + groupId + " ORDER BY FIND_IN_SET(groupmembership.level, 'owner,staff,member'), name ");
 	}
 	
-	public UserBean[] getAccounts()
+	public List<UserBean> getAccounts()
 	{
 		return getAccounts(false);
 	}
 	
-	public UserBean[] getAccounts(boolean usersonly)
+	public List<UserBean> getAccounts(boolean usersonly)
 	{
 		if(usersonly)
-			return getAccountSQL("SELECT * from accounts WHERE type = 'person' ORDER BY name");
+			return getAccountsSQL("SELECT * from accounts WHERE type = 'person' ORDER BY name");
 		else
-			return getAccountSQL("SELECT * from accounts ORDER BY name");
+			return getAccountsSQL("SELECT * from accounts ORDER BY name");
 	}
 	
-	public UserBean[] getExposedAccounts()
+	public List<UserBean> getExposedAccounts()
 	{
-		return getAccountSQL("SELECT * from accounts WHERE exposure <> 0 ORDER BY name");
+		return getAccountsSQL("SELECT * from accounts WHERE exposure <> 0 ORDER BY name");
 	}
 
 	public boolean isGroupOwnerStaff(int groupid, int userid)
@@ -3120,36 +3147,25 @@ public class Data implements Serializable
 		return result;
 	}
 	
-	public String getNameByReadAccessKey(String key)
-	{
-		String result = null;
-		try
-		{
-			String qry = "SELECT name FROM accounts WHERE ReadAccessKey = ?";
-			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, key);
-			if(rs.next())
-				result = rs.getString("name");
-		} 
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		} 
-
-		return result;
-	}
+//	public String getNameByReadAccessKey(String key)
+//	{
+//		String result = null;
+//		try
+//		{
+//			String qry = "SELECT name FROM accounts WHERE ReadAccessKey = ?";
+//			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, key);
+//			if(rs.next())
+//				result = rs.getString("name");
+//		}
+//		catch (SQLException e)
+//		{
+//			e.printStackTrace();
+//		}
+//
+//		return result;
+//	}
 	
-	//Autocomplete work
-	public UserBean[] getAccountNames(String partialName, int limit)
-	{
-		return getAccountNames(partialName, ACCT_TYPE_ALL, limit);
-	}
-	
-	public UserBean[] getAccountNames(String partialName, int acctType, int limit)
-	{
-		return getAccountNames(partialName, acctType, limit, false);
-	}
-	
-	public UserBean[] getAccountNames(String partialName, int acctType, int limit, boolean displayHidden)
+	public List<UserBean> getAccountNames(String partialName, int acctType, int limit, boolean displayHidden)
 	{
 		ArrayList<UserBean> result = new ArrayList<>();
 		try
@@ -3178,10 +3194,28 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new UserBean[result.size()]);
+		return result;
 	}
 
-	UserBean[] getAccountSQL(String qry)
+    UserBean getAccountSQL(String qry)
+    {
+        UserBean result = null;
+
+        try
+        {
+            ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
+            if (rs.next())
+               result = new UserBean(rs);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    List<UserBean> getAccountsSQL(String qry)
 	{
 		ArrayList<UserBean> result = new ArrayList<>();
 		try
@@ -3198,7 +3232,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new UserBean[result.size()]);
+		return result;
 	}
 	
 	public int accountUltimateOwner(int accountId)
@@ -3208,6 +3242,7 @@ public class Data implements Serializable
 		{
 			String qry = "SELECT userId FROM groupmembership WHERE level = 'owner' AND groupId = ?";
 			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, accountId);
+
 			if (rs.next())
 				result = rs.getInt("userId");
 		} 
@@ -3226,6 +3261,7 @@ public class Data implements Serializable
 		{
 			String qry = "SELECT userId FROM groupmembership WHERE level = 'owner' AND groupId = ?";
 			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, accountId);
+
 			if (rs.next())
 				result = rs.getInt("userId");
 		}
@@ -3237,17 +3273,35 @@ public class Data implements Serializable
 		return result;
 	}
 	
-	public ModelBean[] getAllModels()
+	public List<ModelBean> getAllModels()
 	{
-		return getModelSQL("SELECT * FROM models ORDER By make,model");
+		return getModelsSQL("SELECT * FROM models ORDER By make,model");
 	}
 	
-	public ModelBean[] getModelById(int id)
+	public ModelBean getModelById(int id)
 	{
 		return getModelSQL("SELECT * FROM models WHERE id = " + id);
 	}
-	
-	public ModelBean[] getModelSQL(String qry)
+
+    public ModelBean getModelSQL(String qry)
+    {
+        ModelBean result = null;
+
+        try
+        {
+            ResultSet rs= dalHelper.ExecuteReadOnlyQuery(qry);
+            if (rs.next())
+                result = new ModelBean(rs);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public List<ModelBean> getModelsSQL(String qry)
 	{
 		ArrayList<ModelBean> result = new ArrayList<>();
 		
@@ -3265,12 +3319,12 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new ModelBean[result.size()]);
+		return result;
 	}
 	
-	public String[] getMappingsFilterList()
+	public List<String> getMappingsFilterList()
 	{
-		ArrayList<String> result = new ArrayList<>();
+		List<String> result = new ArrayList<>();
 
 		try
 		{
@@ -3311,10 +3365,10 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 		
-		return result.toArray(new String[result.size()]);
+		return result;
 	}
 		
-	public FSMappingBean[] getFilteredMappings(String filter)
+	public List<FSMappingBean> getFilteredMappings(String filter)
 	{
 		if (filter.length() != 1 && filter.length() != 4)
 			return null;
@@ -3340,27 +3394,22 @@ public class Data implements Serializable
 		return getMappingSQL("SELECT * FROM fsmappings where substr(fsaircraft, 1, 1) in (" + infilter + ") ORDER By fsaircraft");
 	}
 		
-	public FSMappingBean[] getAllMappings()
-	{
-		return getMappingSQL("SELECT * FROM fsmappings ORDER By fsaircraft");
-	}
-	
-	public FSMappingBean[] getRequestedMappings()
+	public List<FSMappingBean> getRequestedMappings()
 	{
 		return getMappingSQL("SELECT * FROM fsmappings WHERE model = 0 ORDER By fsaircraft");
 	}
 	
-	public FSMappingBean[] getMappingById(int id)
+	public List<FSMappingBean> getMappingById(int id)
 	{
 		return getMappingSQL("SELECT * FROM fsmappings WHERE id = " + id);
 	}	
 	
-	public FSMappingBean[] getMappingByFSAircraft(String target)
+	public List<FSMappingBean> getMappingByFSAircraft(String target)
 	{
 		return getMappingSQL("SELECT * FROM fsmappings WHERE fsaircraft LIKE '%" + target + "%' order by fsaircraft");
 	}
 	
-	public FSMappingBean[] getMappingSQL(String qry)
+	public List<FSMappingBean> getMappingSQL(String qry)
 	{
 		ArrayList<FSMappingBean> result = new ArrayList<>();
 
@@ -3378,7 +3427,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new FSMappingBean[result.size()]);
+		return result;
 	}
 	
 	public void setMapping(int id, int modelId)
@@ -3420,7 +3469,7 @@ public class Data implements Serializable
 		return getIntSQL("SELECT count(*) FROM log WHERE groupId='" + groupId + "' ");
 	}
 	
-	public LogBean[] getLogForAircraftByMonth(String reg, int month, int year)
+	public List<LogBean> getLogForAircraftByMonth(String reg, int month, int year)
 	{				
 		String sql = "SELECT * FROM log where Year(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))= " + year + " and Month(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))=" + month + ""
 		+ " AND aircraft = '" + Converters.escapeSQL(reg) + "'"; 
@@ -3428,7 +3477,7 @@ public class Data implements Serializable
 		return getLogSQL(sql);
 	}	
 
-	public LogBean[] getLogForAircraftFromId(String reg, int fromid)
+	public List<LogBean> getLogForAircraftFromId(String reg, int fromid)
 	{				
 		String sql = "SELECT * FROM log where id > " + fromid
 		+ " AND aircraft = '" + Converters.escapeSQL(reg) + "'"
@@ -3437,7 +3486,7 @@ public class Data implements Serializable
 		return getLogSQL(sql);
 	}	
 
-	public LogBean[] getLogForGroupByMonth(int groupId, int month, int year)
+	public List<LogBean> getLogForGroupByMonth(int groupId, int month, int year)
 	{				
 		String sql = "SELECT * FROM log where Year(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))= " + year + " and Month(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))=" + month + ""
 		+ " AND groupId = " + groupId; 
@@ -3445,7 +3494,7 @@ public class Data implements Serializable
 		return getLogSQL(sql);
 	}	
 
-	public LogBean[] getLogForUserByMonth(String username, int month, int year)
+	public List<LogBean> getLogForUserByMonth(String username, int month, int year)
 	{				
 		String sql = "SELECT * FROM log where Year(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))= " + year + " and Month(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))=" + month + ""
 		+ " AND user = '" + Converters.escapeSQL(username) + "'"; 
@@ -3453,7 +3502,7 @@ public class Data implements Serializable
 		return getLogSQL(sql);
 	}	
 	
-	public LogBean[] getLogForGroupFromId(int groupId, int fromid)
+	public List<LogBean> getLogForGroupFromId(int groupId, int fromid)
 	{				
 		String sql = "SELECT * FROM log where id > " + fromid
 		+ " AND groupId = " + groupId
@@ -3462,7 +3511,7 @@ public class Data implements Serializable
 		return getLogSQL(sql);
 	}	
 
-	public LogBean[] getLogForGroupFromRegistrations(String registrations, int fromid)
+	public List<LogBean> getLogForGroupFromRegistrations(String registrations, int fromid)
 	{				
 		String sql = "SELECT * FROM log where id > " + fromid
 		+ " AND aircraft in (" + registrations + ")"
@@ -3471,7 +3520,7 @@ public class Data implements Serializable
 		return getLogSQL(sql);
 	}	
 
-	public LogBean[] getLogForUserFromId(String username, int fromid)
+	public List<LogBean> getLogForUserFromId(String username, int fromid)
 	{				
 		String sql = "SELECT * FROM log where id > " + fromid
 		+ " AND user = '" + Converters.escapeSQL(username) + "'" 
@@ -3480,17 +3529,17 @@ public class Data implements Serializable
 		return getLogSQL(sql);
 	}		
 
-	public LogBean[] getLogForGroup(int groupId, int from, int to)
+	public List<LogBean> getLogForGroup(int groupId, int from, int to)
 	{
 		return getLogSQL("SELECT * FROM log WHERE groupId=" + groupId + " ORDER BY time DESC LIMIT " + from + "," + to);
 	}
 	
-	public LogBean[] getLogForUser(UserBean user, int from, int amount)
+	public List<LogBean> getLogForUser(UserBean user, int from, int amount)
 	{
 		return getLogSQL("SELECT * FROM log WHERE type <> 'refuel' and type <> 'maintenance' and user='" + Converters.escapeSQL(user.getName()) + "' ORDER BY time DESC LIMIT " + from + "," + amount);
 	}	
 	
-	public LogBean[] getLogForUser(UserBean user, int afterLogId)
+	public List<LogBean> getLogForUser(UserBean user, int afterLogId)
 	{
 		return getLogSQL("SELECT * FROM log WHERE id > " + afterLogId + " AND type <> 'refuel' and type <> 'maintenance' and user='" + Converters.escapeSQL(user.getName()) + "' ORDER BY time DESC ");
 	}	
@@ -3500,22 +3549,23 @@ public class Data implements Serializable
 		return getIntSQL("SELECT count(*) FROM log WHERE user='" + Converters.escapeSQL(user.getName()) + "'");		
 	}
 	
-	public LogBean[] getLogById(int id)
+	public LogBean getLogById(int id)
 	{
-		return getLogSQL("SELECT * FROM log WHERE id = " + id);
+        List<LogBean> result = getLogSQL("SELECT * FROM log WHERE id = " + id);
+        return result.size() == 0 ? null : result.get(0);
 	}
 	
-	public LogBean[] getLogForFbo(int fbo, int from, int amount)
+	public List<LogBean> getLogForFbo(int fbo, int from, int amount)
 	{
 		return getLogSQL("SELECT * FROM log WHERE fbo=" + fbo + " ORDER BY time DESC LIMIT " + from + "," + amount);
 	}
 	
-	public LogBean[] getLogForAircraft(String registration, int from, int amount)
+	public List<LogBean> getLogForAircraft(String registration, int from, int amount)
 	{
 		return getLogSQL("SELECT * FROM log WHERE aircraft='" + Converters.escapeSQL(registration) + "' ORDER BY time DESC LIMIT " + from + "," + amount);
 	}
 	
-	public LogBean[] getLogForAircraft(String registration, int entryid)
+	public List<LogBean> getLogForAircraft(String registration, int entryid)
 	{
 		return getLogSQL("SELECT * FROM log WHERE aircraft='" + Converters.escapeSQL(registration) + "' AND ID > " + entryid + " ORDER BY time DESC");
 	}
@@ -3530,12 +3580,12 @@ public class Data implements Serializable
 		return getIntSQL("SELECT count(*) FROM log WHERE fbo=" + fbo);
 	}			
 
-	public LogBean[] getLogForMaintenanceAircraft(String registration)
+	public List<LogBean> getLogForMaintenanceAircraft(String registration)
 	{
 		return getLogSQL("SELECT * FROM log WHERE type = 'maintenance' AND aircraft='" + Converters.escapeSQL(registration) + "' ORDER BY time DESC");
 	}
-	
-	LogBean[] getLogSQL(String qry)
+
+    private List<LogBean> getLogSQL(String qry)
 	{
 		ArrayList<LogBean> result = new ArrayList<>();
 
@@ -3553,7 +3603,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new LogBean[result.size()]);
+		return result;
 	}
 	
 	public int getAmountPaymentsForUser(int user, int fboId, String aircraft, boolean paymentsToSelf)
@@ -3572,7 +3622,7 @@ public class Data implements Serializable
 				getIntSQL("SELECT count(*) FROM payments WHERE otherparty = " + user + where);		
 	}
 	
-	public PaymentBean[] getPaymentsForUser(int user, int from, int amount, int fboId, String aircraft, boolean paymentsToSelf)
+	public List<PaymentBean> getPaymentsForUser(int user, int from, int amount, int fboId, String aircraft, boolean paymentsToSelf)
 	{
 		String where = "";
 		if (fboId > 0)
@@ -3596,13 +3646,13 @@ public class Data implements Serializable
 		return getPaymentLogSQL("Select m.* from (Select id from payments where (user = " + user + " OR otherparty = " + user + ") " + where + " order by id desc Limit " + from + "," + amount + ") q join payments m on q.id=m.id order by id desc");
 	}
 	
-	public PaymentBean[] getPaymentsForIdByMonth(int id, int month, int year)
+	public List<PaymentBean> getPaymentsForIdByMonth(int id, int month, int year)
 	{	
 		String sql = "Select m.* from (Select id, year(CONVERT_TZ(`time`, @@session.time_zone, '+00:00')) year, month(CONVERT_TZ(`time`, @@session.time_zone, '+00:00')) month from payments where (user = " + id + " OR otherparty = " + id + ") order by id desc) q join payments m on q.id=m.id WHERE (q.year= " + year + " AND q.month=" + month + ")  order by id desc";
 		return getPaymentLogSQL(sql);
 	}
 	
-	public PaymentBean[] getPaymentLogSQL(String qry)
+	public List<PaymentBean> getPaymentLogSQL(String qry)
 	{
 		ArrayList<PaymentBean> result = new ArrayList<>();
 
@@ -3620,7 +3670,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}
 
-		return result.toArray(new PaymentBean[result.size()]);
+		return result;
 	}
 	
 	public Object[] outputLog(String selection)
@@ -3718,7 +3768,7 @@ public class Data implements Serializable
 			return "";
 	}
 	
-	public AssignmentBean[] getAssignmentsToArea(String location, closeAirport[] locations, int minPax, int maxPax, int minKG, int maxKG)
+	public List<AssignmentBean> getAssignmentsToArea(String location, List<closeAirport> locations, int minPax, int maxPax, int minKG, int maxKG)
 	{
 		StringBuilder where = new StringBuilder("'" + Converters.escapeSQL(location) + "'");
         for (closeAirport location1 : locations)
@@ -3729,7 +3779,7 @@ public class Data implements Serializable
 		return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock is null AND groupId is null AND " + cargoFilter + " toicao in (" + where.toString() + ") ORDER BY bearing");
 	}
 	
-	public AssignmentBean[] getAssignmentsInArea(String location, closeAirport[] locations, int minPax, int maxPax, int minKG, int maxKG)
+	public List<AssignmentBean> getAssignmentsInArea(String location, List<closeAirport> locations, int minPax, int maxPax, int minKG, int maxKG)
 	{
 		StringBuilder where = new StringBuilder("'" + Converters.escapeSQL(location) + "'");
         for (closeAirport location1 : locations)
@@ -3740,12 +3790,12 @@ public class Data implements Serializable
 		return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock is null AND groupId is null AND " + cargoFilter + " location in (" + where.toString() + ") ORDER BY bearing");
 	}
 	
-	public AssignmentBean[] getAssignmentById(int id)
+	public AssignmentBean getAssignmentById(int id)
 	{
-		return getAssignmentsSQL("SELECT * FROM assignments WHERE id=" + id);
+		return getAssignmentSQL("SELECT * FROM assignments WHERE id=" + id);
 	}
 	
-	public AssignmentBean[] getAssignmentsForGroup(int groupId, boolean includelocked)
+	public List<AssignmentBean> getAssignmentsForGroup(int groupId, boolean includelocked)
 	{
 		if (includelocked) 
 			return getAssignmentsSQL("SELECT * FROM assignments WHERE groupId=" + groupId + " ORDER BY location");
@@ -3753,43 +3803,60 @@ public class Data implements Serializable
 			return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock is null AND groupId=" + groupId + " ORDER BY location");
 	}
 	
-	public AssignmentBean[] getAssignmentsForUser(int userId)
+	public List<AssignmentBean> getAssignmentsForUser(int userId)
 	{
 		return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock=" + userId);
 	}
 	
-	public AssignmentBean[] getAssignmentsForTransfer(int userId)
+	public List<AssignmentBean> getAssignmentsForTransfer(int userId)
 	{
 		return getAssignmentsSQL("SELECT * FROM assignments WHERE owner=" + userId);
 	}
 	
-	public AssignmentBean[] getAssignments(String location, int minPax, int maxPax, int minKG, int maxKG)
+	public List<AssignmentBean> getAssignments(String location, int minPax, int maxPax, int minKG, int maxKG)
 	{
 		String cargoFilter = BuildAssignmentCargoFilter(minPax, maxPax, minKG, maxKG);
 		return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock is null AND groupId is null AND " + cargoFilter + " location='" + location + "' AND (aircraft is null OR location = (SELECT location FROM aircraft WHERE aircraft.registration = assignments.aircraft)) ORDER BY bearing");
 	}
 	
-	public AssignmentBean[] getAssignmentsToAirport(String location, int minPax, int maxPax, int minKG, int maxKG)
+	public List<AssignmentBean> getAssignmentsToAirport(String location, int minPax, int maxPax, int minKG, int maxKG)
 	{
 		String cargoFilter = BuildAssignmentCargoFilter(minPax, maxPax, minKG, maxKG);
 		return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock is null AND groupId is null AND " + cargoFilter + " toicao='" + location + "' AND (aircraft is null OR location = (SELECT location FROM aircraft WHERE aircraft.registration = assignments.aircraft)) ORDER BY bearing");
 	}
 	
-	public AssignmentBean[] getAssignmentsFromAirport(String location)
+	public List<AssignmentBean> getAssignmentsFromAirport(String location)
 	{
 		String sql = "SELECT * FROM assignments WHERE userlock is null AND groupId is null AND location IN(" + location + ") ORDER BY location, distance";
 
 		return getAssignmentsSQL(sql);
 	}
 	
-	public AssignmentBean[] getAssignmentsToAirport(String location)
+	public List<AssignmentBean> getAssignmentsToAirport(String location)
 	{
 		String sql = "SELECT * FROM assignments WHERE userlock is null AND groupId is null AND toicao IN(" + location + ") ORDER BY location, distance";
 
 		return getAssignmentsSQL(sql);
 	}
-	
-	public AssignmentBean[] getAssignmentsSQL(String qry)
+
+    public AssignmentBean getAssignmentSQL(String qry)
+    {
+        try
+        {
+            ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
+            if (rs.next())
+            {
+                return new AssignmentBean(rs);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+	public List<AssignmentBean> getAssignmentsSQL(String qry)
 	{
 		ArrayList<AssignmentBean> result = new ArrayList<>();
 		try
@@ -3806,7 +3873,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}	
 
-		return result.toArray(new AssignmentBean[result.size()]);
+		return result;
 	}
 	
 	public void unlockAssignment(int id, boolean unlockAll)
@@ -3851,10 +3918,10 @@ public class Data implements Serializable
 		} 
 	}	
 	
-	public void moveAssignment(UserBean user, int id, int group) throws DataError
+	public void moveAssignment(UserBean user, int id, int groupid) throws DataError
 	{
-		UserBean[] groups = getGroupById(group);
-		if (groups.length == 0)
+		UserBean group = getGroupById(groupid);
+		if (group == null)
 			throw new DataError("Group not found.");
 			
 		try
@@ -3878,7 +3945,7 @@ public class Data implements Serializable
 			
 			//Move it to group assignments
 			qry = "UPDATE assignments SET pilotFee=pay*amount*distance*0.01*?, groupId = ? WHERE id = ?";
-			dalHelper.ExecuteUpdate(qry, groups[0].getDefaultPilotFee()/100.0, group, id);
+			dalHelper.ExecuteUpdate(qry, group.getDefaultPilotFee()/100.0, groupid, id);
 		} 
 		catch (SQLException e)
 		{
@@ -4030,8 +4097,8 @@ public class Data implements Serializable
 			//The following check allows ALLIN only aircraft to be rented, bypassing the exploit canceling code
 			if ((aircraft.getRentalPriceDry() + aircraft.getRentalPriceWet() == 0) && !(aircraft.canAlwaysRent(renter))) 
 			{
-				ModelBean mb[] = getModelById(aircraft.getModelId());
-				if(mb[0].getFuelSystemOnly() == 0) // 0 == can be fueled, so not an ALLIN limited aircraft
+				ModelBean mb = getModelById(aircraft.getModelId());
+				if(mb.getFuelSystemOnly() == 0) // 0 == can be fueled, so not an ALLIN limited aircraft
 					throw new DataError("Rental not authorized");
 			}
 			
@@ -4111,8 +4178,8 @@ public class Data implements Serializable
 		
 		double fboAssignmentFee = 0.0;
 		double fbofee = assignment.calcPay() * 0.05;
-		FboBean[] fbos = getFboByLocation(fboIcao);
-		if (fbos.length > 0)
+		List<FboBean> fbos = getFboByLocation(fboIcao);
+		if (fbos.size() > 0)
 		{
 			FboBean ownerFbo = null;
 			if (assignment.getFromFboTemplate() > 0)
@@ -4135,6 +4202,7 @@ public class Data implements Serializable
 					}
 				}
 			}
+
 			if (ownerFbo == null)
 			{
 				int flightUltimateOwner = accountUltimateOwner(payAssignmentToAccount);
@@ -4147,9 +4215,11 @@ public class Data implements Serializable
                     }
                 }
 			}
+
 			if (ownerFbo != null)
 			{
-                fbos = new FboBean[]{ownerFbo};
+                fbos = new ArrayList<>();
+                fbos.add(ownerFbo);
 			}
 			
 			fboAssignmentFee = fbofee;
@@ -4195,7 +4265,7 @@ public class Data implements Serializable
 		try //This try block is for SQL Exceptions
 		{
 			//Defined outside our inner try so that the aircraft lock can be evaluated in the finally block
-			AircraftBean[] aircraft;
+			AircraftBean aircraft;
 			int freeAircraft = 0;
 
 			//Setup our connection needs
@@ -4211,14 +4281,14 @@ public class Data implements Serializable
 				aircraft = getAircraftForUser(user.getId());
 				
 				//Is valid aircraft
-				if (aircraft.length == 0)
+				if (aircraft == null)
 				{
 					System.err.println(new Timestamp(System.currentTimeMillis()) + " processFlight: No Aircraft lock.  SimType = " + simType.name() + ", User = " + user.getId());
 					throw new DataError("VALIDATIONERROR: No aircraft in use, flight aborted.");
 				}
 				
 				//Check flight in progress 
-				if (aircraft[0].getDepartedFrom() == null) 
+				if (aircraft.getDepartedFrom() == null)
 				{ 
 					System.err.println(new Timestamp(System.currentTimeMillis()) + " processFlight: No flight in progress.  SimType = " + simType.name() + ", User = " + user.getId()); 
 					throw new DataError("VALIDATIONERROR: It appears that a duplicate flight was submitted and canceled. Please check your My Flight page for current flight status."); 
@@ -4226,19 +4296,19 @@ public class Data implements Serializable
 				
 				// Load up our model parameters for later checks
 				// Need to do this after getAircraftForUser is validated
-				ModelBean[] m = getModelById(aircraft[0].getModelId());  
+				ModelBean m = getModelById(aircraft.getModelId());
 
 				// Speed checks
 				// Average Speed of flight should be less than 2.5 the models cruise speed, this is very generous
-				int flightDistance = (int)Math.round(getDistance(location.icao, aircraft[0].getDepartedFrom()));
+				int flightDistance = (int)Math.round(getDistance(location.icao, aircraft.getDepartedFrom()));
 				Float flightMPH = (float) (flightDistance/(engineTime/3600.0));
-				if (flightMPH > (m[0].getCruise()*2.5))
+				if (flightMPH > (m.getCruise()*2.5))
 				{
 					cancelFlight(user);
 					//Added more debugging variables to the system message, this happens rarely but we have no idea why
 					
-					System.err.println(new Timestamp(System.currentTimeMillis()) + " Excess Speed Calculated, rejecting flight. SimType = " + simType.name() + ", Reg = " + aircraft[0].getRegistration() + " User = " + user.getId() + " DepartICAO = " + aircraft[0].getDepartedFrom() + " ArriveICAO = " + location.icao + " Distance = " + flightDistance + " Airspeed = " + flightMPH + " EngineTime = " + engineTime);	
-					throw new DataError("VALIDATIONERROR: Invalid speed calculated. (" + flightMPH + "-MPH) between DepartICAO = " + aircraft[0].getDepartedFrom() + " to ArriveICAO = " + location.icao + " in " + (int)(engineTime/60.0 + .5) + " Minutes, flight aborted");
+					System.err.println(new Timestamp(System.currentTimeMillis()) + " Excess Speed Calculated, rejecting flight. SimType = " + simType.name() + ", Reg = " + aircraft.getRegistration() + " User = " + user.getId() + " DepartICAO = " + aircraft.getDepartedFrom() + " ArriveICAO = " + location.icao + " Distance = " + flightDistance + " Airspeed = " + flightMPH + " EngineTime = " + engineTime);
+					throw new DataError("VALIDATIONERROR: Invalid speed calculated. (" + flightMPH + "-MPH) between DepartICAO = " + aircraft.getDepartedFrom() + " to ArriveICAO = " + location.icao + " in " + (int)(engineTime/60.0 + .5) + " Minutes, flight aborted");
 				}
 				
 				///////////////////////////////////////////////////////
@@ -4248,7 +4318,7 @@ public class Data implements Serializable
 				//modified to always zero out unused fuel tanks based on model data
 				for (int i = 0; i < fuel.length; i++)
 				{
-					int capacity = m[0].getCap(i);
+					int capacity = m.getCap(i);
 					if (capacity == 0) 	// Model has 0 fuel for this tank
 					{
 						fuel[i] = 0;	//Added just to make sure no ghost tanks with fuel - Airboss 3/5/11
@@ -4261,13 +4331,13 @@ public class Data implements Serializable
 				}
 				
 				//Set the current aircraft fuel levels
-				aircraft[0].setFuel(fuel);				
+				aircraft.setFuel(fuel);
 	
 				// Fuel checks, only sets flag, does not toss data error
-				double initialFuel = aircraft[0].getInitialFuel();
+				double initialFuel = aircraft.getInitialFuel();
 
 				// More fuel then when started, if only that could be true!
-				boolean invalidFuel = (!aircraft[0].wasWetRent()) && (initialFuel < aircraft[0].getTotalFuel());				
+				boolean invalidFuel = (!aircraft.wasWetRent()) && (initialFuel < aircraft.getTotalFuel());
 				
 				// Before we start we need to process Pax assignment to assign the 
 				// tax rate to each for computing costs so...
@@ -4310,7 +4380,7 @@ public class Data implements Serializable
 				{
 					//Get AllIn assignments that are enroute using the reported aircraft
 					qry = "SELECT (count(id) > 0) AS found FROM assignments WHERE active = 1 AND aircraft = ?";
-					boolean allInAssignment = dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft[0].getRegistration());
+					boolean allInAssignment = dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getRegistration());
 					if( !allInAssignment )
 					{
 						System.err.println("  Flight kicked: AllIn flight with no assignment at current aircraft location");
@@ -4320,17 +4390,17 @@ public class Data implements Serializable
 						throw new DataError(errmsg);
 					}
 					qry = "SELECT toicao FROM assignments WHERE active = 1 AND aircraft = ?";
-					allInAssignmentToIcao = dalHelper.ExecuteScalar(qry, new DALHelper.StringResultTransformer(), aircraft[0].getRegistration());
+					allInAssignmentToIcao = dalHelper.ExecuteScalar(qry, new DALHelper.StringResultTransformer(), aircraft.getRegistration());
 				}
 				
 				//All-In change - don't pay rental, fuel, or distance fees
 				if (!allIn)
 				{
 					// Get Rental cost (Dry/Wet)					
-					if (aircraft[0].wasWetRent())
-						price = aircraft[0].getRentalPriceWet(); // Wet rental
+					if (aircraft.wasWetRent())
+						price = aircraft.getRentalPriceWet(); // Wet rental
 					else
-						price = aircraft[0].getRentalPriceDry();  //Dry rental					
+						price = aircraft.getRentalPriceDry();  //Dry rental
 					
 					// Get rental time in hours
 					rentalTime = (float)(engineTime/3600.0);
@@ -4340,29 +4410,29 @@ public class Data implements Serializable
 					
 					// Check to see if we need to add in fuel costs for Dry rental
 					// Currently if no fuel was used no fuel cost, Scot-Free???
-					if (!aircraft[0].wasWetRent() && !invalidFuel)
+					if (!aircraft.wasWetRent() && !invalidFuel)
 					{
-						double cost = (initialFuel - aircraft[0].getTotalFuel()) * getFuelPrice(location.icao);
-						if (aircraft[0].getFuelType() == AircraftBean.FUELTYPE_JETA)
+						double cost = (initialFuel - aircraft.getTotalFuel()) * getFuelPrice(location.icao);
+						if (aircraft.getFuelType() == AircraftBean.FUELTYPE_JETA)
 							cost *= getJetaMultiplier();
 						
 						fuelCost = (float)cost;
 					}
 					
 					// if bonus setting is 0 or we are back to where we started, leave pilot bonus at 0
-					if(aircraft[0].getBonus() != 0 && !location.icao.contentEquals(aircraft[0].getDepartedFrom()))
+					if(aircraft.getBonus() != 0 && !location.icao.contentEquals(aircraft.getDepartedFrom()))
 					{
 						// If we are not at home, we need to calculate distance/bearing otherwise leave at 0, 0
-						if(!location.icao.equals(aircraft[0].getHome()))
-							distanceFromHome = getDistanceBearing(location.icao, aircraft[0].getHome());
+						if(!location.icao.equals(aircraft.getHome()))
+							distanceFromHome = getDistanceBearing(location.icao, aircraft.getHome());
 
 						double dist = 0.0;
 
 						// If departure airport was home icao, no need to calculate the distance
-						if(!aircraft[0].getHome().contentEquals(aircraft[0].getDepartedFrom()))
-							dist = getDistance(aircraft[0].getHome(), aircraft[0].getDepartedFrom());
+						if(!aircraft.getHome().contentEquals(aircraft.getDepartedFrom()))
+							dist = getDistance(aircraft.getHome(), aircraft.getDepartedFrom());
 						
-						double b = aircraft[0].getBonus();
+						double b = aircraft.getBonus();
 						
 						// If both distance and distanceFromHome are 0, bonus is 0
 						if( dist != 0 || distanceFromHome[0] != 0.0 )
@@ -4376,16 +4446,16 @@ public class Data implements Serializable
 					toPayOwner = flightCost;  // Pay this to the owner of the aircraft
 	
 					if(flightCost == 0 && price != 0)
-						System.err.println("****> Rental costs for Reg: " + aircraft[0].getRegistration() + 
+						System.err.println("****> Rental costs for Reg: " + aircraft.getRegistration() +
 							", Date: " + new Timestamp(System.currentTimeMillis()) +
-							", Owner: " + getAccountNameById(aircraft[0].getOwner()) +  
+							", Owner: " + getAccountNameById(aircraft.getOwner()) +
 							", By: " + user.getName() +
-							", From: " + aircraft[0].getDepartedFrom() + 
+							", From: " + aircraft.getDepartedFrom() +
 							", To: " + location.icao + 
-							", EngineTimeType: " + (aircraft[0].getAccounting() == AircraftBean.ACC_HOUR ? "Hourly" : "Tach") +
+							", EngineTimeType: " + (aircraft.getAccounting() == AircraftBean.ACC_HOUR ? "Hourly" : "Tach") +
 							", EngineTime: " + engineTime + 
 							", RentalTime: " + rentalTime + 
-							", RentalType: " + (aircraft[0].wasWetRent() ? "Wet" : "Dry") + 
+							", RentalType: " + (aircraft.wasWetRent() ? "Wet" : "Dry") +
 							", InvalidFuel: " + invalidFuel + 
 							", pricePerHour: " + price + 
 							", Rental Cost: " + rentalCost + 
@@ -4394,7 +4464,7 @@ public class Data implements Serializable
 							", TotalToOwner: " + flightCost );
 					
 					// Crew Cost added  - deducts $100 per hour per additional crew member from payout
-					crewCost = m[0].getCrew() * 100 * (float)(engineTime/3600.0);					
+					crewCost = m.getCrew() * 100 * (float)(engineTime/3600.0);
 				}	//All-In clause
 	
 				// Determine if Group flight and if so payments
@@ -4421,13 +4491,13 @@ public class Data implements Serializable
 				// and thus have no group ID and pilot fee assigned
 				if (groupFlight)
 				{
-					UserBean[] groups = getGroupById(groupId);
+					UserBean group = getGroupById(groupId);
 					stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-					stmt.executeUpdate("UPDATE assignments SET pilotFee=pay*amount*distance*0.01*" + groups[0].getDefaultPilotFee()/100.0 + ", groupId = " + groupId + " WHERE active=1 and userlock = " + user.getId() + " and groupId is null");
+					stmt.executeUpdate("UPDATE assignments SET pilotFee=pay*amount*distance*0.01*" + group.getDefaultPilotFee()/100.0 + ", groupId = " + groupId + " WHERE active=1 and userlock = " + user.getId() + " and groupId is null");
 					stmt.close();
 					
 					//gurka - added to keep track of the group to pay for closing exploit - to be used later on just before the committ to check balances of group bank account
-					groupToPay = groups[0];
+					groupToPay = group;
 				}
 				
 				//////////////////////////////////////////////
@@ -4461,8 +4531,8 @@ public class Data implements Serializable
 					totalPilotFee += pilotFee;
 					income += value;				
 					
-					fboAssignmentFee += payFboGroundCrewFees(assignment.getFrom(), assignment, payAssignmentToAccount, location.icao, aircraft[0].getRegistration(), true);
-					fboAssignmentFee += payFboGroundCrewFees(location.icao, assignment, payAssignmentToAccount, location.icao, aircraft[0].getRegistration(), true);
+					fboAssignmentFee += payFboGroundCrewFees(assignment.getFrom(), assignment, payAssignmentToAccount, location.icao, aircraft.getRegistration(), true);
+					fboAssignmentFee += payFboGroundCrewFees(location.icao, assignment, payAssignmentToAccount, location.icao, aircraft.getRegistration(), true);
 				}
 				rs.close();
 				stmt.close();
@@ -4511,11 +4581,11 @@ public class Data implements Serializable
 
 				// Pay rental + fuel + bonus to owner of aircraft
 				if (toPayOwner != 0)
-					doPayment(payAssignmentToAccount, aircraft[0].getOwner(), toPayOwner, PaymentBean.RENTAL, 0, -1, location.icao, aircraft[0].getRegistration(), "", false);
+					doPayment(payAssignmentToAccount, aircraft.getOwner(), toPayOwner, PaymentBean.RENTAL, 0, -1, location.icao, aircraft.getRegistration(), "", false);
 				
 				// Pay crew cost
 				if (crewCost > 0)
-					doPayment(payAssignmentToAccount, 0, crewCost, PaymentBean.CREW_FEE, 0, -1, location.icao, aircraft[0].getRegistration(), "", false);				
+					doPayment(payAssignmentToAccount, 0, crewCost, PaymentBean.CREW_FEE, 0, -1, location.icao, aircraft.getRegistration(), "", false);
 				
 				//---------------------------------------------
 				// Variable payouts based on each assignment
@@ -4539,16 +4609,16 @@ public class Data implements Serializable
                         logTemplateAssignment(assignment, payAssignmentToAccount);
 
 					// Pay assignment to operator of flight
-					doPayment(owner, payAssignmentToAccount, value, PaymentBean.ASSIGNMENT, 0, -1, location.icao, aircraft[0].getRegistration(), "", false);
+					doPayment(owner, payAssignmentToAccount, value, PaymentBean.ASSIGNMENT, 0, -1, location.icao, aircraft.getRegistration(), "", false);
 
 					// If group flight, pay the pilot fee
 					if (groupFlight && pilotFee > 0)
-						doPayment(payAssignmentToAccount, user.getId(), pilotFee, PaymentBean.PILOT_FEE, 0, -1, location.icao, aircraft[0].getRegistration(), "", false);
+						doPayment(payAssignmentToAccount, user.getId(), pilotFee, PaymentBean.PILOT_FEE, 0, -1, location.icao, aircraft.getRegistration(), "", false);
 					
 					// Charge mptTax - convert tax rate to a percent
 					if (mptTaxRate > 0) 
 					{
-						doPayment(payAssignmentToAccount, 0, (value * (mptTaxRate * .01)), PaymentBean.MULTIPLE_PT_TAX, 0, -1, location.icao, aircraft[0].getRegistration(), "", false);
+						doPayment(payAssignmentToAccount, 0, (value * (mptTaxRate * .01)), PaymentBean.MULTIPLE_PT_TAX, 0, -1, location.icao, aircraft.getRegistration(), "", false);
 						
 						// Used for tracking log
 						mpttax += (value * (mptTaxRate * .01)); 
@@ -4583,8 +4653,8 @@ public class Data implements Serializable
 					totalPilotFee += pilotFee;
 					income += value;				
 					
-					fboAssignmentFee += payFboGroundCrewFees(assignment.getFrom(), assignment, payAssignmentToAccount, location.icao, aircraft[0].getRegistration(), false);
-					fboAssignmentFee += payFboGroundCrewFees(location.icao, assignment, payAssignmentToAccount, location.icao, aircraft[0].getRegistration(), false);
+					fboAssignmentFee += payFboGroundCrewFees(assignment.getFrom(), assignment, payAssignmentToAccount, location.icao, aircraft.getRegistration(), false);
+					fboAssignmentFee += payFboGroundCrewFees(location.icao, assignment, payAssignmentToAccount, location.icao, aircraft.getRegistration(), false);
 				}
 				rs.close();
 				stmt.close();
@@ -4635,10 +4705,10 @@ public class Data implements Serializable
 					rs.updateInt("bearingToHome", (int)Math.round(distanceFromHome[1]));
 				
 				if (!invalidFuel)
-					aircraft[0].writeFuel(rs);
+					aircraft.writeFuel(rs);
 				
 				// if no awaiting assignments and no aircraft hold, or allin at it destination, then release the aircraft lock/rental
-				if ((freeAircraft < 1 && !aircraft[0].getHoldRental()) 
+				if ((freeAircraft < 1 && !aircraft.getHoldRental())
 					|| (allIn && location.icao.equals(allInAssignmentToIcao)) )
 				{
 					rs.updateNull("userlock");
@@ -4647,8 +4717,8 @@ public class Data implements Serializable
 				} 
 				else // otherwise keep the aircraft locked / rented, and update initial fuel
 				{
-					if (!aircraft[0].wasWetRent() && !invalidFuel)
-						rs.updateFloat("initialFuel", (float)aircraft[0].getTotalFuel());
+					if (!aircraft.wasWetRent() && !invalidFuel)
+						rs.updateFloat("initialFuel", (float)aircraft.getTotalFuel());
 				}
 				
 				// Update the aircraft record
@@ -4661,10 +4731,10 @@ public class Data implements Serializable
 				//////////////////////////////////////////////////////
 				// Currently only Heat, and Mixture > 95% above 1000ft is checked in client
 				for (int c=0; c< damage.length; c++)
-					addAircraftDamage(aircraft[0].getRegistration(), damage[c][0], damage[c][1], damage[c][2]);
+					addAircraftDamage(aircraft.getRegistration(), damage[c][0], damage[c][1], damage[c][2]);
 				
-				for (int c=1; c<= aircraft[0].getEngines(); c++)
-					addAircraftDamage(aircraft[0].getRegistration(), c, AircraftMaintenanceBean.DAMAGE_RUNTIME, engineTime);
+				for (int c=1; c<= aircraft.getEngines(); c++)
+					addAircraftDamage(aircraft.getRegistration(), c, AircraftMaintenanceBean.DAMAGE_RUNTIME, engineTime);
 				
 				// Add log entry
 				///////////////////////////////////////////////////
@@ -4676,8 +4746,8 @@ public class Data implements Serializable
 				
 				rs.updateTimestamp("time",new Timestamp(System.currentTimeMillis()));
 				rs.updateString("user", user.getName());
-				rs.updateString("aircraft", aircraft[0].getRegistration());
-				rs.updateString("from", aircraft[0].getDepartedFrom());
+				rs.updateString("aircraft", aircraft.getRegistration());
+				rs.updateString("from", aircraft.getDepartedFrom());
 				rs.updateString("to", location.icao);
 				rs.updateString("type", "flight");
 				rs.updateInt("totalEngineTime", totalEngineTime);
@@ -4687,10 +4757,10 @@ public class Data implements Serializable
 				rs.updateFloat("landingCost", 0); // not used		
 				rs.updateFloat("crewCost", crewCost);
 				rs.updateFloat("rentalPrice", price);
-				rs.updateString("rentalType", aircraft[0].wasWetRent() ? "wet" : "dry"); 
+				rs.updateString("rentalType", aircraft.wasWetRent() ? "wet" : "dry");
 				rs.updateInt("flightEngineTime", engineTime);
 				rs.updateInt("flightEngineTicks", engineTicks);
-				rs.updateInt("accounting", aircraft[0].getAccounting());
+				rs.updateInt("accounting", aircraft.getAccounting());
 				rs.updateInt("distance", flightDistance);
 				rs.updateInt("night", night);
 				rs.updateInt("pilotFee", totalPilotFee);
@@ -4719,7 +4789,7 @@ public class Data implements Serializable
 				Calendar cal = Calendar.getInstance();
 				int year = cal.get(Calendar.YEAR);
 				int month = cal.get(Calendar.MONTH) + 1; //0 based instead of 1
-				String fromICAO = aircraft[0].getDepartedFrom();
+				String fromICAO = aircraft.getDepartedFrom();
 				String toICAO = location.icao;
 				
 				rs = stmt.executeQuery("SELECT * from flightops where opyear=" + year + " AND opmonth=" + month + " AND icao='" + fromICAO + "'");				
@@ -4829,7 +4899,7 @@ public class Data implements Serializable
 		int totalWeight = 0;
 		double fuelWeight = 0;
 		boolean rentedDry = false;
-		ModelBean[] Models = getModelById(bean.modelId);
+		ModelBean model = getModelById(bean.modelId);
 		boolean allInFlight = false;
 
 		try
@@ -4867,7 +4937,7 @@ public class Data implements Serializable
 			qry = "SELECT (initialFuel is not null) AS rentedDry FROM aircraft WHERE registration = ?";
 			rentedDry = dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), bean.registration);
 
-			if (bean.getCanFlyAssignments(Models[0]))
+			if (bean.getCanFlyAssignments(model))
 			{
 				int onBoard = 0;
 				qry = "SELECT * FROM assignments WHERE (active = 1 OR (location = ? AND active <> 2)) AND userlock = ? ORDER BY active DESC";
@@ -4917,7 +4987,7 @@ public class Data implements Serializable
                    {
                         Math.round(totalWeight),
                         (int) Math.round(totalWeight + fuelWeight + bean.getEmptyWeight()),
-                        result.toArray(new AssignmentBean[result.size()]),
+                        result,
                         rentedDry
                    };
 	}
@@ -4935,11 +5005,11 @@ public class Data implements Serializable
 			
 			int totalWeight = 77 + (77 * crewWeight);  	// * seats subtracts weight of pilot (77) + any addt'l crew members
 			double weightLeft = bean.maxPayloadWeight();
-			ModelBean[] Models = getModelById(bean.modelId);
+			ModelBean model = getModelById(bean.modelId);
 			int group = -1;
 			int passengerCount = 0;
 			
-			if (bean.getCanFlyAssignments(Models[0]))
+			if (bean.getCanFlyAssignments(model))
 			{
 				String qry = "SELECT * FROM assignments WHERE userlock = ? AND (active =1 OR location=?) ORDER BY active DESC";
 				ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, user, location);
@@ -5124,8 +5194,8 @@ public class Data implements Serializable
 	{
 		UserBean user = getAccountById(userid);
 		reloadMemberships(user);
-		ModelBean[] mb = getModelById( aircraft.getModelId());
-		if (!aircraft.changeAllowed(user) && mb[0].getFuelSystemOnly()!= 1)
+		ModelBean mb = getModelById( aircraft.getModelId());
+		if (!aircraft.changeAllowed(user) && mb.getFuelSystemOnly()!= 1)
 			throw new DataError("Only the owner or group staff may defuel.");
 		
 		if (amount < 0)
@@ -5169,38 +5239,38 @@ public class Data implements Serializable
 		Connection conn = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		AircraftBean[] aircraft = getAircraftByRegistration(reg);
+		AircraftBean aircraft = getAircraftByRegistration(reg);
 		UserBean pilot = getAccountById(user);
 		String location;
 		
-		if (aircraft.length == 0)
+		if (aircraft == null)
 			throw new DataError("Aircraft not found.");
 		
-		location = aircraft[0].getLocation();
+		location = aircraft.getLocation();
 		if (location == null)
 			throw new DataError("Cannot refuel while aircraft is in the air.");
 		
-		if (aircraft[0].getUserLock() != user)
+		if (aircraft.getUserLock() != user)
 			throw new DataError("Permission denied.");
 		
 		if (provider == -2) 
 		{
-			defuelAircraft(aircraft[0], user, amount);
+			defuelAircraft(aircraft, user, amount);
 			return;
 		}
 		
-		if (aircraft[0].getTotalCapacity() <= aircraft[0].getTotalFuel())
+		if (aircraft.getTotalCapacity() <= aircraft.getTotalFuel())
 			throw new DataError("Aircraft is already filled up.");
 		
-		double fuelBefore = aircraft[0].getTotalFuel();
+		double fuelBefore = aircraft.getTotalFuel();
 		if (fuelBefore >= amount)
 			return;
 		
-		int capacity = aircraft[0].getTotalCapacity();
+		int capacity = aircraft.getTotalCapacity();
 		if (amount > capacity)
 			amount = capacity;
 			
-		aircraft[0].addFuel(amount);
+		aircraft.addFuel(amount);
 					
 		FboBean fbo = null;
 		double added = amount - fuelBefore;
@@ -5243,7 +5313,7 @@ public class Data implements Serializable
 						fuelPrice = getFuelPrice(location) * getJetaMultiplier();
 					break;
 			 	default: 
-			 		if (aircraft[0].getOwner() > 0) // System aircraft always pay bucket rate
+			 		if (aircraft.getOwner() > 0) // System aircraft always pay bucket rate
 			 		{
 			 			fuelPrice = fbo.getFuelByType(type);
 			 		} 
@@ -5259,7 +5329,7 @@ public class Data implements Serializable
 			float cost = (float)(added * fuelPrice);			
 
 			//Owner have enough cash to pay for fuel?
-			UserBean account = getAccountById(aircraft[0].getOwner());
+			UserBean account = getAccountById(aircraft.getOwner());
 			if( cost > account.getMoney())
 				throw new DataError("Aircraft owner does not have enough cash money to purchase fuel amount requested");
 			
@@ -5267,7 +5337,7 @@ public class Data implements Serializable
 			rs= stmt.executeQuery("SELECT * FROM aircraft WHERE registration='" + reg + "' AND userlock=" + user);
 			if (rs.next())
 			{
-				aircraft[0].writeFuel(rs);
+				aircraft.writeFuel(rs);
 				rs.updateRow();
 			}
 			rs.close();
@@ -5307,11 +5377,11 @@ public class Data implements Serializable
 				String comment = "User ID: " + user + " Amount (gals): " + Formatters.oneDecimal.format(added) + ", $ per Gal: " + Formatters.currency.format(fuelPrice);
 				if (type < 1)
 				{
-					doPayment(aircraft[0].getOwner(), fbo == null ? 0 : fbo.getOwner(), cost, PaymentBean.REASON_REFUEL, logId, fboId, location, reg, comment, false);
+					doPayment(aircraft.getOwner(), fbo == null ? 0 : fbo.getOwner(), cost, PaymentBean.REASON_REFUEL, logId, fboId, location, reg, comment, false);
 				} 
 				else 
 				{
-					doPayment(aircraft[0].getOwner(), fbo == null ? 0 : fbo.getOwner(), cost, PaymentBean.REASON_REFUEL_JETA, logId, fboId, location, reg, comment, false);
+					doPayment(aircraft.getOwner(), fbo == null ? 0 : fbo.getOwner(), cost, PaymentBean.REASON_REFUEL_JETA, logId, fboId, location, reg, comment, false);
 				}				
 			}
 		} 
@@ -5397,7 +5467,7 @@ public class Data implements Serializable
 		} 
 	}
 	
-	public void sellAircraft(String aircraft, UserBean user) throws DataError
+	public void sellAircraft(String reg, UserBean user) throws DataError
 	{
 		Connection conn = null;
 		Statement stmt = null;
@@ -5407,22 +5477,21 @@ public class Data implements Serializable
 			conn = dalHelper.getConnection();
 
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			rs = stmt.executeQuery("SELECT * from aircraft WHERE registration = '" + aircraft + "'");
+			rs = stmt.executeQuery("SELECT * from aircraft WHERE registration = '" + reg + "'");
 			if (rs.next())
 			{
-				AircraftBean[] ac = getAircraftByRegistration(aircraft);
-				ModelBean[] Models = getModelById(ac[0].modelId);
-				
-				if (ac.length == 0)
+				AircraftBean aircraft = getAircraftByRegistration(reg);
+
+				if (aircraft == null)
 					throw new DataError("Aircraft not found.");
 				
-				if (!ac[0].changeAllowed(user))
+				if (!aircraft.changeAllowed(user))
 					throw new DataError("Not your aircraft.");
 				
-				if (ac[0].isBroken())
+				if (aircraft.isBroken())
 					throw new DataError("The Bank of FSE does not buy broken aircraft.");
 				
-				int sellPrice = ac[0].getMinimumPrice();
+				int sellPrice = aircraft.getMinimumPrice();
 				int oldOwner = rs.getInt("owner");
 				String location = rs.getString("location");
 				rs.updateInt("owner", 0);
@@ -5434,19 +5503,19 @@ public class Data implements Serializable
 				rs.updateNull("accounting");
 				
 				// Randomize rent
-				ModelBean[] model = getModelById(rs.getInt("model"));
+				ModelBean model = getModelById(rs.getInt("model"));
 				int equipment = rs.getInt("equipment");
-				int rent = model[0].getTotalRentalTarget(equipment);
+				int rent = model.getTotalRentalTarget(equipment);
 				rent *= 1+(Math.random()*0.40) - 0.2;					
 				rs.updateInt("RentalDry", rent);
 				String home = rs.getString("home");
-				int fuelCost = (int)Math.round(model[0].getGph() * getFuelPrice(home));
+				int fuelCost = (int)Math.round(model.getGph() * getFuelPrice(home));
 				rs.updateInt("RentalWet", fuelCost + rent);
 				rs.updateRow();
 				rs.close();
 				rs = null;
 
-				doPayment(0, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraft, "", false);				
+				doPayment(0, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, reg, "", false);
 			} 
 			else
 			{
@@ -5516,7 +5585,7 @@ public class Data implements Serializable
 			if (!aircraft.changeAllowed(user))
 				throw new DataError("Permission denied");
 			
-			if (newRegistration!= null && getAircraftByRegistration(newRegistration).length > 0)
+			if (newRegistration!= null && getAircraftByRegistration(newRegistration) == null)
 				throw new DataError("Registration already in use.");	
 			
 			double[] distanceFromHome = getDistanceBearing(aircraft.getLocation(), aircraft.getHome());
@@ -5581,13 +5650,13 @@ public class Data implements Serializable
 			//***********
 			//Remember, aircraft is BEFORE any changes that follow, as we are in a transaction!!
 			//***********
-			AircraftBean[] aircraft = getAircraftShippingInfoByRegistration(reg);
+			AircraftBean aircraft = getAircraftShippingInfoByRegistration(reg);
 			
 			rs = stmt.executeQuery("SELECT * FROM aircraft WHERE registration='" + reg + "'");
 			
 			if(rs.next())
 			{
-				Date shippingNext = new Date( new Date().getTime() + (aircraft[0].getShippingStateDelay()*1000)); 
+				Date shippingNext = new Date( new Date().getTime() + (aircraft.getShippingStateDelay()*1000));
 				Timestamp ts = new Timestamp(shippingNext.getTime());
 				rs.updateTimestamp("shippingStateNext", ts );
 				
@@ -5595,7 +5664,7 @@ public class Data implements Serializable
 				
 				//if not admin reset to departure, set the aircraft to its shipped to location
 				if( !resetdepart)
-					rs.updateString("location", aircraft[0].getShippingTo());	
+					rs.updateString("location", aircraft.getShippingTo());
 				
 				rs.updateRow();
 				rs.close();
@@ -5616,7 +5685,7 @@ public class Data implements Serializable
 			{
 				//For completed Assignments, remove them
 				stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-				stmt.executeUpdate("DELETE from assignments WHERE commodityid=99 AND commodity like '%" + aircraft[0].getRegistration() + "%'");
+				stmt.executeUpdate("DELETE from assignments WHERE commodityid=99 AND commodity like '%" + aircraft.getRegistration() + "%'");
 				stmt.close();
 			}			
 		} 
@@ -6024,7 +6093,7 @@ public class Data implements Serializable
 			stmt.executeUpdate("update fbofacilities set occupant = " + user.getId() + " where occupant = " + group);
 					
 			// Transfer ownership of group owned goods
-			GoodsBean[] goods = this.getGoodsForAccountAvailable(group);
+            List<GoodsBean> goods = this.getGoodsForAccountAvailable(group);
             for (GoodsBean good : goods)
             {
                 String location = good.getLocation();
@@ -6062,19 +6131,19 @@ public class Data implements Serializable
 		reloadMemberships(user);
 	}
 	
-	public void flyForGroup(UserBean user, int group) throws DataError
+	public void flyForGroup(UserBean user, int groupid) throws DataError
 	{
-		UserBean[] groups = getGroupById(group);
-		if (groups.length == 0)
+		UserBean group = getGroupById(groupid);
+		if (group == null)
 			throw new DataError("Group not found.");
 	
 		try
 		{
-			if (user.groupMemberLevel(group) < UserBean.GROUP_MEMBER)
+			if (user.groupMemberLevel(groupid) < UserBean.GROUP_MEMBER)
 				throw new DataError("Permission denied.");
 				
 			String qry = "UPDATE assignments SET pilotFee=pay*amount*distance*0.01*?, groupId = ? WHERE userlock = ? and active <> 2";
-			dalHelper.ExecuteUpdate(qry, groups[0].getDefaultPilotFee()/100.0, group, user.getId());
+			dalHelper.ExecuteUpdate(qry, group.getDefaultPilotFee()/100.0, groupid, user.getId());
 		} 
 		catch (SQLException e)
 		{
@@ -6082,34 +6151,34 @@ public class Data implements Serializable
 		} 
 	}
 	
-	public void payMembers(UserBean user, int group, double money, String[] members, String comment) throws DataError
+	public void payMembers(UserBean user, int groupid, double money, String[] members, String comment) throws DataError
 	{
-		UserBean[] groups = getGroupById(group);
+		UserBean group = getGroupById(groupid);
 		
-		if (groups.length == 0)
+		if (group == null)
 			throw new DataError("Group not found.");
 	
-		if (user.groupMemberLevel(group) < UserBean.GROUP_OWNER)
+		if (user.groupMemberLevel(groupid) < UserBean.GROUP_OWNER)
 			throw new DataError("Permission denied.");
 		
-		if (groups[0].getMoney() < money)
+		if (group.getMoney() < money)
 			throw new DataError("Group does not have enough money.");
 			
 		Money topay = new Money(money);
 		topay.divide(members.length);
 		
 		for (int c = 0; c < members.length; c++)
-			doPayment(group, Integer.parseInt(members[c]), topay, PaymentBean.GROUP_PAYMENT, 0, -1, "", "", comment, false);			
+			doPayment(groupid, Integer.parseInt(members[c]), topay, PaymentBean.GROUP_PAYMENT, 0, -1, "", "", comment, false);
 	}
 	
-	public void mailMembers(UserBean user, int group, String[] members, String text) throws DataError
+	public void mailMembers(UserBean user, int groupid, String[] members, String text) throws DataError
 	{
-		UserBean[] groups = getGroupById(group);
+		UserBean group = getGroupById(groupid);
 		
-		if (groups.length == 0)
+		if (group == null)
 			throw new DataError("Group not found.");
 		
-		if (user.groupMemberLevel(group) < UserBean.GROUP_OWNER)
+		if (user.groupMemberLevel(groupid) < UserBean.GROUP_OWNER)
 			throw new DataError("Permission denied.");
 			
 		try
@@ -6123,7 +6192,7 @@ public class Data implements Serializable
 			}
 			list.append(")");
 			
-			List<String> toList = new ArrayList<String>();
+			List<String> toList = new ArrayList<>();
 			String qry = "SELECT email FROM accounts, groupmembership WHERE accounts.id = groupmembership.userId AND groupId = ? AND accounts.id IN " + list.toString();
 			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, group);			
 			while (rs.next()) //add recipients to receive this message
@@ -6131,10 +6200,10 @@ public class Data implements Serializable
 				toList.add(rs.getString(1));
 			}
 			
-			String messageText = "This message is sent to you by the administrator of the FSEconomy flight group \"" + groups[0].getName() + "\".\n----------\n"  + text;
+			String messageText = "This message is sent to you by the administrator of the FSEconomy flight group \"" + group.getName() + "\".\n----------\n"  + text;
 			
 			Emailer emailer = Emailer.getInstance();
-			emailer.sendEmail("no-reply@fseconomy.net", "FS Economy flight group "  + groups[0].getName(),
+			emailer.sendEmail("no-reply@fseconomy.net", "FS Economy flight group "  + group.getName(),
 					"FSEconomy Group Message", messageText, toList, Emailer.ADDRESS_BCC);
 		}
 		catch (Exception e) 
@@ -6159,15 +6228,14 @@ public class Data implements Serializable
 			String location = aircraft.getLocation();
 			if (location == null)
 				return;
-			AirportBean airport = this.getAirport(aircraft.getLocation());
-			FboBean[] fbos = this.getFboForRepair(airport);
-			if (fbos.length == 0)
+
+            AirportBean airport = this.getAirport(aircraft.getLocation());
+			List<FboBean> fbos = this.getFboForRepair(airport, FBO_ID);
+
+            if (fbos.size() == 0)
 				return;
 			
-			//Sort by owner, bank will be first and should be available
-			Arrays.sort(fbos, (o1, o2) -> Integer.compare(o2.getOwner(), o1.getOwner()));
-
-			fbo = fbos[0];
+			fbo = fbos.get(0);
 		}
 			
 		try
@@ -6352,16 +6420,16 @@ public class Data implements Serializable
 	{
 		try
 		{	
-			LogBean log[] = getLogById(logId);
+			LogBean log = getLogById(logId);
 			
-			if (log.length == 0)
+			if (log == null)
 				throw new DataError("Maintenance record not found.");
 			
-			AircraftBean aircraft[] = this.getAircraftByRegistration(log[0].getAircraft());
-			if (aircraft.length == 0)
+			AircraftBean aircraft = this.getAircraftByRegistration(log.getAircraft());
+			if (aircraft == null)
 				throw new DataError("Aircraft not found.");
 			
-			FboBean fbo = log[0].getFbo() == 0 ? FboBean.getInstance() : this.getFbo(log[0].getFbo());
+			FboBean fbo = log.getFbo() == 0 ? FboBean.getInstance() : this.getFbo(log.getFbo());
 			
 			if (fbo == null)
 				throw new DataError("Repairshop not found.");
@@ -6369,7 +6437,7 @@ public class Data implements Serializable
 			String qry = "SELECT * FROM maintenance WHERE log = ?";
 			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, logId);
 			
-			return new AircraftMaintenanceBean(rs, aircraft[0], log[0].maintenanceCost, fbo, log[0].ageECost, log[0].ageAvCost, log[0].ageAfCost, log[0].ageAdwCost);			
+			return new AircraftMaintenanceBean(rs, aircraft, log.maintenanceCost, fbo, log.ageECost, log.ageAvCost, log.ageAfCost, log.ageAdwCost);
 		} 
 		catch (SQLException e)
 		{
@@ -6423,16 +6491,14 @@ public class Data implements Serializable
 			String location = aircraft.getLocation();
 			if (location == null)
 				return;
+
 			AirportBean airport = this.getAirport(aircraft.getLocation());
-			FboBean[] fbos = this.getFboForRepair(airport);
-			if (fbos.length == 0)
+			List<FboBean> fbos = this.getFboForRepair(airport, FBO_EQUIPMENT_MARGIN);
+
+			if (fbos.size() == 0)
 				return;
-			Arrays.sort(fbos, (o1, o2) -> {
-                int v1 = o1.getEquipmentInstallMargin();
-                int v2 = o2.getEquipmentInstallMargin();
-                return v1 < v2 ? -1 : v1 > v2 ? 1 : 0;
-            });
-			fbo = fbos[0];
+
+			fbo = fbos.get(0);
 		}
 		
 		try
@@ -6484,7 +6550,7 @@ public class Data implements Serializable
 	
 	public AircraftAlias[] getAircraftAliasesOld()
 	{
-		ArrayList<AircraftAlias> result = new ArrayList<AircraftAlias>();
+		ArrayList<AircraftAlias> result = new ArrayList<>();
 		String qry;
 		ResultSet rs;
 		
@@ -6557,11 +6623,11 @@ public class Data implements Serializable
 		public String ModelName;
 	}
 	
-	public MakeModel[] getMakeModels()
+	public List<MakeModel> getMakeModels()
 	{
 		String qry;
 		ResultSet rs;
-		ArrayList<MakeModel> makemodels = new ArrayList<MakeModel>();
+		ArrayList<MakeModel> makemodels = new ArrayList<>();
 		
 		try
 		{
@@ -6597,7 +6663,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}		
 		
-		return makemodels.toArray(new MakeModel[makemodels.size()]);
+		return makemodels;
 	}
 	
 	public ModelAliases getModelAliases(int modelId)
@@ -6668,7 +6734,7 @@ public class Data implements Serializable
 		return aircraft;
 	}
 	
-	public aircraftConfigs[] getAircraftConfigs()
+	public List<aircraftConfigs> getAircraftConfigs()
 	{
 		ArrayList<aircraftConfigs> result = new ArrayList<>();
 		ResultSet rs;
@@ -6701,10 +6767,10 @@ public class Data implements Serializable
 			e.printStackTrace();
 		}	
 		
-		return result.toArray(new aircraftConfigs[result.size()]);
+		return result;
 	}
 	
-	public GoodsBean[] getGoodsAtAirportToSell(String icao, int type, int size, double fuelPrice, double JetAPrice)
+	public List<GoodsBean> getGoodsAtAirportToSell(String icao, int type, int size, double fuelPrice, double JetAPrice)
 	{
 		return getGoodsAtAirportSQL("SELECT goods.*, commodities.name, accounts.name FROM " + 
 			"goods, commodities, accounts WHERE ( goods.owner = 0 or exists (select * from fbo WHERE fbo.location = goods.location AND fbo.owner = goods.owner AND " +
@@ -6713,14 +6779,14 @@ public class Data implements Serializable
 			icao, type, size, fuelPrice, JetAPrice);
 	}
 	
-	public GoodsBean[] getGoodsForFbo(String icao, int owner)
+	public List<GoodsBean> getGoodsForFbo(String icao, int owner)
 	{
 		return getGoodsAtAirportSQL("SELECT goods.*, commodities.name, accounts.name FROM " + 
 			"goods, commodities, accounts WHERE goods.owner = accounts.id AND goods.type = commodities.id AND owner = " + 
 			owner + " AND location = '" + icao + "'",	icao, 0, -1, 0, 0);
 	}
 	
-	public GoodsBean[] getGoodsAtAirportGMap(String icao, int size, double fuelPrice, double JetAPrice)
+	public List<GoodsBean> getGoodsAtAirportGMap(String icao, int size, double fuelPrice, double JetAPrice)
 	{
 		return getGoodsAtAirportSQL("SELECT goods.*, commodities.name, accounts.name FROM " +
 			"goods, commodities, accounts WHERE (goods.owner = 0 OR exists (select * from fbo WHERE fbo.location = goods.location AND fbo.owner = goods.owner AND " +
@@ -6728,7 +6794,7 @@ public class Data implements Serializable
 			"goods.location = '" + icao + "' AND goods.owner = accounts.id", icao, 0, size, fuelPrice, JetAPrice);
 	}
 	
-	public GoodsBean[] getGoodsAtAirport(String icao, int size, double fuelPrice, double JetAPrice)
+	public List<GoodsBean> getGoodsAtAirport(String icao, int size, double fuelPrice, double JetAPrice)
 	{
 		return getGoodsAtAirportSQL("SELECT goods.*, commodities.name, accounts.name FROM " +
 			"goods, commodities, accounts WHERE (goods.owner = 0 OR exists (select * from fbo WHERE fbo.location = goods.location AND fbo.owner = goods.owner AND " +
@@ -6736,43 +6802,44 @@ public class Data implements Serializable
 			"goods.location = '" + icao + "' AND goods.owner = accounts.id", icao, 0, size, fuelPrice, JetAPrice);
 	}
 	
-	public GoodsBean[] getGoodsAtAirportSQL(String SQL, String icao, int type, int size, double fuelPrice, double JetAPrice)
-	{		
-		GoodsBean[] returnValue = getGoodsSQL(SQL);
+	public List<GoodsBean> getGoodsAtAirportSQL(String SQL, String icao, int type, int size, double fuelPrice, double JetAPrice)
+	{
+        List<GoodsBean> returnValue = getGoodsSQL(SQL);
 		if (commodities != null && size > 0)
 		{
-			ArrayList<GoodsBean> result = new ArrayList<GoodsBean>();
+			List<GoodsBean> result = new ArrayList<>();
 			int amount[] = new int[commodities.length + 1];
-			for (int c=0; c < returnValue.length; c++)
+			for (GoodsBean item : returnValue)
 			{
-				if (returnValue[c].owner == 0)
-					amount[returnValue[c].getType()]+=returnValue[c].amount;
+				if (item.owner == 0)
+					amount[item.getType()]+=item.amount;
 				else
-					result.add(returnValue[c]);
+					result.add(item);
 			}		
 			
 			for (int c = 0; c < commodities.length; c++)
 				if (commodities[c] != null && size > commodities[c].getMinAirportSize() && (type == 0 || c == type))
 					result.add(new GoodsBean(commodities[c], icao, size, fuelPrice, amount[commodities[c].getId()], JetAPrice));
 			
-			returnValue = result.toArray(new GoodsBean[result.size()]);
+			returnValue = result;
 		}
+
 		return returnValue;
 	}
 	
-	public GoodsBean[] getGoodsForAccountAvailable(int id)
+	public List<GoodsBean> getGoodsForAccountAvailable(int id)
 	{
 		return getGoodsSQL("SELECT goods.*, commodities.name, accounts.name FROM goods, commodities, accounts WHERE goods.owner = accounts.id AND goods.type = commodities.id AND amount > 0 AND owner=" + id);
 	}
 	
 	public GoodsBean getGoods(String location, int owner, int type)
 	{
-		GoodsBean[] returnValue = getGoodsSQL("SELECT goods.*, commodities.name, accounts.name FROM goods, commodities, accounts WHERE goods.owner = accounts.id AND goods.type = commodities.id AND goods.type = " + type + " AND goods.owner = " + owner + " AND goods.location = '" + location + "'");
+        List<GoodsBean> returnValue = getGoodsSQL("SELECT goods.*, commodities.name, accounts.name FROM goods, commodities, accounts WHERE goods.owner = accounts.id AND goods.type = commodities.id AND goods.type = " + type + " AND goods.owner = " + owner + " AND goods.location = '" + location + "'");
 
-        return returnValue.length == 0 ? null : returnValue[0];
+        return returnValue.size() == 0 ? null : returnValue.get(0);
 	}
 
-	GoodsBean[] getGoodsSQL(String qry)
+    List<GoodsBean> getGoodsSQL(String qry)
 	{
 		ArrayList<GoodsBean> result = new ArrayList<GoodsBean>();
 		try
@@ -6789,7 +6856,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 
-		return result.toArray(new GoodsBean[result.size()]);
+		return result;
 	}
 	
 	public int getGoodsQty(FboBean fbo, int type)
@@ -7238,12 +7305,12 @@ public class Data implements Serializable
 		} 
 	}
 	
-	public FboBean[] getFbo()
+	public List<FboBean> getFbo()
 	{
 		return getFboSql("SELECT * from fbo ORDER BY id");
 	}
 
-	public FboBean[] getFboByOwner(int owner)
+	public List<FboBean> getFboByOwner(int owner)
 	{
 		return getFboSql("SELECT * FROM fbo WHERE owner=" + owner + " ORDER BY id");
 	}
@@ -7270,40 +7337,49 @@ public class Data implements Serializable
 		return retval;
 	}
 
-	public FboBean[] getFboByOwner(int owner, String sortFieldName)
+	public List<FboBean> getFboByOwner(int owner, String sortFieldName)
 	{
 		return getFboSql("SELECT * FROM fbo WHERE owner=" + owner + " ORDER BY " + sortFieldName);
 	}
 	
-	public FboBean[] getFboByLocation(String location)
+	public List<FboBean> getFboByLocation(String location)
 	{
 		return getFboSql("SELECT * FROM fbo WHERE active = 1 AND location='" + location + "' ORDER BY id");
 	}
 	
-	public FboBean[] getInactiveFboByLocation(String location)
+	public List<FboBean> getInactiveFboByLocation(String location)
 	{
 		return getFboSql("SELECT * FROM fbo WHERE active = 0 AND location='" + location + "' ORDER BY id");
 	}
-	
-	public FboBean[] getFboForRepair(AirportBean airport)
+
+    public List<FboBean> getFboForRepair(AirportBean airport)
+    {
+        return getFboForRepair(airport, 0);
+    }
+
+	public List<FboBean> getFboForRepair(AirportBean airport, int orderby)
 	{
-		FboBean[] returnValue = getFboSql("SELECT * from fbo WHERE active = 1 AND (services & " + FboBean.FBO_REPAIRSHOP + ") > 0 AND location='" + airport.getIcao() + "' ORDER BY id");
+        //0 = id, 1 = repair margin, 2 = equipment margin
+        String order;
+        switch(orderby)
+        {
+            case FBO_REPAIR_MARGIN: order = "margin";
+            case FBO_EQUIPMENT_MARGIN: order = "equipmentmargin";
+            default: order = "id";
+        }
+        List<FboBean> returnValue = getFboSql("SELECT * from fbo WHERE active = 1 AND (services & " + FboBean.FBO_REPAIRSHOP + ") > 0 AND location='" + airport.getIcao() + "' ORDER BY " + order);
 		
 		if (airport.size >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE)
 		{
-			List<FboBean> list = new ArrayList<FboBean>(Arrays.asList(returnValue));
-			
 			FboBean fb = FboBean.getInstance();
 			fb.location = airport.getIcao();
-			list.add(fb);
-			
-			returnValue = list.toArray(new FboBean[list.size()]);
+            returnValue.add(fb);
 		}
 		
 		return returnValue;
 	}
 	
-	public FboBean[] getFboForSale()
+	public List<FboBean> getFboForSale()
 	{
 		return getFboSql("SELECT f.* FROM fbo f WHERE f.saleprice > 0 ORDER BY f.saleprice");
 	}
@@ -7313,11 +7389,11 @@ public class Data implements Serializable
         if(id == 0)
             return null;
 
-		FboBean[] result = getFboSql("SELECT * FROM fbo WHERE id=" + id);
-		return result.length == 0 ? null : result[0];
+        List<FboBean> result = getFboSql("SELECT * FROM fbo WHERE id=" + id);
+		return result.size() == 0 ? null : result.get(0);
 	}
 	
-	public FboBean[] getFboSql(String qry)
+	public List<FboBean> getFboSql(String qry)
 	{
 		ArrayList<FboBean> result = new ArrayList<>();
 
@@ -7332,7 +7408,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 
-		return result.toArray(new FboBean[result.size()]);
+		return result;
 	}
 	
 	public FboBean getSingleFboSql(String qry)
@@ -7353,54 +7429,54 @@ public class Data implements Serializable
 		return fbo;
 	}
 	
-	public FboFacilityBean[] getFboFacilitiesByOccupant(int account)
+	public List<FboFacilityBean> getFboFacilitiesByOccupant(int account)
 	{
 		return getFboFacilitiesSql("select t.* from fbofacilities t where t.occupant = " + account + " order by location, id");
 	}
 	
-	public FboFacilityBean[] getFboDefaultFacilitiesForAirport(AirportBean airport)
+	public List<FboFacilityBean> getFboDefaultFacilitiesForAirport(AirportBean airport)
 	{
 		return getFboFacilitiesForAirport(airport.getIcao());
 	}
 	
-	public FboFacilityBean[] getFboDefaultFacilitiesForAirport(String icao)
+	public List<FboFacilityBean> getFboDefaultFacilitiesForAirport(String icao)
+    {
+        return getFboFacilitiesSql("SELECT * FROM fbofacilities WHERE reservedSpace >= 0 AND location ='" + icao + "' order by id");
+    }
+
+    public List<FboFacilityBean> getFboFacilitiesForAirport(AirportBean airport)
+    {
+        return getFboFacilitiesForAirport(airport.getIcao());
+    }
+
+    public List<FboFacilityBean> getFboFacilitiesForAirport(String icao)
+    {
+        return getFboFacilitiesSql("select t.* from fbofacilities t, fbo f where t.fboId = f.id and f.active = 1 and f.location = '" + icao + "' order by id");
+    }
+
+    public FboFacilityBean getFboDefaultFacility(FboBean fbo)
+    {
+        return getFboDefaultFacility(fbo.getId());
+    }
+
+    public FboFacilityBean getFboDefaultFacility(int fboId)
+    {
+        List<FboFacilityBean> result = getFboFacilitiesSql("SELECT * FROM fbofacilities WHERE reservedSpace >= 0 AND fboId=" + fboId);
+        return result.size() == 0 ? null : result.get(0);
+    }
+
+    public List<FboFacilityBean> getFboRenterFacilities(FboBean fbo)
+    {
+        return getFboFacilitiesSql("select * from fbofacilities where reservedSpace < 0 and fboId = " + fbo.getId() + " order by id");
+    }
+
+    public FboFacilityBean getFboFacility(int id)
 	{
-		return getFboFacilitiesSql("SELECT * FROM fbofacilities WHERE reservedSpace >= 0 AND location ='" + icao + "' order by id");
+        List<FboFacilityBean> result = getFboFacilitiesSql("SELECT * FROM fbofacilities WHERE id=" + id);
+		return result.size() == 0 ? null : result.get(0);
 	}
 	
-	public FboFacilityBean[] getFboFacilitiesForAirport(AirportBean airport)
-	{
-		return getFboFacilitiesForAirport(airport.getIcao());
-	}
-	
-	public FboFacilityBean[] getFboFacilitiesForAirport(String icao)
-	{
-		return getFboFacilitiesSql("select t.* from fbofacilities t, fbo f where t.fboId = f.id and f.active = 1 and f.location = '" + icao + "' order by id");
-	}
-	
-	public FboFacilityBean getFboDefaultFacility(FboBean fbo)
-	{
-		return getFboDefaultFacility(fbo.getId());
-	}
-	
-	public FboFacilityBean getFboDefaultFacility(int fboId)
-	{
-		FboFacilityBean[] result = getFboFacilitiesSql("SELECT * FROM fbofacilities WHERE reservedSpace >= 0 AND fboId=" + fboId);
-		return result.length == 0 ? null : result[0];
-	}
-	
-	public FboFacilityBean[] getFboRenterFacilities(FboBean fbo)
-	{
-		return getFboFacilitiesSql("select * from fbofacilities where reservedSpace < 0 and fboId = " + fbo.getId() + " order by id");
-	}
-	
-	public FboFacilityBean getFboFacility(int id)
-	{
-		FboFacilityBean[] result = getFboFacilitiesSql("SELECT * FROM fbofacilities WHERE id=" + id);
-		return result.length == 0 ? null : result[0];
-	}
-	
-	public FboFacilityBean[] getFboFacilitiesSql(String qry)
+	public List<FboFacilityBean> getFboFacilitiesSql(String qry)
 	{
 		ArrayList<FboFacilityBean> result = new ArrayList<FboFacilityBean>();
 		
@@ -7415,7 +7491,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 
-		return result.toArray(new FboFacilityBean[result.size()]);
+		return result;
 	}
 	
 	public int calcFboFacilitySpaceAvailable(FboFacilityBean facility, FboBean fbo, AirportBean airport)
@@ -7641,7 +7717,7 @@ public class Data implements Serializable
 		} 
 	}
 	
-	public void updateFboFacility(FboFacilityBean facility, FboFacilityBean[] renters, UserBean user) throws DataError
+	public void updateFboFacility(FboFacilityBean facility, List<FboFacilityBean> renters, UserBean user) throws DataError
 	{
 		if (facility == null)
 			return;
@@ -7764,7 +7840,7 @@ public class Data implements Serializable
 	}
 	
 	/** 
-	 * Probe the database for an aicraft with a specific title. If found, return the nearest aircraft of this type
+	 * Probe the database for an aircraft with a specific title. If found, return the nearest aircraft of this type
 	 * @param aircraft The title of the aircraft
 	 * @param airport closeAirport object
 	 * @param airportList The list to fill with aircraft
@@ -7797,7 +7873,7 @@ public class Data implements Serializable
                 for (Data.closeAirport closeAirport : closeAirports)
                     airportMap.put(closeAirport.icao.toLowerCase(), closeAirport);
 
-				AircraftBean[] areaAircraft = getAircraftOfTypeInArea(airport.icao, closeAirports, modelId);
+				List<AircraftBean> areaAircraft = getAircraftOfTypeInArea(airport.icao, closeAirports, modelId);
 				Set<closeAirport> airportSet = new HashSet<>();
                 for (AircraftBean anAreaAircraft : areaAircraft)
                 {
@@ -7816,7 +7892,7 @@ public class Data implements Serializable
 				airportList.addAll(airportSet);				
 			}
 			
-			AircraftBean[] otherAircraft = getAircraft(thisAirport.getIcao());
+			List<AircraftBean> otherAircraft = getAircraft(thisAirport.getIcao());
             for (AircraftBean anOtherAircraft : otherAircraft)
             {
                 if (anOtherAircraft.getUserLock() == 0)
@@ -8120,12 +8196,7 @@ public class Data implements Serializable
 	{
 		return statistics;
 	}
-	
-	public static String oddLine(int line)
-	{
-		return line%2 == 1 ? "class=\"odd\" ":"";
-	}
-	
+
 	public static String sortHelper(String helper)
 	{
 		return "<span style=\"display: none\">" + helper + "</span>";
@@ -8271,7 +8342,7 @@ public class Data implements Serializable
 				throw new DataError("No aircraft found.");
 			
 			aircraft.setEquipment(rs.getInt("equipment"));
-			if (newRegistration != null && getAircraftByRegistration(newRegistration).length > 0)
+			if (newRegistration != null && getAircraftByRegistration(newRegistration) != null)
 				throw new DataError("Registration already in use.");
 			
 			double[] distanceFromHome = getDistanceBearing(aircraft.getLocation(), aircraft.getHome());
@@ -8423,49 +8494,49 @@ public class Data implements Serializable
 
 	public ServiceProviderBean getServiceProviderById(int serviceid)
 	{
-		ServiceProviderBean[] result = null;
+		List<ServiceProviderBean> result = null;
 
 		try
 		{
 			String qry = "SELECT s.id, s.owner, a1.name AS ownername, s.alternate, a2.name AS alternatename, s.servicename, s.ip, s.url, s.description, s.status, s.key, notes FROM serviceproviders AS s LEFT JOIN accounts AS a1 ON owner=a1.id LEFT JOIN accounts AS a2 on alternate=a2.id  WHERE s.id = ? order by status, a1.name";			
 			CachedRowSet crs = dalHelper.ExecuteReadOnlyQuery(qry, serviceid);
-			result = getServiceProviderArray(crs);
+			result = getServiceProviderList(crs);
 		}
 		catch(SQLException e)
 		{
 			e.printStackTrace();
 		}
 		
-		return result.length == 0 ? null : result[0];
+		return result.size() == 0 ? null : result.get(0);
 	}
 
 	public ServiceProviderBean getServiceProviderByOwner(int userid)
 	{
-		ServiceProviderBean[] result = null;
+		List<ServiceProviderBean> result = null;
 
 		try
 		{
 			String qry = "SELECT s.id, s.owner, a1.name AS ownername, s.alternate, a2.name AS alternatename, s.servicename, s.ip, s.url, s.description, s.status, s.key, notes FROM serviceproviders AS s LEFT JOIN accounts AS a1 ON owner=a1.id LEFT JOIN accounts AS a2 on alternate=a2.id  WHERE s.owner = ? order by status, a1.name";			
 			CachedRowSet crs = dalHelper.ExecuteReadOnlyQuery(qry, userid);
-			result = getServiceProviderArray(crs);
+			result = getServiceProviderList(crs);
 		}
 		catch(SQLException e)
 		{
 			e.printStackTrace();
 		}
 		
-		return result.length == 0 ? null : result[0];
+		return result.size() == 0 ? null : result.get(0);
 	}
 
-	public ServiceProviderBean[] getServiceProviders()
+	public List<ServiceProviderBean> getServiceProviders()
 	{
-		ServiceProviderBean[] result = null;
+		List<ServiceProviderBean> result = null;
 
 		try
 		{
 			String qry = "SELECT s.id, s.owner, a1.name AS ownername, s.alternate, a2.name AS alternatename, s.servicename, s.ip, s.url, s.description, s.status, s.key, notes FROM serviceproviders AS s LEFT JOIN accounts AS a1 ON owner=a1.id LEFT JOIN accounts AS a2 on alternate=a2.id";
 			CachedRowSet crs = dalHelper.ExecuteReadOnlyQuery(qry);
-			result = getServiceProviderArray(crs);
+			result = getServiceProviderList(crs);
 		}
 		catch(SQLException e)
 		{
@@ -8477,20 +8548,20 @@ public class Data implements Serializable
 
 	public ServiceProviderBean getServiceProviderByKey(String key)
 	{
-		ServiceProviderBean[] result = null;
+		List<ServiceProviderBean> result = null;
 
 		try
 		{
 			String qry = "SELECT s.id, s.owner, a1.name AS ownername, s.alternate, a2.name AS alternatename, s.servicename, s.ip, s.url, s.description, s.status, s.key, notes FROM serviceproviders AS s LEFT JOIN accounts AS a1 ON owner=a1.id LEFT JOIN accounts AS a2 on alternate=a2.id where s.key = ?";
 			CachedRowSet crs = dalHelper.ExecuteReadOnlyQuery(qry, key);
-			result = getServiceProviderArray(crs);
+			result = getServiceProviderList(crs);
 		}
 		catch(SQLException e)
 		{
 			e.printStackTrace();
 		}
 		
-		return result.length == 0 ? null : result[0];
+		return result.size() == 0 ? null : result.get(0);
 	}
 
 	public String getServiceProviderNameByKey(String key)
@@ -8510,7 +8581,25 @@ public class Data implements Serializable
 		return result;
 	}
 
-	ServiceProviderBean[] getServiceProviderArray(ResultSet rs)
+    List<ServiceProviderBean> getServiceProviderList(ResultSet rs)
+    {
+        ArrayList<ServiceProviderBean> result = new ArrayList<>();
+        try
+        {
+            while (rs.next())
+            {
+                ServiceProviderBean item = new ServiceProviderBean(rs);
+                result.add(item);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    ServiceProviderBean[] getServiceProviderArrayXX(ResultSet rs)
 	{
 		ArrayList<ServiceProviderBean> result = new ArrayList<>();
 		try
@@ -8633,8 +8722,8 @@ public class Data implements Serializable
 	/**
 	* return a mysql resultset as an ArrayList. Mysql query of log table to return a users last 500 flights 
 	* and calulate the total hours flown in last 48 hours.
-	* @ param users - user name input from adminuser48hourtrend.jsp. Access this screen from admin.jsp	
-	* @ return Mysql Resulset as an ArrayList to adminuser48hourtrend.jsp
+	* @ param users - user name input from checkuser48hourtrend.jsp. Access this screen from index.jsp
+	* @ return Mysql Resulset as an ArrayList to checkuser48hourtrend.jsp
 	* @ author - chuck229
 	*/ 		
 	public trendHours[] getTrendHoursQuery(String user) throws DataError
@@ -9238,15 +9327,15 @@ public class Data implements Serializable
         }
     }
 
-    public ServiceProviderBean[] getAccountAvailableServiceProviders(int accountId)
+    public List<ServiceProviderBean> getAccountAvailableServiceProviders(int accountId)
     {
-        ServiceProviderBean[] result = null;
+        List<ServiceProviderBean> result = null;
 
         try
         {
             String qry = "SELECT s.id, s.owner, a1.name AS ownername, s.alternate, a2.name AS alternatename, s.servicename, s.ip, s.url, s.description, s.status, s.key, notes FROM serviceproviders AS s LEFT JOIN accounts AS a1 ON owner=a1.id LEFT JOIN accounts AS a2 on alternate=a2.id LEFT JOIN serviceaccess as sa on s.id=sa.serviceId AND sa.accountId=? where s.status=1 AND sa.serviceId is null";
             CachedRowSet crs = dalHelper.ExecuteReadOnlyQuery(qry, accountId);
-            result = getServiceProviderArray(crs);
+            result = getServiceProviderList(crs);
         }
         catch(SQLException e)
         {
@@ -9255,4 +9344,56 @@ public class Data implements Serializable
 
         return result;
     }
+
+    public String getAirportName(String icao)
+    {
+        String result = null;
+
+        try
+        {
+            String qry = "SELECT name FROM airports WHERE icao = ?;";
+            result = dalHelper.ExecuteScalar(qry, new DALHelper.StringResultTransformer(), icao);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public boolean isGroup(int accountid)
+    {
+        boolean result = false;
+
+        try
+        {
+            String qry = "SELECT (type='group') FROM accounts WHERE id = ?;";
+            result = dalHelper.ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), accountid);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public String getAircraftMakeModel(String reg)
+    {
+        String result = null;
+
+        try
+        {
+            String qry = "SELECT CONCAT(m.make, ' ', m.model) FROM aircraft a, models m  WHERE a.model=m.id AND registration = ?;";
+            result = dalHelper.ExecuteScalar(qry, new DALHelper.StringResultTransformer(), reg);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
 }

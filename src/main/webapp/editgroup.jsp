@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
@@ -14,7 +15,7 @@
     String returnPage = request.getRequestURI() + groupParam;
 
     int groupId = Integer.parseInt(sId);
-    UserBean group = data.getGroupById(groupId)[0];
+    UserBean group = data.getGroupById(groupId);
 
     if (request.getParameter("submit") == null)
     {
@@ -43,6 +44,7 @@
         }
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,15 +56,17 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%

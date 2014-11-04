@@ -1,9 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
+<%
+    Data data = (Data)application.getAttribute("data");
+%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +18,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
     <script type="text/javaScript">
         function doSubmit(id, event, groupname)
@@ -49,13 +53,15 @@
 </head>
 
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%
-	UserBean invitations[] = data.getGroupsThatInviteUser(user.getId());
-	if (invitations.length > 0) 
+	List<UserBean> invitations = data.getGroupsThatInviteUser(user.getId());
+	if (invitations.size() > 0)
 	{
 %>
 <div class="dataTable">
@@ -76,13 +82,13 @@
 	</thead>
 	<tbody>
 <%
-		for (int c=0; c < invitations.length; c++)
+		for (UserBean group : invitations)
 		{
-			int id = invitations[c].getId();
+			int id = group.getId();
 %>
 	<tr>
-	<td><%= invitations[c].getName() %></td>
-	<td><%= invitations[c].getComment() %></td>
+	<td><%= group.getName() %></td>
+	<td><%= group.getComment() %></td>
 	<td>
 		<a class="link" href="javascript:doSubmit3(<%= id %>, 'accept')">Accept</a>
 		<a class="link" href="javascript:doSubmit3(<%= id %>, 'delete')">Delete</a>
@@ -102,7 +108,7 @@
 <%
 	boolean allGroups = request.getParameter("all") != null;
 	
-	UserBean[] groups = allGroups ? data.getAllExposedGroups() : data.getGroupsForUser(user.getId());
+	List<UserBean> groups = allGroups ? data.getAllExposedGroups() : data.getGroupsForUser(user.getId());
 %>
 	<form method="post" name="groupForm">
 	<input type="hidden" name="event" />
@@ -122,26 +128,26 @@
 <%
 	data.reloadMemberships(user);
 
-	for (int c=0; c < groups.length; c++)
+	for (UserBean group : groups)
 	{
-		int id = groups[c].getId();
-		String name = groups[c].getName();
-		String url = groups[c].getUrl();
+		int id = group.getId();
+		String name = group.getName();
+		String url = group.getUrl();
 		if (url != null)
 			url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
 		else
 			url = name;
 				
 %>
-	<tr <%= Data.oddLine(c) %>>
+	<tr>
 	<td><%= url %></td>
-	<td><%= groups[c].getComment() %></td>
+	<td><%= group.getComment() %></td>
 	<td>
 <%
 		int memberLevel = user.groupMemberLevel(id);
 		if (memberLevel == -1) 
 		{
-			if (!groups[c].isExposedJoin()) 
+			if (!group.isExposedJoin())
 			{
 %>
 				<a class="link" href="javascript:doSubmit(<%= id %>, 'joingroup')">Join</a>

@@ -2,17 +2,18 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,12 +23,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/jquery-ui.min.js"></script>
-    <script src="scripts/AutoComplete.js"></script>
+    <script src="/scripts/jquery.min.js"></script>
+    <script src="/scripts/jquery-ui.min.js"></script>
+    <script src="/scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -40,14 +41,17 @@
 
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
+
 <%
-	UserBean Accounts[] = data.getAccounts();
 	String message = (String) request.getAttribute("message");
 %>
+
 <%	
 if (request.getParameter("submit") == null && (message == null)) 
 { 
@@ -93,7 +97,7 @@ if (request.getParameter("submit") == null && (message == null))
 	<tr><td>
 	<input type="submit" class="button" value="GO" />
 	<input type="hidden" name="submit" value="true" />
-	<input type="hidden" name="return" value="admineditgoods.jsp" />
+	<input type="hidden" name="return" value="/admin/goodsedit.jsp" />
 	</td></tr>
 	</table>
 	</form>
@@ -121,7 +125,7 @@ else if (request.getParameter("submit") != null)
 %>
 	<h2>Adjust Goods</h2>
 	<div class="form" style="width: 600px">
-	<form method="post" action="userctl">
+	<form method="post" action="/userctl">
 	<table>
 	<tr><td>Owner </td><td><%=ownername %></td></tr>
 	<tr><td>Location </td><td><%=location %></td></tr>
@@ -140,7 +144,7 @@ else if (request.getParameter("submit") != null)
 	<input type="submit" class="button" value="Submit" />
 	<input type="hidden" name="submit" value="true"/>
 	<input type="hidden" name="event" value="adjustGoods"/>
-	<input type="hidden" name="return" value="admineditgoods.jsp"/>
+	<input type="hidden" name="return" value="/admin/goodsedit.jsp"/>
 	<input type="hidden" name="owner" value="<%=owner%>" />
 	<input type="hidden" name="location" value="<%=location%>" />
 	<input type="hidden" name="commodity" value="<%=commodity%>" />
@@ -156,6 +160,7 @@ else if (request.getParameter("submit") != null)
 <% 	
 } 
 %>
+</div>
 </div>
 </div>
 </body>

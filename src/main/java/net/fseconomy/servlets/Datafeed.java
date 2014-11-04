@@ -607,8 +607,7 @@ public class Datafeed extends HttpServlet
 				csvoutput.appendHeaderItem("ExpireDateTime");		
 			}	
 			
-			AssignmentBean[] assignments;
-			assignments = data.getAssignmentsSQL("SELECT * FROM assignments WHERE aircraft is not null");
+            List<AssignmentBean> assignments = data.getAssignmentsSQL("SELECT * FROM assignments WHERE aircraft is not null");
 
             for (AssignmentBean assignment : assignments)
             {
@@ -619,8 +618,8 @@ public class Datafeed extends HttpServlet
                     csvoutput.append(assignment.getFromTemplate());
                     csvoutput.append(assignment.getId());
                     csvoutput.append(assignment.getAircraft());
-                    AircraftBean[] ac = data.getAircraftByRegistration(assignment.getAircraft());
-                    csvoutput.append(ac[0].getMakeModel());
+                    AircraftBean ac = data.getAircraftByRegistration(assignment.getAircraft());
+                    csvoutput.append(ac.getMakeModel());
                     csvoutput.append(assignment.getFrom());
                     csvoutput.append(assignment.getTo());
                     csvoutput.append(assignment.getDistance());
@@ -636,8 +635,8 @@ public class Datafeed extends HttpServlet
                     xmloutput.append("templateId", assignment.getFromTemplate());
                     xmloutput.append("id", assignment.getId());
                     xmloutput.append("aircraft", assignment.getAircraft());
-                    AircraftBean[] ac = data.getAircraftByRegistration(assignment.getAircraft());
-                    xmloutput.append("makemodel", ac[0].getMakeModel());
+                    AircraftBean ac = data.getAircraftByRegistration(assignment.getAircraft());
+                    xmloutput.append("makemodel", ac.getMakeModel());
                     xmloutput.append("from", assignment.getFrom());
                     xmloutput.append("to", assignment.getTo());
                     xmloutput.append("distance", assignment.getDistance());
@@ -862,7 +861,7 @@ public class Datafeed extends HttpServlet
 	private String Assignments(HttpServletRequest req) throws DataError
 	{
 		int id;
-		AssignmentBean[] assignments;
+		List<AssignmentBean> assignments;
 
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format, DFPS.search);
@@ -924,7 +923,7 @@ public class Datafeed extends HttpServlet
 			else
 			{
 				String xsd = GetXsdByQuery("Assignments");
-				return GetXMLHeader() + "<AssignmentItems total=\"" + assignments.length + "\"" + xsd + ">\n" + xmloutput.toString() + "</AssignmentItems>\n";
+				return GetXMLHeader() + "<AssignmentItems total=\"" + assignments.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</AssignmentItems>\n";
 			}
 		}
 	}
@@ -956,7 +955,7 @@ public class Datafeed extends HttpServlet
 
 		UserBean account = data.getAccountById(id);
 				
-		GoodsBean[] goods = data.getGoodsForAccountAvailable(account.getId());
+		List<GoodsBean> goods = data.getGoodsForAccountAvailable(account.getId());
 
         for (GoodsBean good : goods)
         {
@@ -1129,30 +1128,33 @@ public class Datafeed extends HttpServlet
                 String sfromid = req.getParameter("fromid");
                 fromid = Integer.parseInt(sfromid);
 
-                LogBean[] log;
+                List<LogBean> log;
                 if (reg != null && !reg.isEmpty())
                 {
                     log = data.getLogForAircraftFromId(reg, fromid);
                 }
                 else if (req.getParameter("type") != null && req.getParameter("type").toLowerCase().contains("groupaircraft"))
                 {
-                    AircraftBean[] aircraft = data.getAircraftOwnedByUser(account.getId());
-                    if (aircraft.length > 0)
+                    List<AircraftBean> aircraftList = data.getAircraftOwnedByUser(account.getId());
+                    if (aircraftList.size() > 0)
                     {
                         String regs = "";
-                        for (int c = 0; c < aircraft.length; c++)
+                        int counter = 0;
+                        for (AircraftBean aircraft : aircraftList)
                         {
-                            if (c == 0)
+                            if (counter == 0)
                             {
-                                regs = "'" + aircraft[c].getRegistration() + "'";
+                                regs = "'" + aircraft.getRegistration() + "'";
                             }
                             else
                             {
-                                regs = regs + "'" + aircraft[c].getRegistration() + "'";
+                                regs = regs + "'" + aircraft.getRegistration() + "'";
                             }
 
-                            if ((c + 1) < aircraft.length)
+                            if ((counter + 1) < aircraftList.size())
                                 regs = regs + ", ";
+
+                            counter++;
                         }
                         log = data.getLogForGroupFromRegistrations(regs, fromid);
                     }
@@ -1214,7 +1216,7 @@ public class Datafeed extends HttpServlet
                 int month = ValidateMonth(req.getParameter("month"));
                 int year = ValidateYear(req.getParameter("year"), month);
 
-                LogBean[] log;
+                List<LogBean> log;
                 if (reg != null && !reg.isEmpty())
                     log = data.getLogForAircraftByMonth(reg, month, year);
                 else if (account.isGroup())
@@ -1233,7 +1235,7 @@ public class Datafeed extends HttpServlet
 
 	private String Payments(HttpServletRequest req) throws DataError
 	{
-		PaymentBean[] log = null;
+		List<PaymentBean> log = null;
 		
 		//validate that we have all needed parameters
 		CheckParameters(req, DFPS.format, DFPS.search, DFPS.readaccesskey);
@@ -1311,35 +1313,38 @@ public class Datafeed extends HttpServlet
 		
 		if(searchParam.equals("members"))
 		{
-			UserBean[] members = data.getUsersForGroup(id);
-			for (int c = 0; c < members.length; c++)
+            boolean firstLoop = true;
+
+			List<UserBean> members = data.getUsersForGroup(id);
+			for (UserBean member : members)
 			{
-				data.reloadMemberships(members[c]);
+				data.reloadMemberships(member);
 
 				String level = "ERROR";
-				if(members[c].getMemberships().containsKey(id))
+				if(member.getMemberships().containsKey(id))
 				{
-					Data.groupMemberData gmd = members[c].getMemberships().get(id);
+					Data.groupMemberData gmd = member.getMemberships().get(id);
 					level = UserBean.getGroupLevelName(gmd.memberLevel);
 				}
 
 				if(csvformat)
 				{
-					if(c == 0) 
+					if(firstLoop)
 					{
+                        firstLoop = false;
 						csvoutput.appendHeaderItem("Group");
 						csvoutput.appendHeaderItem("Member");
 						csvoutput.appendHeaderItem("Status");
 					}
 					csvoutput.append(account.getName());
-					csvoutput.append(members[c].getName());
+					csvoutput.append(member.getName());
 					csvoutput.append(level);
 					csvoutput.newrow();
 				}
 				else
 				{
 					xmloutput.appendOpenTag("Member");
-					xmloutput.append("Name", Converters.XMLHelper.protectSpecialCharacters(members[c].getName()));
+					xmloutput.append("Name", Converters.XMLHelper.protectSpecialCharacters(member.getName()));
 					xmloutput.append("Status", level);
 					xmloutput.appendCloseTag("Member");
 				}
@@ -1349,7 +1354,7 @@ public class Datafeed extends HttpServlet
 			else
 			{
 				String xsd = GetXsdByQuery("Members");
-				results = GetXMLHeader() + "<MemberItems name=\"" + groupname + "\" total=\"" + members.length + "\"" + xsd + ">\n" + xmloutput.toString() + "</MemberItems>\n";
+				results = GetXMLHeader() + "<MemberItems name=\"" + groupname + "\" total=\"" + members.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</MemberItems>\n";
 			}
 		}
 		else
@@ -1379,7 +1384,7 @@ public class Datafeed extends HttpServlet
 			throw new DataError("No User or Group found for provided ReadAccessKey.");
 		
 		//get the facilities by the requester
-		FboFacilityBean[] facs = data.getFboFacilitiesByOccupant(id);
+		List<FboFacilityBean> facs = data.getFboFacilitiesByOccupant(id);
 		result = ProcessFacilities(req, facs, "Facilities");
 		
 		return result;
@@ -1408,7 +1413,7 @@ public class Datafeed extends HttpServlet
                     throw new DataError("No User or Group found for provided ReadAccessKey.");
 
                 //get selected aircraft
-                FboBean[] fbos = data.getFboByOwner(id);
+                List<FboBean> fbos = data.getFboByOwner(id);
                 result = ProcessFbos(req, fbos, "FboByKey");
                 break;
             }
@@ -1441,18 +1446,20 @@ public class Datafeed extends HttpServlet
 
                 //if key owns fbo at icao continue, else throw access error!
                 String sql = "select * from fbo where location='" + icao + "' and owner=" + account.getId();
-                FboBean[] fbo = data.getFboSql(sql);
-                if (fbo == null || fbo.length == 0)
+                List<FboBean> fbos = data.getFboSql(sql);
+
+                if (fbos.size() == 0)
                     throw new DataError("No fbo found for provided ReadAccessKey.");
 
                 //Month parameter is required, so if there is an error send back the error message
                 int month = ValidateMonth(req.getParameter("month"));
                 int year = ValidateYear(req.getParameter("year"), month);
 
+                //Only does the first returned FBO
                 if (csvformat)
-                    AddCSVFboPaymentSummaryItem(csvoutput, account, fbo[0], icao, month, year);
+                    AddCSVFboPaymentSummaryItem(csvoutput, account, fbos.get(0), icao, month, year);
                 else
-                    AddXMLFboPaymentSummaryItem(xmloutput, account, fbo[0], icao, month, year);
+                    AddXMLFboPaymentSummaryItem(xmloutput, account, fbos.get(0), icao, month, year);
 
                 if (csvformat)
                     result = csvoutput.toString();
@@ -1466,7 +1473,7 @@ public class Datafeed extends HttpServlet
             case "forsale":
             {
                 //get list of aircraft for sale
-                FboBean[] fbos = data.getFboForSale();
+                List<FboBean> fbos = data.getFboForSale();
 
                 result = ProcessFbos(req, fbos, "FbosForSale");
                 break;
@@ -1493,9 +1500,9 @@ public class Datafeed extends HttpServlet
                 String icao = req.getParameter("icao");
 
                 //get selected aircraft
-                AircraftBean[] aircraft = data.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND location='" + icao + "' ORDER BY make, models.model");
+                List<AircraftBean> aircraftList = data.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND location='" + icao + "' ORDER BY make, models.model");
 
-                results = ProcessAircraft(req, aircraft, "IcaoAircraft");
+                results = ProcessAircraft(req, aircraftList, "IcaoAircraft");
                 break;
             }
             case "fbo":
@@ -1519,9 +1526,9 @@ public class Datafeed extends HttpServlet
                 else
                     xmloutput = new Converters.xmlBuffer();
 
-                FboBean[] fbos = data.getFboByLocation(icao);
+                List<FboBean> fbos = data.getFboByLocation(icao);
 
-                if (fbos != null && fbos.length != 0)
+                if (fbos != null && fbos.size() != 0)
                 {
                     //throw new DataError("No active FBO Found.\n");
 
@@ -1531,7 +1538,7 @@ public class Datafeed extends HttpServlet
                     else
                         AddXMLFboItems(xmloutput, fbos, false);
 
-                    numfbos = fbos.length;
+                    numfbos = fbos.size();
                 }
 
                 AirportBean airport = data.getAirport(icao);
@@ -1552,7 +1559,7 @@ public class Datafeed extends HttpServlet
             }
             case "jobsto":
             case "jobsfrom":
-                AssignmentBean[] assignments;
+                List<AssignmentBean> assignments;
                 String icaos = req.getParameter("icaos");
 
                 //Expected Icaos format: CZFA-CEX4-CFP4
@@ -1580,7 +1587,8 @@ public class Datafeed extends HttpServlet
 	private String Aircraft(HttpServletRequest req) throws DataError
 	{
 		int id = -1;
-		AircraftBean[] aircraft;
+		List<AircraftBean> aircraftList;
+        AircraftBean aircraft;
 		String queryname;
 		
 		//validate that we have all needed parameters
@@ -1601,7 +1609,7 @@ public class Datafeed extends HttpServlet
 		
 		if(searchParam.equals("key"))
 		{
-			aircraft = data.getAircraftOwnedByUser(id);
+            aircraftList = data.getAircraftOwnedByUser(id);
 			queryname = "AircraftByKey";
 		}
 		else if(searchParam.equals("configs"))
@@ -1615,7 +1623,7 @@ public class Datafeed extends HttpServlet
 		else if(searchParam.equals("forsale"))
 		{
 			//get list of aircraft for sale
-			aircraft = data.getAircraftForSale();
+            aircraftList = data.getAircraftForSale();
 			queryname = "AircraftForSale";
 		}
 		else if(searchParam.equals("makemodel"))
@@ -1629,7 +1637,7 @@ public class Datafeed extends HttpServlet
 			aircraftname = aircraftname.replaceAll("'", "\\\\'").replaceAll(";","");
 			
 			//get selected aircraft
-			aircraft = data.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND concat(concat(models.make,' '), models.model)='" + aircraftname + "' ORDER BY make, models.model");
+            aircraftList = data.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND concat(concat(models.make,' '), models.model)='" + aircraftname + "' ORDER BY make, models.model");
 			queryname = "AircraftByMakeModel";
 		}
 		else if(searchParam.toLowerCase().equals("ownername"))
@@ -1651,7 +1659,7 @@ public class Datafeed extends HttpServlet
 				ownersname = "Bank";
 			
 			//get selected aircraft
-			aircraft = data.getAircraftSQL(
+            aircraftList = data.getAircraftSQL(
 					" SELECT aircraft.*, models.* " +
 					" FROM aircraft, models, accounts " +
 					" WHERE Upper(aircraft.location)!='DEAD' " +
@@ -1673,6 +1681,11 @@ public class Datafeed extends HttpServlet
 			
 			//get selected aircraft
 			aircraft = data.getAircraftByRegistration(registration);
+            aircraftList = new ArrayList<>();
+
+            if(aircraft != null)
+                aircraftList.add(aircraft);
+
 			queryname = "AircraftByRegistration";
 		}
 		else if(searchParam.toLowerCase().equals("status"))
@@ -1688,26 +1701,24 @@ public class Datafeed extends HttpServlet
 			aircraftreg = aircraftreg.replaceAll("'", "\\\\'").replaceAll(";","");
 			
 			//get selected aircraft
-			AircraftBean [] aircrafts = data.getAircraftByRegistration(aircraftreg);
-			if(aircrafts == null || aircrafts.length == 0)
+			aircraft = data.getAircraftByRegistration(aircraftreg);
+			if(aircraft == null)
 				throw new DataError("No Aircraft Found.");
 			
-			AircraftBean ac = aircrafts[0];		
-
 			//create an Aircraft tag
 			output.append("<Aircraft>");
 
-			if( ac.getLocation() == null)
+			if( aircraft.getLocation() == null)
 				output.append("Status", "In Flight");
 			else
 				output.append("Status", "On Ground");
 
-			output.append("Location", ac.getLocation());
+			output.append("Location", aircraft.getLocation());
 
 			output.append("</Aircraft>");
 			
 			//return our generated xml
-			return "<AircraftStatus registration=\"" + ac.getRegistration() + "\">\n" + output.toString() + "</AircraftStatus>\n";
+			return "<AircraftStatus registration=\"" + aircraft.getRegistration() + "\">\n" + output.toString() + "</AircraftStatus>\n";
 		}
 		else
 		{
@@ -1716,7 +1727,7 @@ public class Datafeed extends HttpServlet
 		
 		//get selected aircraft
 		
-		return ProcessAircraft(req, aircraft, queryname);
+		return ProcessAircraft(req, aircraftList, queryname);
 	}
 
 	private String AircraftAliases(HttpServletRequest req)
@@ -1801,7 +1812,7 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//get list of configs
-		Data.aircraftConfigs[] aircraft = data.getAircraftConfigs();
+		List<Data.aircraftConfigs> aircraftConfigs = data.getAircraftConfigs();
 		
 		//dump out our HashMap data
 		if(csvformat)
@@ -1831,7 +1842,7 @@ public class Datafeed extends HttpServlet
 		}
 		
 		//create an aircraft tag section for each config
-        for (Data.aircraftConfigs anAircraft : aircraft)
+        for (Data.aircraftConfigs anAircraft : aircraftConfigs)
         {
             if (csvformat)
             {
@@ -1893,7 +1904,7 @@ public class Datafeed extends HttpServlet
 		else
 		{
 			String xsd = GetXsdByQuery("AircraftConfigs");
-			return GetXMLHeader() + "<AircraftConfigItems total=\"" + aircraft.length + "\"" + xsd + ">\n" + xmloutput.toString() + "</AircraftConfigItems>\n";
+			return GetXMLHeader() + "<AircraftConfigItems total=\"" + aircraftConfigs.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</AircraftConfigItems>\n";
 		}
 	}
 	
@@ -2045,7 +2056,7 @@ public class Datafeed extends HttpServlet
 		return year;
 	}
 	
-	private String ProcessFlightLogs(HttpServletRequest req, LogBean[] flightlog, String queryname)
+	private String ProcessFlightLogs(HttpServletRequest req, List<LogBean> flightlog, String queryname)
 	{
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
@@ -2070,11 +2081,11 @@ public class Datafeed extends HttpServlet
 		else
 		{
 			String xsd = GetXsdByQuery(queryname);
-			return GetXMLHeader() + "<" + queryname + " total=\"" + flightlog.length + "\"" + xsd + ">\n" + xmloutput.toString() + "</" + queryname + ">\n";		
+			return GetXMLHeader() + "<" + queryname + " total=\"" + flightlog.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</" + queryname + ">\n";
 		}
 	}
 
-	private String ProcessPayments(HttpServletRequest req, PaymentBean[] payments, String queryname)
+	private String ProcessPayments(HttpServletRequest req, List<PaymentBean> payments, String queryname)
 	{
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
@@ -2099,11 +2110,11 @@ public class Datafeed extends HttpServlet
 		else
 		{
 			String xsd = GetXsdByQuery(queryname);
-			return GetXMLHeader() + "<" + queryname + " total=\"" + payments.length + "\"" + xsd + ">\n" + xmloutput.toString() + "</" + queryname + ">\n";		
+			return GetXMLHeader() + "<" + queryname + " total=\"" + payments.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</" + queryname + ">\n";
 		}
 	}
 
-	private String ProcessJobs(HttpServletRequest req, AssignmentBean[] assignments, String queryname)
+	private String ProcessJobs(HttpServletRequest req, List<AssignmentBean> assignments, String queryname)
 	{
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
@@ -2128,11 +2139,11 @@ public class Datafeed extends HttpServlet
 		else
 		{
 			String xsd = GetXsdByQuery(queryname);
-			return GetXMLHeader() + "<" + queryname + " total=\"" + assignments.length + "\"" + xsd + ">\n" + xmloutput.toString() + "</" + queryname + ">\n";		
+			return GetXMLHeader() + "<" + queryname + " total=\"" + assignments.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</" + queryname + ">\n";
 		}
 	}
 
-	private String ProcessFacilities(HttpServletRequest req, FboFacilityBean[] facs, String queryname)
+	private String ProcessFacilities(HttpServletRequest req, List<FboFacilityBean> facs, String queryname)
 	{
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
@@ -2157,11 +2168,11 @@ public class Datafeed extends HttpServlet
 		else
 		{
 			String xsd = GetXsdByQuery(queryname);
-			return GetXMLHeader() + "<FacilityItems" + " total=\"" + facs.length + "\"" + xsd + ">\n" + xmloutput.toString() + "</FacilityItems>\n";		
+			return GetXMLHeader() + "<FacilityItems" + " total=\"" + facs.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</FacilityItems>\n";
 		}
 	}
 
-	private String ProcessFbos(HttpServletRequest req, FboBean[] fbos, String queryname)
+	private String ProcessFbos(HttpServletRequest req, List<FboBean> fbos, String queryname)
 	{
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
@@ -2186,11 +2197,11 @@ public class Datafeed extends HttpServlet
 		else
 		{
 			String xsd = GetXsdByQuery(queryname);
-			return GetXMLHeader() + "<FboItems total=\"" + fbos.length + "\"" + xsd + ">\n" + xmloutput.toString() + "</FboItems>\n";		
+			return GetXMLHeader() + "<FboItems total=\"" + fbos.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</FboItems>\n";
 		}
 	}
 
-	private String ProcessAircraft(HttpServletRequest req, AircraftBean[] aircraft, String queryname)
+	private String ProcessAircraft(HttpServletRequest req, List<AircraftBean> aircraftList, String queryname)
 	{
 		Converters.csvBuffer csvoutput = null;
 		Converters.xmlBuffer xmloutput = null;
@@ -2206,16 +2217,16 @@ public class Datafeed extends HttpServlet
 
 		//create an aircraft tag section for each alias
 		if(csvformat)
-			AddCSVAircraftItems(csvoutput, aircraft);
+			AddCSVAircraftItems(csvoutput, aircraftList);
 		else
-			AddXMLAircraftItems(xmloutput, aircraft);					
+			AddXMLAircraftItems(xmloutput, aircraftList);
 		
 		if(csvformat)
 			return csvoutput.toString();
 		else
 		{
 			String xsd = GetXsdByQuery(queryname);
-			return GetXMLHeader() + "<AircraftItems query=\"" + queryname + "\" total=\"" + aircraft.length + "\" " + xsd + ">\n" + xmloutput.toString() + "</AircraftItems>";
+			return GetXMLHeader() + "<AircraftItems query=\"" + queryname + "\" total=\"" + aircraftList.size() + "\" " + xsd + ">\n" + xmloutput.toString() + "</AircraftItems>";
 		}
 	}
 	
@@ -2498,7 +2509,7 @@ public class Datafeed extends HttpServlet
 		buffer.append("</FboMonthlySummary>\n");
 	}
 	
-	void AddCSVAssignmentItems(Converters.csvBuffer buffer, AssignmentBean[] assignments, int id) throws DataError
+	void AddCSVAssignmentItems(Converters.csvBuffer buffer, List<AssignmentBean> assignments, int id) throws DataError
 	{
 		if(buffer.isHeaderEmpty())
 		{
@@ -2523,10 +2534,10 @@ public class Datafeed extends HttpServlet
         for (AssignmentBean assignment : assignments)
         {
             Map<String, Integer> flightsMap = new HashMap<>();
-            AircraftBean[] aircraft = data.getAircraftForUser(id);
-            if (aircraft.length > 0)
+            AircraftBean aircraft = data.getAircraftForUser(id);
+            if (aircraft != null)
             {
-                flightsMap = data.getMyFlightInfo(aircraft[0], id);
+                flightsMap = data.getMyFlightInfo(aircraft, id);
             }
 
             UserBean lockedBy = null;
@@ -2579,15 +2590,15 @@ public class Datafeed extends HttpServlet
         }
 	}
 
-	void AddXMLAssignmentItems(Converters.xmlBuffer buffer, AssignmentBean[] assignments, int id) throws DataError
+	void AddXMLAssignmentItems(Converters.xmlBuffer buffer, List<AssignmentBean> assignments, int id) throws DataError
 	{
         for (AssignmentBean assignment : assignments)
         {
             Map<String, Integer> flightsMap = new HashMap<>();
-            AircraftBean[] aircraft = data.getAircraftForUser(id);
-            if (aircraft.length > 0)
+            AircraftBean aircraft = data.getAircraftForUser(id);
+            if (aircraft != null)
             {
-                flightsMap = data.getMyFlightInfo(aircraft[0], id);
+                flightsMap = data.getMyFlightInfo(aircraft, id);
             }
 
             UserBean lockedBy = null;
@@ -2640,7 +2651,7 @@ public class Datafeed extends HttpServlet
         }
 	}
 
-	void AddCSVFlightLogItems(Converters.csvBuffer buffer, LogBean[] logs)
+	void AddCSVFlightLogItems(Converters.csvBuffer buffer, List<LogBean> logs)
 	{
 		if(buffer.isHeaderEmpty())
 		{
@@ -2671,21 +2682,13 @@ public class Datafeed extends HttpServlet
 
         for (LogBean log : logs)
         {
-            String type = "None";
-            AircraftBean[] aircraft = data.getAircraftByRegistration(log.getAircraft());
-            if (aircraft != null && aircraft.length > 0)
-            {
-                type = aircraft[0].getMakeModel();
-            }
+            String type = data.getAircraftMakeModel(log.getAircraft());
 
             String groupName = "";
             if (log.getGroupId() > 0)
             {
-                UserBean[] group = data.getGroupById(log.getGroupId());
-                if (group.length > 0)
-                {
-                    groupName = Converters.XMLHelper.protectSpecialCharacters(group[0].getName());
-                }
+                groupName = data.getAccountNameById(log.getGroupId());
+                groupName = Converters.XMLHelper.protectSpecialCharacters(groupName);
             }
 
             String rentalType;
@@ -2738,14 +2741,14 @@ public class Datafeed extends HttpServlet
         }
 	}
 	
-	void AddXMLFlightLogItems(Converters.xmlBuffer buffer, LogBean[] logs)
+	void AddXMLFlightLogItems(Converters.xmlBuffer buffer, List<LogBean> logs)
 	{
         for (LogBean log : logs)
         {
             String type;
             try
             {
-                type = data.getAircraftByRegistration(log.getAircraft())[0].getMakeModel();
+                type = data.getAircraftMakeModel(log.getAircraft());
             }
             catch (ArrayIndexOutOfBoundsException e)
             {
@@ -2755,11 +2758,8 @@ public class Datafeed extends HttpServlet
             String groupName = "";
             if (log.getGroupId() > 0)
             {
-                UserBean[] group = data.getGroupById(log.getGroupId());
-                if (group.length > 0)
-                {
-                    groupName = Converters.XMLHelper.protectSpecialCharacters(group[0].getName());
-                }
+                groupName = data.getAccountNameById(log.getGroupId());
+                groupName = Converters.XMLHelper.protectSpecialCharacters(groupName);
             }
 
             String rentalType;
@@ -2813,7 +2813,7 @@ public class Datafeed extends HttpServlet
         }
 	}
 	
-	void AddCSVPaymentItems(Converters.csvBuffer buffer, PaymentBean[] payments)
+	void AddCSVPaymentItems(Converters.csvBuffer buffer, List<PaymentBean> payments)
 	{
 		if(buffer.isHeaderEmpty())
 		{
@@ -2867,7 +2867,7 @@ public class Datafeed extends HttpServlet
         }
 	}
 	
-	void AddXMLPaymentItems(Converters.xmlBuffer buffer, PaymentBean[] payments)
+	void AddXMLPaymentItems(Converters.xmlBuffer buffer, List<PaymentBean> payments)
 	{
         for (PaymentBean payment : payments)
         {
@@ -2908,7 +2908,7 @@ public class Datafeed extends HttpServlet
         }
 	}
 
-	private void AddCSVAircraftItems(Converters.csvBuffer buffer, AircraftBean[] aircraftlist)
+	private void AddCSVAircraftItems(Converters.csvBuffer buffer, List<AircraftBean> aircraftlist)
 	{
 		//fill in the header if empty
 		if(buffer.isHeaderEmpty())
@@ -2940,8 +2940,6 @@ public class Datafeed extends HttpServlet
             //setup our needed variables
             String loc;
             String locname;
-            ModelBean modelBean = data.getModelById(aircraft.getModelId())[0];
-            AirportBean location = data.getAirport(aircraft.getLocation());
 
             if (aircraft.getLocation() == null)
             {
@@ -2951,45 +2949,21 @@ public class Datafeed extends HttpServlet
             else
             {
                 loc = aircraft.getLocation();
-                locname = location.getTitle();
+
+                locname = data.getAirportName(loc);
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
             String owner = "Bank of FSE";
             if (aircraft.getOwner() != 0)
             {
-                UserBean uOwner = data.getAccountById(aircraft.getOwner());
-                if (uOwner != null)
-                {
-                    if (uOwner.isGroup())
-                    {
-                        UserBean gOwner = data.getAccountById(data.accountUltimateGroupOwner(uOwner.getId()));
-                        if (gOwner != null)
-                        {
-                            owner = uOwner.getName() + " (" + gOwner.getName() + ")";
-                        }
-                        else
-                        {
-                            owner = uOwner.getName();
-                        }
-                    }
-                    else
-                    {
-                        owner = uOwner.getName();
-                    }
-                }
+                owner = data.getAccountNameById(aircraft.getOwner());
+                if(data.isGroup(aircraft.getOwner()))
+                    owner += " (" + data.getAccountNameById(data.accountUltimateGroupOwner(aircraft.getOwner())) + ")";
             }
-
-            String userlockname;
+            String userlockname = "Not rented.";
             if (aircraft.getUserLock() > 0)
-            {
-                UserBean lockuser = data.getAccountById(aircraft.getUserLock());
-                userlockname = lockuser.getName();
-            }
-            else
-            {
-                userlockname = "Not rented.";
-            }
+                userlockname = data.getAccountNameById(aircraft.getUserLock());
 
             buffer.append(aircraft.getMakeModel());
             buffer.append(aircraft.getRegistration());
@@ -3007,7 +2981,7 @@ public class Datafeed extends HttpServlet
             buffer.append(aircraft.getMaxRentTime());
             buffer.append(userlockname);
             buffer.append(Formatters.twoDecimals.format(aircraft.getTotalFuel() / aircraft.getTotalCapacity()));
-            buffer.append(aircraft.getCanFlyAssignments(modelBean) ? 0 : 1);
+            buffer.append(aircraft.getCanFlyAssignments(aircraft.getFuelType()) ? 0 : 1);
             buffer.append(aircraft.getAirframeHoursString());
             buffer.append(aircraft.getEngineHoursString());
             buffer.append(aircraft.getHoursSinceLastCheckString());
@@ -3015,15 +2989,13 @@ public class Datafeed extends HttpServlet
         }
 	}
 	
-	private void AddXMLAircraftItems(Converters.xmlBuffer buffer, AircraftBean[] aircraftlist)
+	private void AddXMLAircraftItems(Converters.xmlBuffer buffer, List<AircraftBean> aircraftlist)
 	{
         for (AircraftBean aircraft : aircraftlist)
         {
             //setup our needed variables
             String loc;
             String locname;
-            ModelBean modelBean = data.getModelById(aircraft.getModelId())[0];
-            AirportBean location = data.getAirport(aircraft.getLocation());
 
             if (aircraft.getLocation() == null)
             {
@@ -3033,45 +3005,21 @@ public class Datafeed extends HttpServlet
             else
             {
                 loc = aircraft.getLocation();
-                locname = location.getTitle();
+
+                locname = data.getAirportName(loc);
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
             String owner = "Bank of FSE";
             if (aircraft.getOwner() != 0)
             {
-                UserBean uOwner = data.getAccountById(aircraft.getOwner());
-                if (uOwner != null)
-                {
-                    if (uOwner.isGroup())
-                    {
-                        UserBean gOwner = data.getAccountById(data.accountUltimateGroupOwner(uOwner.getId()));
-                        if (gOwner != null)
-                        {
-                            owner = uOwner.getName() + " (" + gOwner.getName() + ")";
-                        }
-                        else
-                        {
-                            owner = uOwner.getName();
-                        }
-                    }
-                    else
-                    {
-                        owner = uOwner.getName();
-                    }
-                }
+                owner = data.getAccountNameById(aircraft.getOwner());
+                if(data.isGroup(aircraft.getOwner()))
+                    owner += " (" + data.getAccountNameById(data.accountUltimateGroupOwner(aircraft.getOwner())) + ")";
             }
-
-            String userlockname;
+            String userlockname = "Not rented.";
             if (aircraft.getUserLock() > 0)
-            {
-                UserBean lockuser = data.getAccountById(aircraft.getUserLock());
-                userlockname = lockuser.getName();
-            }
-            else
-            {
-                userlockname = "Not rented.";
-            }
+                userlockname = data.getAccountNameById(aircraft.getUserLock());
 
             buffer.append("<Aircraft>\n");
             buffer.append("MakeModel", aircraft.getMakeModel());
@@ -3090,7 +3038,7 @@ public class Datafeed extends HttpServlet
             buffer.append("RentalTime", aircraft.getMaxRentTime());
             buffer.append("RentedBy", userlockname);
             buffer.append("FuelPct", Formatters.twoDecimals.format(aircraft.getTotalFuel() / aircraft.getTotalCapacity()));
-            buffer.append("NeedsRepair", aircraft.getCanFlyAssignments(modelBean) ? 0 : 1);
+            buffer.append("NeedsRepair", aircraft.getCanFlyAssignments(aircraft.getFuelType()) ? 0 : 1);
             buffer.append("AirframeTime", aircraft.getAirframeHoursString());
             buffer.append("EngineTime", aircraft.getEngineHoursString());
             buffer.append("TimeLast100hr", aircraft.getHoursSinceLastCheckString());
@@ -3164,7 +3112,7 @@ public class Datafeed extends HttpServlet
 		buffer.append("</FBO>\n");
 	}
 	
-	private void AddCSVFacilityItems(Converters.csvBuffer buffer, FboFacilityBean[] facs)
+	private void AddCSVFacilityItems(Converters.csvBuffer buffer, List<FboFacilityBean> facs)
 	{
 		if(buffer.isHeaderEmpty())
 		{			
@@ -3195,7 +3143,7 @@ public class Datafeed extends HttpServlet
             if (fac.getReservedSpace() >= 0)
             {
                 //Owner facility record, see if there are any non-rented slots
-                FboFacilityBean[] facrenters = data.getFboRenterFacilities(fbo);
+                List<FboFacilityBean> facrenters = data.getFboRenterFacilities(fbo);
                 int rentcount = 0;
 
                 for (FboFacilityBean facrenter : facrenters)
@@ -3222,7 +3170,7 @@ public class Datafeed extends HttpServlet
         }
 	}
 	
-	private void AddXMLFacilityItems(Converters.xmlBuffer buffer, FboFacilityBean[] facs)
+	private void AddXMLFacilityItems(Converters.xmlBuffer buffer, List<FboFacilityBean> facs)
 	{
         for (FboFacilityBean fac : facs)
         {
@@ -3240,7 +3188,7 @@ public class Datafeed extends HttpServlet
             if (fac.getReservedSpace() >= 0)
             {
                 //Owner facility record, see if there are any non-rented slots
-                FboFacilityBean[] facrenters = data.getFboRenterFacilities(fbo);
+                List<FboFacilityBean> facrenters = data.getFboRenterFacilities(fbo);
                 int rentcount = 0;
                 for (FboFacilityBean facrenter : facrenters)
                 {
@@ -3265,7 +3213,7 @@ public class Datafeed extends HttpServlet
         }
 	}
 
-	private void AddCSVFboItems(Converters.csvBuffer buffer, FboBean[] fbos, boolean showsupplies)
+	private void AddCSVFboItems(Converters.csvBuffer buffer, List<FboBean> fbos, boolean showsupplies)
 	{
 		if(buffer.isHeaderEmpty())
 		{			
@@ -3340,7 +3288,7 @@ public class Datafeed extends HttpServlet
         }
 	}
 	
-	private void AddXMLFboItems(Converters.xmlBuffer buffer, FboBean[] fbos, boolean showsupplies)
+	private void AddXMLFboItems(Converters.xmlBuffer buffer, List<FboBean> fbos, boolean showsupplies)
 	{
         for (FboBean fbo : fbos)
         {
@@ -3397,7 +3345,7 @@ public class Datafeed extends HttpServlet
 
 	//NOTE NOTE NOTE!!!
 	//Any changes here need to be reflected in Data.java's version of this method!
-	public void AddCSVJobItems(Converters.csvBuffer buffer, AssignmentBean[] assignments)
+	public void AddCSVJobItems(Converters.csvBuffer buffer, List<AssignmentBean> assignments)
 	{
 		if(buffer.isHeaderEmpty())
 		{
@@ -3433,7 +3381,7 @@ public class Datafeed extends HttpServlet
         }
 	}
 
-	private void AddXMLJobItems(Converters.xmlBuffer buffer, AssignmentBean[] assignments)
+	private void AddXMLJobItems(Converters.xmlBuffer buffer, List<AssignmentBean> assignments)
 	{
         for (AssignmentBean assignment : assignments)
         {

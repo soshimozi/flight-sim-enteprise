@@ -1,12 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     String icao = request.getParameter("icao");
 
     String SfacilityId = request.getParameter("facilityId");
@@ -21,17 +22,17 @@
     FboBean fbo = null;
     AirportBean airport = data.getAirport(icao);
     data.fillAirport(airport);
-    FboFacilityBean[] facilities = data.getFboDefaultFacilitiesForAirport(icao);
+    List<FboFacilityBean> facilities = data.getFboDefaultFacilitiesForAirport(icao);
     FboFacilityBean facility = null;
 
     if (madeFacilitySelection)
     {
         facilityId = Integer.parseInt(SfacilityId);
-        for (int i = 0; i < facilities.length; i++)
+        for (FboFacilityBean bean : facilities)
         {
-            if (facilities[i].getId() == facilityId)
+            if (bean.getId() == facilityId)
             {
-                facility = facilities[i];
+                facility = bean;
                 break;
             }
         }
@@ -47,6 +48,7 @@
         }
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,17 +58,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	<div class="dataTable">
 <%	
-	if ((facilities.length == 0) || (madeFacilitySelection && (facility == null)))  
+	if ((facilities.size() == 0) || (madeFacilitySelection && (facility == null)))
 	{ 
 %>
 	<div class="message">No facilities available.</div>
@@ -86,19 +90,19 @@
 		</thead>
 		<tbody>
 <%
-		for (int i = 0; i < facilities.length; i++)
+		for (FboFacilityBean bean : facilities)
 		{ 
-			if (facilities[i].getUnits() == AssignmentBean.UNIT_PASSENGERS)
+			if (bean.getUnits() == AssignmentBean.UNIT_PASSENGERS)
 			{
-				fbo = data.getFbo(facilities[i].getFboId());
-				int spaceAvailable = data.calcFboFacilitySpaceAvailable(facilities[i], fbo, airport);
-				String rentURL = "fbofacilityrent.jsp?icao=" + airport.getIcao() + "&facilityId=" + facilities[i].getId();
+				fbo = data.getFbo(bean.getFboId());
+				int spaceAvailable = data.calcFboFacilitySpaceAvailable(bean, fbo, airport);
+				String rentURL = "fbofacilityrent.jsp?icao=" + airport.getIcao() + "&facilityId=" + bean.getId();
 				String rentLink = "<a href=\"" + rentURL + "\">Rent</a>";
 %>
 			<tr>
 				<td><%= fbo.getName() %></td>
 				<td><%= spaceAvailable %> gates</td>
-				<td><%= Formatters.currency.format(facilities[i].getRent()) %></td>
+				<td><%= Formatters.currency.format(bean.getRent()) %></td>
 				<td><%= spaceAvailable < 1 ? "" : rentLink %></td>
 			</tr>
 <%

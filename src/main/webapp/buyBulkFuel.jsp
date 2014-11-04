@@ -1,11 +1,13 @@
 <%@page language="java"
-	    import="java.util.*, java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        contentType="text/html; charset=ISO-8859-1"
+        import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	String returnPage = request.getHeader("referer");
 
 	int baseBulkFuelKg=5000;
@@ -30,6 +32,7 @@
 	GoodsBean fuelleft = data.getGoods(fboAccount.getLocation(), fboAccount.getOwner(), GoodsBean.GOODS_FUEL100LL);
 	GoodsBean jetaleft = data.getGoods(fboAccount.getLocation(), fboAccount.getOwner(), GoodsBean.GOODS_FUELJETA);
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,9 +42,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 	
-	<script src="scripts/jquery.min.js"></script>
+	<script src="/scripts/jquery.min.js"></script>
 
 	<script>
 		function checkForm()
@@ -78,6 +81,7 @@
 			});
 		});
 	</script>
+
 </head>
 <body>
 

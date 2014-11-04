@@ -1,15 +1,17 @@
 <%@page language="java"
-	import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="net.fseconomy.data.*, java.util.List, net.fseconomy.util.Formatters"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
-<%	
+<%
+    Data data = (Data)application.getAttribute("data");
+
 	String returnPage = request.getHeader("referer");
 
 	String sId = request.getParameter("id");
-	int id = 0;
+	int id;
 	String error = null;
 	
 	FboBean fbo;
@@ -29,8 +31,10 @@
 		
 		for (int c=0; c < data.commodities.length; c++)
 		{
-			if (data.commodities[c] == null) 
-				continue;
+            if (data.commodities[c] == null)
+            {
+                continue;
+            }
 			String prefix = "g_" + c + "_";
 			
 			String buy = request.getParameter(prefix + "buy");
@@ -38,10 +42,12 @@
 			String max = request.getParameter(prefix + "max");
 			String sell = request.getParameter(prefix + "sell");
 			String sellPrice = request.getParameter(prefix + "sp");
-			String retain = request.getParameter(prefix + "retain");		
-	
-			if (buyPrice == null || max == null || sellPrice == null || retain == null)
-				continue;
+			String retain = request.getParameter(prefix + "retain");
+
+            if (buyPrice == null || max == null || sellPrice == null || retain == null)
+            {
+                continue;
+            }
 			GoodsBean good = new GoodsBean();
 			good.setLocation(fbo.getLocation());
 			good.setOwner(fbo.getOwner());
@@ -56,19 +62,22 @@
 		}
 				
 		airport = data.getAirport(fbo.getLocation());
-		data.fillAirport(airport);			
-		
-		GoodsBean[] thegoods = data.getGoodsForFbo(fbo.getLocation(), fbo.getOwner());	
-		for (int c=0; c < thegoods.length; c++)
-		{
-			if (goodsList[thegoods[c].getType()] == null)
-				goodsList[thegoods[c].getType()] = thegoods[c];
-		}
+		data.fillAirport(airport);
+
+        List<GoodsBean> goodsBeanList = data.getGoodsForFbo(fbo.getLocation(), fbo.getOwner());
+		GoodsBean[] thegoods = goodsBeanList.toArray(new GoodsBean[goodsBeanList.size()]);
+        for (GoodsBean thegood : thegoods)
+        {
+            if (goodsList[thegood.getType()] == null)
+                goodsList[thegood.getType()] = thegood;
+        }
 	
 		for (int c=0; c < goodsList.length; c++)
 		{
-			if (data.commodities[c] == null)
-				continue;
+            if (data.commodities[c] == null)
+            {
+                continue;
+            }
 				
 			if (goodsList[c] == null)
 			{
@@ -83,6 +92,7 @@
 		error = "Permission denied.";
 	}
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,7 +102,7 @@
 	
 	<title>FSEconomy terminal</title>
 	
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 	<script>
 		function submitBuildRepair(form){
@@ -111,8 +121,8 @@
 			}
 		}
 	</script>
-</head>
 
+</head>
 <body>
 
 <jsp:include flush="true" page="top.jsp" />
@@ -241,12 +251,14 @@
 	{
 		CommodityBean commodity = data.commodities[c];
 		GoodsBean good = goodsList[c];
-		if (commodity == null)
-			continue;
+        if (commodity == null)
+        {
+            continue;
+        }
 
 		String prefix = "g_" + c + "_";
 %>
-				<tr <%= Data.oddLine(c) %>>
+				<tr>
 					<td><%= commodity.getName() %></td>
 					<td><input name="<%= prefix %>buy" type="checkbox" value="true" <%= good.isBuy() ? "checked" :"" %>/></td>
 					<td><input name="<%= prefix %>bp" type="text" class="textarea" value="<%= Formatters.twoDecimals.format(good.getPriceBuy()) %>" size="7"/></td>

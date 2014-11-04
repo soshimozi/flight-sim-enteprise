@@ -1,16 +1,19 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="java.util.List, net.fseconomy.data.*"
 %>
-<%Data data = (Data)application.getAttribute("data");%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
+    Data data = (Data)application.getAttribute("data");
+
     String group = request.getParameter("groupId");
     int groupId = -1;
     if (group != null)
         groupId = Integer.parseInt(group);
 
-    UserBean[] members = data.getUsersForGroup(groupId);
+    List<UserBean> members = data.getUsersForGroup(groupId);
 %>
 
 <!DOCTYPE html>
@@ -22,12 +25,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery/1.10.2/jquery.min.js"></script>
-    <script src="scripts/jquery-ui.min.js"></script>
-    <script src="scripts/AutoComplete.js"></script>
+    <script src="/scripts/jquery/1.10.2/jquery.min.js"></script>
+    <script src="/scripts/jquery-ui.min.js"></script>
+    <script src="/scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -67,10 +70,11 @@
     </script>
 
 </head>
-
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	<form method="post" action="userctl" name="memberForm">
@@ -92,15 +96,15 @@
 	</thead>
 	<tbody>
 <%
-	for (int c=0; c < members.length; c++)
+	for (UserBean member : members)
 	{
-		int id = members[c].getId();
-		String name = members[c].getName();
-		data.reloadMemberships(members[c]);
-		int memberLevel = members[c].groupMemberLevel(groupId);		
+		int id = member.getId();
+		String name = member.getName();
+		data.reloadMemberships(member);
+		int memberLevel = member.groupMemberLevel(groupId);
 %>
-	<tr <%= Data.oddLine(c) %>>
-	<td><%= members[c].getName() %></td>
+	<tr>
+	<td><%= member.getName() %></td>
 	<td><%= UserBean.getGroupLevelName(memberLevel) %></td>
 	<td>
 <%
@@ -139,30 +143,36 @@
 <%
     }
 %>
-	<tr><td></td><td></td><td></td><td><input name="selectAll" type="checkbox" onChange="checkAll()"> All</td></tr>
+	<tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><input name="selectAll" type="checkbox" onChange="checkAll()"> All</td>
+    </tr>
 	</tbody>
 	</table>
 	</div>
+
 	<div class="form" style="width:400px">
-	Pay a total of <input name="money" type="text" class="textarea" size="4" />
-	to all selected members.
-	<input type="submit" class="button" value="Pay"/> </br>
-	Comment: <input name="comment" type="text" class="textarea" size="50" />
+        Pay a total of <input name="money" type="text" class="textarea" size="4" />
+        to all selected members.
+        <input type="submit" class="button" value="Pay"/> </br>
+        Comment: <input name="comment" type="text" class="textarea" size="50" />
 	</div>
 	<br/>
 	
 	<div class="form" style="width:400px">
-	Invite a new member:<br/> 
-	<input id="membername" name="membername" type="text" class="textarea" size="40" />
-	<input type="hidden" id="member" name="member" />
-	<input type="submit" class="button" value="Invite"/>
+        Invite a new member:<br/>
+        <input id="membername" name="membername" type="text" class="textarea" size="40" />
+        <input type="hidden" id="member" name="member" />
+        <input type="submit" class="button" value="Invite"/>
 	</div>
 	<br/>	
 
 	<div class="form" style="width:400px">
-	Send an email message to all selected members:
-	<textarea name="email" cols="40" rows="10" class="textarea"></textarea>
-	<input type="submit" class="button" value="Send"/>
+        Send an email message to all selected members:
+        <textarea name="email" cols="40" rows="10" class="textarea"></textarea>
+        <input type="submit" class="button" value="Send"/>
 	</div>
 	<br/>
 		

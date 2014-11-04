@@ -1,18 +1,20 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.*, java.util.*"
+        import="net.fseconomy.data.*"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
         return;
     }
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,15 +24,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css">
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script type='text/javascript' src='scripts/common.js'></script>
-    <script type='text/javascript' src='scripts/css.js'></script>
-    <script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/jquery-ui.min.js"></script>
-    <script src="scripts/AutoComplete.js"></script>
+    <script type='text/javascript' src='/scripts/common.js'></script>
+    <script type='text/javascript' src='/scripts/css.js'></script>
+    <script type='text/javascript' src='/scripts/standardista-table-sorting.js'></script>
+    <script type='text/javascript' src="/scripts/jquery.min.js"></script>
+    <script type='text/javascript' src="/scripts/jquery-ui.min.js"></script>
+    <script type='text/javascript' src="/scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -43,8 +45,10 @@
 
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="../top.jsp" />
+<jsp:include flush="true" page="../menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <%
@@ -73,15 +77,15 @@
 	<br/>
 	<input type="submit" class="button" value="GO" />
 	<input type="hidden" name="submit" value="true"/>
-	<input type="hidden" name="return" value="adminuser48hourtrend.jsp"/>
+	<input type="hidden" name="return" value="/admin/adminuser48hourtrend.jsp"/>
 	</form>
 	</div>
 <%
     }
     else if (request.getParameter("submit") != null)
     {
-        UserBean[] inputuser = data.getAccountByName(request.getParameter("username"));
-        if (inputuser.length == 0)
+        UserBean inputuser = data.getAccountByName(request.getParameter("username"));
+        if (inputuser == null)
         {
             message = "User Not Found";
         }
@@ -89,7 +93,7 @@
         Data.trendHours[] trend = null;
         try
         {
-            trend = data.getTrendHoursQuery(inputuser[0].getName());
+            trend = data.getTrendHoursQuery(inputuser.getName());
         }
         catch(DataError e)
         {
@@ -101,11 +105,11 @@
 %>	<div class="message"><%= message %></div>
 <%
         }
-        else if (inputuser.length != 0)
+        else if (inputuser != null)
         {
 %>		<div class="dataTable">	
-		<h2>User - <%= inputuser[0].getName() %> - 48 Hour Trend - Last 500 Flights</h2><br/>
-		<a href="admin.jsp">Return to Admin Page</a><br/>
+		<h2>User - <%= inputuser.getName() %> - 48 Hour Trend - Last 500 Flights</h2><br/>
+		<a href="/admin/index.jsp">Return to Admin Page</a><br/>
 		<table id="sortableTableStats" class="sortable">
 		<thead>
 		<tr>
@@ -120,7 +124,7 @@
             for (int c=0; c < trend.length; c++)
             {
 %>
-            <tr <%= Data.oddLine(c) %>>
+            <tr>
 			<td><%= trend[c].logdate %></td>
 			<td><%= trend[c].duration %></td>
 			<td><%= ((trend[c].last48Hours > 20.0) ? "<HTML><font color=Red><b>" : "") + trend[c].last48Hours + ((trend[c].last48Hours > 20.0) ? "</font></HTML></b>" : "") %></td>

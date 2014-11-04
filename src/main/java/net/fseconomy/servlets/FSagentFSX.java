@@ -160,9 +160,9 @@ public class FSagentFSX extends HttpServlet
 		    if (ipAddress == null) 
 		    	ipAddress = req.getRemoteAddr();
 		    
-		    AircraftBean[] aircraft = data.getAircraftForUser(userBean.getId());
-		    if(aircraft.length > 0)
-		    	reg = aircraft[0].getRegistration();
+		    AircraftBean aircraft = data.getAircraftForUser(userBean.getId());
+		    if(aircraft!= null)
+		    	reg = aircraft.getRegistration();
 		    else
 		    	reg="-";
 		    
@@ -310,9 +310,9 @@ public class FSagentFSX extends HttpServlet
 		String aircraftTitle = req.getParameter("aircraft");
 		Data.closeAirport airport = closestAirport(req);
 		
-		List airportList = new ArrayList();
-		List currentAirport = new ArrayList();
-		List alternativeAircraft = new ArrayList();
+		List<Data.closeAirport> airportList = new ArrayList<>();
+		List<AirportBean> currentAirport = new ArrayList<>();
+		List<AircraftBean> alternativeAircraft = new ArrayList<>();
 		String modelName = data.probeAircraft(aircraftTitle, airport, airportList, currentAirport, alternativeAircraft);
 
 		if (modelName == null)
@@ -321,7 +321,7 @@ public class FSagentFSX extends HttpServlet
 			result.append(xmlNodeCDATA("aircraftType", modelName));
 		
 		if (currentAirport.size() > 0)
-			result.append(airportToXml((AirportBean) currentAirport.get(0)));
+			result.append(airportToXml(currentAirport.get(0)));
 
 		if (airportList.size() > 0)
         {
@@ -358,19 +358,19 @@ public class FSagentFSX extends HttpServlet
 			throw new DataError("Invalid Aircraft name, or Departing ICAO received, flight aborted.");
 
 		// Lets get the users current aircraft
-		AircraftBean[] aircraft = data.getAircraftForUser(user.getId());
+		AircraftBean aircraft = data.getAircraftForUser(user.getId());
 		
 		// If there is no rented aircraft or the aircraft is not at the same location, exit
-		if (aircraft.length == 0 || !closest.icao.equals(aircraft[0].getLocation()))
+		if (aircraft == null || !closest.icao.equals(aircraft.getLocation()))
 			throw new DataError("You have no rented aircraft at " + closest.icao);
 
 		// Check the aircraft name mapping to make sure we have a match, if not, exit
-		if (!data.aircraftOk(aircraft[0], FSAircraft))
-			throw new DataError(FSAircraft + " is not compatible with your rented " + aircraft[0].getMakeModel());
+		if (!data.aircraftOk(aircraft, FSAircraft))
+			throw new DataError(FSAircraft + " is not compatible with your rented " + aircraft.getMakeModel());
 
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit
-		if(data.checkAllInAircraftWithOutAssigment(aircraft[0]))
-			throw new DataError(aircraft[0].getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
+		if(data.checkAllInAircraftWithOutAssigment(aircraft))
+			throw new DataError(aircraft.getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
 
 		// Check the number of hours the user has flown, if over 30 hours, exit
 		if (data.getNumberOfHours(user.getName(), 48) > 30)
@@ -379,40 +379,40 @@ public class FSagentFSX extends HttpServlet
 		// Lets put together our aircraft data
 		
 		// Get the aircraft data
-		Object[] info = data.departAircraft(aircraft[0], user.getId(), closest.icao);
+		Object[] info = data.departAircraft(aircraft, user.getId(), closest.icao);
 		
 		// Reformat the data into typed variables
 		int payloadWeight = (Integer) info[0];
 		int totalWeight = (Integer) info[1];
 		boolean rentedDry = (Boolean) info[3];
 		
-		float[] fuel = aircraft[0].getFuelInGallons();
+		float[] fuel = aircraft.getFuelInGallons();
 		StringBuilder fuelString = new StringBuilder();
 
         for (float aFuel : fuel)
             fuelString.append(Float.toString(aFuel)).append(" ");
 
 		long maxrenttime;
-		int ultimateOwner = data.accountUltimateGroupOwner(aircraft[0].getOwner());
+		int ultimateOwner = data.accountUltimateGroupOwner(aircraft.getOwner());
 		if(user.getId() == ultimateOwner)
 			maxrenttime = 100*3600; // unlimited for owner
 		else
-			maxrenttime = aircraft[0].getMaxRentTime();
+			maxrenttime = aircraft.getMaxRentTime();
 		
 
 		// This data is where the assignments are shown as selected or Awaiting departure
-		AssignmentBean[] assignments = (AssignmentBean[]) info[2];
+        List<AssignmentBean> assignments = (List<AssignmentBean>) info[2];
 		
 		// Alright, lets form up our return XML data to the client
 		result.append(xmlNode("payloadWeight", payloadWeight));
 		result.append(xmlNode("totalWeight", totalWeight));
-		result.append(xmlNode("registration", aircraft[0].getRegistration()));
+		result.append(xmlNode("registration", aircraft.getRegistration()));
 		result.append(xmlNode("fuel", fuelString.toString()));
-		result.append(xmlNode("equipment", aircraft[0].getEquipment()));
+		result.append(xmlNode("equipment", aircraft.getEquipment()));
 		result.append(xmlNode("leaseExpires", Long.toString(maxrenttime)));
-		result.append(xmlNode("accounting", aircraft[0].getAccounting() == AircraftBean.ACC_HOUR ? "hour" : "tacho"));
+		result.append(xmlNode("accounting", aircraft.getAccounting() == AircraftBean.ACC_HOUR ? "hour" : "tacho"));
 		result.append(xmlNode("rentedDry", rentedDry ? "true" : "false"));
-		result.append(xmlNode("rentalPrice", rentedDry ? aircraft[0].getRentalPriceDry() : aircraft[0].getRentalPriceWet()));
+		result.append(xmlNode("rentalPrice", rentedDry ? aircraft.getRentalPriceDry() : aircraft.getRentalPriceWet()));
 		
 		// List all our assignments
         for (AssignmentBean as : assignments)

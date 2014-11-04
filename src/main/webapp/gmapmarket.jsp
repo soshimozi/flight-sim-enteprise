@@ -1,13 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     int modelId = (request.getParameter("modelId") == null || request.getParameter("modelId").equals("")) ? -1 : Integer.parseInt(request.getParameter("modelId"));
     int lowPrice = (request.getParameter("lowPrice") == null || request.getParameter("lowPrice").equals("")) ? -1 : Integer.parseInt(request.getParameter("lowPrice"));
     int highPrice = (request.getParameter("highPrice") == null || request.getParameter("highPrice").equals("")) ? -1: Integer.parseInt(request.getParameter("highPrice"));
@@ -37,13 +37,13 @@
 
     boolean isSearch = (modelId != -1) || (lowPrice != -1) || (highPrice != -1) || (lowTime != -1) || (highTime != -1) || (distance != -1) || (lowPax != -1) || (highPax != -1) || (lowLoad != -1) || (highLoad != -1) || hasVfr || hasIfr || hasGps || hasAp || isSystemOwned || isPlayerOwned || equipment != "all";
 
-    AircraftBean[] aircraft = null;
+    List<AircraftBean> aircraftList = null;
     String message = null;
     if (isSearch)
     {
         try
         {
-            aircraft = data.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
+            aircraftList = data.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
         }
         catch(DataError e)
         {
@@ -52,7 +52,7 @@
     }
     else
     {
-        aircraft = data.getAircraftForSale();
+        aircraftList = data.getAircraftForSale();
     }
 %>
 
@@ -84,6 +84,7 @@
 
 </head>
 <body text="#000080" bgcolor="#FFFFFF" background="">
+
 <%
 if (message != null) 
 {
@@ -92,7 +93,7 @@ if (message != null)
 }
 %>
 <form name="fboForm" id="fboForm" method="post" action="userctl">
-	<%=aircraft.length%> aircraft meet your criteria.  &nbsp;&nbsp;
+	<%=aircraftList.size()%> aircraft meet your criteria.  &nbsp;&nbsp;
 	<script type="text/javascript">
 	<!-- Begin
 	document.write('Your map data took <span id="endTime">0.0</span> seconds to load.');
@@ -107,12 +108,13 @@ if (message != null)
     var locations = 
         [
 <%
-for (int c=0; c < aircraft.length; c++)
+for (AircraftBean aircraft : aircraftList)
 {
-	if(aircraft[c].getLocation() == null)
+	if(aircraft.getLocation() == null)
 		continue;
-	boolean bankOwned = aircraft[c].getOwner() == 0;
-	AirportBean airport = data.getAirport(aircraft[c].getLocation());
+		
+	boolean bankOwned = aircraft.getOwner() == 0;
+	AirportBean airport = data.getAirport(aircraft.getLocation());
 	double lat = airport.getLat();
 	double lon = airport.getLon();
 	String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
@@ -121,32 +123,32 @@ for (int c=0; c < aircraft.length; c++)
 	sb.append("<div class=\"infowindow-content\">");
 	sb.append(airportLink);
 	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(data.getAccountNameById(aircraft[c].getOwner())));
+	sb.append(Converters.escapeJavaScript(data.getAccountNameById(aircraft.getOwner())));
 	sb.append("<br>");
-	sb.append(aircraft[c].getRegistration());
+	sb.append(aircraft.getRegistration());
 	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(aircraft[c].getMakeModel()));
+	sb.append(Converters.escapeJavaScript(aircraft.getMakeModel()));
 	sb.append("<br>");
-	sb.append(Formatters.oneDecimal.format(aircraft[c].getAirframeHours()));
+	sb.append(Formatters.oneDecimal.format(aircraft.getAirframeHours()));
 	sb.append(" hrs Airframe");
 	sb.append("<br>");
-	sb.append(Formatters.oneDecimal.format(aircraft[c].getEngineHours()));
+	sb.append(Formatters.oneDecimal.format(aircraft.getEngineHours()));
 	sb.append(" hrs Engine Time");
 	sb.append("<br>");
-	sb.append(Formatters.oneDecimal.format(aircraft[c].getHoursSinceLastCheck()));
+	sb.append(Formatters.oneDecimal.format(aircraft.getHoursSinceLastCheck()));
 	sb.append(" hrs Since 100hr");
 	sb.append("<br>");
-	sb.append(Formatters.oneDecimal.format(aircraft[c].getTotalFuel()));
+	sb.append(Formatters.oneDecimal.format(aircraft.getTotalFuel()));
 	sb.append(" of ");
-	sb.append(Formatters.oneDecimal.format(aircraft[c].getTotalCapacity()));
+	sb.append(Formatters.oneDecimal.format(aircraft.getTotalCapacity()));
 	sb.append(" Gallons");
 	sb.append("<br>");
-	sb.append(aircraft[c].getSEquipment());
+	sb.append(aircraft.getSEquipment());
 	sb.append("<br>");
-	sb.append(Formatters.currency.format(aircraft[c].getSellPrice()));
+	sb.append(Formatters.currency.format(aircraft.getSellPrice()));
 	sb.append(" Sell Price");
 	sb.append("<br>");
-	sb.append(Formatters.currency.format(aircraft[c].getMinimumPrice()));
+	sb.append(Formatters.currency.format(aircraft.getMinimumPrice()));
 	sb.append(" Buyback Price");
 	sb.append("</div>");
 %>

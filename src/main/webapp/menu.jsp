@@ -1,6 +1,8 @@
 <%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
 	    import = "net.fseconomy.data.*, java.util.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%!
@@ -42,8 +44,9 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 	return returnValue.toString();
 }
 %>
-<link href="theme/menu.css" rel="stylesheet" type="text/css" />
-<script src="scripts/coolmenus4.js">
+
+<link href="/theme/menu.css" rel="stylesheet" type="text/css" />
+<script src="/scripts/coolmenus4.js">
 </script>
 
 <script >
@@ -53,7 +56,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 	oM.rows=1; 
 	oM.onlineRoot="/";
 	oM.pxBetween =0; 
-	oM.fillImg="img/empty.gif";
+	oM.fillImg="/img/empty.gif";
 	// menu positions
 	oM.fromTop=101; oM.fromLeft=10; oM.wait=300; oM.zIndex=400;
 	oM.useBar=1; oM.barWidth=700; oM.barHeight="menu"; oM.barX=0;oM.barY="menu"; oM.barClass="menuclass";
@@ -63,7 +66,6 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 	oM.level[0]=new cm_makeLevel(90,menuheight,"cl0","cl0over",0,1,"cl0border",0,"bottom",0,0,0,0,0,1);
 	oM.level[1]=new cm_makeLevel(150,menuheight,"cl1","cl1over",1,1,"cl1border",0,"right",0,0,0,10,10);
 	oM.level[2]=new cm_makeLevel(220,menuheight);
-	//oM.level[1]=new cm_makeLevel(140,22);
 
 	oM.makeMenu('m1','','Home','<%= response.encodeURL("index.jsp") %>', "", 60);
 	oM.makeMenu('sub1_0','m1','Home','<%= response.encodeURL("index.jsp") %>');
@@ -118,57 +120,34 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 		<%= groupMenu(user, "m10", 3, "Facilities", true, true, "fbofacility.jsp", "?id=", response) %>
 		oM.makeMenu('sub10_0','m10','FBO Maps','<%= response.encodeURL("fbomap.jsp")%>');
 		oM.makeMenu('sub10_1','m10','Purchase FBO','<%= response.encodeURL("marketfbo.jsp") %>');
-   		//oM.makeMenu('m11','','Tripfinder','<%= response.encodeURL("tripfinder.jsp") %>', "", 95);
 
    		oM.makeMenu('m11','','Site Map','<%= response.encodeURL("menumap.jsp") %>', "", 75);
 
 <%
-	if (user.getLevel() == UserBean.LEV_MODERATOR)
+	if (user.getLevel() == UserBean.LEV_MODERATOR || user.getLevel() == UserBean.LEV_ADMIN)
 	{
 %>
-		oM.makeMenu('m12','','Admin','<%= response.encodeURL("admin.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
-		oM.makeMenu('sub12_0','m12','Modify aircraft mappings','<%= response.encodeURL("fsmappings.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_1','m12','Modify aircraft models','<%= response.encodeURL("models.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_2','m12','Modify assignment templates','<%= response.encodeURL("templates.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_3','m12','Add New User','<%= response.encodeURL("signup.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_4','m12','Lock Account','<%= response.encodeURL("lockaccount.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_5','m12','Unlock Account','<%= response.encodeURL("unlockaccount.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_6','m12','Reset Rental Ban List','<%= response.encodeURL("resetbanlist.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_7','m12','Client Ip Checks','<%= response.encodeURL("adminclientipchecks.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-<% 
+		oM.makeMenu('m12','','Admin','<%= response.encodeURL("admin/index.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
+<%
 	}
-	if (user.getLevel() == UserBean.LEV_ADMIN)
-	{
-%>
-		oM.makeMenu('m12','','Admin','<%= response.encodeURL("admin.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
-		oM.makeMenu('sub12_0','m12','Modify aircraft mappings','<%= response.encodeURL("fsmappings.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_1','m12','Modify aircraft models','<%= response.encodeURL("models.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_2','m12','Modify assignment templates','<%= response.encodeURL("templates.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_3','m12','Add New User','<%= response.encodeURL("signup.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_4','m12','Lock Account','<%= response.encodeURL("lockaccount.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_5','m12','Unlock Account','<%= response.encodeURL("unlockaccount.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_6','m12','Reset Rental Ban List','<%= response.encodeURL("resetbanlist.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub12_7','m12','Client Ip Checks','<%= response.encodeURL("adminclientipchecks.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
-<% 
-	}
+
 	if (user.getLevel() == UserBean.LEV_CSR)
 	{
 %>
-		oM.makeMenu('m13','','CSR','<%= response.encodeURL("admin.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
+		oM.makeMenu('m13','','CSR','<%= response.encodeURL("admin/index.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
 		oM.makeMenu('sub13_0','m13','Add User','<%= response.encodeURL("signup.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub13_1','m13','Edit User','<%= response.encodeURL("admineditaccount.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub13_2','m13','Client Ip Checks','<%= response.encodeURL("adminclientipchecks.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
+		oM.makeMenu('sub13_1','m13','Edit User','<%= response.encodeURL("admin/accountedit.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
+		oM.makeMenu('sub13_2','m13','Client Ip Checks','<%= response.encodeURL("admin/checkclientip.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
 <% 
 	}
 	if (user.getLevel() == UserBean.LEV_ACA)
 	{
 %>
-		oM.makeMenu('m14','','Aircraft Mapping','<%= response.encodeURL("fsmappings.jsp") %>', '', 120, null, null, null, 'cl0gold','cl0overgold');
+		oM.makeMenu('m14','','Aircraft Mapping','<%= response.encodeURL("aircraftmappings.jsp") %>', '', 120, null, null, null, 'cl0gold','cl0overgold');
 <% 
 	}
 } 
 %>
-
 
 oM.construct()
 </script>

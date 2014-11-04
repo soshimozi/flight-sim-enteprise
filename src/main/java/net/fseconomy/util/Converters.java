@@ -44,10 +44,10 @@ public class Converters
 	
 	public static class xmlBuffer
 	{
-		StringBuffer content;
+		StringBuilder content;
 		public xmlBuffer()
 		{
-			content = new StringBuffer();
+			content = new StringBuilder();
 		}
 		public void appendOpenTag(String name)
 		{

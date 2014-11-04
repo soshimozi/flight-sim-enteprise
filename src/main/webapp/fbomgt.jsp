@@ -1,12 +1,13 @@
-<%@ page language="java"
-	import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	UserBean account = null;
 	String sId = request.getParameter("id");
 	
@@ -19,22 +20,25 @@
 	{
 		int id = Integer.parseInt(sId);
 		account = data.getAccountById(id);
-		if (account != null)
-			if (account.isGroup() == false || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
-				account = null;		
+        if (account != null)
+        {
+            if (!account.isGroup() || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
+            {
+                account = null;
+            }
+        }		
 	}
+
+    if (account == null)
+    {
+        account = user;
+    }
 	
-	if (account == null)
-		account = user;
-	
-	FboBean[] fbo = data.getFboByOwner(account.getId(), "location");
-	AirportBean[] airports = data.getAirportsForFboConstruction(account.getId());	
-	
+	List<FboBean> fbos = data.getFboByOwner(account.getId(), "location");
 %>
 
-<%= "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 
 	<title>FSEconomy terminal</title>
@@ -42,23 +46,24 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
-	<link href="theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
 	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
 	
 	
-	<script src="scripts/jquery.min.js"></script>
+	<script type="text/javascript" src="/scripts/jquery.min.js" ></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script type="text/javascript" src="/scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
-	<script src="scripts/PopupWindow.js"></script>
-	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script charset="iso-8859-1" src="scripts/js/highcharts.js"> </script>
+	<script type="text/javascript" src="/scripts/PopupWindow.js"></script>
+	<script type="text/javascript" src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
+	<script type="text/javascript" src="/scripts/js/highcharts.js"> </script>
 	
-	<script type="text/javascript"> var gmap = new PopupWindow(); </script>
-	<script type="text/javascript">
+	<script type="text/javascript"> 
+        var gmap = new PopupWindow(); 
+
 		function makeChart ( ) {
 		    var months = { '1': 'Jan', '2': 'Feb', '3': 'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul', '8': 'Aug', '9': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec' };
 			
@@ -69,13 +74,13 @@
 		    var titles = [ ];
 			
 <%
-    for ( int i = 0; i < fbo.length; i++ )
-    {
+        for(FboBean aFbo: fbos)
+        {
 %>
-				data.push(<%=data.getAirportOperationDataJSON(fbo[i].getLocation()) %>);
-				titles.push('<%=fbo[i].getLocation() %>');
+            data.push(<%= data.getAirportOperationDataJSON(aFbo.getLocation()) %>);
+            titles.push('<%= aFbo.getLocation() %>');
 <%
-    }
+        }
 %>
 				
 			for ( var i = 0, d; d = data[i]; i++ ) {
@@ -180,8 +185,8 @@
 		});
 		
 	</script>
-</head>
 
+</head>
 <body>
 
 <jsp:include flush="true" page="top.jsp" />
@@ -237,26 +242,26 @@
 	
 	<tbody>
 <%
-	for (int c=0; c < fbo.length; c++)
+	for (FboBean fbo : fbos)
 	{
-		GoodsBean supplies = data.getGoods(fbo[c].getLocation(), fbo[c].getOwner(), GoodsBean.GOODS_SUPPLIES);
-		GoodsBean fuel = data.getGoods(fbo[c].getLocation(), fbo[c].getOwner(), GoodsBean.GOODS_FUEL100LL);
-		GoodsBean jeta = data.getGoods(fbo[c].getLocation(), fbo[c].getOwner(), GoodsBean.GOODS_FUELJETA);
-		GoodsBean buildingmaterials = data.getGoods(fbo[c].getLocation(), fbo[c].getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
-		AirportBean ap = data.getAirport(fbo[c].getLocation());
-		int availJobs = data.getFacilityJobCount(fbo[c].getOwner(), fbo[c].getLocation()); 
+		GoodsBean supplies = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_SUPPLIES);
+		GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
+		GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
+		GoodsBean buildingmaterials = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
+		AirportBean ap = data.getAirport(fbo.getLocation());
+		int availJobs = data.getFacilityJobCount(fbo.getOwner(), fbo.getLocation()); 
 %>
-	<tr <%= Data.oddLine(c) %>>
+	<tr>
 	<td><%= data.airportLink(ap, ap, response) %></td>	
-	<td><%= supplies != null ? ((supplies.getAmount() / fbo[c].getSuppliesPerDay(ap) < 1) ? "<span style=\'color: red;\'><small>" + fbo[c].getName() + "</small></span>" : "<small>" + fbo[c].getName() + "</small>"): fbo[c].getName() %></td>
+	<td><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(ap) < 1) ? "<span style=\'color: red;\'><small>" + fbo.getName() + "</small></span>" : "<small>" + fbo.getName() + "</small>"): fbo.getName() %></td>
 
 	<td><%= availJobs %></td>		
 	<td><%= ap.getSize() > 2999 ? ((ap.getSize() > 4999) ? "BdM/Sp" : "Supply") : "<span style=\'color: gray;\'><small>NONE</small></span>" %></td>
 	
-	<td class="numeric"><%= fbo[c].getSuppliesPerDay(ap) %></td>
-	<td class="numeric"><%= supplies != null ? ((supplies.getAmount() / fbo[c].getSuppliesPerDay(ap) > 14) ? supplies.getAmount() / fbo[c].getSuppliesPerDay(ap) : "<span style=\'color: red;\'>" + supplies.getAmount() / fbo[c].getSuppliesPerDay(ap)+ "</span>" ): "" %></td>
+	<td class="numeric"><%= fbo.getSuppliesPerDay(ap) %></td>
+	<td class="numeric"><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(ap) > 14) ? supplies.getAmount() / fbo.getSuppliesPerDay(ap) : "<span style=\'color: red;\'>" + supplies.getAmount() / fbo.getSuppliesPerDay(ap)+ "</span>" ): "" %></td>
 
-	<td><%= fbo[c].getServices() == 1 | fbo[c].getServices() == 5 ? "<small>" + fbo[c].getRepairShopMargin() + "%/" + fbo[c].getEquipmentInstallMargin() + "%</small>" : "<span style=\'color: gray;\'><small>No Shop</small></span>" %></td>
+	<td><%= fbo.getServices() == 1 | fbo.getServices() == 5 ? "<small>" + fbo.getRepairShopMargin() + "%/" + fbo.getEquipmentInstallMargin() + "%</small>" : "<span style=\'color: gray;\'><small>No Shop</small></span>" %></td>
 	
 	<td class="numeric"><%= supplies != null ? (supplies.getSaleFlag() == 2 | supplies.getSaleFlag() == 3 ?  Formatters.currency.format(supplies.getPriceBuy()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
 	<td class="numeric"><%= supplies != null ? (supplies.getSaleFlag() == 1 | supplies.getSaleFlag() == 3 ?  Formatters.currency.format(supplies.getPriceSell()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
@@ -264,19 +269,19 @@
 	<td class="numeric"><%= buildingmaterials != null ? (buildingmaterials.getSaleFlag() == 2 | buildingmaterials.getSaleFlag() == 3 ?  Formatters.currency.format(buildingmaterials.getPriceBuy()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
 	<td class="numeric"><%= buildingmaterials != null ? (buildingmaterials.getSaleFlag() == 1 | buildingmaterials.getSaleFlag() == 3 ?  Formatters.currency.format(buildingmaterials.getPriceSell()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
 
-	<td class="numeric"><%= fuel != null ? (Formatters.currency.format(fbo[c].getFuel100LL())): "" %></td>
+	<td class="numeric"><%= fuel != null ? (Formatters.currency.format(fbo.getFuel100LL())): "" %></td>
 	<td><%= fuel != null ? (fuel.getAmount() != 0 ? (((int)Math.floor(fuel.getAmount() / 2.68735) < 1000) ? "<span style=\'color: firebrick;\'>" + (int)Math.floor(fuel.getAmount() / 2.68735) + "</span>" : (int)Math.floor(fuel.getAmount() / 2.68735)) : "<span style=\'color: gray;\'><small>NONE</small></span>"): "" %></td>
 	<td class="numeric"><%= fuel != null ? (fuel.getSaleFlag() == 2 | fuel.getSaleFlag() == 3 ?  Formatters.currency.format(fuel.getPriceBuy()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
 	<td class="numeric"><%= fuel != null ? (fuel.getSaleFlag() == 1 | fuel.getSaleFlag() == 3 ?  Formatters.currency.format(fuel.getPriceSell()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
 	
-	<td class="numeric"><%= jeta != null ? (Formatters.currency.format(fbo[c].getFueljeta())): "" %></td>
+	<td class="numeric"><%= jeta != null ? (Formatters.currency.format(fbo.getFueljeta())): "" %></td>
 	<td><%= jeta != null ? (jeta.getAmount() != 0 ? (((int)Math.floor(jeta.getAmount() / 2.68735) < 1000) ? "<span style=\'color: firebrick;\'>" + (int)Math.floor(jeta.getAmount() / 2.68735) + "</span>" : (int)Math.floor(jeta.getAmount() / 2.68735)) : "<span style=\'color: gray;\'><small>NONE</small></span>"): "" %></td>
 	<td class="numeric"><%= jeta != null ? (jeta.getSaleFlag() == 2 | jeta.getSaleFlag() == 3 ?  Formatters.currency.format(jeta.getPriceBuy()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
 	<td class="numeric"><%= jeta != null ? (jeta.getSaleFlag() == 1 | jeta.getSaleFlag() == 3 ?  Formatters.currency.format(jeta.getPriceSell()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
 
 	<td>
-		<a class="link" href="<%= response.encodeURL("editfbo.jsp?id=" + fbo[c].getId()) %>">Edit FBO</a>
-		<a class="link" href="<%= response.encodeURL("buyBulkFuel.jsp?id=" + fbo[c].getId()) %>"><%=data.doesBulkFuelRequestExist(fbo[c].getId()) ? " Order Pending ":" Order Fuel " %></a>
+		<a class="link" href="<%= response.encodeURL("editfbo.jsp?id=" + fbo.getId()) %>">Edit FBO</a>
+		<a class="link" href="<%= response.encodeURL("buyBulkFuel.jsp?id=" + fbo.getId()) %>"><%=data.doesBulkFuelRequestExist(fbo.getId()) ? " Order Pending ":" Order Fuel " %></a>
 	</td>
 	</tr>
 <%

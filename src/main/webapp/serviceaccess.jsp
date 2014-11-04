@@ -1,13 +1,13 @@
-<%@ page language="java"
-    import="java.text.*, net.fseconomy.data.*"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+        import="java.util.List, net.fseconomy.data.*"
 %>
 
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     //setup return page if action used
     String returnPage = java.net.URLDecoder.decode(request.getParameter("returnpage"),"UTF-8").trim();
 
@@ -28,7 +28,7 @@
         //get services
         StringBuilder optionServiceProviders = new StringBuilder();
         optionServiceProviders.append("<option value=\"0\">Make Selection</option>/n");
-        ServiceProviderBean[] services =  Data.getInstance().getAccountAvailableServiceProviders(account.getId());
+        List<ServiceProviderBean> services =  Data.getInstance().getAccountAvailableServiceProviders(account.getId());
         for(ServiceProviderBean spb: services)
         {
             if(spb.getStatus() == ServiceProviderBean.STATUS_ACTIVE)

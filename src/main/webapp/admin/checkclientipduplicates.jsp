@@ -2,14 +2,16 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.text.*, net.fseconomy.data.*, java.util.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<% 
+
+<%
 	Data data = (Data)application.getAttribute("data");
 
 
 	if (!Data.needLevel(user, UserBean.LEV_MODERATOR)) 
 	{
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+		out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
 		return; 
 	}
 
@@ -24,6 +26,7 @@
 		error = e.getMessage();
 	}
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,12 +36,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+
+<jsp:include flush="true" page="/top.jsp" />
+<jsp:include flush="true" page="/menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	<h2>Client IP used by Multiple Users</h2>
@@ -51,7 +56,7 @@
 %>
 
 	<div class="dataTable">	
-		<a href="admin.jsp">Return to Admin page</a><br/>
+		<a href="/admin/index.jsp">Return to Admin page</a><br/>
 		<table id="sortableTableStats" class="sortable">
 			<thead>
 			<tr>
@@ -66,7 +71,7 @@
 			{
 				String[] s = list.get(c).split("\\|");
 %>
-				<tr <%= Data.oddLine(c) %>>
+				<tr>
 					<td>
 						<%= s[0] %>
 					</td>

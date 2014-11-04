@@ -2,12 +2,12 @@
         contentType="text/html; charset=ISO-8859-1"
         import = "java.text.*, net.fseconomy.data.*"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
     int parked = 0;
     int flying = 0;
     try
@@ -32,10 +32,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/AnchorPosition.js"></script>
-    <script src="scripts/PopupWindow.js"></script>
+    <script src="/scripts/AnchorPosition.js"></script>
+    <script src="/scripts/PopupWindow.js"></script>
     <script type="text/javascript">
 
         //Original javascript code by Daniel Insley at bravenet.com - modified by Paul Dahlen.
@@ -140,16 +140,11 @@
 
 </head>
 <body onload="loadtime()">
-<div class="top">
-	<jsp:include flush="true" page="top.jsp" />
-</div>
+
+<jsp:include flush="true" page="top.jsp" />
+<jsp:include flush="true" page="menu.jsp" />
 
 <div id="wrapper">
-
-	<jsp:include flush="true" page="menu.jsp">
-		<jsp:param name="open" value="airport"/>
-	</jsp:include>
-	<br />
 
 	<div class="content">
 	

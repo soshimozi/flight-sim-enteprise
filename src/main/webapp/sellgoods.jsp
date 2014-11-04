@@ -1,11 +1,13 @@
-<%@ page language="java"
-	import="net.fseconomy.data.*, net.fseconomy.util.*"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	//setup return page if action used
 	String returnPage = request.getHeader("referer");
 
@@ -17,7 +19,7 @@
 	data.fillAirport(airport);
 	
 	int type = Integer.parseInt(sType);
-	GoodsBean[] salesPoints = data.getGoodsAtAirportToSell(location, type, airport.getSize(), airport.getFuelPrice(), airport.getJetAPrice());
+	List<GoodsBean> salesPoints = data.getGoodsAtAirportToSell(location, type, airport.getSize(), airport.getFuelPrice(), airport.getJetAPrice());
 	
 	String groupParam = "";
 	if (owner != null)
@@ -40,17 +42,19 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 	
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />	
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 	<div class="dataTable">	
 <%
-	if (salesPoints.length > 0) 
+	if (salesPoints.size() > 0)
 	{ 
 %>
 	<table>
@@ -64,9 +68,9 @@
 		</thead>
 		<tbody>
 <%
-		for (int c=0; c < salesPoints.length; c++)
+		for (GoodsBean good : salesPoints)
 		{ 
-			int max = salesPoints[c].getAmountAccepted();
+			int max = good.getAmountAccepted();
 			String limit;
 			if (max >= 0)
 				limit = max + " Kg";
@@ -74,8 +78,8 @@
 				limit = "unlimited";
 %>
 		<tr>
-			<td><%= salesPoints[c].getOwnerName() %></td>
-			<td><%= Formatters.currency.format(salesPoints[c].getPriceBuy()) %></td>
+			<td><%= good.getOwnerName() %></td>
+			<td><%= Formatters.currency.format(good.getPriceBuy()) %></td>
 			<td><%= limit %></td>
 		</tr>
 <%
@@ -92,10 +96,10 @@
 			Sell to: 
 			<select name="owner" class="formselect">
 <%
-		for (int c=0; c< salesPoints.length; c++) 
+		for (GoodsBean good : salesPoints)
 		{ 
 %>
-				<option class="formselect" value="<%= salesPoints[c].getOwner() %>"><%= salesPoints[c].getOwnerName() %></option>
+				<option class="formselect" value="<%= good.getOwner() %>"><%= good.getOwnerName() %></option>
 <%
 		} 
 %>			</select>

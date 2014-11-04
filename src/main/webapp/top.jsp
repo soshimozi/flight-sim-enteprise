@@ -1,13 +1,14 @@
-<%@ page language="java"
-	import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
     boolean isTestServer = request.getRequestURL().toString().contains("8080");
 %>
-
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <div class="header">
     <div style="background-color: lightcoral; color: #ffffff; display: <%=isTestServer ? "block" : "none"%>">
@@ -21,7 +22,7 @@
 	<script type="text/javascript">
 		function submit()
 		{
-			document.loginform.action="<%= response.encodeURL("requestnewpassword.jsp") %>";
+			document.loginform.action="<%= response.encodeURL("/requestnewpassword.jsp") %>";
 			document.loginform.submit();
 		}
 	</script>
@@ -44,7 +45,7 @@
 		</div> 
 		<div style="float:right;">
 			<input type="submit" name="event" width="30" height="25" style="margin-top:7px;" value="Agree & Log in" /><br>
-			<input type="button" onClick="location.href='requestnewpassword.jsp';" style="margin-top:8px;" width="30" class="button" value="Forgot Password" />
+			<input type="button" onClick="location.href='/requestnewpassword.jsp';" style="margin-top:8px;" width="30" class="button" value="Forgot Password" />
 		</div>
 	</form>
 <%
@@ -93,7 +94,7 @@
 %>
 </div>
 <div id="banner">
-	<img src="img/spacer.gif" border="0" />
+	<img src="/img/spacer.gif" border="0" />
 </div>
 </div>
 

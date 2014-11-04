@@ -1,20 +1,23 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*" %>
-<%
-    Data data = (Data)application.getAttribute("data");
+        import="java.util.List, net.fseconomy.data.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
-    UserBean Accounts[] = data.getAllExposedGroups();
+    Data data = (Data)application.getAttribute("data");
+%>
+
+<%
+    List<UserBean> accounts = data.getAllExposedGroups();
 %>
 	<select name="transferTo" id="transferTo" class="formselect">
 		<option class="formselect" value=""></option>                                
-<%	for ( int c = 0; c < Accounts.length; c++ ) 
+<%	for (UserBean account : accounts)
     { 
 %>
-        <option class="formselect" value="<%=Accounts[c].getId()%>"><%= Accounts[c].getName()%></option>
+        <option class="formselect" value="<%=account.getId()%>"><%= account.getName()%></option>
 <%
     }
 %>

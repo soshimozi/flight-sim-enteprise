@@ -1,8 +1,10 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
 
@@ -18,10 +20,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/AnchorPosition.js"></script>
-    <script src="scripts/PopupWindow.js"></script>
+    <script src="/scripts/AnchorPosition.js"></script>
+    <script src="/scripts/PopupWindow.js"></script>
     <script type='text/javascript' src='scripts/common.js'></script>
     <script type='text/javascript' src='scripts/css.js'></script>
     <script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>
@@ -41,16 +43,18 @@
         }
 
     </script>
-</head>
 
+</head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp"></jsp:include>
+
 <div id="wrapper">
 <div class="content">
 <div class="dataTable">	
 <%
-	FboBean[] fbo = data.getFboForSale();
+	List<FboBean> fbos = data.getFboForSale();
 	Data.groupMemberData[] staffGroups = user.getStaffGroups();
 %>
 	<form method="post" action="userctl" name="fboForm">
@@ -75,26 +79,24 @@
 	</thead>
 	<tbody>
 <%
-	for (int c=0; c < fbo.length ; c++)
+	for (FboBean fbo : fbos)
 	{
-		int fboid = fbo[c].getId();
-		String price = Formatters.currency.format(fbo[c].getPrice());
-		int owner=fbo[c].getOwner();
+		int fboid = fbo.getId();
+		String price = Formatters.currency.format(fbo.getPrice());
+		int owner=fbo.getOwner();
 		UserBean fboowner = data.getAccountById(owner);
-		String icao = fbo[c].getLocation();
+		String icao = fbo.getLocation();
 		AirportBean airport = data.getAirport(icao);
-		FboFacilityBean [] facility = data.getFboDefaultFacilitiesForAirport(icao);
 		int groupOwnerid = data.accountUltimateGroupOwner(owner);
 		UserBean ultimateOwner = data.getAccountById(groupOwnerid);
-		int totalSpace = fbo[c].getFboSize() * airport.getFboSlots();
+		int totalSpace = fbo.getFboSize() * airport.getFboSlots();
 		int rented = data.getFboFacilityBlocksInUse(fboid);
- 	    String fboservices = "<br>Lots=" + fbo[c].getFboSize() + ",Repair Shop=" + ((fbo[c].getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No") + "<br>" + ((fbo[c].getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? totalSpace + " gates (" + rented + " rented)" : "No Passenger Terminal");
-		String fboname = fbo[c].getName() + "<br><span class=\"small\"><i>" + fboowner.getName() + (fboowner.isGroup() ? "(" + ultimateOwner.getName() + ")" : "") + fboservices + "</i></span>";
+ 	    String fboservices = "<br>Lots=" + fbo.getFboSize() + ",Repair Shop=" + ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No") + "<br>" + ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? totalSpace + " gates (" + rented + " rented)" : "No Passenger Terminal");
+		String fboname = fbo.getName() + "<br><span class=\"small\"><i>" + fboowner.getName() + (fboowner.isGroup() ? "(" + ultimateOwner.getName() + ")" : "") + fboservices + "</i></span>";
 		String location = airport.getCity() + "<br />" + airport.getCountry();
-		String icaopopup = "<a HREF=\"#\" onClick=\"gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=" + icao + "');gmap.showPopup('gmap');return false;\" NAME=\"gmap\" ID=\"gmap\"><img src=\"" + airport.getDescriptiveImage(fbo)  + "\" align=\"absmiddle\" border=\"0\"/></a>";
 		String goodsincluded = "";
 
-		if (fbo[c].getPriceIncludesGoods())
+		if (fbo.getPriceIncludesGoods())
         {
 			GoodsBean fuel = data.getGoods(icao, owner, GoodsBean.GOODS_FUEL100LL);
 			GoodsBean jeta = data.getGoods(icao, owner, GoodsBean.GOODS_FUELJETA);
@@ -127,18 +129,18 @@
 			}
 		}
 %>
-	<tr <%= Data.oddLine(c) %>>
+	<tr>
 	<td><%= fboname %></td>
 	<td><%= data.airportLink(airport, airport, response) %></td>
 	<td><%= data.sortHelper(airport.getCountry() + ", " + airport.getState() + ", " + airport.getCity()) %><%= location %></td>
 	<td><%= goodsincluded %></td>
 	<td style="text-align: right;"><%= price %></td>
-	<td><a class="link" href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo[c].getName()) %>', '<%= fboid %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
+	<td><a class="link" href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fboid %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
         for (int loop=0; loop < staffGroups.length; loop++)
         {
 %>
-		| <a class="link" href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo[c].getName()) %>', '<%= fboid %>', '<%= price %>', <%= staffGroups[loop].groupId %>)">Buy for <%= staffGroups[loop].groupName %></a>
+		| <a class="link" href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fboid %>', '<%= price %>', <%= staffGroups[loop].groupId %>)">Buy for <%= staffGroups[loop].groupName %></a>
 <%
         }
 %>

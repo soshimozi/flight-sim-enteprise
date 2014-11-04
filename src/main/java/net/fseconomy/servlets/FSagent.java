@@ -81,9 +81,9 @@ public class FSagent extends HttpServlet
 		    if (ipAddress == null) 
 		    	ipAddress = req.getRemoteAddr();
 		    
-		    AircraftBean[] aircraft = data.getAircraftForUser(userBean.getId());
-		    if(aircraft.length > 0)
-		    	reg = aircraft[0].getRegistration();
+		    AircraftBean aircraft = data.getAircraftForUser(userBean.getId());
+		    if(aircraft == null)
+		    	reg = aircraft.getRegistration();
 		    else
 		    	reg="-";
 		    
@@ -178,27 +178,27 @@ public class FSagent extends HttpServlet
 		{
 			return "";
 		}
-		AircraftBean[] aircraft = data.getAircraftForUser(user.getId());
+		AircraftBean aircraft = data.getAircraftForUser(user.getId());
 		
-		if (aircraft.length == 0 || !closest.icao.equals(aircraft[0].getLocation()))
+		if (aircraft == null || !closest.icao.equals(aircraft.getLocation()))
 			throw new DataError("You have no active aircraft at " + closest.icao);
 		
-		if (!data.aircraftOk(aircraft[0], FSAircraft))
-			throw new DataError(FSAircraft+" is not compatible with your active "+aircraft[0].getMakeModel());
+		if (!data.aircraftOk(aircraft, FSAircraft))
+			throw new DataError(FSAircraft+" is not compatible with your active "+aircraft.getMakeModel());
 		
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit
-		if(data.checkAllInAircraftWithOutAssigment(aircraft[0]))
+		if(data.checkAllInAircraftWithOutAssigment(aircraft))
 		{
-			throw new DataError(aircraft[0].getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
+			throw new DataError(aircraft.getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
 		}		
 
 		if (data.getNumberOfHours(user.getName(), 48) > 30)
 			throw new DataError("Maximum pilot hours in a 48 hour period reached");
 		
-		Object[] info = data.departAircraft(aircraft[0], user.getId(), closest.icao);
+		Object[] info = data.departAircraft(aircraft, user.getId(), closest.icao);
 		int payloadWeight = (Integer) info[0];
 		int totalWeight = (Integer) info[1];
-		AssignmentBean[] assignments = (AssignmentBean[]) info[2];
+		List<AssignmentBean> assignments = (List<AssignmentBean>)info[2];
 		
 		StringBuilder buffer = new StringBuilder();
         for (AssignmentBean assignment : assignments)
@@ -218,23 +218,23 @@ public class FSagent extends HttpServlet
         }
 		
 		long maxrenttime;
-		int ultimateOwner = data.accountUltimateGroupOwner(aircraft[0].getOwner());
+		int ultimateOwner = data.accountUltimateGroupOwner(aircraft.getOwner());
 		if(user.getId() == ultimateOwner)
-			maxrenttime = ((aircraft[0].getLockedSince().getTime()/1000) + (1000*60*60));  // unlimited for owner
+			maxrenttime = ((aircraft.getLockedSince().getTime()/1000) + (1000*60*60));  // unlimited for owner
 		else
-			maxrenttime = ((aircraft[0].getLockedSince().getTime()/1000) + aircraft[0].getMaxRentTime());
+			maxrenttime = ((aircraft.getLockedSince().getTime()/1000) + aircraft.getMaxRentTime());
 		
 		StringBuilder sb = new StringBuilder();
 		//Pairs
-		sb.append("reg="); sb.append(aircraft[0].getRegistration());
+		sb.append("reg="); sb.append(aircraft.getRegistration());
 		sb.append("\nexpiry="); sb.append(maxrenttime);
-		sb.append("\naccount="); sb.append(aircraft[0].getAccounting());
-		sb.append("\nequip="); sb.append(aircraft[0].getEquipment());
+		sb.append("\naccount="); sb.append(aircraft.getAccounting());
+		sb.append("\nequip="); sb.append(aircraft.getEquipment());
 		sb.append("\npayload="); sb.append(payloadWeight);
 		sb.append("\nweight="); sb.append(totalWeight);
 
 		//append fuel
-		float[] fuel = aircraft[0].getFuel();
+		float[] fuel = aircraft.getFuel();
 		sb.append("\nfuel="); 
 		for(int i=0;i<=10;i++)
 		{

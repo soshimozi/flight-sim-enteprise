@@ -1,14 +1,16 @@
-<%@ page language="java"
-	errorPage="errorpage.jsp"
-	import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    errorPage="errorpage.jsp"
+	    import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 <jsp:useBean id="fbo" class="net.fseconomy.data.FboBean" scope="session" />
 <jsp:useBean id="dataError" class="net.fseconomy.data.DataError" scope="session" />
 
-<%	
+<%
+    Data data = (Data)application.getAttribute("data");
+
 	String returnPage = request.getParameter("returnpage");
 
 	String icao = request.getParameter("icao");
@@ -34,6 +36,7 @@
 	if (Integer.parseInt(amountJetA) > 0)
 		price += data.quoteFuel(fboAccount.getLocation(), GoodsBean.GOODS_FUELJETA, Integer.parseInt(amountJetA));
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +46,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 	
 	<script>
 		function checkDecline(form) {

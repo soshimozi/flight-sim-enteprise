@@ -1,8 +1,8 @@
-<%@ page
-        language="java"
+<%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
-        %>
+%>
+
 <%
     Data data = (Data)application.getAttribute("data");
 %>
@@ -16,10 +16,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
+
 <div class="content">
 <%
 	

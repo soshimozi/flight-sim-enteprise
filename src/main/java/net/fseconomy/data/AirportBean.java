@@ -2,6 +2,7 @@ package net.fseconomy.data;
 
 import java.io.Serializable;
 import java.sql.*;
+import java.util.List;
 
 public class AirportBean implements Serializable
 {
@@ -249,11 +250,11 @@ public class AirportBean implements Serializable
         return "Large " + add + "airport";
 	}
 	
-	public String getDescriptiveImage(FboBean[] fbos)
+	public String getDescriptiveImage(List<FboBean> fbos)
 	{
 		String base;
 		String ext="";
-		boolean hasFbo = fbos.length > 0;
+		boolean hasFbo = fbos.size() > 0;
 		boolean hasFuel = isAvgas();
 
 		switch (type)

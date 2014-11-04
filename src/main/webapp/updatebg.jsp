@@ -1,11 +1,13 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.*, net.fseconomy.data.*, org.apache.commons.fileupload.*"%>
+        import="java.util.*, net.fseconomy.data.*, org.apache.commons.fileupload.*"
+%>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
 	String message = null;
 	String content = "";
 	String style = "";
@@ -88,6 +90,7 @@
 		}
 	}
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,9 +100,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+
 </head>
 <body>
+
 <div id="wrapper">
 <span style="visibility: hidden"><%= user.getMemberships() == null ? "UserId: " + user.getId() : user.getMemberships().size() %></span>
 <div class="content">

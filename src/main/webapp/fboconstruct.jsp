@@ -1,11 +1,12 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, nl.captcha.Captcha"%>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
+
     String error = null;
     String sOwner = request.getParameter("owner");
     String location = request.getParameter("location");
@@ -63,6 +64,7 @@
             .build(); // Required.
     session.setAttribute(Captcha.NAME, captcha);
 %>
+
 <!DOCTYPE html>
 <html lang="">
 <head>
@@ -72,12 +74,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <% 	if (error != null) 

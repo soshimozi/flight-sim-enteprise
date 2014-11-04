@@ -1,35 +1,36 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.*"
+        import="net.fseconomy.data.*, java.util.List, net.fseconomy.util.Formatters"
 %>
-<%@ page import="net.fseconomy.util.Formatters" %>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
-%>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<%
-    Data.aircraftConfigs[] aircraft = data.getAircraftConfigs();
-    NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
+
+    List<Data.aircraftConfigs> aircraftList = data.getAircraftConfigs();
 
     String sview = request.getParameter("view");
     int view = 0;
     if (sview != null)
         view = Integer.parseInt(sview);
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <title>FSEconomy terminal</title>
 
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
-    <link href="theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
 
     <script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-    <script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
+    <script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
     <script type='text/javascript' src='scripts/parser-checkbox.js'></script>
     <script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 
@@ -49,8 +50,10 @@
 
 </head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 <div class="content">
 <h3>Notes:</h3>
@@ -82,33 +85,33 @@
 	</thead>
 	<tbody>
 <%
-        for (int c=0; c < aircraft.length; c++)
+        for (Data.aircraftConfigs aircraft : aircraftList)
         {
-        String price = Formatters.currency.format(aircraft[c].price);
-        int totalFuel = aircraft[c].fcapExt1 + aircraft[c].fcapLeftTip + aircraft[c].fcapLeftAux + aircraft[c].fcapLeftMain +
-                aircraft[c].fcapCenter + aircraft[c].fcapCenter2 + aircraft[c].fcapCenter3 +
-                aircraft[c].fcapRightMain + aircraft[c].fcapRightAux + aircraft[c].fcapRightTip + aircraft[c].fcapExt2;
+        String price = Formatters.currency.format(aircraft.price);
+        int totalFuel = aircraft.fcapExt1 + aircraft.fcapLeftTip + aircraft.fcapLeftAux + aircraft.fcapLeftMain +
+                aircraft.fcapCenter + aircraft.fcapCenter2 + aircraft.fcapCenter3 +
+                aircraft.fcapRightMain + aircraft.fcapRightAux + aircraft.fcapRightTip + aircraft.fcapExt2;
 
-        double fType = aircraft[c].fueltype;
+        double fType = aircraft.fueltype;
         String fuelType = "100LL";
         if (fType > 0)
         {
             fuelType = "JetA";
         }
 %>
-	<tr <%= Data.oddLine(c) %>>
+	<tr>
 <%
-        if (!aircraft[c].canShip) //add * to denote that model can be shipped to listing
-		    aircraft[c].makemodel += "*";
+        if (!aircraft.canShip) //add * to denote that model can be shipped to listing
+		    aircraft.makemodel += "*";
 %>
-	<td><%= aircraft[c].makemodel %></td>
-	<td><%= aircraft[c].crew %></td>
-	<td><%= aircraft[c].seats %></td>
-	<td><%= aircraft[c].cruisespeed %></td>
+	<td><%= aircraft.makemodel %></td>
+	<td><%= aircraft.crew %></td>
+	<td><%= aircraft.seats %></td>
+	<td><%= aircraft.cruisespeed %></td>
 	<td><%= totalFuel %></td>
 	<td><%= fuelType %></td>
-	<td><%= aircraft[c].gph %></td>
-	<td><%= aircraft[c].maxWeight - aircraft[c].emptyWeight %></td>
+	<td><%= aircraft.gph %></td>
+	<td><%= aircraft.maxWeight - aircraft.emptyWeight %></td>
 	<td><%= price %></td>
 	</tr>
 <%
@@ -149,40 +152,40 @@
 	</thead>
 	<tbody>
 <%
-        for (int c=0; c < aircraft.length; c++)
+        for (Data.aircraftConfigs aircraft : aircraftList)
         {
-        String price = Formatters.currency.format(aircraft[c].price);
-        double fType = aircraft[c].fueltype;
-        String fuelType = "100LL";
+            String price = Formatters.currency.format(aircraft.price);
+            double fType = aircraft.fueltype;
+            String fuelType = "100LL";
             if (fType > 0)
             {
                 fuelType = "JetA";
             }
 %>
-	<tr <%= Data.oddLine(c) %>>
+	<tr>
 <%
-            if (!aircraft[c].canShip) //add * to denote that model can be shipped to listing
-                aircraft[c].makemodel += "*";
+            if (!aircraft.canShip) //add * to denote that model can be shipped to listing
+                aircraft.makemodel += "*";
 %>
-	<td><%= aircraft[c].makemodel %></td>
-	<td><%= aircraft[c].crew %></td>
-	<td><%= aircraft[c].seats %></td>
-	<td><%= aircraft[c].cruisespeed %></td>
-	<td><%= aircraft[c].fcapExt1 %></td>
-	<td><%= aircraft[c].fcapLeftTip %></td>
-	<td><%= aircraft[c].fcapLeftAux %></td>
-	<td><%= aircraft[c].fcapLeftMain %></td>
-	<td><%= aircraft[c].fcapCenter %></td>
-	<td><%= aircraft[c].fcapCenter2 %></td>
-	<td><%= aircraft[c].fcapCenter3 %></td>
-	<td><%= aircraft[c].fcapRightMain %></td>
-	<td><%= aircraft[c].fcapRightAux %></td>
-	<td><%= aircraft[c].fcapRightTip %></td>
-	<td><%= aircraft[c].fcapExt2 %></td>
-	<td><%= aircraft[c].gph %></td>
+	<td><%= aircraft.makemodel %></td>
+	<td><%= aircraft.crew %></td>
+	<td><%= aircraft.seats %></td>
+	<td><%= aircraft.cruisespeed %></td>
+	<td><%= aircraft.fcapExt1 %></td>
+	<td><%= aircraft.fcapLeftTip %></td>
+	<td><%= aircraft.fcapLeftAux %></td>
+	<td><%= aircraft.fcapLeftMain %></td>
+	<td><%= aircraft.fcapCenter %></td>
+	<td><%= aircraft.fcapCenter2 %></td>
+	<td><%= aircraft.fcapCenter3 %></td>
+	<td><%= aircraft.fcapRightMain %></td>
+	<td><%= aircraft.fcapRightAux %></td>
+	<td><%= aircraft.fcapRightTip %></td>
+	<td><%= aircraft.fcapExt2 %></td>
+	<td><%= aircraft.gph %></td>
 	<td><%= fuelType %></td>
-	<td><%= aircraft[c].maxWeight %></td>
-	<td><%= aircraft[c].emptyWeight %></td>
+	<td><%= aircraft.maxWeight %></td>
+	<td><%= aircraft.emptyWeight %></td>
 	<td><%= price %></td>
 	</tr>
 <%

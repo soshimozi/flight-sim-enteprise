@@ -1,28 +1,29 @@
-<%@ page language="java"
-	import="java.text.*, java.util.Calendar, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.List, java.util.Calendar, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<%Data data = (Data)application.getAttribute("data");%>
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
-	
+    Data data = (Data)application.getAttribute("data");
+
 	//setup return page if action used
 	String returnPage = request.getRequestURI();
     response.addHeader("referer", request.getRequestURI());
 
 	String error = (String) request.getAttribute("message");
 
-	UserBean[] groups = null;
+	List<UserBean> groups = null;
 	
 	if(error == null)
 		groups = data.getGroupsForUser(user.getId());
 
 	Calendar cal = Calendar.getInstance();
 	int month = cal.get(Calendar.MONTH)+1;
-	int year = cal.get(Calendar.YEAR);	
-	
+	int year = cal.get(Calendar.YEAR);
 %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -32,7 +33,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 	<script type="text/javaScript">	
 		function doSubmit(sel)	
@@ -43,12 +44,10 @@
 	</script>
 	
 </head>
-
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp">
-	<jsp:param name="open" value="groups"/>
-</jsp:include>
+<jsp:include flush="true" page="menu.jsp" />
 
 <div id="wrapper">
 <%
@@ -123,13 +122,13 @@
 <%
 	//Add group accounts
 	
-	for (int c=0; c < groups.length; c++)
+	for (UserBean group : groups)
 	{
-		int id = groups[c].getId();
-		String name = groups[c].getName();
-		String url = groups[c].getUrl();
-		double grpmoney = groups[c].getMoney();
-		double grpbank = groups[c].getBank();
+		int id = group.getId();
+		String name = group.getName();
+		String url = group.getUrl();
+		double grpmoney = group.getMoney();
+		double grpbank = group.getBank();
 		
 		if (url != null)
 			url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
@@ -206,14 +205,14 @@
 	                                <option class="formselect" value=""></option>
 	                                <option class="formselect" value="<%=user.getId()%>"><%= user.getName()%></option>
 <% 		
-		for ( int c = 0; c < groups.length; c++ ) 
+		for (UserBean group : groups)
 		{ 
 %>
 <% 			
-			if (user.groupMemberLevel(groups[c].getId()) >= UserBean.GROUP_STAFF) 
+			if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
 			{ 
 %>
-                                	<option class="formselect" value="<%=groups[c].getId()%>"><%= groups[c].getName()%></option>
+                                	<option class="formselect" value="<%=group.getId()%>"><%= group.getName()%></option>
 <% 			
 			}
 %>
@@ -230,10 +229,10 @@
 	                                <option class="formselect" value=""></option>
 	                                <option class="formselect" value="<%=user.getId()%>"><%= user.getName()%></option>
 <% 		
-		for ( int c = 0; c < groups.length; c++ ) 
+		for (UserBean group : groups)
 		{ 
 %>
-	     							<option class="formselect" value="<%=groups[c].getId()%>"><%= groups[c].getName()%></option>
+	     							<option class="formselect" value="<%=group.getId()%>"><%= group.getName()%></option>
 <% 		
 		} 
 %>  

@@ -1,24 +1,23 @@
-<%@ page language="java" 
-	import="net.fseconomy.data.*, net.fseconomy.util.*"
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%
-    Data data = (Data)application.getAttribute("data");
-%>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	String registration = request.getParameter("registration");
 
 	//setup return page if action used
 	String returnPage = "maintenance.jsp?registration=" + registration;
 
- 	AircraftBean[] aircraftData = data.getAircraftByRegistration(registration);
- 	AircraftBean aircraft = aircraftData[0];
- 	LogBean[] logs = data.getLogForMaintenanceAircraft(aircraft.getRegistration());
-    ModelBean[] models = data.getModelById(aircraft.getModelId());
+ 	AircraftBean aircraft = data.getAircraftByRegistration(registration);
+ 	List<LogBean> logs = data.getLogForMaintenanceAircraft(aircraft.getRegistration());
   
-    int tetminutes = (aircraftData[0].getTotalEngineTime()) / 60;
- 	int lcminutes = (aircraftData[0].getTotalEngineTime() - aircraftData[0].getLastCheck()) / 60;
+    int tetminutes = (aircraft.getTotalEngineTime()) / 60;
+ 	int lcminutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck()) / 60;
     int afminutes = (aircraft.getAirframe()) / 60;
     int minutes = 0;
     
@@ -26,12 +25,11 @@
  	String lastCheck = (Formatters.twoDigits.format(lcminutes / 60) + ":" + Formatters.twoDigits.format(lcminutes % 60));
     String airFrameTime = (Formatters.twoDigits.format(afminutes / 60) + ":" + Formatters.twoDigits.format(afminutes % 60));
     
-	FboBean[] fbos = null;
+	List<FboBean> fbos = null;
 	if(aircraft.getLocation() != null && !aircraft.getLocation().equals(""))
 		fbos = data.getFboForRepair(data.getAirport(aircraft.getLocation()));
-	
-
  %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,7 +39,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 	
 	<script type="text/javascript">
 		function doSubmit(id, price, fbo)
@@ -66,13 +64,13 @@
 			}
 		}
 	</script>
-</head>
 
+</head>
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp">
-	<jsp:param name="open" value="aircraft" />
-</jsp:include> 
+<jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
 	<div class="content">
 		<div class="dataTable">
@@ -125,7 +123,7 @@
 					</tr>
 					<tr>
 					  	<td>TBO</td>
-					  	<td><%=models[0].getFueltype()==0 ? AircraftBean.TBO_RECIP/3600 : AircraftBean.TBO_JET/3600%></td>
+					  	<td><%=aircraft.getFuelType()==0 ? AircraftBean.TBO_RECIP/3600 : AircraftBean.TBO_JET/3600%></td>
 					</tr>
 					<tr>
 					  	<td>Airframe Hours</td>
@@ -168,16 +166,16 @@
 <%
 		if ((equipment & ModelBean.EQUIPMENT_IFR_MASK) == 0) 
 		{
-			for (int c = 0; c < fbos.length; c++) 
+			for (FboBean fbo : fbos) 
 			{
-				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_IFR_MASK, fbos[c]));
+				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_IFR_MASK, fbo));
 %>
 					    <tr>
 					      	<td>IFR package</td>
-					      	<td><%=fbos[c].getName()%></td>
+					      	<td><%=fbo.getName()%></td>
 					      	<td><%=price%></td>
 					      	<td>
-					      		<input type="button" class="button" onclick="doSubmit2(<%=ModelBean.EQUIPMENT_IFR_MASK%>, '<%=price%>', <%=fbos[c].getId()%>) "	value="Install" />
+					      		<input type="button" class="button" onclick="doSubmit2(<%=ModelBean.EQUIPMENT_IFR_MASK%>, '<%=price%>', <%=fbo.getId()%>) "	value="Install" />
 					       	</td>
 					    </tr>
 <%
@@ -186,16 +184,16 @@
 	
 		if ((equipment & ModelBean.EQUIPMENT_AP_MASK) == 0) 
 		{
-			for (int c = 0; c < fbos.length; c++) 
+			for (FboBean fbo : fbos) 
 			{
-				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_AP_MASK, fbos[c]));
+				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_AP_MASK, fbo));
 %>
 					    <tr>
 					      	<td>Autopilot</td>
-					      	<td><%=fbos[c].getName()%></td>
+					      	<td><%=fbo.getName()%></td>
 					      	<td><%=price%></td>
 					      	<td>
-					      		<input type="button" class="button"	onclick="doSubmit2(<%=ModelBean.EQUIPMENT_AP_MASK%>, '<%=price%>', <%=fbos[c].getId()%>) " value="Install" />
+					      		<input type="button" class="button"	onclick="doSubmit2(<%=ModelBean.EQUIPMENT_AP_MASK%>, '<%=price%>', <%=fbo.getId()%>) " value="Install" />
 					        </td>
 					    </tr>
 <%
@@ -204,16 +202,16 @@
 
 		if ((equipment & ModelBean.EQUIPMENT_GPS_MASK) == 0) 
 		{
-			for (int c = 0; c < fbos.length; c++) 
+			for (FboBean fbo : fbos) 
 			{
-				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_GPS_MASK, fbos[c]));
+				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_GPS_MASK, fbo));
 %>
 					    <tr>
 					      	<td>GPS</td>
-					      	<td><%=fbos[c].getName()%></td>
+					      	<td><%=fbo.getName()%></td>
 					      	<td><%=price%></td>
 					      	<td>
-					      		<input type="button" class="button"	onclick="doSubmit2(<%=ModelBean.EQUIPMENT_GPS_MASK%>, '<%=price%>', <%=fbos[c].getId()%>) "	value="Install" />
+					      		<input type="button" class="button"	onclick="doSubmit2(<%=ModelBean.EQUIPMENT_GPS_MASK%>, '<%=price%>', <%=fbo.getId()%>) "	value="Install" />
 					        </td>
 					    </tr>
 <%
@@ -238,7 +236,7 @@
 			Check that the aircraft is not in flight. 
 <%	
 	}
-	else if(fbos.length > 0) 
+	else if(fbos.size() > 0) 
 	{
 %>
 			<form method="post" action="userctl" id="maintenanceForm">
@@ -271,10 +269,10 @@
 	          addedPrice += conditionPrice[i];
 	    }
 	
-		for (int c = 0; c < fbos.length; c++) 
+		for (FboBean fbo : fbos) 
 	    {
-	            int price100hr = aircraft.getMaintenancePrice(AircraftMaintenanceBean.MAINT_100HOUR,  fbos[c]);
-	            int totalAddedPrice = (addedPrice + Math.round((addedPrice * (1+ fbos[c].getRepairShopMargin())/100)));
+	            int price100hr = aircraft.getMaintenancePrice(AircraftMaintenanceBean.MAINT_100HOUR,  fbo);
+	            int totalAddedPrice = (addedPrice + Math.round((addedPrice * (1+ fbo.getRepairShopMargin())/100)));
 	            int estPrice = price100hr + totalAddedPrice;
 	            String sPrice100hr = Formatters.currency.format(price100hr);                
 	            String sAddedPrice = Formatters.currency.format(totalAddedPrice);
@@ -286,43 +284,43 @@
 				  
 			    <tr>
 				     <td>100 Hour check</td>
-				     <td><%=fbos[c].getName()%></td>
+				     <td><%=fbo.getName()%></td>
 				     <td><%=sEstPrice%></td>
-				     <td><input type="button" class="button" onclick="doSubmit(<%=AircraftMaintenanceBean.MAINT_100HOUR%>, '<%="Estimated Cost of" + sEstPrice%>', <%=fbos[c].getId()%>) " value="Perform" /></td>
+				     <td><input type="button" class="button" onclick="doSubmit(<%=AircraftMaintenanceBean.MAINT_100HOUR%>, '<%="Estimated Cost of" + sEstPrice%>', <%=fbo.getId()%>) " value="Perform" /></td>
 			    </tr>
 				
 <%
 		 	}
 		}
 		
-		for (int c = 0; c < fbos.length; c++) 
+		for (FboBean fbo : fbos) 
 		{
-		  	String priceER = Formatters.currency.format(aircraft.getMaintenancePrice(AircraftMaintenanceBean.MAINT_REPLACEENGINE,fbos[c]));
+		  	String priceER = Formatters.currency.format(aircraft.getMaintenancePrice(AircraftMaintenanceBean.MAINT_REPLACEENGINE,fbo));
 		  	if (!repair)
 		  	{
 %>
 				<tr>
 					<td>Engine Replacement</td>
-				    <td><%=fbos[c].getName()%></td>
+				    <td><%=fbo.getName()%></td>
 				    <td><%=priceER%></td>
-				    <td><input type="button" class="button" onclick="doSubmit(<%=AircraftMaintenanceBean.MAINT_REPLACEENGINE%>, '<%=priceER%>', <%=fbos[c].getId()%>) " value="Perform" /></td>
+				    <td><input type="button" class="button" onclick="doSubmit(<%=AircraftMaintenanceBean.MAINT_REPLACEENGINE%>, '<%=priceER%>', <%=fbo.getId()%>) " value="Perform" /></td>
 				</tr>
 <%
 			}
   		}
 
-		for (int c = 0; c < fbos.length; c++) 
+		for (FboBean fbo : fbos)
 		{
-		  	String priceER = Formatters.currency.format(aircraft.getMaintenancePrice(AircraftMaintenanceBean.MAINT_FIXAIRCRAFT,fbos[c]));
+		  	String priceER = Formatters.currency.format(aircraft.getMaintenancePrice(AircraftMaintenanceBean.MAINT_FIXAIRCRAFT,fbo));
 		    if (repair) 
 		    {
 %>
 
 			    <tr>
 			      	<td>Aircraft Repair</td>
-			      	<td><%=fbos[c].getName()%></td>
+			      	<td><%=fbo.getName()%></td>
 			      	<td><%="under $5000"%></td>
-			      	<td><input type="button" class="button" onclick="doSubmit(<%=AircraftMaintenanceBean.MAINT_FIXAIRCRAFT%>, 'under $5000', <%=fbos[c].getId()%>) " value="Perform" /></td>
+			      	<td><input type="button" class="button" onclick="doSubmit(<%=AircraftMaintenanceBean.MAINT_FIXAIRCRAFT%>, 'under $5000', <%=fbo.getId()%>) " value="Perform" /></td>
 			    </tr>
 <%
 			}
@@ -348,7 +346,7 @@
 		
 		<div class="dataTable">
 <%
-	if (logs.length > 0) 
+	if (logs.size() > 0)
 	{
 %>
 		<table>
@@ -368,9 +366,8 @@
 		int totalFlightTime = 0;
 		double totalMoney = 0;
 		
-		for (int c = 0; c < logs.length; c++) 
+		for (LogBean log : logs)
 		{
-			LogBean log = logs[c];
 			minutes = log.getTotalEngineTime() / 60;
 			String engineTime = minutes == 0 ? "" : (Formatters.twoDigits.format(minutes / 60) + ":" + Formatters.twoDigits.format(minutes % 60));
 %>

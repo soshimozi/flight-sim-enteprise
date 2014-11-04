@@ -1,11 +1,13 @@
-<%@ page
-        language="java"
+<%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, java.util.*, net.fseconomy.data.*"%>
+        import="java.util.*, net.fseconomy.data.*"
+%>
+
+<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%
     Data data = (Data)application.getAttribute("data");
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <!DOCTYPE html>
 <html xmlns="https://www.w3.org/1999/xhtml">
@@ -17,11 +19,11 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
     <% // http://ivaynberg.github.io/select2/ %>
-    <link href="theme/select2.css" rel="stylesheet"/>
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/select2.css" rel="stylesheet"/>
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="scripts/select2.js"></script>
+    <script src="/scripts/select2.js"></script>
 
     <script>
 
@@ -41,10 +43,11 @@
     </script>
 
 </head>
-
 <body>
+
 <jsp:include flush="true" page="top.jsp" />
 <jsp:include flush="true" page="menu.jsp" />
+
 <div id="wrapper">
     <div class="content">
         <div style="font-size: 14pt; font-weight: bold;">
@@ -53,16 +56,16 @@
         <a href="aircraftconfigs.jsp">Open Table View</a>
         <select id="modelSelect"  style="width:300px; margin-top:40;" size="20" class="select2">
 <%
-    Data.MakeModel[] aircraft = data.getMakeModels();
-    for(int i=0; i<aircraft.length; i++)
+    List<Data.MakeModel> makeModels = data.getMakeModels();
+    for(Data.MakeModel makeModel : makeModels)
     {
 %>
-            <optgroup label="<%=aircraft[i].MakeName%>">
+            <optgroup label="<%=makeModel.MakeName%>">
 <%
-        for(int j=0;j<aircraft[i].Models.length; j++)
+        for(int j=0;j<makeModel.Models.length; j++)
         {
 %>
-                <option value="<%=aircraft[i].Models[j].Id%>"><%=aircraft[i].Models[j].ModelName %></option>
+                <option value="<%=makeModel.Models[j].Id%>"><%=makeModel.Models[j].ModelName %></option>
 <%
         }
 %>

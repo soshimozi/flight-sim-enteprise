@@ -1,13 +1,13 @@
-<%@ page language="java"
-	import="java.text.*, net.fseconomy.data.*"
-%>
-<%
-    Data data = (Data)application.getAttribute("data");
+<%@page language="java"
+        contentType="text/html; charset=ISO-8859-1"
+    	import="java.util.List, java.text.*, net.fseconomy.data.*"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
 
 <%
+    Data data = (Data)application.getAttribute("data");
+
 	UserBean account = null;
 	String sId = request.getParameter("id");
 
@@ -30,8 +30,9 @@
 	if (account == null)
 		account = user;	
 	
-	FboFacilityBean[] facilities = data.getFboFacilitiesByOccupant(account.getId());
+	List<FboFacilityBean> facilities = data.getFboFacilitiesByOccupant(account.getId());
 %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,16 +41,16 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>    
 	
-	<link rel="stylesheet" type="text/css" href="theme/Master.css" />
-	<link rel="stylesheet" type="text/css" href="theme/tablesorter-style.css" />
+	<link rel="stylesheet" type="text/css" href="/theme/Master.css" />
+	<link rel="stylesheet" type="text/css" href="/theme/tablesorter-style.css" />
 	
-	<script src="scripts/jquery.min.js"></script>
+	<script src="/scripts/jquery.min.js"></script>
 	
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
-	<script src="scripts/PopupWindow.js"></script>
+	<script src="/scripts/PopupWindow.js"></script>
 
 	<script type="text/javascript"> var gmap = new PopupWindow(); </script>
 	
@@ -123,29 +124,29 @@
 			<tbody>
 <%
 	NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
-	for (int c=0; c < facilities.length; c++)
+	for (FboFacilityBean facility : facilities)
 	{
-		FboBean fbo = data.getFbo(facilities[c].getFboId());
-		AirportBean ap = data.getAirport(facilities[c].getLocation());
+		FboBean fbo = data.getFbo(facility.getFboId());
+		AirportBean ap = data.getAirport(facility.getLocation());
 		
 		String sizedesc = null;
-		if (facilities[c].getIsDefault())
+		if (facility.getIsDefault())
 		{
 			int totalSpace = fbo.getFboSize() * ap.getFboSlots();
 			int rented = data.getFboFacilityBlocksInUse(fbo.getId());
 			sizedesc = totalSpace + " gates (" + rented + " rented)";
 		} else {
-			sizedesc = facilities[c].getSize() + " gates";
+			sizedesc = facility.getSize() + " gates";
 		}
 		int suppliedDays = data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(ap);
-		int availJobs = data.getFacilityJobCount(facilities[c].getOccupant(), facilities[c].getLocation()); 
+		int availJobs = data.getFacilityJobCount(facility.getOccupant(), facility.getLocation()); 
 %>
-				<tr <%= Data.oddLine(c) %>>
+				<tr>
 					<td style="width: 80px;"><%= data.airportLink(ap, ap, response) %></td>	
-					<td><%= facilities[c].getName() %><br/><span style="font-size:9px; font-weight: bold;"><%= fbo.getName() %></span></td>
+					<td><%= facility.getName() %><br/><span style="font-size:9px; font-weight: bold;"><%= fbo.getName() %></span></td>
 					<td>
 <%
-		String commodities = facilities[c].getCommodity();
+		String commodities = facility.getCommodity();
 		if (commodities == null)
 			commodities = "";
 		String[] items = commodities.trim().split(",\\ *");
@@ -159,20 +160,20 @@
 					</td>
 					<td style="width: 80px; text-align: center;"><%= availJobs %></td>
 					<td><%= sizedesc %></td>
-					<td style="width: 60px; text-align: center;"><%= facilities[c].getIsDefault() ? "Owned" : "Rented" %></td>
-					<td><%= facilities[c].getParametersDesc() %></td>
+					<td style="width: 60px; text-align: center;"><%= facility.getIsDefault() ? "Owned" : "Rented" %></td>
+					<td><%= facility.getParametersDesc() %></td>
 					<td style="width: 80px; text-align: center;"><%= fbo.isActive() ? "Active" : "Closed" %></td>
 					<td style="width: 80px; text-align: center;"><%= suppliedDays > 14 ? suppliedDays + " days" : "<span style=\"color: red;\">" + suppliedDays + " days</span>" %></td>
 					<td>
-						<a class="link" href="<%= response.encodeURL("editfbofacility.jsp?facilityId=" + facilities[c].getId()) %>">Edit</a>
+						<a class="link" href="<%= response.encodeURL("editfbofacility.jsp?facilityId=" + facility.getId()) %>">Edit</a>
 <%
-		if (!facilities[c].getIsDefault())
+		if (!facility.getIsDefault())
 		{
 			String link;
-			if (facilities[c].getSize() > 1)
-				link = "| <a class=\"link\" href=\"javascript:doSubmit1(" + facilities[c].getId() + ")\">Shrink</a>";
+			if (facility.getSize() > 1)
+				link = "| <a class=\"link\" href=\"javascript:doSubmit1(" + facility.getId() + ")\">Shrink</a>";
 			else
-				link = "| <a class=\"link\" href=\"javascript:doSubmit2(" + facilities[c].getId() + ")\">Move&nbsp;out</a>";
+				link = "| <a class=\"link\" href=\"javascript:doSubmit2(" + facility.getId() + ")\">Move&nbsp;out</a>";
 %>
 						<%= link %>
 <%

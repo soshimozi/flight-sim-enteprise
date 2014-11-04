@@ -2,7 +2,9 @@
         contentType="text/html; charset=ISO-8859-1"
         import = "net.fseconomy.data.*, java.util.*"
 %>
+
 <jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+
 <%!
     String groupMenu(UserBean user, String name, boolean staffOnly, boolean includeBaseLink, String link, String arg, HttpServletResponse response)
     {
@@ -53,10 +55,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
+
 	<jsp:include flush="true" page="top.jsp" />
 	<br/>
 	<a href="index.jsp">Home</a><br/><br/>
@@ -107,14 +110,14 @@ if (user.isLoggedIn())
 	if (user.getLevel() == UserBean.LEV_MODERATOR || user.getLevel() == UserBean.LEV_ADMIN)
 	{
 %>
-	<a href="admin.jsp">Admin</a><br/><br/>
-	<a href="fsmappings.jsp">Modify aircraft mappings</a><br/><br/>
-	<a href="models.jsp">Modify aircraft models</a><br/><br/>
-	<a href="templates.jsp">Modify assignment templates</a><br/><br/>
+	<a href="admin/index.jsp">Admin</a><br/><br/>
+	<a href="admin/aircraftmappings.jsp">Modify aircraft mappings</a><br/><br/>
+	<a href="admin/models.jsp">Modify aircraft models</a><br/><br/>
+	<a href="admin/templates.jsp">Modify assignment templates</a><br/><br/>
 	<a href="signup.jsp">Add New User</a><br/><br/>
-	<a href="lockaccount.jsp">Lock Account</a><br/><br/>
-	<a href="unlockaccount.jsp">Unlock Account</a><br/><br/>
-	<a href="resetbanlist.jsp">Reset Rental Ban List</a><br/><br/>
+	<a href="admin/accountstatusedit.jsp">Lock Account</a><br/><br/>
+	<a href="admin/accountunlock.jsp">Unlock Account</a><br/><br/>
+	<a href="admin/banlistreset.jsp">Reset Rental Ban List</a><br/><br/>
 <% 
 	}
 	if (user.getLevel() == UserBean.LEV_CSR)
@@ -122,7 +125,7 @@ if (user.isLoggedIn())
 %>
 	<br/><br/>
 	<a href="signup.jsp">Add User</a><br/><br/>
-	<a href="admineditaccount.jsp">Edit User</a><br/><br/>
+	<a href="admin/accountedit.jsp">Edit User</a><br/><br/>
 <% 
 	}
 }

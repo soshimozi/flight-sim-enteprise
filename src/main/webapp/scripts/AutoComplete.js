@@ -6,7 +6,7 @@ function initAutoComplete(myname, myvalue, mytype)
                 {   
                     $.ajax(
                     {
-                        url: "namelookup.jsp",
+                        url: "/namelookup.jsp",
                         data: {
                     			startsWith: request.term,
                     			accountType: mytype
