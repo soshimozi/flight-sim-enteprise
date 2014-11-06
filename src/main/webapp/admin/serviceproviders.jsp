@@ -2,8 +2,10 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*,java.util.*, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.beans.ServiceProviderBean" %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -25,7 +27,7 @@
         id = Integer.parseInt(request.getParameter("id"));
         action = request.getParameter("action").toLowerCase();
 
-        ServiceProviderBean service = data.getServiceProviderById(id);
+        ServiceProviderBean service = ServiceProviders.getServiceProviderById(id);
 
         if(action.equals("approve"))
         {
@@ -45,12 +47,12 @@
         }
         String notes = Formatters.getUserTimeFormat(user).format(date) + " (" + user.getName() + ")" + " - Status changed to: " + action + "\n" + service.getNotes();
         service.setNotes(notes);
-        data.updateServiceProvider(service);
+        ServiceProviders.updateServiceProvider(service);
 
         String msg = "This is a notification that the service for: " + service.getName() + " has had a status change.\nThe new status is: " + service.getStatusString() + ".\nIf you have any questions please contact administrator@fseconomy.com\n\nThis is an automated notice.";
         try
         {
-            data.doServiceProviderNotification(service, "FSE - Service Status Change", msg, false);
+            ServiceProviders.doServiceProviderNotification(service, "FSE - Service Status Change", msg, false);
         }
         catch (DataError e)
         {
@@ -62,7 +64,7 @@
     //setup for display
     //get the current service providers
     //presorted by status, owner
-    List<ServiceProviderBean> services = data.getServiceProviders();
+    List<ServiceProviderBean> services = ServiceProviders.getServiceProviders();
 %>
 
 <!DOCTYPE html>

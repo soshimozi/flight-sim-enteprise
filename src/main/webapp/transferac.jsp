@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="net.fseconomy.data.* "
+	    import="net.fseconomy.beans.*, net.fseconomy.data.* "
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -11,11 +11,11 @@
 	String returnPage = request.getHeader("referer");
 
 	String reg = request.getParameter("registration");
-	AircraftBean aircraft = data.getAircraftByRegistration(reg);
+	AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
 	String error = null;
 
 	UserBean owneraccount = null;
-	owneraccount = data.getAccountById(aircraft.getOwner());
+	owneraccount = Accounts.getAccountById(aircraft.getOwner());
 %>
 
 <!DOCTYPE html>

@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -15,8 +15,8 @@
     
 	String aircraft = request.getParameter("registration");
     
-	AircraftBean aircraftData = data.getAircraftByRegistration(aircraft);
-	ModelBean modelData = data.getModelById(aircraftData.getModelId());
+	AircraftBean aircraftData = Aircraft.getAircraftByRegistration(aircraft);
+	ModelBean modelData = Models.getModelById(aircraftData.getModelId());
 
     if (aircraftData.getLocation() == null)
         message = "Flight in Progress! Refueling Not Allowed.";
@@ -29,16 +29,16 @@
         return;
     }
 
-    List<FboBean> fbos = data.getFboByLocation(aircraftData.getLocation());
-    AirportBean airport = data.getAirport(aircraftData.getLocation());
+    List<FboBean> fbos = Fbos.getFboByLocation(aircraftData.getLocation());
+    AirportBean airport = Airports.getAirport(aircraftData.getLocation());
     int fueltype = aircraftData.getFuelType();
 
-    GoodsBean fuelDrums = data.getGoods(aircraftData.getLocation(), user.getId(), GoodsBean.GOODS_FUEL100LL);
+    GoodsBean fuelDrums = Goods.getGoods(aircraftData.getLocation(), user.getId(), GoodsBean.GOODS_FUEL100LL);
 
     if (fueltype > 0)
-        fuelDrums = data.getGoods(aircraftData.getLocation(), user.getId(), GoodsBean.GOODS_FUELJETA);
+        fuelDrums = Goods.getGoods(aircraftData.getLocation(), user.getId(), GoodsBean.GOODS_FUELJETA);
 
-    data.fillAirport(airport);
+    Airports.fillAirport(airport);
 
     boolean defuelAllowed = aircraftData.changeAllowed(user);
 %>
@@ -100,11 +100,11 @@
 				int fuelQty = 0;
 				if (fueltype > 0)
 				{
-					fuelQty = data.getGoodsQty(fbo, GoodsBean.GOODS_FUELJETA);
+					fuelQty = Goods.getGoodsQty(fbo, GoodsBean.GOODS_FUELJETA);
 				} 
 				else 
 				{
-					fuelQty = data.getGoodsQty(fbo, GoodsBean.GOODS_FUEL100LL);
+					fuelQty = Goods.getGoodsQty(fbo, GoodsBean.GOODS_FUEL100LL);
 				}
 %>
 				<tr>
@@ -194,7 +194,7 @@
 						Buy from
 						<select name="provider" class="formselect">
 <%
-				ModelBean mb = data.getModelById(aircraftData.getModelId());
+				ModelBean mb = Models.getModelById(aircraftData.getModelId());
 				for (int c=0; c < fbos.size() && mb.getFuelSystemOnly() == 0; c++)
 				{ 
 %>

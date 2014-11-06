@@ -2,7 +2,8 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<%@ page import="net.fseconomy.beans.UserBean" %>
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -83,12 +84,12 @@ if (request.getParameter("submit") == null && (message == null))
 	<td>
 	<select name="commodity" class="formselect">
 		<option class="formselect" value=""> </option>
-<%	for (int c=0; c < data.commodities.length; c++)
+<%	for (int c=0; c < Goods.commodities.length; c++)
 	{ 
-		if (data.commodities[c] == null)
+		if (Goods.commodities[c] == null)
 			continue;
 	%>		
-		<option class="formselect" value="<%= c %>"><%= data.commodities[c].getName() %></option>
+		<option class="formselect" value="<%= c %>"><%= Goods.commodities[c].getName() %></option>
 <% 	} 
 %>
 	</select>
@@ -110,12 +111,12 @@ else if (request.getParameter("submit") != null)
 		String type = request.getParameter("commodity");
 		String location = request.getParameter("location").toUpperCase();
 		int commodity = Integer.parseInt(request.getParameter("commodity"));
-		if (data.getAirport(location) == null)
+		if (Airports.getAirport(location) == null)
 			message = "Invalid Location ICAO";
-		int goodsOnSite = data.getGoodsQty(location,owner,commodity);
-		UserBean account = data.getAccountById(owner);
+		int goodsOnSite = Goods.getGoodsQty(location,owner,commodity);
+		UserBean account = Accounts.getAccountById(owner);
 		String ownername = account.getName();
-		String goods = data.commodities[Integer.parseInt(type)].getName();
+		String goods = Goods.commodities[Integer.parseInt(type)].getName();
 %>
 <%	if (message != null) 
 	{ 

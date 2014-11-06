@@ -1,9 +1,9 @@
 <%@ page language="java"
          contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.data.*"
+	    import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -11,7 +11,7 @@
 	String returnPage =  request.getHeader("referer");
 
 	int facilityId = Integer.parseInt(request.getParameter("facilityId"));		
-	FboFacilityBean facility = data.getFboFacility(facilityId);
+	FboFacilityBean facility = Fbos.getFboFacility(facilityId);
 
 	String error = null;
 	List<FboFacilityBean> renters = null;
@@ -21,12 +21,12 @@
 	
 	if (facility.updateAllowed(user))
 	{	
-		fbo = data.getFbo(facility.getFboId());
+		fbo = Fbos.getFbo(facility.getFboId());
 	
 		if (facility.getIsDefault())
-			renters = data.getFboRenterFacilities(fbo);
+			renters = Fbos.getFboRenterFacilities(fbo);
 		else 
-			landlord = data.getFboDefaultFacility(fbo);
+			landlord = Fbos.getFboDefaultFacility(fbo);
 		
 		int iSessionRent=0;
 		
@@ -38,8 +38,8 @@
 		
 		session.setAttribute(facility.getLocation() + "Rent", request.getParameter("pd_rent"));
 			
-		airport = data.getAirport(fbo.getLocation());
-		data.fillAirport(airport);
+		airport = Airports.getAirport(fbo.getLocation());
+		Airports.fillAirport(airport);
 	}
 	else
 	{
@@ -95,7 +95,7 @@
 	if (facility.getIsDefault())
 	{
 		int totalSpace = fbo.getFboSize() * airport.getFboSlots();
-		int rented = data.getFboFacilityBlocksInUse(fbo.getId());
+		int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
 		sizedesc = totalSpace + " gates (" + rented + " rented)";
 	} 
 	else 
@@ -112,7 +112,7 @@
 %>		
 			<tr>
 				<td>Space available</td>
-				<td colspan="2"><%= data.calcFboFacilitySpaceAvailable(facility, fbo, airport) %> gates</td>
+				<td colspan="2"><%= Fbos.calcFboFacilitySpaceAvailable(facility, fbo, airport) %> gates</td>
 			</tr>
 			<tr>
 				<td>Reserve</td>
@@ -188,7 +188,7 @@
 	} 
 	else 
 	{
-		int spaceAvailable = data.calcFboFacilitySpaceAvailable(landlord, fbo, airport);
+		int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(landlord, fbo, airport);
 %>		
 			<tr>
 				<td>Space available</td>

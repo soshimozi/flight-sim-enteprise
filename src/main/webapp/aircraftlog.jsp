@@ -1,10 +1,10 @@
 <%@page
         language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="net.fseconomy.beans.*, net.fseconomy.dto.*,java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -19,16 +19,16 @@
         from = 0;
 
     String linkOptions = "registration=" + aircraft + "&";
-    AircraftBean aircraftData = data.getAircraftByRegistration(aircraft);
-    List<LogBean> logs = data.getLogForAircraft(aircraft, from, Data.stepSize);
+    AircraftBean aircraftData = Aircraft.getAircraftByRegistration(aircraft);
+    List<LogBean> logs = Logging.getLogForAircraft(aircraft, from, Data.stepSize);
     String owner = "-";
     if (aircraftData.getOwner() != 0)
     {
-        UserBean uOwner = data.getAccountById(aircraftData.getOwner());
+        UserBean uOwner = Accounts.getAccountById(aircraftData.getOwner());
         if (uOwner != null)
             if (uOwner.isGroup())
             {
-                UserBean gOwner = data.getAccountById(data.accountUltimateGroupOwner(uOwner.getId()));
+                UserBean gOwner = Accounts.getAccountById(Accounts.accountUltimateGroupOwner(uOwner.getId()));
                 if (gOwner != null)
                 {
                     owner = uOwner.getName() + " (" + gOwner.getName() + ")";
@@ -64,15 +64,15 @@
         crewseats = 1;
     int seats = aircraftData.getSeats() - crewseats;
 
-    int amount = data.getAmountLogForAircraft(aircraft);
+    int amount = Logging.getAmountLogForAircraft(aircraft);
     int sellprice=aircraftData.getSellPrice();
     String saleprice = Formatters.currency.format(aircraftData.getSellPrice());
     String price = Formatters.currency.format(aircraftData.getSellPrice());
     String reg = aircraftData.getRegistration();
-    Data.groupMemberData[] staffGroups = user.getStaffGroups();
+    Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
 
     //find how many planes of this type for sale in the FSE world
-    int acForSale = data.FindAircraftForSaleByModelCount(aircraftData.getModelId());
+    int acForSale = Aircraft.FindAircraftForSaleByModelCount(aircraftData.getModelId());
     //data.AircraftBean[] aircraftForSale = data.findAircraftForSale(aircraftData[0].getModelId(), -1, -1, -1, -1, -1, -1, -1, -1, -1, null, false, false, false, false, false, false, "");
 %>
 

@@ -2,8 +2,9 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -86,7 +87,7 @@
     else if (request.getParameter("submit") != null)
     {
         int userid = Integer.parseInt(request.getParameter("user"));
-        UserBean edituser = data.getAccountById(userid);
+        UserBean edituser = Accounts.getAccountById(userid);
         if (edituser == null)
         {
             message = "User Not Found";

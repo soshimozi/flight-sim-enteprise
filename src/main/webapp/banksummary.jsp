@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, java.util.Calendar, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+	    import="java.util.List, net.fseconomy.beans.*, java.util.Calendar, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -17,7 +17,7 @@
 	List<UserBean> groups = null;
 	
 	if(error == null)
-		groups = data.getGroupsForUser(user.getId());
+		groups = Accounts.getGroupsForUser(user.getId());
 
 	Calendar cal = Calendar.getInstance();
 	int month = cal.get(Calendar.MONTH)+1;

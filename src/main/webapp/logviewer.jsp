@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, java.util.*, net.fseconomy.util.*"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, java.util.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -15,16 +15,16 @@
     String sAircraft = request.getParameter("aircraft");
 
     if (sAircraft != null)
-        output = data.outputLog("aircraft='" + Converters.escapeSQL(sAircraft) + "'");
+        output = Logging.outputLog("aircraft='" + Converters.escapeSQL(sAircraft) + "'");
     else if (sUser != null)
     {
         if (sUser.equals(user.getName()))
-            output = data.outputLog("user='" + Converters.escapeSQL(sUser) + "'");
+            output = Logging.outputLog("user='" + Converters.escapeSQL(sUser) + "'");
     } else if (sGroupId != null)
     {
         int groupId = Integer.parseInt(sGroupId);
         if (user.groupMemberLevel(groupId) > UserBean.GROUP_INVITED)
-            output = data.outputLog("groupId=" + groupId);
+            output = Logging.outputLog("groupId=" + groupId);
     }
     if (output == null)
     {

@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*, java.util.*"
+        import="net.fseconomy.beans.*, net.fseconomy.dto.*, net.fseconomy.data.*, net.fseconomy.util.*, java.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -73,12 +73,12 @@
 	    </thead>
 	    <tbody>
 <%	
-	Data.statistics[] stats = data.getStatistics();
+	Statistics[] stats = data.getStatistics();
 	if(stats != null)
 	{
 		for (int c=0; c < stats.length; c++)
 		{
-			Data.statistics entry = stats[c];
+			Statistics entry = stats[c];
 			if (entry.group != group)
 				continue;
 			

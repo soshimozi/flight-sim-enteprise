@@ -2,14 +2,15 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.text.*, net.fseconomy.data.*, java.util.*"
 %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
 	Data data = (Data)application.getAttribute("data");
 
 
-	if (!Data.needLevel(user, UserBean.LEV_CSR) && !Data.needLevel(user, UserBean.LEV_MODERATOR)) 
+	if (!Data.needLevel(user, UserBean.LEV_CSR) && !Data.needLevel(user, UserBean.LEV_MODERATOR))
 	{
 		out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
 		return; 
@@ -102,7 +103,7 @@
 			searchfor = request.getParameter("searchfor");
 			if(searchfor == null)
 				searchfor = request.getParameter("username");
-			inputuser = data.getAccountByName(searchfor);
+			inputuser = Accounts.getAccountByName(searchfor);
 			
 			if (inputuser == null)
 			{

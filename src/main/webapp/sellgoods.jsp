@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+	    import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -15,11 +15,11 @@
 	String location = request.getParameter("icao");
 	String owner = request.getParameter("owner");
 	String sType = request.getParameter("type");
-	AirportBean airport = data.getAirport(location);
-	data.fillAirport(airport);
+	AirportBean airport = Airports.getAirport(location);
+	Airports.fillAirport(airport);
 	
 	int type = Integer.parseInt(sType);
-	List<GoodsBean> salesPoints = data.getGoodsAtAirportToSell(location, type, airport.getSize(), airport.getFuelPrice(), airport.getJetAPrice());
+	List<GoodsBean> salesPoints = Goods.getGoodsAtAirportToSell(location, type, airport.getSize(), airport.getFuelPrice(), airport.getJetAPrice());
 	
 	String groupParam = "";
 	if (owner != null)
@@ -27,7 +27,7 @@
 		int id = Integer.parseInt(owner);
 		if (id != user.getId())
 		{
-			account = data.getAccountById(id);
+			account = Accounts.getAccountById(id);
 			 groupParam = "?groupId=" + id;
 		}
 	}

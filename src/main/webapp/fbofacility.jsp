@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-    	import="java.util.List, java.text.*, net.fseconomy.data.*"
+    	import="java.util.List, java.text.*, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -19,7 +19,7 @@
 	if (sId != null)
 	{
 		int id = Integer.parseInt(sId);
-		account = data.getAccountById(id);
+		account = Accounts.getAccountById(id);
 		if (account != null)
 		{
 			if (account.isGroup() == false || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
@@ -30,7 +30,7 @@
 	if (account == null)
 		account = user;	
 	
-	List<FboFacilityBean> facilities = data.getFboFacilitiesByOccupant(account.getId());
+	List<FboFacilityBean> facilities = Fbos.getFboFacilitiesByOccupant(account.getId());
 %>
 
 <!DOCTYPE html>
@@ -126,23 +126,23 @@
 	NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
 	for (FboFacilityBean facility : facilities)
 	{
-		FboBean fbo = data.getFbo(facility.getFboId());
-		AirportBean ap = data.getAirport(facility.getLocation());
+		FboBean fbo = Fbos.getFbo(facility.getFboId());
+		AirportBean ap = Airports.getAirport(facility.getLocation());
 		
 		String sizedesc = null;
 		if (facility.getIsDefault())
 		{
 			int totalSpace = fbo.getFboSize() * ap.getFboSlots();
-			int rented = data.getFboFacilityBlocksInUse(fbo.getId());
+			int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
 			sizedesc = totalSpace + " gates (" + rented + " rented)";
 		} else {
 			sizedesc = facility.getSize() + " gates";
 		}
-		int suppliedDays = data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(ap);
+		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(ap);
 		int availJobs = data.getFacilityJobCount(facility.getOccupant(), facility.getLocation()); 
 %>
 				<tr>
-					<td style="width: 80px;"><%= data.airportLink(ap, ap, response) %></td>	
+					<td style="width: 80px;"><%= Airports.airportLink(ap, ap, response) %></td>
 					<td><%= facility.getName() %><br/><span style="font-size:9px; font-weight: bold;"><%= fbo.getName() %></span></td>
 					<td>
 <%

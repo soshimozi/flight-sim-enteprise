@@ -1,11 +1,11 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
 	    errorPage="errorpage.jsp"
-	    import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+	    import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<jsp:useBean id="fbo" class="net.fseconomy.data.FboBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
+<jsp:useBean id="fbo" class="net.fseconomy.beans.FboBean" scope="session" />
 <jsp:useBean id="dataError" class="net.fseconomy.data.DataError" scope="session" />
 
 <%
@@ -21,20 +21,20 @@
 	double dAmountJetA = Integer.parseInt(amountJetA) / Data.GALLONS_TO_KG;
 	
 	String fboID = request.getParameter("id");
-	int days = data.calculateShippingDay();
+	int days = Fbos.calculateShippingDay();
 	
 	//check if enough v$ exists to pay for the request
 	double price=0;
 			
 	//use the account for the owner of the FBO
-	FboBean fboAccount = data.getFboByID(Integer.parseInt(fboID));
-	UserBean account = data.getAccountById(fboAccount.getOwner());
-			
+	FboBean fboAccount = Fbos.getFboByID(Integer.parseInt(fboID));
+	UserBean account = Accounts.getAccountById(fboAccount.getOwner());
+
 	if (Integer.parseInt(amount100ll) > 0)
-		price = data.quoteFuel(fboAccount.getLocation(), GoodsBean.GOODS_FUEL100LL, Integer.parseInt(amount100ll));
+		price = Goods.quoteFuel(fboAccount.getLocation(), GoodsBean.GOODS_FUEL100LL, Integer.parseInt(amount100ll));
 	
 	if (Integer.parseInt(amountJetA) > 0)
-		price += data.quoteFuel(fboAccount.getLocation(), GoodsBean.GOODS_FUELJETA, Integer.parseInt(amountJetA));
+		price += Goods.quoteFuel(fboAccount.getLocation(), GoodsBean.GOODS_FUELJETA, Integer.parseInt(amountJetA));
 %>
 
 <!DOCTYPE html>
@@ -76,13 +76,13 @@
 	</div> 
 <%
 		//reset the flag so user is not penalized for not having enough on hand funds and can make another request
-		data.resetBulkFuelOrder(Integer.parseInt(fboID));
+		Fbos.resetBulkFuelOrder(Integer.parseInt(fboID));
 		
 		return;				
 	}
 	else 
 	{
-		if (data.doesBulkFuelRequestExist(Integer.parseInt(fboID)) ) 
+		if (Fbos.doesBulkFuelRequestExist(Integer.parseInt(fboID)) )
 		{ 
 %>
 	<div class="form" style="width: 500px">
@@ -101,7 +101,7 @@
 		else 
 		{		
 		//we have enough money - proceed - log this request
-			data.logBulkFuelRequest(Integer.parseInt(fboID)); 
+			Fbos.logBulkFuelRequest(Integer.parseInt(fboID));
 %>
 	<div class="form" style="width: 600px">
 		<h3>Bulk Order Confirmation</h3>
@@ -113,7 +113,7 @@
 				  <li>100LL Fuel Quantity: <%=amount100ll %> Kg | <%=(int)Math.round(dAmount100ll) %> gallons</li>
 				  <li>JetA Fuel Quantity: <%=amountJetA %> Kg | <%=(int)Math.round(dAmountJetA) %> gallons</li>
 				  <li>Cost: <%=Formatters.currency.format(price) %></li>
-				  <li>Estimated delivery date: <%=data.deliveryDateFormatted(days) %></li>
+				  <li>Estimated delivery date: <%=Fbos.deliveryDateFormatted(days) %></li>
 				</ul>
 			</div>
 				

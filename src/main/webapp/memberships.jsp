@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -13,7 +13,7 @@
     if (group != null)
         groupId = Integer.parseInt(group);
 
-    List<UserBean> members = data.getUsersForGroup(groupId);
+    List<UserBean> members = Accounts.getUsersForGroup(groupId);
 %>
 
 <!DOCTYPE html>
@@ -100,7 +100,7 @@
 	{
 		int id = member.getId();
 		String name = member.getName();
-		data.reloadMemberships(member);
+        Accounts.reloadMemberships(member);
 		int memberLevel = member.groupMemberLevel(groupId);
 %>
 	<tr>

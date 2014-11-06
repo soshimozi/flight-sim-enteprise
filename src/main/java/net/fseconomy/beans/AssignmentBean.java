@@ -1,4 +1,7 @@
-package net.fseconomy.data;
+package net.fseconomy.beans;
+
+import net.fseconomy.data.Airports;
+import net.fseconomy.data.Data;
 
 import java.io.Serializable;
 import java.sql.*;
@@ -109,9 +112,9 @@ public class AssignmentBean implements Serializable
 		rs.updateDouble("pay", getPay());
 	}
 	
-	public void updateData(Data data)
+	public void updateData()
 	{
-		double distanceBearing[] = data.getDistanceBearing(getFrom(), getTo());
+		double distanceBearing[] = Airports.getDistanceBearing(getFrom(), getTo());
 
 		setDistance((int)Math.round(distanceBearing[0]));
 		setBearing((int)Math.round(distanceBearing[1]));
@@ -219,7 +222,7 @@ public class AssignmentBean implements Serializable
 	public AirportBean getFromAirport(Data data)
 	{
 		if (fromAirport == null)
-			setFromAirport(data.getAirport(from));
+			setFromAirport(Airports.getAirport(from));
 
 		return fromAirport;
 	}
@@ -456,7 +459,7 @@ public class AssignmentBean implements Serializable
 			*/
 			if (loc != null)
 			{
-				double db[] = data.getDistanceBearing(loc, getDestinationAirport(data));
+				double db[] = Airports.getDistanceBearing(loc, getDestinationAirport(data));
 				actualDistance = (int)Math.round(db[0]);
 				actualBearing = (int)Math.round(db[1]);
 			} else {
@@ -640,7 +643,7 @@ public class AssignmentBean implements Serializable
 	public AirportBean getDestinationAirport(Data data)
 	{
 		if (destinationAirport == null)
-			setDestinationAirport(data.getAirport(to));
+			setDestinationAirport(Airports.getAirport(to));
 		return destinationAirport;
 	}
 
@@ -667,7 +670,7 @@ public class AssignmentBean implements Serializable
 	public AirportBean getLocationAirport(Data data)
 	{
 		if (locationAirport == null)
-			setLocationAirport(data.getAirport(location));
+			setLocationAirport(Airports.getAirport(location));
 
 		return locationAirport;
 	}

@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+	    import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -13,8 +13,8 @@
 	//setup return page if action used
 	String returnPage = "maintenance.jsp?registration=" + registration;
 
- 	AircraftBean aircraft = data.getAircraftByRegistration(registration);
- 	List<LogBean> logs = data.getLogForMaintenanceAircraft(aircraft.getRegistration());
+ 	AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
+ 	List<LogBean> logs = Logging.getLogForMaintenanceAircraft(aircraft.getRegistration());
   
     int tetminutes = (aircraft.getTotalEngineTime()) / 60;
  	int lcminutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck()) / 60;
@@ -27,7 +27,7 @@
     
 	List<FboBean> fbos = null;
 	if(aircraft.getLocation() != null && !aircraft.getLocation().equals(""))
-		fbos = data.getFboForRepair(data.getAirport(aircraft.getLocation()));
+		fbos = Fbos.getFboForRepair(Airports.getAirport(aircraft.getLocation()));
  %>
 
 <!DOCTYPE html>

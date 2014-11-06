@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.Formatters "
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters "
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -57,7 +57,7 @@
     else
     {
         id = Integer.parseInt(sId);
-        assignment = data.getAssignmentById(id);
+        assignment = Assignments.getAssignmentById(id);
     }
 
     if (from != null)
@@ -69,14 +69,14 @@
     if (sCommodityId != null && !sCommodityId.contains("99") ) //Ignore aircraft crate
     {
         assignment.setCommodityId(Integer.parseInt(sCommodityId));
-        assignment.setCommodity(data.commodities[assignment.getCommodityId()].getName());
+        assignment.setCommodity(Goods.commodities[assignment.getCommodityId()].getName());
     }
 
-    if (sPay != null && (data.getAirport(assignment.getTo()) != null))
+    if (sPay != null && (Airports.getAirport(assignment.getTo()) != null))
     {
         if (sAmount != null && sAmount.matches("[0-9]+") && !assignment.isFerry() && assignment.isCreatedByUser())
         {
-            distance = data.findDistance(from, to);
+            distance = Airports.findDistance(from, to);
 
             if (distance < 1)
                 distance = 1;
@@ -95,7 +95,7 @@
     if (sOwner != null)
     {
         assignment.setOwner(Integer.parseInt(sOwner));
-        goodsOwner = data.getAccountById(Integer.parseInt(sOwner));
+        goodsOwner = Accounts.getAccountById(Integer.parseInt(sOwner));
     }
 
     if (assignment.getLocation() == null)
@@ -121,17 +121,17 @@
             if (from.equalsIgnoreCase(to))
                 throw new DataError("Goods already at destination");
 
-            if (assignment.getId() <= 0 && assignment.getCommodityId() > 0 && !data.checkGoodsAvailable(from, goodsOwner.getId(), assignment.getCommodityId(), assignment.getAmount()*cnt))
+            if (assignment.getId() <= 0 && assignment.getCommodityId() > 0 && !Goods.checkGoodsAvailable(from, goodsOwner.getId(), assignment.getCommodityId(), assignment.getAmount()*cnt))
                 throw new DataError("Not enough Goods available!");;
 
-            if (data.getAirport(assignment.getFrom()) == null)
+            if (Airports.getAirport(assignment.getFrom()) == null)
                 throw new DataError("From airport not found.");
 
-            if (data.getAirport(assignment.getTo()) == null)
+            if (Airports.getAirport(assignment.getTo()) == null)
                 throw new DataError("To airport not found.");
 
             for (i=0;i<cnt;i++)
-                data.updateAssignment(assignment, user);
+                Assignments.updateAssignment(assignment, user);
 
             //if (assignment.getOwner() > 0)
             if(assignment.getGroupId() > 0)

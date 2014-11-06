@@ -2,9 +2,12 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.beans.FSMappingBean" %>
+<%@ page import="net.fseconomy.beans.ModelBean" %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<jsp:useBean id="model" class="net.fseconomy.data.ModelBean">
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
+<jsp:useBean id="model" class="net.fseconomy.beans.ModelBean">
     <jsp:setProperty name="model" property="*"/>
 </jsp:useBean>
 
@@ -29,7 +32,7 @@
             model.setId(-1);
             if(!newModel.contentEquals(""))
             {
-                List<FSMappingBean> result = data.getMappingById(Integer.parseInt(newModel));
+                List<FSMappingBean> result = Aircraft.getMappingById(Integer.parseInt(newModel));
                 if (result.size() > 0)
                     model.setCapacity(result.get(0).getCapacity());
             }
@@ -38,14 +41,14 @@
         }
         else
         {
-            model = data.getModelById(model.getId());
+            model = Models.getModelById(model.getId());
         }
     }
     else if (error == null)
     {
         try
         {
-            data.updateModel(model, user);
+            Models.updateModel(model, user);
 %>
 <jsp:forward page="/admin/models.jsp"></jsp:forward>
 <%

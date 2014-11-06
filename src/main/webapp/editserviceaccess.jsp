@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -21,7 +21,7 @@
 
     //check permissions
     if(accountId != user.getId())
-        account = data.getAccountById(accountId);
+        account = Accounts.getAccountById(accountId);
     else
         account = user;
 
@@ -35,7 +35,7 @@
 
     //get current service permissions
     StringBuilder trCurrentServiceProviders = new StringBuilder();
-    ServiceAccessBean bean = Data.getInstance().getServiceProviderAccess(serviceId, accountId);
+    ServiceAccessBean bean = ServiceProviders.getServiceProviderAccess(serviceId, accountId);
 %>
 
 <!DOCTYPE html>

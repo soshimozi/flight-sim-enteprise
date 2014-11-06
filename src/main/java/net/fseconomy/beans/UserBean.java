@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package net.fseconomy.data;
+package net.fseconomy.beans;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -30,7 +30,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import net.fseconomy.data.Data.groupMemberData;
+import net.fseconomy.data.Accounts.groupMemberData;
+import net.fseconomy.data.Data;
 
 // Airboss 11/27/2011
 // DB Change for new xmlfeed access
@@ -104,7 +105,6 @@ public class UserBean implements Serializable
 		setDefaultPilotFee(rs.getInt("defaultPilotFee"));
 		setLoanLimit(rs.getInt("limit"));
 		setExposure(rs.getInt("exposure"));
-		setXmlKey(rs.getString("xmlkey"));
 		setDateFormat(rs.getInt("dateformat"));
 		setShowPaymentsToSelf(rs.getBoolean("showPaymentsToSelf"));
 		setBanList(rs.getString("banList"));
@@ -298,16 +298,16 @@ public class UserBean implements Serializable
 		if (memberships == null)
 			return -1;
 		
-		Data.groupMemberData data = memberships.get(group);
+		groupMemberData data = memberships.get(group);
 		
 		return data == null ? -1 : data.memberLevel;
 	}
 	
-	public Data.groupMemberData[] getStaffGroups()
+	public groupMemberData[] getStaffGroups()
 	{
 		ArrayList<groupMemberData> returnValue = new ArrayList<>();
 		if (memberships == null)
-			return new Data.groupMemberData[0];
+			return new groupMemberData[0];
 
         for (groupMemberData item : memberships.values())
         {
@@ -486,19 +486,6 @@ public class UserBean implements Serializable
 	public void setTimeZone(TimeZone zone)
 	{
 		timeZone = zone;
-	}
-
-	public String getXmlKey(Data data) 
-	{
-		if (xmlKey == null)
-			data.setAccountXmlKey(this);
-		
-		return xmlKey;
-	}
-
-	public void setXmlKey(String xmlKey) 
-	{
-		this.xmlKey = xmlKey;
 	}
 
 	public void setDateFormat(int i)

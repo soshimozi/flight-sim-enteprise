@@ -1,9 +1,10 @@
-package net.fseconomy.data;
+package net.fseconomy.beans;
 
 import java.io.Serializable;
 import java.sql.*;
 import java.util.Date;
 
+import net.fseconomy.data.Data;
 import net.fseconomy.util.Formatters;
 
 public class AircraftBean implements Serializable

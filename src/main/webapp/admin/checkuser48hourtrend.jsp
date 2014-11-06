@@ -2,8 +2,10 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
+<%@ page import="net.fseconomy.dto.TrendHours" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -84,13 +86,13 @@
     }
     else if (request.getParameter("submit") != null)
     {
-        UserBean inputuser = data.getAccountByName(request.getParameter("username"));
+        UserBean inputuser = Accounts.getAccountByName(request.getParameter("username"));
         if (inputuser == null)
         {
             message = "User Not Found";
         }
 
-        Data.trendHours[] trend = null;
+        TrendHours[] trend = null;
         try
         {
             trend = data.getTrendHoursQuery(inputuser.getName());

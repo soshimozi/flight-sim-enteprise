@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.text.*, java.util.*, net.fseconomy.data.*, net.fseconomy.util.*"
+	    import="java.text.*, java.util.*, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -30,7 +30,7 @@
 		else
 			transferId = user.getId();
 		
-		UserBean account = data.getAccountById(transferId);
+		UserBean account = Accounts.getAccountById(transferId);
 
 		if (transfer != null && account.isGroup() && user.groupMemberLevel(transferId) < UserBean.GROUP_MEMBER) 
 		{
@@ -45,10 +45,10 @@
 			return; 
 		}
 		
-		UserBean transferAccount = data.getAccountById(transferId);
+		UserBean transferAccount = Accounts.getAccountById(transferId);
 		caption = "Transfer assignments for " + transferAccount.getName();
 		
-		assignments = data.getAssignmentsForTransfer(transferId);
+		assignments = Assignments.getAssignmentsForTransfer(transferId);
 	} 
 	else
 	{
@@ -62,11 +62,11 @@
 		}
 		
 		boolean userIsGroupStaff = user.groupMemberLevel(groupId) >= UserBean.GROUP_STAFF;
-		assignments = data.getAssignmentsForGroup(groupId, userIsGroupStaff);
+		assignments = Assignments.getAssignmentsForGroup(groupId, userIsGroupStaff);
 		
 		groupMode = true;
 		
-		UserBean groupAccount = data.getAccountById(groupId);
+		UserBean groupAccount = Accounts.getAccountById(groupId);
 		caption = "Group assignments for " + groupAccount.getName();
 	} 
 	
@@ -301,22 +301,22 @@
 			UserBean lockedBy = null;
 			if (as.getUserlock() != 0) 
 			{
-				lockedBy = data.getAccountById(as.getUserlock());
+				lockedBy = Accounts.getAccountById(as.getUserlock());
 			} 
 			else if (!groupMode && as.isGroup()) 
 			{
-				lockedBy = data.getAccountById(as.getGroupId());
+				lockedBy = Accounts.getAccountById(as.getGroupId());
 			}
 			String locked = lockedBy == null ? "-" : lockedBy.getName();
 			
 			String icao = location.getIcao();
 			String destIcao = destination.getIcao();
 			
-			AirportBean mapAirport = data.getAirport(icao);
+			AirportBean mapAirport = Airports.getAirport(icao);
 			double latl = mapAirport.getLat();
 			double lonl = mapAirport.getLon();
 			
-			AirportBean mapDestAirport = data.getAirport(destIcao);
+			AirportBean mapDestAirport = Airports.getAirport(destIcao);
 			double destLatl = mapDestAirport.getLat();
 			double destLonl = mapDestAirport.getLon();
 			
@@ -369,18 +369,18 @@
 			else if (as.getActive() == 2) 
 			{ 
 %>
-				<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img src="<%= location.getDescriptiveImage(data.getFboByLocation(as.getLocation())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= location.getTitle() %> "class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getLocation()) %>"><%= as.getLocation() %></a> [on hold]</td>
+				<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(as.getLocation())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= location.getTitle() %> "class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getLocation()) %>"><%= as.getLocation() %></a> [on hold]</td>
 <%
 			} 
 			else 
 			{ 
 %>		
-				<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img src="<%= location.getDescriptiveImage(data.getFboByLocation(as.getLocation())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= location.getTitle() %> "class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getLocation()) %>"><%= as.getLocation() %></a></td>
+				<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(as.getLocation())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= location.getTitle() %> "class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getLocation()) %>"><%= as.getLocation() %></a></td>
 <%  
 			} 
 %>
 			<td><img src="img/blankap.gif" style="vertical-align:middle;" /><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getFrom()) %>"><%= as.getFrom() %></a></td>
-			<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap1"><img src="<%= destination.getDescriptiveImage(data.getFboByLocation(as.getTo())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= destination.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getTo()) %>"><%= as.getTo() %></a></td>
+			<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap1"><img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(as.getTo())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= destination.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getTo()) %>"><%= as.getTo() %></a></td>
 			<td class="numeric"><%= as.getActualDistance(data) %></td>
 			<td class="numeric"><%= as.getActualBearing(data) %> <img src="<%= image %>" /></td>
 			<td><%= as.getSCargo() %></td>
@@ -481,8 +481,8 @@
 			);
 		</script>		
 				<select id="addToGroup" class="formselect">
-<%			
-				Data.groupMemberData[] memberGroups = (Data.groupMemberData [])user.getMemberships().values().toArray(new Data.groupMemberData[0]);
+<%
+                Accounts.groupMemberData[] memberGroups = (Accounts.groupMemberData [])user.getMemberships().values().toArray(new Accounts.groupMemberData[0]);
 
 				for (int c=0; c< memberGroups.length; c++)
 				{ 

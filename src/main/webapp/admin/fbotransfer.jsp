@@ -2,7 +2,9 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.* "
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<%@ page import="net.fseconomy.beans.FboBean" %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -18,7 +20,7 @@
     int id;
     FboBean fbo;
     id = Integer.parseInt(sId);
-    fbo = data.getFbo(id);
+    fbo = Fbos.getFbo(id);
 
     String error = null;
     if ("true".equals(request.getParameter("submit")))
@@ -32,7 +34,7 @@
 
         try
         {
-            data.transferFbo(fbo, user, ibuyer, iseller, icao, goods.equals("checkbox"));
+            Fbos.transferFbo(fbo, user, ibuyer, iseller, icao, goods.equals("checkbox"));
 %>
         <jsp:forward page="/admin/index.jsp"></jsp:forward>
 <%
@@ -80,7 +82,7 @@
 <div class="content">
 <%
 UserBean account;
-account = data.getAccountById(fbo.getOwner());
+account = Accounts.getAccountById(fbo.getOwner());
 if (error != null)
 {
 %>

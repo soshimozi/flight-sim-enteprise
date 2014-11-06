@@ -1,10 +1,10 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.beans.*,net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<jsp:useBean id="group" class="net.fseconomy.data.UserBean">
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
+<jsp:useBean id="group" class="net.fseconomy.beans.UserBean">
     <jsp:setProperty name="group" property="*"/>
 </jsp:useBean>
 
@@ -32,7 +32,7 @@
             group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
             group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
             group.setBanList(request.getParameter("banList"));
-            data.CreateGroup(group, user);
+            Accounts.CreateGroup(group, user);
 %>
     <jsp:forward page="groups.jsp"></jsp:forward>
 <%

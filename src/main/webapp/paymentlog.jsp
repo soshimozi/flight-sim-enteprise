@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.*, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.*, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="userMap" class="java.util.HashMap" scope="session" />
 
 <%
@@ -18,7 +18,7 @@
         String value = (String) userMap.get(new Integer(id));
         if (value == null)
         {
-            UserBean thisUser = data.getAccountById(id);
+            UserBean thisUser = Accounts.getAccountById(id);
             if (thisUser != null)
                 value = thisUser.getName();
             userMap.put(new Integer(id), value);
@@ -82,7 +82,7 @@
     {
         fboId = Integer.parseInt(sFboId);
         linkOptions = linkOptions + "fboId=" + fboId + "&";
-        filterFbo = data.getFbo(fboId);
+        filterFbo = Fbos.getFbo(fboId);
         sFilter = filterFbo.getLocation() + " - " + filterFbo.getName();
     }
     if ((aircraft != null) && !aircraft.equals(""))
@@ -147,15 +147,15 @@
 			prevMonth = 12;
 			prevYear--;
 		}
-		double[][] statement = data.getStatement(new GregorianCalendar(year, month-1, 1), account, fboId, aircraft, user.getShowPaymentsToSelf());	
+		double[][] statement = Banking.getStatement(new GregorianCalendar(year, month-1, 1), account, fboId, aircraft, user.getShowPaymentsToSelf());
 		String nextString = "paymentlog.jsp?" + linkOptions + "month=" + nextMonth + "&year=" + nextYear;
 		String prevString = "paymentlog.jsp?" + linkOptions + "month=" + prevMonth + "&year=" + prevYear;
 		
 		int flightOps = 0;
 		if(groupId > 0)
-			flightOps = data.getGroupOperationsByMonthYear(groupId,month,year);
+			flightOps = Airports.getGroupOperationsByMonthYear(groupId,month,year);
 		else if(account > 0)
-			flightOps = data.getGroupOperationsByMonthYear(account,month,year);
+			flightOps = Airports.getGroupOperationsByMonthYear(account,month,year);
 %>
 	<div class="dataTable">
 	<table class="flightLog">
@@ -239,8 +239,8 @@
 	}
     else
     {
-		int amount = data.getAmountPaymentsForUser(account, fboId, aircraft, user.getShowPaymentsToSelf());	
-		List<PaymentBean> logs = data.getPaymentsForUser(account, from, Data.stepSize, fboId, aircraft, user.getShowPaymentsToSelf());
+		int amount = Banking.getAmountPaymentsForUser(account, fboId, aircraft, user.getShowPaymentsToSelf());
+		List<PaymentBean> logs = Banking.getPaymentsForUser(account, from, Data.stepSize, fboId, aircraft, user.getShowPaymentsToSelf());
 		if (logs.size() > 0)
 		{
 			GregorianCalendar now = new GregorianCalendar();
@@ -267,11 +267,11 @@
 <%
                 for (PaymentBean log : logs)
                 {
-                    AirportBean airport = data.getAirport(log.getLocation());
-                    FboBean fbo = data.getFbo(log.getFboId());
+                    AirportBean airport = Airports.getAirport(log.getLocation());
+                    FboBean fbo = Fbos.getFbo(log.getFboId());
                     AirportBean fboAirport = null;
                     if (fbo != null)
-                        fboAirport = data.getAirport(fbo.getLocation());
+                        fboAirport = Airports.getAirport(fbo.getLocation());
 
 %>
                 <tr>
@@ -280,9 +280,9 @@
                     <td><%= getUser(log.getUser(), userMap, data) %></td>
                     <td class="numeric"><%= account != log.getOtherParty() ? Formatters.currency.format(log.getAmount()) : "<span style=\"color: red;\">" + Formatters.currency.format(-log.getAmount()) + "</span>" %></td>
                     <td><%= log.getSReason() %></td>
-                    <td><%= data.airportLink(airport, response) %></td>
+                    <td><%= Airports.airportLink(airport, response) %></td>
                     <td><a class="normal" href="<%= response.encodeURL( log.getAircraft() != null ? "aircraftlog.jsp?registration=" + log.getAircraft() : "" )%>"><%= log.getAircraft() != null ? log.getAircraft() : "" %></a></td>
-                    <td><%= fbo != null ? data.airportLink(fboAirport, airport, fboAirport, response) + " " + fbo.getName() : (log.getFboId() > 0 ? "(-)" : "") %></td>
+                    <td><%= fbo != null ? Airports.airportLink(fboAirport, airport, fboAirport, response) + " " + fbo.getName() : (log.getFboId() > 0 ? "(-)" : "") %></td>
                     <td><%= log.getComment() == null ? "" : log.getComment()  %></td>
                 </tr>
 <%

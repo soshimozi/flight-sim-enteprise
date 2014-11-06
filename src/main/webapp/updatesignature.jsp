@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.*, net.fseconomy.data.*, org.apache.commons.fileupload.*, java.io.File, java.io.IOException"
+        import="java.util.*, net.fseconomy.beans.*, net.fseconomy.data.*, org.apache.commons.fileupload.*, java.io.File, java.io.IOException"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");

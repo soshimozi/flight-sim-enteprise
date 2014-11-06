@@ -2,8 +2,11 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.HashMap, java.util.List, net.fseconomy.data.*"
 %>
+<%@ page import="net.fseconomy.beans.FSMappingBean" %>
+<%@ page import="net.fseconomy.beans.ModelBean" %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -16,7 +19,7 @@
 
     String returnPage = request.getRequestURI();
 
-    List<ModelBean> models = data.getAllModels();
+    List<ModelBean> models = Models.getAllModels();
     HashMap<Integer, ModelBean> modelMap = new HashMap<>();
 
     String htmloptions = "<select><option value=\"\">[No change]</option><option value=\"0\">[Unmap]</option><option value=\"-1\">[Delete]</option>";
@@ -37,11 +40,11 @@
     List<FSMappingBean> mappings;
 
     if (all)
-        mappings = data.getFilteredMappings(allParam);
+        mappings = Aircraft.getFilteredMappings(allParam);
     else if (target)
-        mappings = data.getMappingByFSAircraft(targetParam);
+        mappings = Aircraft.getMappingByFSAircraft(targetParam);
     else
-        mappings = data.getRequestedMappings();
+        mappings = Aircraft.getRequestedMappings();
 %>
 
 <!DOCTYPE html>
@@ -92,7 +95,7 @@
 
 	<a href="<%= response.encodeURL("/admin/aircraftmappings.jsp") %>">Empty Mappings</a>&nbsp;&nbsp;
 <%
-	List<String> mappingfilters = data.getMappingsFilterList();
+	List<String> mappingfilters = Aircraft.getMappingsFilterList();
     for (String mappingfilter : mappingfilters)
     {
 %>

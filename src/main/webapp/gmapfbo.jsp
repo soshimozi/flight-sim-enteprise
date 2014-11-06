@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.* "
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.* "
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -40,7 +40,7 @@
 
     try
     {
-        airports = data.findCertainAirports(region, state, country, icao, name, showFuel, showRepair, showFbo, showInactive, facilityPT, facilityCargo, fboOwner);
+        airports = Airports.findCertainAirports(region, state, country, icao, name, showFuel, showRepair, showFbo, showInactive, facilityPT, facilityCargo, fboOwner);
     }
     catch(DataError e)
     {
@@ -113,7 +113,7 @@
         double lat = airport.getLat();
         double lon = airport.getLon();
 
-        String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
+        String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
 
         boolean hasServices = airport.hasServices(data);
         boolean hasGoodsForSale = airport.hasGoodsForSale(data);

@@ -1,10 +1,10 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, java.util.List"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, java.util.List"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<jsp:useBean id="goods" class="net.fseconomy.data.GoodsBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
+<jsp:useBean id="goods" class="net.fseconomy.beans.GoodsBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -16,9 +16,9 @@
 	String error = null;
 
 	UserBean owneraccount = null;
-	owneraccount = data.getAccountById(owner);
+	owneraccount = Accounts.getAccountById(owner);
 	
-	List<GoodsBean> goodslist = data.getGoodsForAccountAvailable(owner);
+	List<GoodsBean> goodslist = Goods.getGoodsForAccountAvailable(owner);
 	
 	GoodsBean gb = null;
 	for(GoodsBean good : goodslist)
@@ -50,7 +50,7 @@
 		{
 			try
 			{
-				data.transferFBOGoods(Integer.parseInt(buyer), owner, request.getParameter("fromICAO"), commodityId, Integer.parseInt(request.getParameter("amount")));
+				Fbos.transferFBOGoods(Integer.parseInt(buyer), owner, request.getParameter("fromICAO"), commodityId, Integer.parseInt(request.getParameter("amount")));
 %>
 				<jsp:forward page="goods.jsp" />
 <%

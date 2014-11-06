@@ -1,8 +1,8 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -18,7 +18,7 @@
         if (sId != null)
         {
             id = Integer.parseInt(sId);
-            maintenance = data.getMaintenance(id);
+            maintenance = Aircraft.getMaintenance(id);
         }
 
         if (maintenance == null)

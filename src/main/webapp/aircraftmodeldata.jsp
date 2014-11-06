@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="net.fseconomy.dto.*,java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -16,12 +16,12 @@
 	}
 
 	int id = Integer.parseInt(sId);
-	Data.aircraftConfigs acconfig = data.getAircraftConfigs(id);
+	AircraftConfigs acconfig = Aircraft.getAircraftConfigs(id);
 	
 	double endurHr = (double)Math.round(((double)acconfig.fcaptotal/(double)acconfig.gph)*10.0)/10.0;
 	double endurNm = (double)Math.round((endurHr * acconfig.cruisespeed)*10.0)/10.0;
 
-	double fuelprice = acconfig.fueltype > 0 ? (data.currFuelPrice*data.currJetAMultiplier) : data.currFuelPrice;
+	double fuelprice = acconfig.fueltype > 0 ? (Goods.currFuelPrice*Goods.currJetAMultiplier) : Goods.currFuelPrice;
 	
 	double costPerHr = (double)Math.round(((double)acconfig.gph * fuelprice)*100.0)/100.0;
 	double costPerNm = (double)Math.round((costPerHr / (double)acconfig.cruisespeed)*100.0)/100.0;

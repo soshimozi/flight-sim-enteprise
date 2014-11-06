@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.util.Formatters, net.fseconomy.data.UserBean, net.fseconomy.data.Data, net.fseconomy.data.LogBean"
+        import="java.util.List, net.fseconomy.util.Formatters, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session"/>
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
 <%
     Data data = (Data) application.getAttribute("data");
@@ -29,16 +29,16 @@
     if (!groupPage)
     {
         selector = "pilot " + user.getName();
-        logs = data.getLogForUser(user, from, Data.stepSize);
-        amount = data.getAmountLogForUser(user);
+        logs = Logging.getLogForUser(user, from, Data.stepSize);
+        amount = Logging.getAmountLogForUser(user);
         mapViewer = "pilot=" + user.getName();
     }
     else
     {
         int groupId = Integer.parseInt(sGroup);
-        amount = data.getAmountLogForGroup(groupId);
-        logs = data.getLogForGroup(groupId, from, Data.stepSize);
-        UserBean group = data.getGroupById(groupId);
+        amount = Logging.getAmountLogForGroup(groupId);
+        logs = Logging.getLogForGroup(groupId, from, Data.stepSize);
+        UserBean group = Accounts.getGroupById(groupId);
 
         selector = "group " + group.getName();
         linkOptions = "groupId=" + sGroup + "&";
@@ -97,7 +97,7 @@
             double paidToGroup = total - paidToPilot;
             if (isGroup)
             {
-                UserBean group = data.getGroupById(log.getGroupId());
+                UserBean group = Accounts.getGroupById(log.getGroupId());
                 if (group != null)
                     groupName = group.getName();
             }
@@ -249,7 +249,7 @@
             String type;
             try
             {
-                type = data.getAircraftByRegistration(log.getAircraft()).getMakeModel();
+                type = Aircraft.getAircraftByRegistration(log.getAircraft()).getMakeModel();
             }
             catch (ArrayIndexOutOfBoundsException e)
             {

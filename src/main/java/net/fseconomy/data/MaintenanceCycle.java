@@ -7,7 +7,9 @@ import java.util.Date;
 
 import javax.sql.rowset.CachedRowSet;
 
-import net.fseconomy.data.Data.statistics;
+import net.fseconomy.beans.*;
+import net.fseconomy.dto.CloseAirport;
+import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 
@@ -274,7 +276,7 @@ public class MaintenanceCycle implements Runnable
 		
 		try
 		{
-			List<statistics> stats = new ArrayList<>();
+			List<Statistics> stats = new ArrayList<>();
 			
 			// Overall total stats
 			String qry = "SELECT sum(flightenginetime), sum(distance), sum(income) FROM log";
@@ -335,7 +337,7 @@ public class MaintenanceCycle implements Runnable
 					continue;
 				
 				if ((thisUser.getExposure() & UserBean.EXPOSURE_SCORE) > 0)
-					stats.add(new statistics(thisUser.id, thisUser.getName(), null, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(thisUser.getId()), false));
+					stats.add(new Statistics(thisUser.getId(), thisUser.getName(), null, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(thisUser.getId()), false));
 				
 				//Loan check, if 10 flights and current limit is 0, add name to update list
 				if (thisUser.getLoanLimit() == 0 && rs.getInt(2) >= 10)
@@ -356,7 +358,7 @@ public class MaintenanceCycle implements Runnable
 					continue;
 				String owner = ownersByGroup.get(new Integer(rs.getInt(1)));
 				if ((thisUser.getExposure() & UserBean.EXPOSURE_SCORE) > 0)
-					stats.add(new statistics(thisUser.id, thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(thisUser.getId()), true));
+					stats.add(new Statistics(thisUser.getId(), thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(thisUser.getId()), true));
 			}
 
 			qry = "SELECT id FROM accounts WHERE type='group' AND NOT EXISTS (SELECT * FROM log WHERE log.groupid = accounts.id)";
@@ -368,14 +370,14 @@ public class MaintenanceCycle implements Runnable
 					continue;
 				String owner = ownersByGroup.get(new Integer(rs.getInt(1)));
 				if ((thisUser.getExposure() & UserBean.EXPOSURE_SCORE) > 0)
-					stats.add(new statistics(thisUser.id, thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), 0, 0, 0, null, aircraft.get(thisUser.getId()), true));
+					stats.add(new Statistics(thisUser.getId(), thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), 0, 0, 0, null, aircraft.get(thisUser.getId()), true));
 			}				
 
-			data.statistics = stats.toArray(new statistics[stats.size()]);
+			data.statistics = stats.toArray(new Statistics[stats.size()]);
 			Arrays.sort(data.statistics);
 			
-			HashMap<String, statistics> hm = new HashMap<>();
-			for( statistics s : stats)
+			HashMap<String, Statistics> hm = new HashMap<>();
+			for( Statistics s : stats)
 				hm.put(s.accountName.toLowerCase(), s);
 			
 			Data.prevstatsmap = Data.statsmap;
@@ -447,7 +449,7 @@ public class MaintenanceCycle implements Runnable
 	    		while (rs.next())
 	    		{
 	    			Money interest = new Money(rs.getBigDecimal("interest").doubleValue());
-	    			this.data.addPaymentRecord(rs.getInt("id"), 0, interest, PaymentBean.INTEREST_PAYMENT, 0, 0, "", "", "");
+                    Banking.addPaymentRecord(rs.getInt("id"), 0, interest, PaymentBean.INTEREST_PAYMENT, 0, 0, "", "", "");
 
 	    			totalPaid = totalPaid.add(rs.getBigDecimal("interest"));
 	    			counter++;
@@ -489,7 +491,7 @@ public class MaintenanceCycle implements Runnable
 			int suppliesKG = GoodsBean.AMOUNT_FBO_SUPPLIES_PER_DAY;  
 
 			String qry = 									
-				" UPDATE goods, (SELECT goods.type, goods.location, goods.owner, case when airports.size < " + AirportBean.MIN_SIZE_MED + " then 1*fbo.fbosize when airports.size < " + AirportBean.MIN_SIZE_BIG + " then 2*fbo.fbosize else 3*fbo.fbosize end size FROM goods, fbo, airports " + 
+				" UPDATE goods, (SELECT goods.type, goods.location, goods.owner, case when airports.size < " + AirportBean.MIN_SIZE_MED + " then 1*fbo.fbosize when airports.size < " + AirportBean.MIN_SIZE_BIG + " then 2*fbo.fbosize else 3*fbo.fbosize end size FROM goods, fbo, airports " +
 				" WHERE  goods.type=" + GoodsBean.GOODS_SUPPLIES + " AND fbo.location = goods.location AND fbo.owner = goods.owner AND airports.icao = goods.location) t "+
 				" Set amount = amount - (" + suppliesKG + " * t.size) "+
 				" where goods.type=t.type AND goods.location=t.location AND goods.owner=t.owner ";
@@ -514,7 +516,7 @@ public class MaintenanceCycle implements Runnable
 				qry = "delete from goods where owner= ? and location= ? and type= ?";
 				data.dalHelper.ExecuteUpdate(qry, rs.getInt("owner"), rs.getString("location"), GoodsBean.GOODS_SUPPLIES);
 				
-				data.resetAllGoodsSellBuyFlag(rs.getInt("owner"), rs.getString("location"));
+				Goods.resetAllGoodsSellBuyFlag(rs.getInt("owner"), rs.getString("location"));
 
 				qry = "delete from fbofacilities where fboid = ?";
 				data.dalHelper.ExecuteUpdate(qry, rs.getInt("id"));
@@ -835,7 +837,7 @@ public class MaintenanceCycle implements Runnable
 						
 						double pay = targetPay * (1 + (Math.random() * 2*payDev) - payDev);
 
-						Data.closeAirport to = data.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk);
+						CloseAirport to = Airports.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk);
 						if (to == null)
 							continue;
 	
@@ -996,9 +998,9 @@ public class MaintenanceCycle implements Runnable
 				int rent = rs.getInt("rent") * rs.getInt("size");
 				if (rs.getInt("active") > 0)
 				{
-					if (data.checkAnyFunds(occupant, (double)rent))
+					if (Banking.checkAnyFunds(occupant, (double) rent))
 					{
-						data.doPayment(occupant, rs.getInt("owner"), (double)rent, PaymentBean.FBO_FACILITY_RENT, 0, rs.getInt("fboId"), rs.getString("location"), "", "", false);
+                        Banking.doPayment(occupant, rs.getInt("owner"), (double) rent, PaymentBean.FBO_FACILITY_RENT, 0, rs.getInt("fboId"), rs.getString("location"), "", "", false);
 						
 						qry = "update fbofacilities set lastRentPayment = current_timestamp where id = ?";
 						data.dalHelper.ExecuteUpdate(qry, rs.getInt("id"));
@@ -1116,13 +1118,13 @@ public class MaintenanceCycle implements Runnable
 					
 					//user-set # of days to set for initial PT job expiration
 					//Added minimum live time is 1 day
-					keepAlive = template.daysActive <= 0 ? 1 : template.daysActive;  
+					keepAlive = template.getDaysActive() <= 0 ? 1 : template.getDaysActive();
 					int id = template.getId();
 
 					updateStatus("Working on FBO Assignments for template " + id + " Processing " + fboLoopCounter + " of " + fboCount + " FBO's");
 
-					FboBean fbo = data.getFbo(template.getFboId());
-					AirportBean airport = data.getAirport(template.getLocation());
+					FboBean fbo = Fbos.getFbo(template.getFboId());
+					AirportBean airport = Airports.getAirport(template.getLocation());
 					
 					//This section will either use the facility size if player rented
 					//or if the fbo own has reserved all gates or none have rented (size==0)
@@ -1218,7 +1220,7 @@ public class MaintenanceCycle implements Runnable
 						qry = "select avg(lat) FROM assignments LEFT join  airports ON fromicao = airports.icao where fromFboTemplate = ?"; 
 						double lat = data.dalHelper.ExecuteScalar(qry, new DALHelper.DoubleResultTransformer(), id);
 						
-						Data.closeAirport to = data.getRandomCloseAirport(icao, minDistance, maxDistance, minSize, maxSize, lat, icaoSet2, template.getAllowWater());
+						CloseAirport to = Airports.getRandomCloseAirport(icao, minDistance, maxDistance, minSize, maxSize, lat, icaoSet2, template.getAllowWater());
 						if (to == null)
 							continue;
 	
@@ -1273,7 +1275,7 @@ public class MaintenanceCycle implements Runnable
 
 						if (!template.getPublicByDefault())
 						{
-							UserBean account = data.getAccountById(template.getOccupant());
+							UserBean account = Accounts.getAccountById(template.getOccupant());
 							if (account != null)
 							{
 								if (account.isGroup())
@@ -1352,7 +1354,7 @@ public class MaintenanceCycle implements Runnable
 					expires.add(GregorianCalendar.HOUR, (int)(Math.random() * 72));  // was 24
 
 					String reg = toSellRS.getString("registration");
-					AircraftBean aircraft = data.getAircraftByRegistration(reg);
+					AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
 
 					int sellPrice = aircraft.getSystemSellPrice(); //includes raw equipment costs
 					sellPrice = (int) Math.round(sellPrice * (1 + Math.random() * 0.4 - 0.2));
@@ -1387,7 +1389,7 @@ public class MaintenanceCycle implements Runnable
 					continue;
 
 				long maxRentTime = 10800;
-				int ultimateOwner = data.accountUltimateOwner(rs.getInt("owner"));
+				int ultimateOwner = Accounts.accountUltimateOwner(rs.getInt("owner"));
 				if(rs.getInt("userlock") == ultimateOwner)
 				{
 					maxRentTime = 1000 * 60 * 60; //1000 hours in seconds
@@ -1447,10 +1449,10 @@ public class MaintenanceCycle implements Runnable
 				int amountJetA = rs.getInt("bulkJetAOrdered");					
 
 				updateFboFuelRecord(amount100ll, amountJetA, icao, owner);
-				data.resetBulkFuelOrder(id);
-				
+				Fbos.resetBulkFuelOrder(id);
+
 				//log the delivery as a $0 transaction
-				data.doPayBulkFuelDelivered(owner, 0, 0, id, "Delivery report --  100LL " + amount100ll + " Kg -- JetA " + amountJetA + " Kg", icao);					
+				Banking.doPayBulkFuelDelivered(owner, 0, 0, id, "Delivery report --  100LL " + amount100ll + " Kg -- JetA " + amountJetA + " Kg", icao);
 			}
 		}
 		catch (SQLException e ) 
@@ -1517,7 +1519,7 @@ public class MaintenanceCycle implements Runnable
 						data.dalHelper.ExecuteUpdate(qry, rs.getString("registration"));
 						
 						//Needed to get the aircraft empty weight
-						AircraftBean aircraft = data.getAircraftByRegistration(rs.getString("registration"));
+						AircraftBean aircraft = Aircraft.getAircraftByRegistration(rs.getString("registration"));
 						
 						AssignmentBean assignment;
 						assignment = new AssignmentBean();
@@ -1541,8 +1543,8 @@ public class MaintenanceCycle implements Runnable
 						
 						try
 						{
-							UserBean user = data.getAccountById(rs.getInt("owner"));
-							data.updateAssignment(assignment, user);
+							UserBean user = Accounts.getAccountById(rs.getInt("owner"));
+							Assignments.updateAssignment(assignment, user);
 						}
 						catch(DataError e)
 						{
@@ -1578,7 +1580,7 @@ public class MaintenanceCycle implements Runnable
 	    		AircraftBean aircraft = new AircraftBean(rs);
 	    		try
 	    		{
-	    			this.data.doMaintenance(aircraft, 1, null, null);
+	    			Aircraft.doMaintenance(aircraft, 1, null, null);
 	    		}
 	    		catch (DataError e1)
 	    		{
@@ -1594,7 +1596,7 @@ public class MaintenanceCycle implements Runnable
 	      		AircraftBean aircraft = new AircraftBean(rs);
 	        	try
 	        	{
-	        		this.data.doMaintenance(aircraft, 2, null, null);
+	        		Aircraft.doMaintenance(aircraft, 2, null, null);
 	        	}
 	        	catch (DataError e1)
 	        	{
@@ -1610,7 +1612,7 @@ public class MaintenanceCycle implements Runnable
 	      		AircraftBean aircraft = new AircraftBean(rs);
 	        	try
 	        	{
-	        		this.data.doMaintenance(aircraft, 2, null, null);
+	        		Aircraft.doMaintenance(aircraft, 2, null, null);
 	        	}
 	        	catch (DataError e1)
 	        	{
@@ -1650,7 +1652,7 @@ public class MaintenanceCycle implements Runnable
 					price *= 1+(Math.random()*0.40) - 0.2;
 					
 					//get fuel cost for wet rental
-					int fuelCost = (int)Math.round(model.getGph() * data.getFuelPrice(rs2.getString("home")));
+					int fuelCost = (int)Math.round(model.getGph() * Goods.getFuelPrice(rs2.getString("home")));
 					
 					if (rs2.getString("rentalDry") != null)
 					{
@@ -1681,7 +1683,7 @@ public class MaintenanceCycle implements Runnable
 			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{
-				Data.closeAirport newHome = data.closestAirport(rs.getDouble(3), rs.getDouble(4), rs.getInt(2), false);
+				CloseAirport newHome = Airports.closestAirport(rs.getDouble(3), rs.getDouble(4), rs.getInt(2), false);
 				if (newHome == null)
 					continue;
 					
@@ -1740,7 +1742,7 @@ public class MaintenanceCycle implements Runnable
 						int rent = model.getTotalRentalTarget(mask);
 						rent *= 1+(Math.random()*0.40) - 0.2;
 						updateSet.updateInt("RentalDry", rent);
-						int fuelCost = (int)Math.round(model.getGph() * data.getFuelPrice(home));
+						int fuelCost = (int)Math.round(model.getGph() * Goods.getFuelPrice(home));
 
 						//update so that models with 0 rental price cannot be rented - airboss 7/1/12
 						if(rent != 0)

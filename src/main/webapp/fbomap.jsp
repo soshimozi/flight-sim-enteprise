@@ -3,8 +3,8 @@
         import="java.util.List, net.fseconomy.data.* "
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<jsp:useBean id="airport" class="net.fseconomy.data.AirportBean">
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
+<jsp:useBean id="airport" class="net.fseconomy.beans.AirportBean">
     <jsp:setProperty name="airport" property="icao"/>
 </jsp:useBean>
 
@@ -66,7 +66,7 @@
 	List<String> noDupeStates = null;
 	List<String> noDupeCountries = null;
 	
-	List<String> regions = data.getSearchRegions();
+	List<String> regions = Airports.getSearchRegions();
 	
 	try
 	{

@@ -2,7 +2,11 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.text.*, java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<%@ page import="net.fseconomy.beans.AirportBean" %>
+<%@ page import="net.fseconomy.beans.FboBean" %>
+<%@ page import="net.fseconomy.beans.GoodsBean" %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <%
     Data data = (Data)application.getAttribute("data");
 
@@ -24,9 +28,9 @@
     <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
     <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script type='text/javascript' src='scripts/common.js'></script>
-    <script type='text/javascript' src='scripts/css.js'></script>
-    <script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>
+    <script type='text/javascript' src='/scripts/common.js'></script>
+    <script type='text/javascript' src='/scripts/css.js'></script>
+    <script type='text/javascript' src='/scripts/standardista-table-sorting.js'></script>
 
     <script type='text/javascript' src="/scripts/PopupWindow.js"></script>
 
@@ -110,10 +114,10 @@
         if (sId != null && sId.length() > 0)
         {
             int id = Integer.parseInt(request.getParameter("owner"));
-            account = data.getAccountById(id);
+            account = Accounts.getAccountById(id);
         }
 
-        List<FboBean> fbos = data.getFboByOwner(account.getId(), "location");
+        List<FboBean> fbos = Fbos.getFboByOwner(account.getId(), "location");
 %>
 	<form method="post" action="/userctl" name="fboForm">
         <div>
@@ -146,14 +150,14 @@
 <%
         for (FboBean fbo : fbos)
         {
-            GoodsBean supplies = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_SUPPLIES);
-            GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
-            GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
-            GoodsBean buildingmaterials = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
-            AirportBean ap = data.getAirport(fbo.getLocation());
+            GoodsBean supplies = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_SUPPLIES);
+            GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
+            GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
+            GoodsBean buildingmaterials = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
+            AirportBean ap = Airports.getAirport(fbo.getLocation());
 %>
                 <tr>
-                    <td><%= data.airportLink(ap, ap, response) %></td>
+                    <td><%= Airports.airportLink(ap, ap, response) %></td>
                     <td><%= fbo.getName() %></td>
                     <td><%= fbo.isActive() ? "Operational" : "Not operational" %></td>
                     <td class="numeric"><%= fbo.isForSale() ? Formatters.currency.format(fbo.getPrice()) + (fbo.getPriceIncludesGoods() ? " + goods" : "") : "" %></td>

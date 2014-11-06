@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -25,12 +25,12 @@
 	boolean orderExists;
 	
 	//use the account for the owner of the FBO
-	FboBean fboAccount = data.getFboByID(Integer.parseInt(fboID));
-	account = data.getAccountById(fboAccount.getOwner());
+	FboBean fboAccount = Fbos.getFboByID(Integer.parseInt(fboID));
+	account = Accounts.getAccountById(fboAccount.getOwner());
 	
 	//get current fuel levels
-	GoodsBean fuelleft = data.getGoods(fboAccount.getLocation(), fboAccount.getOwner(), GoodsBean.GOODS_FUEL100LL);
-	GoodsBean jetaleft = data.getGoods(fboAccount.getLocation(), fboAccount.getOwner(), GoodsBean.GOODS_FUELJETA);
+	GoodsBean fuelleft = Goods.getGoods(fboAccount.getLocation(), fboAccount.getOwner(), GoodsBean.GOODS_FUEL100LL);
+	GoodsBean jetaleft = Goods.getGoods(fboAccount.getLocation(), fboAccount.getOwner(), GoodsBean.GOODS_FUELJETA);
 %>
 
 <!DOCTYPE html>
@@ -90,7 +90,7 @@
 
 <div id="wrapper">
 <%		
-	if (data.doesBulkFuelRequestExist(Integer.parseInt(fboID)) ) 
+	if (Fbos.doesBulkFuelRequestExist(Integer.parseInt(fboID)) )
 	{
 %>
 	<div class="form" style="width: 500px">

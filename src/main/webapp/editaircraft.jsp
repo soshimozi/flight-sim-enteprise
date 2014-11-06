@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -16,7 +16,7 @@
 	String mPrice="";
 	String iPrice="";
 	
-	AircraftBean aircraft = data.getAircraftByRegistration(registration);
+	AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
 
 	mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
 	iPrice = Integer.toString(aircraft.getMinimumPrice());
@@ -28,7 +28,7 @@
 	} 
 	else if (userlock > 0) 
 	{
-		UserBean lockuser = data.getAccountById(userlock);
+		UserBean lockuser = Accounts.getAccountById(userlock);
 		error = "Can not edit. Aircraft is rented by " + lockuser.getName();
 	}
 %>

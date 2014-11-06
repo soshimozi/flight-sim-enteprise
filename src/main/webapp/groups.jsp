@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -60,7 +60,7 @@
 <div id="wrapper">
 <div class="content">
 <%
-	List<UserBean> invitations = data.getGroupsThatInviteUser(user.getId());
+	List<UserBean> invitations = Accounts.getGroupsThatInviteUser(user.getId());
 	if (invitations.size() > 0)
 	{
 %>
@@ -108,7 +108,7 @@
 <%
 	boolean allGroups = request.getParameter("all") != null;
 	
-	List<UserBean> groups = allGroups ? data.getAllExposedGroups() : data.getGroupsForUser(user.getId());
+	List<UserBean> groups = allGroups ? Accounts.getAllExposedGroups() : Accounts.getGroupsForUser(user.getId());
 %>
 	<form method="post" name="groupForm">
 	<input type="hidden" name="event" />
@@ -126,7 +126,7 @@
 	</thead>
 	<tbody>
 <%
-	data.reloadMemberships(user);
+    Accounts.reloadMemberships(user);
 
 	for (UserBean group : groups)
 	{

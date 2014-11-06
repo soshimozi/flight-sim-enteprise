@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.*"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -11,12 +11,12 @@
     String depart = request.getParameter("depart");
     String dest = request.getParameter("dest");
 
-    double[] distanceBearing = data.getDistanceBearing(depart, dest);
+    double[] distanceBearing = Airports.getDistanceBearing(depart, dest);
     int distance = (int)(distanceBearing[0] + .5);
     int bearing = (int)(distanceBearing[1] + .5);
 
-    AirportBean apDepart = data.getAirport(depart);
-    AirportBean apDest = data.getAirport(dest);
+    AirportBean apDepart = Airports.getAirport(depart);
+    AirportBean apDest = Airports.getAirport(dest);
 
 %>
 
@@ -70,7 +70,7 @@ StringBuilder sb = new StringBuilder();
 	double latDepart = apDepart.getLat();
 	double lonDepart = apDepart.getLon();
 	
-	String airportLink = Converters.escapeJavaScript(data.airportLink(apDepart, response));
+	String airportLink = Converters.escapeJavaScript(Airports.airportLink(apDepart, response));
 	
 	sb.append("<div class=\"infowindow-content\">");
 	sb.append(airportLink);
@@ -85,7 +85,7 @@ StringBuilder sb = new StringBuilder();
 	double lonDest = apDest.getLon();
 	
 	sb = new StringBuilder();
-	airportLink = Converters.escapeJavaScript(data.airportLink(apDest, response));
+	airportLink = Converters.escapeJavaScript(Airports.airportLink(apDest, response));
 	sb.append("<div class=\"infowindow-content\">");
 	sb.append(airportLink);
 	sb.append("<br>");

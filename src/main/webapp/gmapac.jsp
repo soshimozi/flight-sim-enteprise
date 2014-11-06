@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -11,7 +11,7 @@
     String sId = request.getParameter("Id");
     int Id = Integer.parseInt(sId);
 
-    List<AircraftBean> aircraftList = data.getAircraftOwnedByUser(Id);
+    List<AircraftBean> aircraftList = Aircraft.getAircraftOwnedByUser(Id);
 %>
 
 <!DOCTYPE html>
@@ -62,15 +62,15 @@
         if(aircraft.getLocation() == null)
             continue;
 
-        AirportBean airport = data.getAirport(aircraft.getLocation());
+        AirportBean airport = Airports.getAirport(aircraft.getLocation());
         double lat = airport.getLat();
         double lon = airport.getLon();
-        String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
+        String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
         StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"infowindow-content\">");
         sb.append(airportLink);
         sb.append("<br>");
-        sb.append(data.getAccountNameById(aircraft.getOwner()));
+        sb.append(Accounts.getAccountNameById(aircraft.getOwner()));
         sb.append("<br>");
         sb.append(aircraft.getRegistration());
         sb.append("<br>");

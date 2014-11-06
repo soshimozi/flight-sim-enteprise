@@ -2,8 +2,10 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.beans.AircraftBean" %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -85,14 +87,14 @@ if (request.getParameter("submit") == null && (message == null))
 else if (request.getParameter("submit") != null) 
 {
 	String registration = request.getParameter("registration");
-	AircraftBean aircraft = data.getAircraftByRegistration(registration);
+	AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
 	if (aircraft == null)
 	{
 		message = "Aircraft Not Found";
 	} 
 	else
 	{
-		owner = data.getAccountById(aircraft.getOwner());
+		owner = Accounts.getAccountById(aircraft.getOwner());
 	}
 	
 	if (message != null) 

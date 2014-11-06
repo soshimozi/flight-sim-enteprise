@@ -5,7 +5,9 @@
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 
-package net.fseconomy.data;
+package net.fseconomy.beans;
+
+import net.fseconomy.data.Data;
 
 import java.io.Serializable;
 import java.sql.ResultSet;

@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+	    import="net.fseconomy.beans.*, java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -21,7 +21,7 @@
 	if (sGroupId != null)
 	{
 		int groupId = Integer.parseInt(sGroupId);
-		account = data.getAccountById(groupId);
+		account = Accounts.getAccountById(groupId);
 		if (account != null)
 		{
 			if (account.isGroup() == false || user.groupMemberLevel(groupId) < UserBean.GROUP_INVITED)
@@ -35,7 +35,7 @@
 	if (account == null)
 		account = user;
 	
-	List<AircraftBean> aircraftList = data.getAircraftOwnedByUser(account.getId());
+	List<AircraftBean> aircraftList = Aircraft.getAircraftOwnedByUser(account.getId());
 %>
 
 <!DOCTYPE html>
@@ -221,14 +221,14 @@
 		{
 			if( account.getId() == aircraft.getLessor()) //this is the real owner
 			{
-				UserBean displayName = data.getAccountById(aircraft.getOwner());
+				UserBean displayName = Accounts.getAccountById(aircraft.getOwner());
 %>
 			<td class="numeric">Leased to: <%=displayName.getName()%></td>
 <%
 			}
 			else
 			{
-				UserBean displayName = data.getAccountById(aircraft.getLessor());
+				UserBean displayName = Accounts.getAccountById(aircraft.getLessor());
 %>
 			<td class="numeric">Leased from: <%=displayName.getName()%></td>
 <%

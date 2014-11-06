@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package net.fseconomy.data;
+package net.fseconomy.beans;
+
+import net.fseconomy.data.Data;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -65,7 +67,7 @@ public class FboBean implements Serializable
 		this.owner = owner;
 	}
 	
-	static FboBean getInstance()
+	public static FboBean getInstance()
 	{
 		FboBean fbo = new FboBean(null, 0);
 		fbo.setRepairShopMargin(FboBean.FBO_DEFAULT_REPAIRSHOPMARGIN);
@@ -183,6 +185,10 @@ public class FboBean implements Serializable
 		return fueljeta;
 	}
 
+    public void setLocation(String loc)
+    {
+         location = loc;
+    }
 	public String getLocation()
 	{
 		return location;

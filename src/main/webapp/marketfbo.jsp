@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -54,8 +54,8 @@
 <div class="content">
 <div class="dataTable">	
 <%
-	List<FboBean> fbos = data.getFboForSale();
-	Data.groupMemberData[] staffGroups = user.getStaffGroups();
+	List<FboBean> fbos = Fbos.getFboForSale();
+    Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
 %>
 	<form method="post" action="userctl" name="fboForm">
 	<input type="hidden" name="event" value="MarketFbo"/>
@@ -84,13 +84,13 @@
 		int fboid = fbo.getId();
 		String price = Formatters.currency.format(fbo.getPrice());
 		int owner=fbo.getOwner();
-		UserBean fboowner = data.getAccountById(owner);
+		UserBean fboowner = Accounts.getAccountById(owner);
 		String icao = fbo.getLocation();
-		AirportBean airport = data.getAirport(icao);
-		int groupOwnerid = data.accountUltimateGroupOwner(owner);
-		UserBean ultimateOwner = data.getAccountById(groupOwnerid);
+		AirportBean airport = Airports.getAirport(icao);
+		int groupOwnerid = Accounts.accountUltimateGroupOwner(owner);
+		UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
 		int totalSpace = fbo.getFboSize() * airport.getFboSlots();
-		int rented = data.getFboFacilityBlocksInUse(fboid);
+		int rented = Fbos.getFboFacilityBlocksInUse(fboid);
  	    String fboservices = "<br>Lots=" + fbo.getFboSize() + ",Repair Shop=" + ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No") + "<br>" + ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? totalSpace + " gates (" + rented + " rented)" : "No Passenger Terminal");
 		String fboname = fbo.getName() + "<br><span class=\"small\"><i>" + fboowner.getName() + (fboowner.isGroup() ? "(" + ultimateOwner.getName() + ")" : "") + fboservices + "</i></span>";
 		String location = airport.getCity() + "<br />" + airport.getCountry();
@@ -98,10 +98,10 @@
 
 		if (fbo.getPriceIncludesGoods())
         {
-			GoodsBean fuel = data.getGoods(icao, owner, GoodsBean.GOODS_FUEL100LL);
-			GoodsBean jeta = data.getGoods(icao, owner, GoodsBean.GOODS_FUELJETA);
-			GoodsBean supplies = data.getGoods(icao, owner, GoodsBean.GOODS_SUPPLIES);
-			GoodsBean buildingmaterials = data.getGoods(icao, owner, GoodsBean.GOODS_BUILDING_MATERIALS);
+			GoodsBean fuel = Goods.getGoods(icao, owner, GoodsBean.GOODS_FUEL100LL);
+			GoodsBean jeta = Goods.getGoods(icao, owner, GoodsBean.GOODS_FUELJETA);
+			GoodsBean supplies = Goods.getGoods(icao, owner, GoodsBean.GOODS_SUPPLIES);
+			GoodsBean buildingmaterials = Goods.getGoods(icao, owner, GoodsBean.GOODS_BUILDING_MATERIALS);
 
 			if ((fuel != null ? fuel.getAmount() : 0) > 0)
 				goodsincluded = "100LL Fuel: " + Formatters.oneDigit.format(fuel.getAmount()) + " KG";
@@ -131,7 +131,7 @@
 %>
 	<tr>
 	<td><%= fboname %></td>
-	<td><%= data.airportLink(airport, airport, response) %></td>
+	<td><%= Airports.airportLink(airport, airport, response) %></td>
 	<td><%= data.sortHelper(airport.getCountry() + ", " + airport.getState() + ", " + airport.getCity()) %><%= location %></td>
 	<td><%= goodsincluded %></td>
 	<td style="text-align: right;"><%= price %></td>

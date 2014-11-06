@@ -1,8 +1,8 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, nl.captcha.Captcha"%>
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, nl.captcha.Captcha"%>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -41,7 +41,7 @@
             {
                 try
                 {
-                    data.createFbo(fbo, user);
+                    Fbos.createFbo(fbo, user);
                     Data.logger.info("FBO Constructed: loc = [" + location + "], owner=[" + sOwner + "], Name=["+ name + "]");
                     out.print("<script type=\"text/javascript\">document.location.href=\"fbo.jsp?id=" + owner + "\"</script>");
                     return;

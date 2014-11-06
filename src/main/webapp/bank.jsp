@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+	    import="java.text.*, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -28,7 +28,7 @@
 		}
 		else
 		{
-			account = data.getAccountById(id);
+			account = Accounts.getAccountById(id);
 			if (account == null)
 				message="Account not found";
 			else
@@ -116,7 +116,7 @@
 		} 
 %>
 				<tr>
-					<td>Monthly interest</td><td><%= account.isGroup() ? "N/A" :  Formatters.currency.format(data.getAccountInterest(account.getId())) %> </td>
+					<td>Monthly interest</td><td><%= account.isGroup() ? "N/A" :  Formatters.currency.format(Accounts.getAccountInterest(account.getId())) %> </td>
 				</tr>
 			</table>
 		

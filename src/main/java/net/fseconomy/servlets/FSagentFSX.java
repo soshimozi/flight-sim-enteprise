@@ -34,7 +34,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
+import net.fseconomy.dto.CloseAirport;
 
 public class FSagentFSX extends HttpServlet
 {	
@@ -103,7 +105,7 @@ public class FSagentFSX extends HttpServlet
 		String password = req.getParameter("pass");
 		UserBean userBean;
 		
-		if (user == null || password == null || (userBean=data.userExists(user, password, false)) == null)
+		if (user == null || password == null || (userBean=Accounts.userExists(user, password, false)) == null)
 		{
 			//XPlane error return
 			if(isXPlane)
@@ -160,7 +162,7 @@ public class FSagentFSX extends HttpServlet
 		    if (ipAddress == null) 
 		    	ipAddress = req.getRemoteAddr();
 		    
-		    AircraftBean aircraft = data.getAircraftForUser(userBean.getId());
+		    AircraftBean aircraft = Aircraft.getAircraftForUser(userBean.getId());
 		    if(aircraft!= null)
 		    	reg = aircraft.getRegistration();
 		    else
@@ -169,7 +171,7 @@ public class FSagentFSX extends HttpServlet
 		    String icao = "None";
 		    if(req.getParameter("lat") != null)
 		    {
-		    	icao = data.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon")), 0).icao;
+		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon")), 0).icao;
 		    }
 
 		    String client = isXPlane ? "XP" : "FSX";
@@ -224,7 +226,7 @@ public class FSagentFSX extends HttpServlet
 		resp.getWriter().println(xml);
 	}
 	
-	Data.closeAirport closestAirport(HttpServletRequest req)
+	CloseAirport closestAirport(HttpServletRequest req)
 	{
 		String lat = req.getParameter("lat");
 		String lon = req.getParameter("lon");
@@ -232,7 +234,7 @@ public class FSagentFSX extends HttpServlet
 			return null;
 		double dLat = Double.parseDouble(lat);
 		double dLon = Double.parseDouble(lon);
-		return data.closestAirport(dLat, dLon, 0);
+		return Airports.closestAirport(dLat, dLon, 0);
 	}
 	
 	private StringBuffer airportToXml(AirportBean airport)
@@ -245,7 +247,7 @@ public class FSagentFSX extends HttpServlet
 		output.append("</airport>\n");
 		return output;
 	}
-	private StringBuffer closeAirportToXml(Data.closeAirport airport)
+	private StringBuffer closeAirportToXml(CloseAirport airport)
 	{
 		StringBuffer output = new StringBuffer();
 		output.append("<closeAirport>\n");
@@ -300,7 +302,7 @@ public class FSagentFSX extends HttpServlet
 			(int)Float.parseFloat(fcapLeftAux),(int)Float.parseFloat(fcapLeftTip), (int)Float.parseFloat(fcapRightMain), 
 			(int)Float.parseFloat(fcapRightAux),(int)Float.parseFloat(fcapRightTip), (int)Float.parseFloat(fcapCenter2),
 			(int)Float.parseFloat(fcapCenter3), (int)Float.parseFloat(fcapExt1), (int)Float.parseFloat(fcapExt2) };
-		data.addModel(aircraft, fuelCapacities);
+		Models.addModel(aircraft, fuelCapacities);
 		return "<ok/>";
 	}
 	
@@ -308,12 +310,12 @@ public class FSagentFSX extends HttpServlet
 	{
 		StringBuilder result = new StringBuilder();
 		String aircraftTitle = req.getParameter("aircraft");
-		Data.closeAirport airport = closestAirport(req);
+		CloseAirport airport = closestAirport(req);
 		
-		List<Data.closeAirport> airportList = new ArrayList<>();
+		List<CloseAirport> airportList = new ArrayList<>();
 		List<AirportBean> currentAirport = new ArrayList<>();
 		List<AircraftBean> alternativeAircraft = new ArrayList<>();
-		String modelName = data.probeAircraft(aircraftTitle, airport, airportList, currentAirport, alternativeAircraft);
+		String modelName = Aircraft.probeAircraft(aircraftTitle, airport, airportList, currentAirport, alternativeAircraft);
 
 		if (modelName == null)
 			result.append("<aircraftUnknown/>");
@@ -326,7 +328,7 @@ public class FSagentFSX extends HttpServlet
 		if (airportList.size() > 0)
         {
             for (Object anAirportList : airportList)
-                result.append(closeAirportToXml((Data.closeAirport) anAirportList));
+                result.append(closeAirportToXml((CloseAirport) anAirportList));
         }
 
 		if (alternativeAircraft.size() > 0)
@@ -351,14 +353,14 @@ public class FSagentFSX extends HttpServlet
 		// Ok, lets get the parameters for aircraft and closest airport so we can do some checks
 		// FSAircraft is the title name from FSX/9, we'll compare it against the FSE mappings
 		String FSAircraft = req.getParameter("aircraft");
-		Data.closeAirport closest = closestAirport(req);
+		CloseAirport closest = closestAirport(req);
 		
 		// If either are null, bad data, exit
 		if (FSAircraft == null || closest == null)
 			throw new DataError("Invalid Aircraft name, or Departing ICAO received, flight aborted.");
 
 		// Lets get the users current aircraft
-		AircraftBean aircraft = data.getAircraftForUser(user.getId());
+		AircraftBean aircraft = Aircraft.getAircraftForUser(user.getId());
 		
 		// If there is no rented aircraft or the aircraft is not at the same location, exit
 		if (aircraft == null || !closest.icao.equals(aircraft.getLocation()))
@@ -369,7 +371,7 @@ public class FSagentFSX extends HttpServlet
 			throw new DataError(FSAircraft + " is not compatible with your rented " + aircraft.getMakeModel());
 
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit
-		if(data.checkAllInAircraftWithOutAssigment(aircraft))
+		if(Aircraft.checkAllInAircraftWithOutAssigment(aircraft))
 			throw new DataError(aircraft.getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
 
 		// Check the number of hours the user has flown, if over 30 hours, exit
@@ -393,7 +395,7 @@ public class FSagentFSX extends HttpServlet
             fuelString.append(Float.toString(aFuel)).append(" ");
 
 		long maxrenttime;
-		int ultimateOwner = data.accountUltimateGroupOwner(aircraft.getOwner());
+		int ultimateOwner = Accounts.accountUltimateGroupOwner(aircraft.getOwner());
 		if(user.getId() == ultimateOwner)
 			maxrenttime = 100*3600; // unlimited for owner
 		else
@@ -533,7 +535,7 @@ public class FSagentFSX extends HttpServlet
 				Float.parseFloat(fRightAux),Float.parseFloat(fRightTip), Float.parseFloat(fCenter2), Float.parseFloat(fCenter3),
 				Float.parseFloat(fExt1), Float.parseFloat(fExt2) };
 			
-			Data.closeAirport closest = closestAirport(req);		
+			CloseAirport closest = closestAirport(req);
 			if (closest == null) //added 6/25/10 Airboss - no icao returned, no processing
 			{
 				System.err.println("closestAirport: Failed to find");

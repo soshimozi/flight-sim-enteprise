@@ -1,6 +1,9 @@
 package net.fseconomy.servlets;
 
 import net.fseconomy.data.Data;
+import net.fseconomy.data.Goods;
+import net.fseconomy.dto.LatLonCount;
+import net.fseconomy.dto.PilotStatus;
 import net.fseconomy.services.serviceData;
 import net.fseconomy.util.Formatters;
 
@@ -150,7 +153,7 @@ public class RestServlet
     {
         //This is called A LOT.
         //The PilotStat class uses single character labels to reduce traffic.
-        List<Data.PilotStatus> list = Data.getInstance().getPilotStatus();
+        List<PilotStatus> list = Data.getInstance().getPilotStatus();
 
         return createSuccessResponse(200, null, null, list);
     }
@@ -163,7 +166,7 @@ public class RestServlet
     {
         //This is called A LOT.
         //The PilotStat class uses single character labels to reduce traffic.
-        List<Data.LatLonCount> list = Data.getInstance().FlightSummaryList;
+        List<LatLonCount> list = Data.getInstance().FlightSummaryList;
 
         return createSuccessResponse(200, null, null, list);
     }
@@ -176,7 +179,7 @@ public class RestServlet
                                   @PathParam("amount") final int amount,
                                   @PathParam("icao") final String icao)
     {
-        String price = Formatters.twoDecimals.format(Data.getInstance().quoteFuel(icao, fueltype, amount));
+        String price = Formatters.twoDecimals.format(Goods.quoteFuel(icao, fueltype, amount));
 
         return createSuccessResponse(200, null, null, price);
     }
@@ -192,7 +195,7 @@ public class RestServlet
     {
         boolean BUY = true;
 
-        String price = Formatters.twoDecimals.format(Data.getInstance().quoteGoods(icao, goodstype, amount, src, BUY));
+        String price = Formatters.twoDecimals.format(Goods.quoteGoods(icao, goodstype, amount, src, BUY));
 
         CacheControl NoCache = new CacheControl();
         NoCache.setNoCache(true);

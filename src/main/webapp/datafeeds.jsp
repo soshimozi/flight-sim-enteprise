@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, java.util.Calendar, net.fseconomy.data.*"
+        import="java.util.List, java.util.Calendar, net.fseconomy.beans.*,net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -17,7 +17,7 @@
     String error = null;
 
     boolean servicecreated = false;
-    ServiceProviderBean service = data.getServiceProviderByOwner(user.getId());
+    ServiceProviderBean service = ServiceProviders.getServiceProviderByOwner(user.getId());
     if( service != null)
         servicecreated = true;
 
@@ -58,7 +58,7 @@
                 if(userid == user.getId())
                 {
                     user.setReadAccessKey( newAccessKey );
-                    data.updateUser(user);
+                    Accounts.updateUser(user);
                     requestorKey = accessKey = user.getReadAccessKey();
 
                     error = "Read Access Key Updated.";
@@ -67,12 +67,12 @@
                 {
                     //group access key change
                     //verify that the current user is the owner of the selected group
-                    UserBean group = data.getGroupById(userid);
-                    if(group.isGroup() && data.accountUltimateGroupOwner(userid) == user.getId())
+                    UserBean group = Accounts.getGroupById(userid);
+                    if(group.isGroup() && Accounts.accountUltimateGroupOwner(userid) == user.getId())
                     {
                         //update the group access key
                         group.setReadAccessKey( newAccessKey );
-                        data.updateGroup(group, user);
+                        Accounts.updateGroup(group, user);
                         error = "Read Access Key Updated.";
                     }
                     else
@@ -260,12 +260,12 @@
 	try
 	{	
 		//
-		List<UserBean> groups = data.getGroupsForUser(user.getId());
+		List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
 		if(groups != null)
 		for (UserBean group : groups)
 		{
 			int groupid = group.getId();
-			if(data.accountUltimateGroupOwner(groupid) == user.getId())
+			if(Accounts.accountUltimateGroupOwner(groupid) == user.getId())
 			{
 %>
 				<tr>

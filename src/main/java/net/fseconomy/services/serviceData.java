@@ -21,6 +21,7 @@ package net.fseconomy.services;
 
 import static net.fseconomy.services.common.*;
 
+import net.fseconomy.beans.AircraftBean;
 import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
 
@@ -148,7 +149,7 @@ public class serviceData
     {
         try
         {
-            AircraftBean aircraft = Data.getInstance().getAircraftByRegistration(reg);
+            AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
 
             //if not, return error
             if(aircraft == null)
@@ -185,7 +186,7 @@ public class serviceData
     {
         try
         {
-            AircraftBean aircraft = Data.getInstance().getAircraftByRegistration(reg);
+            AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
 
             //if not, return error
             if(aircraft == null)
@@ -219,7 +220,7 @@ public class serviceData
 
         try
         {
-            AircraftBean aircraft = Data.getInstance().getAircraftByRegistration(reg);
+            AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
 
             //if not, return error
             if(aircraft == null)

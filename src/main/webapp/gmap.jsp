@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -14,8 +14,8 @@
     double lond=0;
 
     String icao = request.getParameter("icao");
-    AirportBean airportd = data.getAirport(icao);
-    AirportBean airportl = data.getAirport(icao);
+    AirportBean airportd = Airports.getAirport(icao);
+    AirportBean airportl = Airports.getAirport(icao);
     List<AssignmentBean> assignments;
     List<FboBean> fboList;
     AssignmentBean assignment;
@@ -37,10 +37,10 @@
 
     if(icaod != null)
     {
-        airportd = data.getAirport(icaod);
+        airportd = Airports.getAirport(icaod);
         latd = airportd.getLat();
         lond = airportd.getLon();
-        data.fillAirport(airportd);
+        Airports.fillAirport(airportd);
         isDest = true;
     }
 %>
@@ -197,7 +197,7 @@ function load()
 	{
 		var pointdest = new GLatLng(<%=latd%>,<%=lond%>);
 		ap = "<font face='Verdana' size='1'><%=airportd.getIcao()%><br><%=airportd.getName()%><br><%=airportd.getCity()%>, <%=airportd.getCountry()%></font>";
-<%		assignments = data.getAssignments(icaod, -1, -1, -1, -1);	
+<%		assignments = Assignments.getAssignments(icaod, -1, -1, -1, -1);
 		
 		if (assignments.size() != 0)
 		{
@@ -218,7 +218,7 @@ function load()
             }
 		}
 			
-		fboList = data.getFboByLocation(icaod);
+		fboList = Fbos.getFboByLocation(icaod);
 		fuelprice = airportd.getFuelPrice();
 		String fuel = Formatters.currency.format(fuelprice);
 		//fbos = new String[fboList.size()];
@@ -230,7 +230,7 @@ function load()
 			for (FboBean fbo : fboList) 
 			{				
 		        String temp = "";
-				fuelleft = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
+				fuelleft = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
 				int fuelgallons = 0;
 				if (fuelleft != null)
 					fuelgallons = (int)Math.floor(fuelleft.getAmount()/Data.GALLONS_TO_KG);

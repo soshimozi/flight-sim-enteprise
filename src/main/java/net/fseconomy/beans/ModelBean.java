@@ -17,7 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package net.fseconomy.data;
+package net.fseconomy.beans;
+
+import net.fseconomy.data.Data;
 
 import java.io.Serializable;
 import java.sql.ResultSet;

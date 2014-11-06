@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import = "net.fseconomy.data.*, java.util.*"
+	    import = "net.fseconomy.beans.*, net.fseconomy.data.*, java.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%!
 String groupMenu(UserBean user, String parent, int id, String name, boolean staffOnly, boolean includeBaseLink, String link, String arg, HttpServletResponse response)
@@ -20,7 +20,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 	if (memberships != null)
 		for (Iterator i = memberships.values().iterator(); i.hasNext(); )
 		{
-			Data.groupMemberData memberData = (Data.groupMemberData) i.next();
+			Accounts.groupMemberData memberData = (Accounts.groupMemberData) i.next();
 			if (staffOnly == false || memberData.memberLevel >= UserBean.GROUP_STAFF)
 			{
 				int len = memberData.groupName.length();
@@ -36,7 +36,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 
 	for (Iterator i = memberships.values().iterator(); i.hasNext(); )
 	{
-		Data.groupMemberData memberData = (Data.groupMemberData) i.next();
+        Accounts.groupMemberData memberData = (Accounts.groupMemberData) i.next();
 		if (staffOnly == false || memberData.memberLevel >= UserBean.GROUP_STAFF)
 			returnValue.append("oM.makeMenu('" + menu + "_" + count++ +"','" + menu + "','" + memberData.groupName.replaceAll("\'","\\\\'") + "','" + response.encodeURL(link + arg + memberData.groupId) + "', '', " + length + ");\n");
 	}
@@ -135,7 +135,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 	{
 %>
 		oM.makeMenu('m13','','CSR','<%= response.encodeURL("admin/index.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
-		oM.makeMenu('sub13_0','m13','Add User','<%= response.encodeURL("signup.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
+		oM.makeMenu('sub13_0','m13','Add User','<%= response.encodeURL("createaccount.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
 		oM.makeMenu('sub13_1','m13','Edit User','<%= response.encodeURL("admin/accountedit.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
 		oM.makeMenu('sub13_2','m13','Client Ip Checks','<%= response.encodeURL("admin/checkclientip.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
 <% 

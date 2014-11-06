@@ -1,10 +1,10 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.* "
+        import="net.fseconomy.beans.*, net.fseconomy.data.* "
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
-<jsp:useBean id="template" class="net.fseconomy.data.TemplateBean">
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
+<jsp:useBean id="template" class="net.fseconomy.beans.TemplateBean">
     <jsp:setProperty name="template" property="*"/>
 </jsp:useBean>
 

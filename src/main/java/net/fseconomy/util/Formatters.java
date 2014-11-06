@@ -1,4 +1,6 @@
 package net.fseconomy.util;
+import net.fseconomy.beans.UserBean;
+
 import java.sql.Timestamp;
 import java.text.*;
 import java.util.Calendar;
@@ -63,7 +65,7 @@ public class Formatters
 		datemmyyyy.setTimeZone(gmt);
 	}
 	
-	public static DateFormat getUserTimeFormat(net.fseconomy.data.UserBean user)
+	public static DateFormat getUserTimeFormat(UserBean user)
 	{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		if(user.getUserTimezone() == 0)

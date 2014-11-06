@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.*, java.net.*"
+        import="java.text.*, net.fseconomy.beans.*, net.fseconomy.data.*, java.net.*"
  %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -26,7 +26,7 @@
     else
     {
         groupId = Integer.parseInt(sGroup);
-        UserBean group = data.getGroupById(groupId);
+        UserBean group = Accounts.getGroupById(groupId);
 
         groupName = group.getName();
         selector = "group " + groupName;

@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.*, net.fseconomy.data.*, org.apache.commons.fileupload.*"
+        import="java.util.*, net.fseconomy.beans.*, net.fseconomy.data.*, org.apache.commons.fileupload.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -29,7 +29,7 @@
 		FileItem fClear = (FileItem) itemsMap.get("clear");
 		String sClear = fClear != null ? fClear.getString() : null;
 		id = Integer.parseInt(sId);
-		fbo = data.getFbo(id);	
+		fbo = Fbos.getFbo(id);
 		FileItem image = (FileItem) itemsMap.get("bg");
 		boolean clear = sClear != null && !sClear.equals("");
 		if (image != null)
@@ -68,7 +68,7 @@
 	{
 		sId = request.getParameter("id");
 		id = Integer.parseInt(sId);
-		fbo = data.getFbo(id);
+		fbo = Fbos.getFbo(id);
 		
 		//FSX Client for some reason does not pass session data
 		if(user.getId() == -1)

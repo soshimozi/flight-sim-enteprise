@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.fseconomy.data.*;
+import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Formatters;
 
 public class SigServer extends HttpServlet
@@ -215,8 +216,8 @@ public class SigServer extends HttpServlet
 		if(Data.prevstatsmap == null)
 			return false;
 		
-		Data.statistics curr = Data.statsmap.get(user);
-		Data.statistics prev = Data.prevstatsmap.get(user);
+		Statistics curr = Data.statsmap.get(user);
+		Statistics prev = Data.prevstatsmap.get(user);
 
         return !(curr.flights == prev.flights && curr.totalFlightTime == prev.totalFlightTime);
 
@@ -238,7 +239,7 @@ public class SigServer extends HttpServlet
         }
 
 		//Compute the text to embed
-		Data.statistics s = Data.statsmap.get(user);		
+		Statistics s = Data.statsmap.get(user);
 		String stats = "1st Flight: " + Formatters.datemmyyyy.format(s.firstFlight) + "       Flights: " + s.flights + "       Hours: " + s.totalFlightTime/3600;
 		
 		//do it

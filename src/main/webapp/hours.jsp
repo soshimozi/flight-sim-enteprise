@@ -1,14 +1,14 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.dto.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
 
-    List<Data.pendingHours> pendingList = null;
+    List<PendingHours> pendingList = null;
     try
     {
         pendingList = data.getPendingHours(user.getName(), 48);
@@ -59,7 +59,7 @@
 <%		
 	}
 		
-	for (Data.pendingHours hour : pendingList)
+	for (PendingHours hour : pendingList)
 	{
 %>
         <tr>

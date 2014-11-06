@@ -1,4 +1,9 @@
-package net.fseconomy.data;
+package net.fseconomy.beans;
+
+import net.fseconomy.data.Data;
+import net.fseconomy.data.Fbos;
+import net.fseconomy.data.Goods;
+import net.fseconomy.dto.CloseAirport;
 
 import java.io.Serializable;
 import java.sql.*;
@@ -35,7 +40,7 @@ public class AirportBean implements Serializable
 	int longestRwy, surfaceType;
 	double fuelPrice,landingFee,JetAPrice,JetAMult;
 	double lat, lon;
-	public Data.closeAirport[] closestAirports;
+	public CloseAirport[] closestAirports;
 	int bucket;
 	boolean avgas;
 	boolean jeta;
@@ -75,7 +80,7 @@ public class AirportBean implements Serializable
 	public boolean hasServices(Data data)
 	{
         return size >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE
-                || data.hasRepairShop(icao);
+                || Fbos.hasRepairShop(icao);
     }
 	
 	public boolean hasGoodsForSale(Data data)
@@ -83,13 +88,13 @@ public class AirportBean implements Serializable
 		if(size > MIN_SIZE_BIG)
 			return true;
 		
-		for (int c = 0; c < data.commodities.length; c++)
+		for (int c = 0; c < Goods.commodities.length; c++)
         {
-            if (data.commodities[c] != null && size > data.commodities[c].getMinAirportSize())
+            if (Goods.commodities[c] != null && size > Goods.commodities[c].getMinAirportSize())
                 return true;
         }
 
-		return data.hasSuppliesForSale(icao);
+		return Fbos.hasSuppliesForSale(icao);
 	}
 	
 	public String getIcao()
@@ -279,7 +284,7 @@ public class AirportBean implements Serializable
 		else if (hasFuel)
 			ext = "-fuel";
 		
-		return "img/" + base + ext + ".gif";
+		return "/img/" + base + ext + ".gif";
 	}
 
 	public int getFboSlots()

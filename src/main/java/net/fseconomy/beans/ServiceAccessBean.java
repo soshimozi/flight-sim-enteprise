@@ -1,4 +1,4 @@
-package net.fseconomy.data;
+package net.fseconomy.beans;
 
 import javax.sql.rowset.CachedRowSet;
 import java.sql.SQLException;
@@ -16,7 +16,7 @@ public class ServiceAccessBean
     private String goodsaccess;
 
     ServiceAccessBean() {};
-    ServiceAccessBean(CachedRowSet rs)
+    public ServiceAccessBean(CachedRowSet rs)
     {
         try
         {

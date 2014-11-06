@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -20,9 +20,9 @@
     boolean madeBlocksSelection = false;
 
     FboBean fbo = null;
-    AirportBean airport = data.getAirport(icao);
-    data.fillAirport(airport);
-    List<FboFacilityBean> facilities = data.getFboDefaultFacilitiesForAirport(icao);
+    AirportBean airport = Airports.getAirport(icao);
+    Airports.fillAirport(airport);
+    List<FboFacilityBean> facilities = Fbos.getFboDefaultFacilitiesForAirport(icao);
     FboFacilityBean facility = null;
 
     if (madeFacilitySelection)
@@ -37,8 +37,8 @@
             }
         }
 
-        fbo = data.getFbo(facility.getFboId());
-        suppliedDays = data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport);
+        fbo = Fbos.getFbo(facility.getFboId());
+        suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport);
         madeBlocksSelection = request.getParameter("selectBlocks") != null;
 
         if (madeBlocksSelection)
@@ -94,8 +94,8 @@
 		{ 
 			if (bean.getUnits() == AssignmentBean.UNIT_PASSENGERS)
 			{
-				fbo = data.getFbo(bean.getFboId());
-				int spaceAvailable = data.calcFboFacilitySpaceAvailable(bean, fbo, airport);
+				fbo = Fbos.getFbo(bean.getFboId());
+				int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(bean, fbo, airport);
 				String rentURL = "fbofacilityrent.jsp?icao=" + airport.getIcao() + "&facilityId=" + bean.getId();
 				String rentLink = "<a href=\"" + rentURL + "\">Rent</a>";
 %>
@@ -115,8 +115,8 @@
 	} 
 	else if (!madeBlocksSelection) 
 	{
-		Data.groupMemberData[] staffGroups = user.getStaffGroups();
-		int spaceAvailable = data.calcFboFacilitySpaceAvailable(facility, fbo, airport);
+        Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
+		int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(facility, fbo, airport);
 %>
 	<form method="post" action="fbofacilityrent.jsp" name="rentForm">
 	<input type="hidden" name="icao" value="<%= icao %>" />
@@ -176,7 +176,7 @@
 	} 
 	else 
 	{
-		UserBean occupant = data.getAccountById(occupantId);
+		UserBean occupant = Accounts.getAccountById(occupantId);
 %>
 	<form method="post" action="userctl" name="rentForm">
 	<input type="hidden" name="event" value="rentFboFacility" />

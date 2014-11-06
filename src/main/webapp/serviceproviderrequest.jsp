@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -81,12 +81,12 @@
 			service.setIP(ip);
 			service.setUrl(url);
 			service.setDescription(desc);
-			data.addServiceProvider(service);
+            ServiceProviders.addServiceProvider(service);
 			
 			String msg = "A new request for a service key has been made for service: " + service.getName() + " (" + service.getOwnerName() + ")" + "\n\nThis is an automated notice.";
 			try
 			{
-				data.doServiceProviderNotification(service, "FSE - New Service Key Request", msg, true);
+                ServiceProviders.doServiceProviderNotification(service, "FSE - New Service Key Request", msg, true);
 			}
 			catch (DataError e)
 			{
@@ -100,7 +100,7 @@
 	if(desc == null || desc.isEmpty())
 		desc = "Please replace this text with a general description of your service.";
 
-	List<UserBean> accounts = data.getAccounts(true);
+	List<UserBean> accounts = Accounts.getAccounts(true);
 %>
 	<h2>Service Provider Key Request</h2>
 	<div class="textarea" style="width: 800px">

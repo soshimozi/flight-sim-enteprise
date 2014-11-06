@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.*, java.text.*, net.fseconomy.data.*"
+        import="java.util.*, java.text.*, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -29,7 +29,7 @@
         if( displayHidden != null)
             displayhidden = Boolean.parseBoolean(displayHidden);
 
-        List<UserBean> accounts = data.getAccountNames(query, accttype, 10, displayhidden);
+        List<UserBean> accounts = Accounts.getAccountNames(query, accttype, 10, displayhidden);
         if(accounts.size() > 0)
         {
             String output = "{\"accounts\": [";

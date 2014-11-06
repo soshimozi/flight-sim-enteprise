@@ -1,8 +1,8 @@
 <%@page language="java"
-	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+	    import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -28,10 +28,10 @@
 	
 	AircraftBean aircraft;
 
-	aircraft = data.getAircraftShippingInfoByRegistration(reg);
+	aircraft = Aircraft.getAircraftShippingInfoByRegistration(reg);
 	
-	AirportBean departairport = data.getAirport(aircraft.getLocation());
-	departfbos = data.getFboForRepair( departairport, data.FBO_REPAIR_MARGIN );
+	AirportBean departairport = Airports.getAirport(aircraft.getLocation());
+	departfbos = Fbos.getFboForRepair( departairport, Fbos.FBO_REPAIR_MARGIN );
 
 	boolean isRented = aircraft.getUserLock() != 0;
 	boolean isForSale = aircraft.getSellPrice() != 0;
@@ -65,7 +65,7 @@
             shipto = shipto.toUpperCase();
 
 		//check that we can find the destination airfield
-		AirportBean destairport = data.getAirport(shipto);
+		AirportBean destairport = Airports.getAirport(shipto);
 		if( destairport == null )
 		{
 			error = "Invalid ICAO entered for destination. Please try again.";
@@ -79,7 +79,7 @@
 			step2 = true;
 			
 			//need to get find the list of active repair stations for departure and destination airfields
-			destfbos = data.getFboForRepair( destairport );		
+			destfbos = Fbos.getFboForRepair( destairport );
 
 			hasActiveShopDest = false;
             for (FboBean destfbo : destfbos)
@@ -144,8 +144,8 @@
 			departSvc = Integer.parseInt(depart);
 			destSvc = Integer.parseInt(dest);
 
-			FboBean fromfbo = data.getFbo(departSvc);
-			FboBean tofbo = data.getFbo(destSvc);
+			FboBean fromfbo = Fbos.getFbo(departSvc);
+			FboBean tofbo = Fbos.getFbo(destSvc);
 
             departMargin = departSvc == 0 ?	departMargin = 25 : fromfbo.getRepairShopMargin();
 			destMargin = destSvc == 0 ?	destMargin = 25 : tofbo.getRepairShopMargin();

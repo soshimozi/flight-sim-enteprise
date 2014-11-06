@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -14,7 +14,7 @@
     String group = request.getParameter("groupId");
     UserBean account = user;
     if (group != null)
-        account = data.getAccountById(Integer.parseInt(group));
+        account = Accounts.getAccountById(Integer.parseInt(group));
 
     boolean display = false;
     if ((account.isGroup() && user.groupMemberLevel(Integer.parseInt(group)) == UserBean.GROUP_OWNER)
@@ -28,7 +28,7 @@
         //get services
         StringBuilder optionServiceProviders = new StringBuilder();
         optionServiceProviders.append("<option value=\"0\">Make Selection</option>/n");
-        List<ServiceProviderBean> services =  Data.getInstance().getAccountAvailableServiceProviders(account.getId());
+        List<ServiceProviderBean> services =  ServiceProviders.getAccountAvailableServiceProviders(account.getId());
         for(ServiceProviderBean spb: services)
         {
             if(spb.getStatus() == ServiceProviderBean.STATUS_ACTIVE)
@@ -42,7 +42,7 @@
 
         //get current service permissions
         StringBuilder trCurrentServiceProviders = new StringBuilder();
-        ServiceAccessBean[] serviceAccess = Data.getInstance().getCurrentServiceProviderAccess(account.getId());
+        ServiceAccessBean[] serviceAccess = ServiceProviders.getCurrentServiceProviderAccess(account.getId());
         if(serviceAccess.length != 0)
         for(ServiceAccessBean bean: serviceAccess)
         {

@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="net.fseconomy.data.*"
+	    import="net.fseconomy.beans.*,net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -25,12 +25,12 @@
 	if (sId != null)
 	{
 		int id = Integer.parseInt(sId);
-	    account = data.getAccountById(id);
+	    account = Accounts.getAccountById(id);
 	}
 	
 	String goods = "";
 	if (type != null)
-		goods = data.commodities[Integer.parseInt(type)].getName();
+		goods = Goods.commodities[Integer.parseInt(type)].getName();
 	
     String pricequote = (String)request.getAttribute("price");	
     if (pricequote == null)
@@ -40,7 +40,7 @@
     if (amountquoted == null)
 	    amountquoted ="0";
     
-    int goodsavail = data.getGoodsQty(location,(account.getId ()),(Integer.parseInt(type)));
+    int goodsavail = Goods.getGoodsQty(location,(account.getId ()),(Integer.parseInt(type)));
 %>
 
 <!DOCTYPE html>

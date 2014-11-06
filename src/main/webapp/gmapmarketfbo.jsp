@@ -1,14 +1,14 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
 
-    List<FboBean> fbos = data.getFboForSale();
+    List<FboBean> fbos = Fbos.getFboForSale();
 %>
 
 <!DOCTYPE html>
@@ -59,10 +59,10 @@
 <%
 for (FboBean fbo : fbos)
 {
-	AirportBean airport = data.getAirport(fbo.getLocation());
+	AirportBean airport = Airports.getAirport(fbo.getLocation());
 	double lat = airport.getLat();
 	double lon = airport.getLon();
-	String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
+	String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
 	int sizeIcon = fbo.getFboSize() - 1;
 	
 	StringBuilder sb = new StringBuilder();
@@ -74,7 +74,7 @@ for (FboBean fbo : fbos)
 	sb.append(", ");
 	sb.append(Converters.escapeJavaScript(airport.getCountry()));
 	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(data.getAccountNameById(fbo.getOwner())));
+	sb.append(Converters.escapeJavaScript(Accounts.getAccountNameById(fbo.getOwner())));
 	sb.append("<br>");
 	sb.append(Formatters.currency.format(fbo.getPrice()));
 	sb.append("</div>");

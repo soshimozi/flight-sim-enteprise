@@ -3,8 +3,9 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -94,7 +95,7 @@
             <input type="button" class="button" onclick="doLockAccount()" value="Lock Account" />&nbsp;&nbsp;&nbsp;&nbsp;
             <input type="button" class="button" onclick="doUnlockAccount()" value="Unlock Account" />
             <input type="hidden" name="event" value="lockAccount"/>
-            <input type="hidden" name="returnpage" value="/admin/accountlock.jsp"/>
+            <input type="hidden" name="returnpage" value="/admin/accountstatusedit.jsp"/>
         </div>
 	</form>
 	</div>

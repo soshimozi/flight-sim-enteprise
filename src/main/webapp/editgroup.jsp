@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -15,7 +15,7 @@
     String returnPage = request.getRequestURI() + groupParam;
 
     int groupId = Integer.parseInt(sId);
-    UserBean group = data.getGroupById(groupId);
+    UserBean group = Accounts.getGroupById(groupId);
 
     if (request.getParameter("submit") == null)
     {
@@ -33,7 +33,7 @@
             group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
             group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
             group.setBanList(request.getParameter("banList"));
-            data.updateGroup(group, user);
+            Accounts.updateGroup(group, user);
 %>
 <jsp:forward page="groups.jsp"></jsp:forward>
 <%

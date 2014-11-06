@@ -1,14 +1,14 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, java.util.List, net.fseconomy.util.Formatters"
+        import="net.fseconomy.dto.*, net.fseconomy.beans.*, net.fseconomy.data.*, java.util.List, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
 
-    List<Data.aircraftConfigs> aircraftList = data.getAircraftConfigs();
+    List<AircraftConfigs> aircraftList = Aircraft.getAircraftConfigs();
 
     String sview = request.getParameter("view");
     int view = 0;
@@ -85,7 +85,7 @@
 	</thead>
 	<tbody>
 <%
-        for (Data.aircraftConfigs aircraft : aircraftList)
+        for (AircraftConfigs aircraft : aircraftList)
         {
         String price = Formatters.currency.format(aircraft.price);
         int totalFuel = aircraft.fcapExt1 + aircraft.fcapLeftTip + aircraft.fcapLeftAux + aircraft.fcapLeftMain +
@@ -152,7 +152,7 @@
 	</thead>
 	<tbody>
 <%
-        for (Data.aircraftConfigs aircraft : aircraftList)
+        for (AircraftConfigs aircraft : aircraftList)
         {
             String price = Formatters.currency.format(aircraft.price);
             double fType = aircraft.fueltype;

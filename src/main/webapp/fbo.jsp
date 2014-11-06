@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters, net.fseconomy.util.Converters"
+	    import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters, net.fseconomy.util.Converters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -19,7 +19,7 @@
 	if (sId != null)
 	{
 		int id = Integer.parseInt(sId);
-		account = data.getAccountById(id);
+		account = Accounts.getAccountById(id);
         if (account != null)
         {
             if (!account.isGroup() || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
@@ -34,8 +34,8 @@
     }
 	
 	
-	List<FboBean> fbos = data.getFboByOwner(account.getId(), "location");
-	List<AirportBean> airports = data.getAirportsForFboConstruction(account.getId());
+	List<FboBean> fbos = Fbos.getFboByOwner(account.getId(), "location");
+	List<AirportBean> airports = Airports.getAirportsForFboConstruction(account.getId());
 %>
 
 <!DOCTYPE html>
@@ -120,7 +120,7 @@
 		for(FboBean aFbo: fbos)
 		{
 	%>
-        data.push(<%=data.getAirportOperationDataJSON(aFbo.getLocation()) %>);
+        data.push(<%=Airports.getAirportOperationDataJSON(aFbo.getLocation()) %>);
         titles.push('<%=aFbo.getLocation() %>');
 <% 	    
         } 
@@ -314,14 +314,14 @@
 <%
     for (FboBean fbo : fbos)
 	{
-		GoodsBean supplies = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_SUPPLIES);
-		GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
-		GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
-		GoodsBean buildingmaterials = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
-		AirportBean ap = data.getAirport(fbo.getLocation());
+		GoodsBean supplies = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_SUPPLIES);
+		GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
+		GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
+		GoodsBean buildingmaterials = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
+		AirportBean ap = Airports.getAirport(fbo.getLocation());
 %>
     		<tr>
-                <td><%= data.airportLink(ap, ap, response) %></td>	
+                <td><%= Airports.airportLink(ap, ap, response) %></td>
                 <td><%= fbo.getName() %></td>
                 <td><%= fbo.isActive() ? "Open" : "<span style=\'color: red;\'>Closed</span>" %></td>
                 <td class="numeric"><%= fbo.isForSale() ? Formatters.currency.format(fbo.getPrice()) + (fbo.getPriceIncludesGoods() ? " + goods" : "") : "" %></td>
@@ -334,7 +334,7 @@
                 <td class="numeric"><%= buildingmaterials != null ? buildingmaterials.getAmount() : "" %></td>
                 <td>
                     <a class="link" href="<%= response.encodeURL("editfbo.jsp?id=" + fbo.getId()) %>">Edit</a>
-                    |<a class="link" href="<%= response.encodeURL("buyBulkFuel.jsp?id=" + fbo.getId()) %>"><%=data.doesBulkFuelRequestExist(fbo.getId()) ? " Order Pending ":" Order Bulk Fuel " %></a>
+                    |<a class="link" href="<%= response.encodeURL("buyBulkFuel.jsp?id=" + fbo.getId()) %>"><%=Fbos.doesBulkFuelRequestExist(fbo.getId()) ? " Order Pending ":" Order Bulk Fuel " %></a>
 <%		
 		String paymentUrl;
         if (account.isGroup())
@@ -355,7 +355,7 @@
 				    | <a class="link" href="javascript:doSubmit<%= fbo.getFboSize() > 1 ? "3" : "2" %>('<%= "(" + fbo.getLocation() + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fbo.getId() %>', '<%= fbo.recoverableBuildingMaterials() %>')">Tear Down</a>
 <%		}
 
-		if ((data.getAirportFboSlotsAvailable(ap.getIcao()) > 0) && (buildingmaterials != null) && (buildingmaterials.getAmount() >= GoodsBean.CONSTRUCT_FBO)) 
+		if ((Fbos.getAirportFboSlotsAvailable(ap.getIcao()) > 0) && (buildingmaterials != null) && (buildingmaterials.getAmount() >= GoodsBean.CONSTRUCT_FBO))
 		{
 %>
 			    	| <a class="link" href="javascript:doSubmit4('<%= "(" + fbo.getLocation() + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fbo.getId() %>', '<%= GoodsBean.CONSTRUCT_FBO %>')">Build Up</a>
@@ -393,7 +393,7 @@
 		{	 
 %>
 			<tr>
-				<td><%= data.airportLink(airport, airport, response) %></td>
+				<td><%= Airports.airportLink(airport, airport, response) %></td>
 				<td><%= airport.getTitle() %></td>
 			</tr>
 <% 		

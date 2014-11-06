@@ -31,7 +31,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
+import net.fseconomy.dto.AircraftAlias;
+import net.fseconomy.dto.AircraftConfigs;
+import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 
@@ -218,7 +222,7 @@ public class Datafeed extends HttpServlet
 		if(isService)
 		{
 			requestorkey = servicekey;
-			ServiceProviderBean spb = data.getServiceProviderByKey(servicekey);
+			ServiceProviderBean spb = ServiceProviders.getServiceProviderByKey(servicekey);
 			
 			//bad key, kick it
 			if(spb == null)
@@ -236,7 +240,7 @@ public class Datafeed extends HttpServlet
 			requestorkey = userkey;
 			
 			//Get our user account data
-			UserBean user = data.getAccountById(data.getUserGroupIdByReadAccessKey(userkey));
+			UserBean user = Accounts.getAccountById(Accounts.getUserGroupIdByReadAccessKey(userkey));
 			
 			//bad key, kick it
 			if(user == null )
@@ -250,7 +254,7 @@ public class Datafeed extends HttpServlet
 		//Check if we have a data access key
 		if(accesskey != null)
 		{
-			accessKeyAccount = data.getAccountById(data.getUserGroupIdByReadAccessKey(accesskey));
+			accessKeyAccount = Accounts.getAccountById(Accounts.getUserGroupIdByReadAccessKey(accesskey));
 		
 			//bad key, kick it
 			if(accessKeyAccount == null)
@@ -607,7 +611,7 @@ public class Datafeed extends HttpServlet
 				csvoutput.appendHeaderItem("ExpireDateTime");		
 			}	
 			
-            List<AssignmentBean> assignments = data.getAssignmentsSQL("SELECT * FROM assignments WHERE aircraft is not null");
+            List<AssignmentBean> assignments = Assignments.getAssignmentsSQL("SELECT * FROM assignments WHERE aircraft is not null");
 
             for (AssignmentBean assignment : assignments)
             {
@@ -618,7 +622,7 @@ public class Datafeed extends HttpServlet
                     csvoutput.append(assignment.getFromTemplate());
                     csvoutput.append(assignment.getId());
                     csvoutput.append(assignment.getAircraft());
-                    AircraftBean ac = data.getAircraftByRegistration(assignment.getAircraft());
+                    AircraftBean ac = Aircraft.getAircraftByRegistration(assignment.getAircraft());
                     csvoutput.append(ac.getMakeModel());
                     csvoutput.append(assignment.getFrom());
                     csvoutput.append(assignment.getTo());
@@ -635,7 +639,7 @@ public class Datafeed extends HttpServlet
                     xmloutput.append("templateId", assignment.getFromTemplate());
                     xmloutput.append("id", assignment.getId());
                     xmloutput.append("aircraft", assignment.getAircraft());
-                    AircraftBean ac = data.getAircraftByRegistration(assignment.getAircraft());
+                    AircraftBean ac = Aircraft.getAircraftByRegistration(assignment.getAircraft());
                     xmloutput.append("makemodel", ac.getMakeModel());
                     xmloutput.append("from", assignment.getFrom());
                     xmloutput.append("to", assignment.getTo());
@@ -889,11 +893,11 @@ public class Datafeed extends HttpServlet
 				
 			//get our read access key and validate it
 			String readAccessKey = req.getParameter("readaccesskey");
-			id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+			id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
 			if(id == -1)
 				throw new DataError("No User or Group found for provided ReadAccessKey.");
 	
-			UserBean account = data.getAccountById(id);		
+			UserBean account = Accounts.getAccountById(id);
 			
 			//Get our name parameter for the make/model we want to retrieve
 			String format = req.getParameter("format");
@@ -909,9 +913,9 @@ public class Datafeed extends HttpServlet
 	
 			//only one search type right now
 			if(account.isGroup())
-				assignments = data.getAssignmentsForGroup(account.getId(), true);
+				assignments = Assignments.getAssignmentsForGroup(account.getId(), true);
 			else
-				assignments = data.getAssignmentsForUser(account.getId());					
+				assignments = Assignments.getAssignmentsForUser(account.getId());					
 			
 			if(csvformat)
 				AddCSVAssignmentItems(csvoutput, assignments, account.getId());
@@ -949,13 +953,13 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//escape single quotes contained in the string
-		int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+		int id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
 		if(id == -1)
 			throw new DataError("No User or Group found for provided ReadAccessKey.");
 
-		UserBean account = data.getAccountById(id);
+		UserBean account = Accounts.getAccountById(id);
 				
-		List<GoodsBean> goods = data.getGoodsForAccountAvailable(account.getId());
+		List<GoodsBean> goods = Goods.getGoodsForAccountAvailable(account.getId());
 
         for (GoodsBean good : goods)
         {
@@ -1012,23 +1016,23 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//escape single quotes contained in the string
-		int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+		int id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
 		if(id == -1)
 			throw new DataError("No User or Group found for provided ReadAccessKey.");
 		
-		UserBean account = data.getAccountById(id);
+		UserBean account = Accounts.getAccountById(id);
 		String name = Converters.XMLHelper.protectSpecialCharacters(account.getName());
 		
 		int flights = 0;
 		int totalMiles = 0;
 		String time = "";
-		Data.statistics[] stats = data.getStatistics();
+		Statistics[] stats = data.getStatistics();
 		if(stats == null)
 		{
 			throw new DataError("Statistics not calculated yet. Try again in a few minutes.");
 		}
 
-        for (Data.statistics entry : stats)
+        for (Statistics entry : stats)
         {
             if (entry.accountName.contentEquals(account.getName()))
             {
@@ -1105,12 +1109,12 @@ public class Datafeed extends HttpServlet
                     readAccessKey = req.getParameter("readaccesskey");
 
                     //escape single quotes contained in the string
-                    id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+                    id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
 
                     if (id == -1)
                         throw new DataError("No User or Group found for provided ReadAccessKey.");
 
-                    account = data.getAccountById(id);
+                    account = Accounts.getAccountById(id);
                 }
                 else if (req.getParameter("aircraftreg") != null)
                 {
@@ -1131,11 +1135,11 @@ public class Datafeed extends HttpServlet
                 List<LogBean> log;
                 if (reg != null && !reg.isEmpty())
                 {
-                    log = data.getLogForAircraftFromId(reg, fromid);
+                    log = Logging.getLogForAircraftFromId(reg, fromid);
                 }
                 else if (req.getParameter("type") != null && req.getParameter("type").toLowerCase().contains("groupaircraft"))
                 {
-                    List<AircraftBean> aircraftList = data.getAircraftOwnedByUser(account.getId());
+                    List<AircraftBean> aircraftList = Aircraft.getAircraftOwnedByUser(account.getId());
                     if (aircraftList.size() > 0)
                     {
                         String regs = "";
@@ -1156,7 +1160,7 @@ public class Datafeed extends HttpServlet
 
                             counter++;
                         }
-                        log = data.getLogForGroupFromRegistrations(regs, fromid);
+                        log = Logging.getLogForGroupFromRegistrations(regs, fromid);
                     }
                     else
                     {
@@ -1165,11 +1169,11 @@ public class Datafeed extends HttpServlet
                 }
                 else if (account.isGroup())
                 {
-                    log = data.getLogForGroupFromId(account.getId(), fromid);
+                    log = Logging.getLogForGroupFromId(account.getId(), fromid);
                 }
                 else
                 {
-                    log = data.getLogForUserFromId(account.getName(), fromid);
+                    log = Logging.getLogForUserFromId(account.getName(), fromid);
                 }
                 results = ProcessFlightLogs(req, log, "FlightLogsFromId");
 
@@ -1194,11 +1198,11 @@ public class Datafeed extends HttpServlet
                     readAccessKey = req.getParameter("readaccesskey");
 
                     //escape single quotes contained in the string
-                    id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+                    id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
                     if (id == -1)
                         throw new DataError("No User or Group found for provided ReadAccessKey.");
 
-                    account = data.getAccountById(id);
+                    account = Accounts.getAccountById(id);
                 }
                 else if (req.getParameter("aircraftreg") != null)
                 {
@@ -1218,11 +1222,11 @@ public class Datafeed extends HttpServlet
 
                 List<LogBean> log;
                 if (reg != null && !reg.isEmpty())
-                    log = data.getLogForAircraftByMonth(reg, month, year);
+                    log = Logging.getLogForAircraftByMonth(reg, month, year);
                 else if (account.isGroup())
-                    log = data.getLogForGroupByMonth(account.getId(), month, year);
+                    log = Logging.getLogForGroupByMonth(account.getId(), month, year);
                 else
-                    log = data.getLogForUserByMonth(account.getName(), month, year);
+                    log = Logging.getLogForUserByMonth(account.getName(), month, year);
 
                 results = ProcessFlightLogs(req, log, "FlightLogsByMonthYear");
                 break;
@@ -1244,11 +1248,11 @@ public class Datafeed extends HttpServlet
 		String readAccessKey = req.getParameter("readaccesskey");
 
 		//escape single quotes contained in the string
-		int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+		int id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
 		if(id == -1)
 			throw new DataError("No User or Group found for provided ReadAccessKey.");
 
-		UserBean account = data.getAccountById(id);
+		UserBean account = Accounts.getAccountById(id);
 		
 		//Get our parameters
 		String searchParam = req.getParameter("search");
@@ -1259,7 +1263,7 @@ public class Datafeed extends HttpServlet
 			int month = ValidateMonth(req.getParameter("month"));
 			int year = ValidateYear(req.getParameter("year"), month);
 
-			log = data.getPaymentsForIdByMonth(account.getId(), month, year);
+			log = Banking.getPaymentsForIdByMonth(account.getId(), month, year);
 		}
 		else if(searchParam.equals("id"))
 		{
@@ -1274,7 +1278,7 @@ public class Datafeed extends HttpServlet
 			+ " UNION SELECT * from payments where otherparty = " + id + " AND id > " + fromid 
 			+ " ORDER BY id LIMIT 500"; 
 			
-			log = data.getPaymentLogSQL(sql);
+			log = Banking.getPaymentLogSQL(sql);
 		}
 		return ProcessPayments(req, log, "PaymentsByMonthYear");
 	}
@@ -1302,11 +1306,11 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//escape single quotes contained in the string
-		int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+		int id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
 		if(id == -1)
 			throw new DataError("No User or Group found for provided ReadAccessKey.");
 
-		UserBean account = data.getAccountById(id);
+		UserBean account = Accounts.getAccountById(id);
 		String groupname = Converters.XMLHelper.protectSpecialCharacters(account.getName());
 		if(!account.isGroup())
 			throw new DataError("Requires a Group ReadAccessKey.");
@@ -1315,15 +1319,15 @@ public class Datafeed extends HttpServlet
 		{
             boolean firstLoop = true;
 
-			List<UserBean> members = data.getUsersForGroup(id);
+			List<UserBean> members = Accounts.getUsersForGroup(id);
 			for (UserBean member : members)
 			{
-				data.reloadMemberships(member);
+                Accounts.reloadMemberships(member);
 
 				String level = "ERROR";
 				if(member.getMemberships().containsKey(id))
 				{
-					Data.groupMemberData gmd = member.getMemberships().get(id);
+                    Accounts.groupMemberData gmd = member.getMemberships().get(id);
 					level = UserBean.getGroupLevelName(gmd.memberLevel);
 				}
 
@@ -1379,12 +1383,12 @@ public class Datafeed extends HttpServlet
 		//Get our name parameter for the make/model we want to retrieve
 		String readAccessKey = req.getParameter("readaccesskey");
 
-		int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+		int id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
 		if(id == -1)
 			throw new DataError("No User or Group found for provided ReadAccessKey.");
 		
 		//get the facilities by the requester
-		List<FboFacilityBean> facs = data.getFboFacilitiesByOccupant(id);
+		List<FboFacilityBean> facs = Fbos.getFboFacilitiesByOccupant(id);
 		result = ProcessFacilities(req, facs, "Facilities");
 		
 		return result;
@@ -1408,12 +1412,12 @@ public class Datafeed extends HttpServlet
                 String readAccessKey = req.getParameter("readaccesskey");
 
                 //escape single quotes contained in the string
-                int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+                int id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
                 if (id == -1)
                     throw new DataError("No User or Group found for provided ReadAccessKey.");
 
                 //get selected aircraft
-                List<FboBean> fbos = data.getFboByOwner(id);
+                List<FboBean> fbos = Fbos.getFboByOwner(id);
                 result = ProcessFbos(req, fbos, "FboByKey");
                 break;
             }
@@ -1436,17 +1440,17 @@ public class Datafeed extends HttpServlet
                     xmloutput = new Converters.xmlBuffer();
 
                 //escape single quotes contained in the string
-                int id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+                int id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
                 if (id == -1)
                     throw new DataError("No User or Group found for provided ReadAccessKey.");
 
-                UserBean account = data.getAccountById(id);
+                UserBean account = Accounts.getAccountById(id);
 
                 String icao = req.getParameter("icao");
 
                 //if key owns fbo at icao continue, else throw access error!
                 String sql = "select * from fbo where location='" + icao + "' and owner=" + account.getId();
-                List<FboBean> fbos = data.getFboSql(sql);
+                List<FboBean> fbos = Fbos.getFboSql(sql);
 
                 if (fbos.size() == 0)
                     throw new DataError("No fbo found for provided ReadAccessKey.");
@@ -1473,7 +1477,7 @@ public class Datafeed extends HttpServlet
             case "forsale":
             {
                 //get list of aircraft for sale
-                List<FboBean> fbos = data.getFboForSale();
+                List<FboBean> fbos = Fbos.getFboForSale();
 
                 result = ProcessFbos(req, fbos, "FbosForSale");
                 break;
@@ -1500,7 +1504,7 @@ public class Datafeed extends HttpServlet
                 String icao = req.getParameter("icao");
 
                 //get selected aircraft
-                List<AircraftBean> aircraftList = data.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND location='" + icao + "' ORDER BY make, models.model");
+                List<AircraftBean> aircraftList = Aircraft.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND location='" + icao + "' ORDER BY make, models.model");
 
                 results = ProcessAircraft(req, aircraftList, "IcaoAircraft");
                 break;
@@ -1526,7 +1530,7 @@ public class Datafeed extends HttpServlet
                 else
                     xmloutput = new Converters.xmlBuffer();
 
-                List<FboBean> fbos = data.getFboByLocation(icao);
+                List<FboBean> fbos = Fbos.getFboByLocation(icao);
 
                 if (fbos != null && fbos.size() != 0)
                 {
@@ -1541,7 +1545,7 @@ public class Datafeed extends HttpServlet
                     numfbos = fbos.size();
                 }
 
-                AirportBean airport = data.getAirport(icao);
+                AirportBean airport = Airports.getAirport(icao);
 
                 //Check if system resources available
                 if (airport != null && (airport.isAvgas() || airport.isJetA() || airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE))
@@ -1571,12 +1575,12 @@ public class Datafeed extends HttpServlet
 
                 if (searchParam.equals("jobsfrom"))
                 {
-                    assignments = data.getAssignmentsFromAirport(icaos);
+                    assignments = Assignments.getAssignmentsFromAirport(icaos);
                     results = ProcessJobs(req, assignments, "IcaoJobsFrom");
                 }
                 else
                 {
-                    assignments = data.getAssignmentsToAirport(icaos);
+                    assignments = Assignments.getAssignmentsToAirport(icaos);
                     results = ProcessJobs(req, assignments, "IcaoJobsTo");
                 }
                 break;
@@ -1602,14 +1606,14 @@ public class Datafeed extends HttpServlet
 			CheckParameters(req, DFPS.readaccesskey);
 
 			String readAccessKey = req.getParameter("readaccesskey");
-			id = data.getUserGroupIdByReadAccessKey(readAccessKey);
+			id = Accounts.getUserGroupIdByReadAccessKey(readAccessKey);
 			if(id == -1)
 				throw new DataError("No User or Group found for provided ReadAccessKey.");
 		}
 		
 		if(searchParam.equals("key"))
 		{
-            aircraftList = data.getAircraftOwnedByUser(id);
+            aircraftList = Aircraft.getAircraftOwnedByUser(id);
 			queryname = "AircraftByKey";
 		}
 		else if(searchParam.equals("configs"))
@@ -1623,7 +1627,7 @@ public class Datafeed extends HttpServlet
 		else if(searchParam.equals("forsale"))
 		{
 			//get list of aircraft for sale
-            aircraftList = data.getAircraftForSale();
+            aircraftList = Aircraft.getAircraftForSale();
 			queryname = "AircraftForSale";
 		}
 		else if(searchParam.equals("makemodel"))
@@ -1637,7 +1641,7 @@ public class Datafeed extends HttpServlet
 			aircraftname = aircraftname.replaceAll("'", "\\\\'").replaceAll(";","");
 			
 			//get selected aircraft
-            aircraftList = data.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND concat(concat(models.make,' '), models.model)='" + aircraftname + "' ORDER BY make, models.model");
+            aircraftList = Aircraft.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND concat(concat(models.make,' '), models.model)='" + aircraftname + "' ORDER BY make, models.model");
 			queryname = "AircraftByMakeModel";
 		}
 		else if(searchParam.toLowerCase().equals("ownername"))
@@ -1659,7 +1663,7 @@ public class Datafeed extends HttpServlet
 				ownersname = "Bank";
 			
 			//get selected aircraft
-            aircraftList = data.getAircraftSQL(
+            aircraftList = Aircraft.getAircraftSQL(
 					" SELECT aircraft.*, models.* " +
 					" FROM aircraft, models, accounts " +
 					" WHERE Upper(aircraft.location)!='DEAD' " +
@@ -1680,7 +1684,7 @@ public class Datafeed extends HttpServlet
 			registration = registration.replaceAll("'", "\\\\'").replaceAll(";","");
 			
 			//get selected aircraft
-			aircraft = data.getAircraftByRegistration(registration);
+			aircraft = Aircraft.getAircraftByRegistration(registration);
             aircraftList = new ArrayList<>();
 
             if(aircraft != null)
@@ -1701,7 +1705,7 @@ public class Datafeed extends HttpServlet
 			aircraftreg = aircraftreg.replaceAll("'", "\\\\'").replaceAll(";","");
 			
 			//get selected aircraft
-			aircraft = data.getAircraftByRegistration(aircraftreg);
+			aircraft = Aircraft.getAircraftByRegistration(aircraftreg);
 			if(aircraft == null)
 				throw new DataError("No Aircraft Found.");
 			
@@ -1745,7 +1749,7 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//get list of aliases, returned sorted by model
-		Data.AircraftAlias[] aircraft = data.getAircraftAliasesOld();
+		AircraftAlias[] aircraft = Aircraft.getAircraftAliasesOld();
 		
 		//dump out our HashMap data
 		if(csvformat)
@@ -1756,7 +1760,7 @@ public class Datafeed extends HttpServlet
 		
 		if(csvformat)
 		{
-            for (Data.AircraftAlias anAircraft : aircraft)
+            for (AircraftAlias anAircraft : aircraft)
             {
                 csvoutput.append(anAircraft.model);
                 csvoutput.append(anAircraft.fsName);
@@ -1812,7 +1816,7 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//get list of configs
-		List<Data.aircraftConfigs> aircraftConfigs = data.getAircraftConfigs();
+		List<AircraftConfigs> aircraftConfigs = Aircraft.getAircraftConfigs();
 		
 		//dump out our HashMap data
 		if(csvformat)
@@ -1842,7 +1846,7 @@ public class Datafeed extends HttpServlet
 		}
 		
 		//create an aircraft tag section for each config
-        for (Data.aircraftConfigs anAircraft : aircraftConfigs)
+        for (AircraftConfigs anAircraft : aircraftConfigs)
         {
             if (csvformat)
             {
@@ -2390,8 +2394,8 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("Avg_Ops");
 		}
 		
-		double[][] statement = data.getStatement(new GregorianCalendar(year, month-1, 1), account.getId(), fbo.getId(), null, account.getShowPaymentsToSelf());
-		int[] ops = data.getAirportOperationsPerMonth(icao);
+		double[][] statement = Banking.getStatement(new GregorianCalendar(year, month-1, 1), account.getId(), fbo.getId(), null, account.getShowPaymentsToSelf());
+		int[] ops = Airports.getAirportOperationsPerMonth(icao);
 		
 		buffer.append(Converters.XMLHelper.protectSpecialCharacters(account.getName()));
 		buffer.append(icao.toUpperCase());
@@ -2450,8 +2454,8 @@ public class Datafeed extends HttpServlet
 	
 	void AddXMLFboPaymentSummaryItem(Converters.xmlBuffer buffer, UserBean account, FboBean fbo, String icao, int month, int year)
 	{
-		double[][] statement = data.getStatement(new GregorianCalendar(year, month-1, 1), account.getId(), fbo.getId(), null, account.getShowPaymentsToSelf());
-		int[] ops = data.getAirportOperationsPerMonth(icao);
+		double[][] statement = Banking.getStatement(new GregorianCalendar(year, month-1, 1), account.getId(), fbo.getId(), null, account.getShowPaymentsToSelf());
+		int[] ops = Airports.getAirportOperationsPerMonth(icao);
 		
 		buffer.append("<FboMonthlySummary>\n");
 		buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(account.getName()));
@@ -2534,7 +2538,7 @@ public class Datafeed extends HttpServlet
         for (AssignmentBean assignment : assignments)
         {
             Map<String, Integer> flightsMap = new HashMap<>();
-            AircraftBean aircraft = data.getAircraftForUser(id);
+            AircraftBean aircraft = Aircraft.getAircraftForUser(id);
             if (aircraft != null)
             {
                 flightsMap = data.getMyFlightInfo(aircraft, id);
@@ -2543,7 +2547,7 @@ public class Datafeed extends HttpServlet
             UserBean lockedBy = null;
             if (assignment.getUserlock() != 0)
             {
-                lockedBy = data.getAccountById(assignment.getUserlock());
+                lockedBy = Accounts.getAccountById(assignment.getUserlock());
             }
 
             String locked = lockedBy == null ? "-" : lockedBy.getName();
@@ -2595,7 +2599,7 @@ public class Datafeed extends HttpServlet
         for (AssignmentBean assignment : assignments)
         {
             Map<String, Integer> flightsMap = new HashMap<>();
-            AircraftBean aircraft = data.getAircraftForUser(id);
+            AircraftBean aircraft = Aircraft.getAircraftForUser(id);
             if (aircraft != null)
             {
                 flightsMap = data.getMyFlightInfo(aircraft, id);
@@ -2604,7 +2608,7 @@ public class Datafeed extends HttpServlet
             UserBean lockedBy = null;
             if (assignment.getUserlock() != 0)
             {
-                lockedBy = data.getAccountById(assignment.getUserlock());
+                lockedBy = Accounts.getAccountById(assignment.getUserlock());
             }
             String locked = lockedBy == null ? "-" : lockedBy.getName();
 
@@ -2682,12 +2686,12 @@ public class Datafeed extends HttpServlet
 
         for (LogBean log : logs)
         {
-            String type = data.getAircraftMakeModel(log.getAircraft());
+            String type = Aircraft.getAircraftMakeModel(log.getAircraft());
 
             String groupName = "";
             if (log.getGroupId() > 0)
             {
-                groupName = data.getAccountNameById(log.getGroupId());
+                groupName = Accounts.getAccountNameById(log.getGroupId());
                 groupName = Converters.XMLHelper.protectSpecialCharacters(groupName);
             }
 
@@ -2748,7 +2752,7 @@ public class Datafeed extends HttpServlet
             String type;
             try
             {
-                type = data.getAircraftMakeModel(log.getAircraft());
+                type = Aircraft.getAircraftMakeModel(log.getAircraft());
             }
             catch (ArrayIndexOutOfBoundsException e)
             {
@@ -2758,7 +2762,7 @@ public class Datafeed extends HttpServlet
             String groupName = "";
             if (log.getGroupId() > 0)
             {
-                groupName = data.getAccountNameById(log.getGroupId());
+                groupName = Accounts.getAccountNameById(log.getGroupId());
                 groupName = Converters.XMLHelper.protectSpecialCharacters(groupName);
             }
 
@@ -2834,20 +2838,20 @@ public class Datafeed extends HttpServlet
             String fboname = "N/A";
             if (payment.getFboId() != -1)
             {
-                FboBean fbobean = data.getFbo(payment.getFboId());
+                FboBean fbobean = Fbos.getFbo(payment.getFboId());
                 if (fbobean != null)
                 {
                     fboname = fbobean.getLocation() + " " + fbobean.getName();
                 }
             }
 
-            String toname = data.getAccountNameById(payment.getUser());
+            String toname = Accounts.getAccountNameById(payment.getUser());
             if (toname == null)
             {
                 toname = "Unknown";
             }
 
-            String fromname = data.getAccountNameById(payment.getOtherParty());
+            String fromname = Accounts.getAccountNameById(payment.getOtherParty());
             if (fromname == null)
             {
                 fromname = "Unknown";
@@ -2874,20 +2878,20 @@ public class Datafeed extends HttpServlet
             String fboname = "N/A";
             if (payment.getFboId() != -1)
             {
-                FboBean fbobean = data.getFbo(payment.getFboId());
+                FboBean fbobean = Fbos.getFbo(payment.getFboId());
                 if (fbobean != null)
                 {
                     fboname = fbobean.getLocation() + " " + fbobean.getName();
                 }
             }
 
-            String toname = data.getAccountNameById(payment.getUser());
+            String toname = Accounts.getAccountNameById(payment.getUser());
             if (toname == null)
             {
                 toname = "Unknown";
             }
 
-            String fromname = data.getAccountNameById(payment.getOtherParty());
+            String fromname = Accounts.getAccountNameById(payment.getOtherParty());
             if (fromname == null)
             {
                 fromname = "Unknown";
@@ -2950,20 +2954,20 @@ public class Datafeed extends HttpServlet
             {
                 loc = aircraft.getLocation();
 
-                locname = data.getAirportName(loc);
+                locname = Airports.getAirportName(loc);
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
             String owner = "Bank of FSE";
             if (aircraft.getOwner() != 0)
             {
-                owner = data.getAccountNameById(aircraft.getOwner());
-                if(data.isGroup(aircraft.getOwner()))
-                    owner += " (" + data.getAccountNameById(data.accountUltimateGroupOwner(aircraft.getOwner())) + ")";
+                owner = Accounts.getAccountNameById(aircraft.getOwner());
+                if(Accounts.isGroup(aircraft.getOwner()))
+                    owner += " (" + Accounts.getAccountNameById(Accounts.accountUltimateGroupOwner(aircraft.getOwner())) + ")";
             }
             String userlockname = "Not rented.";
             if (aircraft.getUserLock() > 0)
-                userlockname = data.getAccountNameById(aircraft.getUserLock());
+                userlockname = Accounts.getAccountNameById(aircraft.getUserLock());
 
             buffer.append(aircraft.getMakeModel());
             buffer.append(aircraft.getRegistration());
@@ -3006,20 +3010,20 @@ public class Datafeed extends HttpServlet
             {
                 loc = aircraft.getLocation();
 
-                locname = data.getAirportName(loc);
+                locname = Airports.getAirportName(loc);
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
             String owner = "Bank of FSE";
             if (aircraft.getOwner() != 0)
             {
-                owner = data.getAccountNameById(aircraft.getOwner());
-                if(data.isGroup(aircraft.getOwner()))
-                    owner += " (" + data.getAccountNameById(data.accountUltimateGroupOwner(aircraft.getOwner())) + ")";
+                owner = Accounts.getAccountNameById(aircraft.getOwner());
+                if(Accounts.isGroup(aircraft.getOwner()))
+                    owner += " (" + Accounts.getAccountNameById(Accounts.accountUltimateGroupOwner(aircraft.getOwner())) + ")";
             }
             String userlockname = "Not rented.";
             if (aircraft.getUserLock() > 0)
-                userlockname = data.getAccountNameById(aircraft.getUserLock());
+                userlockname = Accounts.getAccountNameById(aircraft.getUserLock());
 
             buffer.append("<Aircraft>\n");
             buffer.append("MakeModel", aircraft.getMakeModel());
@@ -3130,8 +3134,8 @@ public class Datafeed extends HttpServlet
 
         for (FboFacilityBean fac : facs)
         {
-            FboBean fbo = data.getFbo(fac.getFboId());
-            AirportBean airport = data.getAirport(fac.getLocation());
+            FboBean fbo = Fbos.getFbo(fac.getFboId());
+            AirportBean airport = Airports.getAirport(fac.getLocation());
 
             buffer.append(fac.getLocation());
             buffer.append(airport.getName());
@@ -3143,7 +3147,7 @@ public class Datafeed extends HttpServlet
             if (fac.getReservedSpace() >= 0)
             {
                 //Owner facility record, see if there are any non-rented slots
-                List<FboFacilityBean> facrenters = data.getFboRenterFacilities(fbo);
+                List<FboFacilityBean> facrenters = Fbos.getFboRenterFacilities(fbo);
                 int rentcount = 0;
 
                 for (FboFacilityBean facrenter : facrenters)
@@ -3174,8 +3178,8 @@ public class Datafeed extends HttpServlet
 	{
         for (FboFacilityBean fac : facs)
         {
-            FboBean fbo = data.getFbo(fac.getFboId());
-            AirportBean airport = data.getAirport(fac.getLocation());
+            FboBean fbo = Fbos.getFbo(fac.getFboId());
+            AirportBean airport = Airports.getAirport(fac.getLocation());
 
             buffer.append("<Facility>\n");
             buffer.append("Icao", fac.getLocation());
@@ -3188,7 +3192,7 @@ public class Datafeed extends HttpServlet
             if (fac.getReservedSpace() >= 0)
             {
                 //Owner facility record, see if there are any non-rented slots
-                List<FboFacilityBean> facrenters = data.getFboRenterFacilities(fbo);
+                List<FboFacilityBean> facrenters = Fbos.getFboRenterFacilities(fbo);
                 int rentcount = 0;
                 for (FboFacilityBean facrenter : facrenters)
                 {
@@ -3238,16 +3242,16 @@ public class Datafeed extends HttpServlet
 
         for (FboBean fbo : fbos)
         {
-            AirportBean airport = data.getAirport(fbo.getLocation());
+            AirportBean airport = Airports.getAirport(fbo.getLocation());
 
-            UserBean fboowner = data.getAccountById(fbo.getOwner());
-            int groupOwnerid = data.accountUltimateGroupOwner(fbo.getOwner());
-            UserBean ultimateOwner = data.getAccountById(groupOwnerid);
+            UserBean fboowner = Accounts.getAccountById(fbo.getOwner());
+            int groupOwnerid = Accounts.accountUltimateGroupOwner(fbo.getOwner());
+            UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
 
             int totalSpace = fbo.getFboSize() * airport.getFboSlots();
-            int rented = data.getFboFacilityBlocksInUse(fbo.getId());
-            GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
-            GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
+            int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
+            GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
+            GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
 
             buffer.append((fbo.isActive() ? "Active" : "Closed"));
             buffer.append(airport.getName());
@@ -3261,11 +3265,11 @@ public class Datafeed extends HttpServlet
             buffer.append(((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + rented : "No Passenger Terminal"));
             buffer.append(fuel != null ? fuel.getAmount() : 0);
             buffer.append(jeta != null ? jeta.getAmount() : 0);
-            buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_BUILDING_MATERIALS));
+            buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_BUILDING_MATERIALS));
 
             if (showsupplies)
             {
-                buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES));
+                buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES));
             }
             else
             {
@@ -3276,7 +3280,7 @@ public class Datafeed extends HttpServlet
 
             if (showsupplies)
             {
-                buffer.append(data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
+                buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
             }
             else
             {
@@ -3292,16 +3296,16 @@ public class Datafeed extends HttpServlet
 	{
         for (FboBean fbo : fbos)
         {
-            AirportBean airport = data.getAirport(fbo.getLocation());
+            AirportBean airport = Airports.getAirport(fbo.getLocation());
 
-            UserBean fboowner = data.getAccountById(fbo.getOwner());
-            int groupOwnerid = data.accountUltimateGroupOwner(fbo.getOwner());
-            UserBean ultimateOwner = data.getAccountById(groupOwnerid);
+            UserBean fboowner = Accounts.getAccountById(fbo.getOwner());
+            int groupOwnerid = Accounts.accountUltimateGroupOwner(fbo.getOwner());
+            UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
 
             int totalSpace = fbo.getFboSize() * airport.getFboSlots();
-            int rented = data.getFboFacilityBlocksInUse(fbo.getId());
-            GoodsBean fuel = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
-            GoodsBean jeta = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
+            int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
+            GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
+            GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
 
             buffer.append("<FBO>\n");
             buffer.append("Status", (fbo.isActive() ? "Active" : "Closed"));
@@ -3316,11 +3320,11 @@ public class Datafeed extends HttpServlet
             buffer.append("GatesRented", ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + rented : "No Passenger Terminal"));
             buffer.append("Fuel100LL", fuel != null ? fuel.getAmount() : 0);
             buffer.append("FuelJetA", jeta != null ? jeta.getAmount() : 0);
-            buffer.append("BuildingMaterials", data.getGoodsQty(fbo, GoodsBean.GOODS_BUILDING_MATERIALS));
+            buffer.append("BuildingMaterials", Goods.getGoodsQty(fbo, GoodsBean.GOODS_BUILDING_MATERIALS));
 
             if (showsupplies)
             {
-                buffer.append("Supplies", data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES));
+                buffer.append("Supplies", Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES));
             }
             else
             {
@@ -3331,7 +3335,7 @@ public class Datafeed extends HttpServlet
 
             if (showsupplies)
             {
-                buffer.append("SuppliedDays", data.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
+                buffer.append("SuppliedDays", Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
             }
             else
             {

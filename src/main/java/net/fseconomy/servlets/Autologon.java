@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import net.fseconomy.beans.UserBean;
 import net.fseconomy.data.*;
 
 public class Autologon extends HttpServlet {
@@ -48,7 +49,7 @@ public class Autologon extends HttpServlet {
 		String sOffset = request.getParameter("offset");
 		UserBean userBean;
 
-		if (user == null || password == null || sOffset == null || ((userBean = data.userExists(user, password, true)) == null))
+		if (user == null || password == null || sOffset == null || ((userBean = Accounts.userExists(user, password, true)) == null))
 		{
 			response.sendRedirect("/welcome.jsp");
 			return;			
@@ -58,7 +59,7 @@ public class Autologon extends HttpServlet {
 			
 		userBean.setTimeZone(new SimpleTimeZone(1000 * 60 * -offset, "Local"));
 		userBean.setLoggedIn(true);
-		data.reloadMemberships(userBean);
+        Accounts.reloadMemberships(userBean);
 
 		HttpSession s = request.getSession();
 		s.setAttribute("user", userBean);

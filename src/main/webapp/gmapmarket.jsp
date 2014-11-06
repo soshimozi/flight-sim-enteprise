@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -43,7 +43,7 @@
     {
         try
         {
-            aircraftList = data.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
+            aircraftList = Aircraft.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
         }
         catch(DataError e)
         {
@@ -52,7 +52,7 @@
     }
     else
     {
-        aircraftList = data.getAircraftForSale();
+        aircraftList = Aircraft.getAircraftForSale();
     }
 %>
 
@@ -114,16 +114,16 @@ for (AircraftBean aircraft : aircraftList)
 		continue;
 		
 	boolean bankOwned = aircraft.getOwner() == 0;
-	AirportBean airport = data.getAirport(aircraft.getLocation());
+	AirportBean airport = Airports.getAirport(aircraft.getLocation());
 	double lat = airport.getLat();
 	double lon = airport.getLon();
-	String airportLink = Converters.escapeJavaScript(data.airportLink(airport, response));
+	String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
 	
 	StringBuilder sb = new StringBuilder();
 	sb.append("<div class=\"infowindow-content\">");
 	sb.append(airportLink);
 	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(data.getAccountNameById(aircraft.getOwner())));
+	sb.append(Converters.escapeJavaScript(Accounts.getAccountNameById(aircraft.getOwner())));
 	sb.append("<br>");
 	sb.append(aircraft.getRegistration());
 	sb.append("<br>");

@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -16,10 +16,10 @@
 
     int fbo = Integer.parseInt(sFbo);
     String linkOptions = "id=" + fbo + "&";
-    List<LogBean> logs = data.getLogForFbo(fbo, from, Data.stepSize);
-    int amount = data.getAmountLogForFbo(fbo);
-    FboBean fboinfo = data.getFbo(fbo);
-    AirportBean airport = data.getAirport(fboinfo.getLocation());
+    List<LogBean> logs = Logging.getLogForFbo(fbo, from, Data.stepSize);
+    int amount = Logging.getAmountLogForFbo(fbo);
+    FboBean fboinfo = Fbos.getFbo(fbo);
+    AirportBean airport = Airports.getAirport(fboinfo.getLocation());
     String paymentUrl = "paymentlog.jsp?groupId=" + fboinfo.getOwner() + "&fboId=" + fbo;
 %>
 
@@ -47,7 +47,7 @@
 	
 	<div class="dataTable">
 	<table>
-		<caption>FBO log for <%= data.airportLink(airport, airport, response) %> | <%= fboinfo.getName() %> | <a class="link" href="<%= response.encodeURL(paymentUrl) %>">Payments...</a></caption>
+		<caption>FBO log for <%= Airports.airportLink(airport, airport, response) %> | <%= fboinfo.getName() %> | <a class="link" href="<%= response.encodeURL(paymentUrl) %>">Payments...</a></caption>
 		<thead>
 			<tr>
 				<th>Date</th>
@@ -65,7 +65,7 @@
 	{
 		String action = log.getType();
 		String reg = log.getAircraft();
-		aircraft = data.getAircraftByRegistration(reg);
+		aircraft = Aircraft.getAircraftByRegistration(reg);
 		fueltype = aircraft.getFuelType();
 		float money = 0;
 		
@@ -81,7 +81,7 @@
 		<tr>
 			<td><%= Formatters.getUserTimeFormat(user).format(log.getTime()) %></td>
 			<td><a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + reg ) %>"><%= log.getAircraft() %></a></td>
-			<td><%=	log.getType() == "refuel" ? (fueltype < 1 ? log.getSType() + " 100LL" : log.getSType() + " JetA") : log.getSType()%></td>
+			<td><%=log.getType().equals("refuel") ? (fueltype < 1 ? log.getSType() + " 100LL" : log.getSType() + " JetA") : log.getSType()%></td>
 			<td class="numeric"><%= Formatters.currency.format(money) %></td>
 			<td>
 <%

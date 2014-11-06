@@ -2,8 +2,10 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.beans.AircraftBean" %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -25,9 +27,9 @@
         reassemToFrom = Integer.parseInt(request.getParameter("reassemtofrom"));
 
         if( reassemToFrom == 0 )
-            data.finalizeAircraftShipment(reg, true, true);   // process aircraft back to its original location
+            Aircraft.finalizeAircraftShipment(reg, true, true);   // process aircraft back to its original location
         else
-            data.finalizeAircraftShipment(reg, false, true); // process aircraft back to the shipped to location
+            Aircraft.finalizeAircraftShipment(reg, false, true); // process aircraft back to the shipped to location
     }
 %>
 
@@ -109,12 +111,12 @@
 	<tbody>
 <%
 	// Get all currently shipped aircraft for display
-	List<AircraftBean> aircraftList = data.getShippedAircraft();
+	List<AircraftBean> aircraftList = Aircraft.getShippedAircraft();
 	
 	for (AircraftBean aircraft : aircraftList)
 	{
-    	UserBean ownerbean = data.getAccountById(aircraft.getOwner());
-    	UserBean shipbybean = data.getAccountById(aircraft.getShippedBy());
+    	UserBean ownerbean = Accounts.getAccountById(aircraft.getOwner());
+    	UserBean shipbybean = Accounts.getAccountById(aircraft.getShippedBy());
 %>
 	<tr>
 

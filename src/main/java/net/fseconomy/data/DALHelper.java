@@ -109,6 +109,22 @@ public class DALHelper
 	    }
 	}
 
+    int getIntSQL(String qry)
+    {
+        try
+        {
+            ResultSet rs = ExecuteReadOnlyQuery(qry);
+            if (rs.next())
+                return rs.getInt(1);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
     public boolean ExecuteStoredProcedureWithStatus(String qry, Object... args) throws SQLException
     {
         Connection conn = null;

@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
+	    import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -210,7 +210,7 @@
 <%
 	String error = null;
 	List<AircraftBean> aircraftList = null;
-	Data.groupMemberData[] staffGroups = user.getStaffGroups();
+    Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
 	
 	if (isSubmit) 
 	{		
@@ -218,7 +218,7 @@
 		{
 			try
 			{
-                aircraftList = data.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
+                aircraftList = Aircraft.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
 			}
 			catch(DataError e)
 			{
@@ -227,7 +227,7 @@
 		}
 		else
 		{
-            aircraftList = data.getAircraftForSale();
+            aircraftList = Aircraft.getAircraftForSale();
 		}			
 
 		if (error != null)
@@ -333,7 +333,7 @@
 			String price = Formatters.currency.format(aircraft.getSellPrice());
 			if (aircraft.getLocation() != null)
 			{		
-				AirportBean location = data.getAirport(aircraft.getLocation()); 
+				AirportBean location = Airports.getAirport(aircraft.getLocation());
 				acLocation=location.getTitle();
 				acICAO=aircraft.getLocation();
 			}
@@ -399,7 +399,7 @@
 					By model <select name="model" class="formselect">
 						<option class="formselect" value=""></option>						
 						<%
-							List<ModelBean> models = data.getAllModels();
+							List<ModelBean> models = Models.getAllModels();
 							for (ModelBean model : models)
 							{
 						%>

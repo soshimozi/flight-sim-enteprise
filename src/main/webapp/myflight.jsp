@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-    	import="net.fseconomy.data.*, net.fseconomy.util.*, java.util.*"
+    	import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*, java.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -32,11 +32,11 @@
 		String reg = request.getParameter("reg");
 		int id = Integer.parseInt(request.getParameter("id"));
 		boolean hold = Boolean.parseBoolean(request.getParameter("hold"));
-		data.setHoldRental(reg, id, !hold);
+		Aircraft.setHoldRental(reg, id, !hold);
 	}
 	
-	List<AssignmentBean> assignments = data.getAssignmentsForUser(user.getId());
-	AircraftBean aircraft = data.getAircraftForUser(user.getId());
+	List<AssignmentBean> assignments = Assignments.getAssignmentsForUser(user.getId());
+	AircraftBean aircraft = Aircraft.getAircraftForUser(user.getId());
 	boolean haveAircraft = aircraft != null;
 	
 	boolean isAllInPresent = false;
@@ -216,7 +216,7 @@
 
     if (groupFlight)
     {
-        theGroup = data.getGroupById(grpId);
+        theGroup = Accounts.getGroupById(grpId);
     }
 
 	if (haveAircraft && aircraft.getLocation() == null)
@@ -233,7 +233,7 @@
 	}
 	else if (haveAircraft && !grounded)
 	{
-	    List<UserBean> groups = data.getGroupsForUser(user.getId());
+	    List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
 %>
 		<h2>Status: Ready for departure</h2>
 
@@ -467,7 +467,7 @@
 		        <td class="numeric"><%=Formatters.currency.format(bean.calcPay()) %></td>
 		        <td>
 		        	<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%=location.getIcao() %>&icaod=<%= destination.getIcao()%>');gmap.showPopup('gmap');return false;" id="gmap">
-		        	<img src="<%=location.getDescriptiveImage(data.getFboByLocation(bean.getLocation()))%>" style="border-style: none; vertical-align:middle;" />
+		        	<img src="<%=location.getDescriptiveImage(Fbos.getFboByLocation(bean.getLocation()))%>" style="border-style: none; vertical-align:middle;" />
 		        	</a>
 		        	<a class="normal" title="<%=location.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao="+ bean.getLocation()) %>">
 		        	<%= bean.getLocation() %>
@@ -475,7 +475,7 @@
 		        </td>
 		        <td>
 		        	<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%=from.getIcao() %>&icaod=<%=(from.getIcao().equals(location.getIcao()))?destination.getIcao():location.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        		<img src="<%=from.getDescriptiveImage(data.getFboByLocation(bean.getFrom()))%>" style="border-style: none; vertical-align:middle;" />
+		        		<img src="<%=from.getDescriptiveImage(Fbos.getFboByLocation(bean.getFrom()))%>" style="border-style: none; vertical-align:middle;" />
 		        	</a>
 		        	<a class="normal" title="<%=from.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + bean.getFrom()) %>">
 		        		<%= bean.getFrom() %>
@@ -483,7 +483,7 @@
 		        </td>
 		        <td>
 		        	<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%=location.getIcao() %>&icaod=<%= destination.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        		<img src="<%=destination.getDescriptiveImage(data.getFboByLocation(bean.getTo()))%>" style="border-style: none; vertical-align:middle;" />
+		        		<img src="<%=destination.getDescriptiveImage(Fbos.getFboByLocation(bean.getTo()))%>" style="border-style: none; vertical-align:middle;" />
 		        	</a>
 		        	<a class="normal" title="<%=destination.getTitle() %>" href="<%=response.encodeURL("airport.jsp?icao=" + bean.getTo()) %>">
 		        		<%=bean.getTo() %>
@@ -668,10 +668,10 @@
 
 				String icao = location.getIcao();
 				String destIcao = destination.getIcao();
-				AirportBean mapAirport = data.getAirport(icao);
+				AirportBean mapAirport = Airports.getAirport(icao);
 				double latl = mapAirport.getLat();
 				double lonl = mapAirport.getLon();
-				AirportBean mapDestAirport = data.getAirport(destIcao);
+				AirportBean mapDestAirport = Airports.getAirport(destIcao);
 				double destLatl = mapDestAirport.getLat();
 				double destLonl = mapDestAirport.getLon();
 %>
@@ -708,7 +708,7 @@
 		        	<td class="numeric"><%=Formatters.currency.format(assignment.calcPay()) %></td>
 		       	 	<td>
 		        		<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%=location.getIcao() %>&icaod=<%= destination.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        			<img src="<%=location.getDescriptiveImage(data.getFboByLocation(assignment.getLocation()))%>" style="border-style: none; vertical-align:middle;" />
+		        			<img src="<%=location.getDescriptiveImage(Fbos.getFboByLocation(assignment.getLocation()))%>" style="border-style: none; vertical-align:middle;" />
 		        		</a>
 		        		<a title="<%=location.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao="+ assignment.getLocation()) %>">
 		        			<%= assignment.getLocation() %>
@@ -716,7 +716,7 @@
 		       		</td>
 		        	<td>
 		        		<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= from.getIcao() %>&icaod=<%=(from.getIcao().equals(location.getIcao()))?destination.getIcao():location.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        			<img src="<%=from.getDescriptiveImage(data.getFboByLocation(assignment.getFrom()))%>" style="border-style: none; vertical-align:middle;" />
+		        			<img src="<%=from.getDescriptiveImage(Fbos.getFboByLocation(assignment.getFrom()))%>" style="border-style: none; vertical-align:middle;" />
 		        		</a>
 		        		<a title="<%=from.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" +assignment.getFrom()) %>">
 		        			<%= assignment.getFrom() %>
@@ -724,7 +724,7 @@
 		        	</td>
 		        	<td>
 		        		<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        			<img src="<%=destination.getDescriptiveImage(data.getFboByLocation(assignment.getTo()))%>" style="border-style: none; vertical-align:middle;" />
+		        			<img src="<%=destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo()))%>" style="border-style: none; vertical-align:middle;" />
 		        		</a>
 		        		<a title="<%=destination.getTitle() %>" href="<%=response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>">
 		        			<%=assignment.getTo() %>
@@ -878,7 +878,7 @@
 		if (!departed) 
 		{
 			String icao = aircraft.getSLocation();
-			AirportBean mapAirport = data.getAirport(icao);
+			AirportBean mapAirport = Airports.getAirport(icao);
 			double latl = mapAirport.getLat();
 			double lonl = mapAirport.getLon();
 %>

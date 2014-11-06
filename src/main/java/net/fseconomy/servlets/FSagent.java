@@ -32,7 +32,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.fseconomy.beans.AircraftBean;
+import net.fseconomy.beans.AircraftMaintenanceBean;
+import net.fseconomy.beans.AssignmentBean;
+import net.fseconomy.beans.UserBean;
 import net.fseconomy.data.*;
+import net.fseconomy.dto.CloseAirport;
 
 public class FSagent extends HttpServlet
 {	
@@ -59,7 +64,7 @@ public class FSagent extends HttpServlet
 		String password = req.getParameter("pass");
 		UserBean userBean;
 		
-		if (user == null || password == null || (userBean=data.userExists(user, password, false)) == null)
+		if (user == null || password == null || (userBean=Accounts.userExists(user, password, false)) == null)
 		{
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid account information");
 			return;
@@ -81,7 +86,7 @@ public class FSagent extends HttpServlet
 		    if (ipAddress == null) 
 		    	ipAddress = req.getRemoteAddr();
 		    
-		    AircraftBean aircraft = data.getAircraftForUser(userBean.getId());
+		    AircraftBean aircraft = Aircraft.getAircraftForUser(userBean.getId());
 		    if(aircraft == null)
 		    	reg = aircraft.getRegistration();
 		    else
@@ -90,7 +95,7 @@ public class FSagent extends HttpServlet
 		    String icao = "None";
 		    if(req.getParameter("lat") != null)
 		    {
-		    	icao = data.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon")), 0).icao;
+		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon")), 0).icao;
 		    }
 			data.addClientRequestEntry(ipAddress, userBean.getId(), userBean.getName(), "FS", action, reg, "lat=" + req.getParameter("lat")+", lon="+req.getParameter("lon")+ ", icao=" + icao);
 		}		
@@ -157,9 +162,10 @@ public class FSagent extends HttpServlet
 			Integer.parseInt(fcapLeftAux),Integer.parseInt(fcapLeftTip), Integer.parseInt(fcapRightMain), 
 			Integer.parseInt(fcapRightAux),Integer.parseInt(fcapRightTip), Integer.parseInt(fcapCenter2),
 			Integer.parseInt(fcapCenter3), Integer.parseInt(fcapExt1), Integer.parseInt(fcapExt2) };
-		return data.addModel(aircraft, fuelCapacities);
+		return Models.addModel(aircraft, fuelCapacities);
 	}
-	Data.closeAirport closestAirport(HttpServletRequest req)
+
+	CloseAirport closestAirport(HttpServletRequest req)
 	{
 		String lat = req.getParameter("lat");
 		String lon = req.getParameter("lon");
@@ -167,18 +173,18 @@ public class FSagent extends HttpServlet
 			return null;
 		double dLat = Double.parseDouble(lat);
 		double dLon = Double.parseDouble(lon);
-		return data.closestAirport(dLat, dLon, 0);
+		return Airports.closestAirport(dLat, dLon, 0);
 	}
 	
 	String doStart(HttpServletRequest req, UserBean user) throws DataError
 	{
 		String FSAircraft = req.getParameter("aircraft");
-		Data.closeAirport closest= closestAirport(req);
+		CloseAirport closest= closestAirport(req);
 		if (FSAircraft == null || closest == null)
 		{
 			return "";
 		}
-		AircraftBean aircraft = data.getAircraftForUser(user.getId());
+		AircraftBean aircraft = Aircraft.getAircraftForUser(user.getId());
 		
 		if (aircraft == null || !closest.icao.equals(aircraft.getLocation()))
 			throw new DataError("You have no active aircraft at " + closest.icao);
@@ -187,7 +193,7 @@ public class FSagent extends HttpServlet
 			throw new DataError(FSAircraft+" is not compatible with your active "+aircraft.getMakeModel());
 		
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit
-		if(data.checkAllInAircraftWithOutAssigment(aircraft))
+		if(Aircraft.checkAllInAircraftWithOutAssigment(aircraft))
 		{
 			throw new DataError(aircraft.getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
 		}		
@@ -218,7 +224,7 @@ public class FSagent extends HttpServlet
         }
 		
 		long maxrenttime;
-		int ultimateOwner = data.accountUltimateGroupOwner(aircraft.getOwner());
+		int ultimateOwner = Accounts.accountUltimateGroupOwner(aircraft.getOwner());
 		if(user.getId() == ultimateOwner)
 			maxrenttime = ((aircraft.getLockedSince().getTime()/1000) + (1000*60*60));  // unlimited for owner
 		else
@@ -374,7 +380,7 @@ public class FSagent extends HttpServlet
 				Float.parseFloat(fRightAux),Float.parseFloat(fRightTip), Float.parseFloat(fCenter2), Float.parseFloat(fCenter3),
 				Float.parseFloat(fExt1), Float.parseFloat(fExt2) };
 			
-			Data.closeAirport closest = closestAirport(req);		
+			CloseAirport closest = closestAirport(req);
 			if (closest == null) //added 6/25/10 Airboss - no icao returned, no processing
 			{
 				System.err.println("closestAirport: Failed to find");

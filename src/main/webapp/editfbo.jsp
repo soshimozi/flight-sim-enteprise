@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="net.fseconomy.data.*, java.util.List, net.fseconomy.util.Formatters"
+	    import="net.fseconomy.beans.*, net.fseconomy.data.*, java.util.List, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -17,7 +17,7 @@
 	FboBean fbo;
 	
 	id = Integer.parseInt(sId);
-	fbo = data.getFbo(id);
+	fbo = Fbos.getFbo(id);
 	
 	AirportBean airport = null;
 	FboFacilityBean defaultPass = null;
@@ -25,13 +25,13 @@
 	
 	if (fbo.updateAllowed(user))
 	{	
-		defaultPass = data.getFboDefaultFacility(fbo);
+		defaultPass = Fbos.getFboDefaultFacility(fbo);
 	
-		goodsList = new GoodsBean[data.getMaxCommodityId()+1];
+		goodsList = new GoodsBean[Goods.getMaxCommodityId()+1];
 		
-		for (int c=0; c < data.commodities.length; c++)
+		for (int c=0; c < Goods.commodities.length; c++)
 		{
-            if (data.commodities[c] == null)
+            if (Goods.commodities[c] == null)
             {
                 continue;
             }
@@ -61,10 +61,10 @@
 			goodsList[c] = good;
 		}
 				
-		airport = data.getAirport(fbo.getLocation());
-		data.fillAirport(airport);
+		airport = Airports.getAirport(fbo.getLocation());
+		Airports.fillAirport(airport);
 
-        List<GoodsBean> goodsBeanList = data.getGoodsForFbo(fbo.getLocation(), fbo.getOwner());
+        List<GoodsBean> goodsBeanList = Goods.getGoodsForFbo(fbo.getLocation(), fbo.getOwner());
 		GoodsBean[] thegoods = goodsBeanList.toArray(new GoodsBean[goodsBeanList.size()]);
         for (GoodsBean thegood : thegoods)
         {
@@ -74,14 +74,14 @@
 	
 		for (int c=0; c < goodsList.length; c++)
 		{
-            if (data.commodities[c] == null)
+            if (Goods.commodities[c] == null)
             {
                 continue;
             }
 				
 			if (goodsList[c] == null)
 			{
-				goodsList[c] = new GoodsBean(data.commodities[c], airport.getIcao(), airport.getSize(), airport.getFuelPrice(), 0, airport.getJetAPrice());
+				goodsList[c] = new GoodsBean(Goods.commodities[c], airport.getIcao(), airport.getSize(), airport.getFuelPrice(), 0, airport.getJetAPrice());
 				goodsList[c].setBuy(false);
 				goodsList[c].setSell(false);
 			}
@@ -187,7 +187,7 @@
 	} 
 	else 
 	{ 
-		GoodsBean goods = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
+		GoodsBean goods = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
 		int amount = goods == null ? 0 : goods.getAmount();
 %>
 			Repair shop not available. You can build a repair shop with <%= GoodsBean.CONSTRUCT_REPAIRSHOP %> Kg of building supplies.<br/>
@@ -217,7 +217,7 @@
     }
 	else
 	{ 
-		GoodsBean goods = data.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
+		GoodsBean goods = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
 		int amount = goods == null ? 0 : goods.getAmount();
 %>
 			Passenger terminal not available. You can build a passenger terminal with <%= GoodsBean.CONSTRUCT_PASSENGERTERMINAL %> Kg of building supplies.<br/>
@@ -247,9 +247,9 @@
 				</tr>
 			</thead>
 			<tbody>
-<% 	for (int c=0; c < data.commodities.length; c++)
+<% 	for (int c=0; c < Goods.commodities.length; c++)
 	{
-		CommodityBean commodity = data.commodities[c];
+		CommodityBean commodity = Goods.commodities[c];
 		GoodsBean good = goodsList[c];
         if (commodity == null)
         {

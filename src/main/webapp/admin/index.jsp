@@ -2,8 +2,9 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*"
 %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -67,7 +68,7 @@
         </ul>
 
         <ul><b>User Account Utilities</b>
-            <li><a href="../signup.jsp">Add User Account</a></li>
+            <li><a href="createaccount.jsp">Add User Account</a></li>
             <li><a href="/admin/accountedit.jsp">Edit User Account</a></li>
             <li><a href="/admin/accountstatusedit.jsp">Change Account Status (lock/unlock)</a></li>
             <li><a href="/admin/checkuser48hourtrend.jsp">User 48 Hour Trend</a></li>

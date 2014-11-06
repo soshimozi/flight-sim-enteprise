@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="net.fseconomy.data.*"
+	    import="net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -17,13 +17,6 @@
 	String returnPage = request.getRequestURI();
 
     String message = (String) request.getAttribute("message");
-    if (message != null)
-    {
-%>
-        <div class="message"><%= message %></div>
-<%
-        return;
-    }
 %>
 
 <!DOCTYPE html>
@@ -40,16 +33,24 @@
 </head>
 <body>
 
-<jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp" />
+<jsp:include flush="true" page="../top.jsp" />
+<jsp:include flush="true" page="../menu.jsp" />
 
 <div id="wrapper">
+<%
+    if (message != null)
+    {
+%>
+    <div class="message"><%= message %></div>
+<%
+    }
+%>
 	<div class="content">
 		<div class="form" style="width: 500px">
             <h2>Sign up</h2>
             <p>To sign up, enter your email address and a user name in the form below.</p>
 
-			<form method="post" action="userctl">
+			<form method="post" action="/userctl">
 				Username<br/>
 				<input name="user" type="text" class="textarea" size="50" maxlength="45"/><br/>
 				Email<br/>

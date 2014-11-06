@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package net.fseconomy.data;
+package net.fseconomy.beans;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -26,8 +26,8 @@ import java.sql.SQLException;
 public class GoodsBean implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-	static final int SALEFLAG_SELL = 1;					// Transfer from market to user
-	static final int SALEFLAG_BUY = 2; 					// Transfer from user to market
+    public static final int SALEFLAG_SELL = 1;					// Transfer from market to user
+    public static final int SALEFLAG_BUY = 2; 					// Transfer from user to market
 	
 	public static final int GOODS_BUILDING_MATERIALS = 1;
 	public static final int GOODS_SUPPLIES = 2;

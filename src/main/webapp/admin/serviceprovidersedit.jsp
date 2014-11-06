@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, java.util.*, net.fseconomy.util.Formatters"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, java.util.*, net.fseconomy.util.Formatters"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -27,7 +27,7 @@
     String newnote = "";
 
     int id = Integer.parseInt(request.getParameter("id"));
-    ServiceProviderBean service = data.getServiceProviderById(id);
+    ServiceProviderBean service = ServiceProviders.getServiceProviderById(id);
 
     if (request.getParameter("submit") != null)
     {
@@ -80,7 +80,7 @@
             service.setUrl(url);
             service.setDescription(desc);
             service.setNotes(notes);
-            data.updateServiceProvider(service);
+            ServiceProviders.updateServiceProvider(service);
 
             System.out.println("newnote = " + newnote);
             if(newnote == null || newnote.isEmpty())

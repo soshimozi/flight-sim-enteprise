@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import = "net.fseconomy.data.*, java.util.*"
+        import = "net.fseconomy.beans.*, net.fseconomy.data.*, java.util.*"
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%!
     String groupMenu(UserBean user, String name, boolean staffOnly, boolean includeBaseLink, String link, String arg, HttpServletResponse response)
@@ -23,7 +23,7 @@
         {
             for (Iterator i = memberships.values().iterator(); i.hasNext(); )
             {
-                Data.groupMemberData memberData = (Data.groupMemberData) i.next();
+                Accounts.groupMemberData memberData = (Accounts.groupMemberData) i.next();
                 if (staffOnly == false || memberData.memberLevel >= UserBean.GROUP_STAFF)
                 {
                     int len = memberData.groupName.length();
@@ -38,7 +38,7 @@
 
         for (Iterator i = memberships.values().iterator(); i.hasNext(); )
         {
-            Data.groupMemberData memberData = (Data.groupMemberData) i.next();
+            Accounts.groupMemberData memberData = (Accounts.groupMemberData) i.next();
             if (staffOnly == false || memberData.memberLevel >= UserBean.GROUP_STAFF)
                 returnValue.append(indent + "<a href=" + response.encodeURL(link + arg + memberData.groupId) + ">" + memberData.groupName.replaceAll("\'","\\\\'") + "</a><br/><br/>\n");
         }
@@ -114,7 +114,7 @@ if (user.isLoggedIn())
 	<a href="admin/aircraftmappings.jsp">Modify aircraft mappings</a><br/><br/>
 	<a href="admin/models.jsp">Modify aircraft models</a><br/><br/>
 	<a href="admin/templates.jsp">Modify assignment templates</a><br/><br/>
-	<a href="signup.jsp">Add New User</a><br/><br/>
+	<a href="admin/createaccount.jsp">Add New User</a><br/><br/>
 	<a href="admin/accountstatusedit.jsp">Lock Account</a><br/><br/>
 	<a href="admin/accountunlock.jsp">Unlock Account</a><br/><br/>
 	<a href="admin/banlistreset.jsp">Reset Rental Ban List</a><br/><br/>
@@ -124,7 +124,7 @@ if (user.isLoggedIn())
 	{
 %>
 	<br/><br/>
-	<a href="signup.jsp">Add User</a><br/><br/>
+	<a href="admin/createaccount.jsp">Add User</a><br/><br/>
 	<a href="admin/accountedit.jsp">Edit User</a><br/><br/>
 <% 
 	}

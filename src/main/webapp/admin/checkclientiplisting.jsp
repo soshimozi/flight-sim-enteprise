@@ -2,8 +2,10 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, java.util.*"
 %>
+<%@ page import="net.fseconomy.beans.UserBean" %>
+<%@ page import="net.fseconomy.dto.ClientRequest" %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -20,13 +22,13 @@
     if(searchby== null || searchfor == null)
         response.sendRedirect("/admin/checkclientip.jsp");
 
-    List<Data.clientrequest> requests = null;
+    List<ClientRequest> requests = null;
     UserBean inputuser = null;
     String message = null;
 
     if("account".equals(searchby))
     {
-        inputuser = data.getAccountByName(searchfor);
+        inputuser = Accounts.getAccountByName(searchfor);
         if (inputuser == null)
         {
             message = "User Not Found";
@@ -108,7 +110,7 @@
 		if(requests != null)
 			for (int c=0; c < requests.size(); c++)
 			{
-				Data.clientrequest cr = requests.get(c);
+				ClientRequest cr = requests.get(c);
 %>			<tr>
 			<td><%= cr.id %></td>
 			<td><%= cr.time %></td>

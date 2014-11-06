@@ -1,9 +1,9 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.* "
+        import="net.fseconomy.beans.*, net.fseconomy.data.* "
 %>
 
-<jsp:useBean id="user" class="net.fseconomy.data.UserBean" scope="session" />
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
@@ -13,7 +13,7 @@
     int id;
     FboBean fbo;
     id = Integer.parseInt(sId);
-    fbo = data.getFbo(id);
+    fbo = Fbos.getFbo(id);
 
     String error = null;
     if ("true".equals(request.getParameter("submit")))
@@ -28,7 +28,7 @@
 
         try
         {
-            data.transferFbo(fbo, user, ibuyer, iseller, icao, true);
+            Fbos.transferFbo(fbo, user, ibuyer, iseller, icao, true);
 %>
 <jsp:forward page="fbo.jsp">
     <jsp:param name="id" value="<%= fbo.getOwner() %>"/>
@@ -42,7 +42,7 @@
         }
     }
     UserBean account;
-    account = data.getAccountById(fbo.getOwner());
+    account = Accounts.getAccountById(fbo.getOwner());
 
     if (error != null)
     {

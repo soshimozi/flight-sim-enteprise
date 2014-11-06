@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package net.fseconomy.data;
+package net.fseconomy.beans;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -575,23 +575,39 @@ public class LogBean implements Serializable
 	{
 		ageECost = i;
 	}
+    public int getAgeECost()
+    {
+        return ageECost;
+    }
 
 	public void setAgeAvCost(int i)
 	{
 		ageAvCost = i;
 	}
+    public int getAgeAvCost()
+    {
+        return ageAvCost;
+    }
 
 	public void setAgeAfCost(int i)
 	{
 		ageAfCost = i;
 	}
+    public int getAgeAfCost()
+    {
+        return ageAfCost;
+    }
 
-	public void setAgeAdwCost(int i)
-	{
-		ageAdwCost = i;
-	}
+    public void setAgeAdwCost(int i)
+    {
+        ageAdwCost = i;
+    }
+    public int getAgeAdwCost()
+    {
+        return ageAdwCost;
+    }
 
-	public float getmptTax()
+    public float getmptTax()
 	{
 		return mpttax;
 	}
