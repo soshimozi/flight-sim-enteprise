@@ -16,6 +16,7 @@ public class Goods implements Serializable
     public static  CommodityBean[] commodities = null;
     static int maxCommodityId = 0;
 
+
     public static double currFuelPrice = 3.0;
     public static double currJetAMultiplier = 1.0;
 

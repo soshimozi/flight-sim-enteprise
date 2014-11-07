@@ -105,7 +105,7 @@
                 <caption>Service Access Permissions</caption>
                 <thead>
                 <tr>
-                    <th><span style="font-size: 9px;">Click Service Name to edit</span></th>
+                    <th><span style="background-color: salmon">Click Service Name to change permissions.</span></th>
                     <th colspan="3"  style="text-align: center;background-color: lightgray">Permissions</th>
                 </tr>
                 <tr style="background-color: darkgrey">

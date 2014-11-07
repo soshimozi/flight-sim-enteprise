@@ -32,19 +32,16 @@
 		
 		UserBean account = Accounts.getAccountById(transferId);
 
-		if (transfer != null && account.isGroup() && user.groupMemberLevel(transferId) < UserBean.GROUP_MEMBER) 
+		if((transfer != null && account.isGroup() && user.groupMemberLevel(transferId) < UserBean.GROUP_MEMBER)
+            || (transfer != null && !account.isGroup() && (transferId != user.getId())))
 		{
 			// This is a group goods tranfer sceen and we are not a member of the group.
-			out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
-			return; 
+%>
+            <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
+			return;
 		}
-		if (transfer != null && !account.isGroup() && (transferId != user.getId())) 
-		{
-			// This is a user goods tranfer sceen and we are trying to access another users screen.
-			out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
-			return; 
-		}
-		
+
 		UserBean transferAccount = Accounts.getAccountById(transferId);
 		caption = "Transfer assignments for " + transferAccount.getName();
 		
@@ -57,8 +54,10 @@
 		if (user.groupMemberLevel(groupId) < UserBean.GROUP_MEMBER) 
 		{
 			// This is a group assignment screen and we are not a member of the group.
-			out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
-			return; 
+%>
+            <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
+			return;
 		}
 		
 		boolean userIsGroupStaff = user.groupMemberLevel(groupId) >= UserBean.GROUP_STAFF;
@@ -84,31 +83,31 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link rel="stylesheet" type="text/css" href="/theme/Master.css" />
-	<link rel="stylesheet" type="text/css" href="/theme/tablesorter-style.css" />
+	<link rel="stylesheet" type="text/css" href="css/Master.css" />
+	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css" />
 	<link rel="stylesheet" type="text/css" href="fancybox/jquery.fancybox-1.3.1.css" />
-	<link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
 	
 	<% //regressed jquery so that lightbox would work %>
-	<script src="/scripts/jquery.min.js"></script>
-	<script src="/scripts/jquery-ui.min.js"></script>
+	<script src="scripts/jquery.min.js"></script>
+	<script src="scripts/jquery-ui.min.js"></script>
 	<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
 	
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
 	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script src="/scripts/PopupWindow.js"></script>
-	<script src="/scripts/location-mapper.js"></script>
-	<script src="/scripts/AutoComplete.js"></script>
+	<script src="scripts/PopupWindow.js"></script>
+	<script src="scripts/location-mapper.js"></script>
+	<script src="scripts/AutoComplete.js"></script>
 	
 	<script type="text/javascript">
 	
 		$(function() 
 		{
-			initAutoComplete("#transfername", "#transfer", <%= Data.ACCT_TYPE_GROUP %>);
+			initAutoComplete("#transfername", "#transfer", <%= Accounts.ACCT_TYPE_GROUP %>);
 		});
 		
 		</script>

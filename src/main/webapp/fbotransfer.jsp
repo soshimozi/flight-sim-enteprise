@@ -7,14 +7,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
-    if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
-    {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
-        return;
-    }
-
     String sId = request.getParameter("id");
 
     int id;
@@ -36,7 +28,7 @@
         {
             Fbos.transferFbo(fbo, user, ibuyer, iseller, icao, goods.equals("checkbox"));
 %>
-        <jsp:forward page="/admin/index.jsp"></jsp:forward>
+        <jsp:forward page="/admin/admin.jsp" />
 <%
             return;
         }
@@ -56,18 +48,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="theme/redmond/jquery-ui.css">
+    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script type="text/javascript" src="/scripts/jquery.min.js"></script>
-    <script type="text/javascript" src="/scripts/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="/scripts/AutoComplete.js"></script>
+    <script type="text/javascript" src="scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="scripts/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
         $(function()
         {
-            initAutoComplete("#buyername", "#buyer", <%= Data.ACCT_TYPE_ALL %>)
+            initAutoComplete("#buyername", "#buyer", <%= Accounts.ACCT_TYPE_ALL %>)
         });
 
     </script>
@@ -93,7 +85,7 @@ if (error != null)
 	<div class="form" style="width: 600px">
 	<h2>Transfer FBO</h2>
 	
-	<form method="post" action="/admin/fbotransfer.jsp">
+	<form method="post" action="fbotransfer.jsp">
 	<div class="formgroup high">
 	<p>
 	<input type="hidden" name="submit" value="true"/>
@@ -117,12 +109,13 @@ if (fbo.getId() > 0)
 	<br />
 	<br />	  
 	<strong>To: </strong>
-    <input type="text" id="buyername" name="buyername"/>
-    <input type="hidden" id="buyer" name="buyer" value=""/>
+    <input type="text" id="buyername" name="buyername">
+    <input type="hidden" id="buyer" name="buyer" value="">
 
 	<br />
 	<br />
-	<strong>Transfer All Goods With FBO</strong>		  <input name="transferGoods" type="checkbox" id="transferGoods" value="checkbox" checked="checked" />
+	<strong>Transfer All Goods With FBO</strong>
+    <input name="transferGoods" type="checkbox" id="transferGoods" value="checkbox" checked="checked">
 	</p>
 	</div>
 	<div class="formgroup high">

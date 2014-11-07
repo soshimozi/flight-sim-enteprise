@@ -5,6 +5,7 @@ import net.fseconomy.dto.LatLonSize;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Formatters;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.*;
@@ -160,7 +161,7 @@ public class Fbos implements Serializable
 
     public static void transferFbo(FboBean fbo, UserBean user, int buyer, int owner, String icao, boolean goods) throws DataError
     {
-        if (!fbo.updateAllowed(user) && (!Data.needLevel(user, UserBean.LEV_MODERATOR)))
+        if (!fbo.updateAllowed(user) && (!Accounts.needLevel(user, UserBean.LEV_MODERATOR)))
         {
             throw new DataError("Permission denied.");
         }
@@ -436,7 +437,7 @@ public class Fbos implements Serializable
 
     public static List<FboBean> getFboSql(String qry)
     {
-        ArrayList<FboBean> result = new ArrayList<FboBean>();
+        ArrayList<FboBean> result = new ArrayList<>();
 
         try
         {
@@ -523,7 +524,7 @@ public class Fbos implements Serializable
 
     public static List<FboFacilityBean> getFboFacilitiesSql(String qry)
     {
-        ArrayList<FboFacilityBean> result = new ArrayList<FboFacilityBean>();
+        ArrayList<FboFacilityBean> result = new ArrayList<>();
 
         try
         {
@@ -723,8 +724,8 @@ public class Fbos implements Serializable
                 throw new DataError("You already own an FBO at this location.");
             }
 
-            int availableBM = 0;
-            int availableSupplies = 0;
+            int availableBM;
+            int availableSupplies;
             qry = "SELECT amount FROM goods WHERE type=? AND location=? AND owner=?";
             availableBM = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), GoodsBean.GOODS_BUILDING_MATERIALS, fbo.getLocation(), fbo.getOwner());
 
@@ -1097,6 +1098,7 @@ public class Fbos implements Serializable
 
     /**
      * return a collection of email addresses associated with renter ID's (Account ID's in the Accounts table or GrouID's in the GroupMembership table)
+     *
      * @ param renters - ArrayList of renter ID's
      * @ return ArrayList - collection of email addresses
      * @ author - Gurka
@@ -1105,19 +1107,19 @@ public class Fbos implements Serializable
     {
         String qry;
         String result;
-        List<String> emails = new ArrayList<String>();
+        List<String> emails = new ArrayList<>();
 
         try
         {
-            for(int id : renters)
+            for (int id : renters)
             {
                 String type = Accounts.getAccountTypeById(id);
-                if("group".contains(type))
+                if ("group".contains(type))
                 {
                     //get email ID's for the staff belonging to the group which rented this facility
                     qry = "SELECT email FROM accounts, groupmembership AS gm WHERE id = userID and (gm.level = 'staff' or gm.level = 'owner') and groupID = ?";
                     ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, id);
-                    while(rs.next())
+                    while (rs.next())
                         emails.add(rs.getString(1));
                 }
                 else
@@ -1125,7 +1127,7 @@ public class Fbos implements Serializable
                     //get email ID for the user
                     qry = "SELECT email FROM accounts WHERE id = ?";
                     result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), id);
-                    if(result != null) //this should never be null, but check anyways
+                    if (result != null) //this should never be null, but check anyways
                         emails.add(result);
                 }
             }
@@ -1235,7 +1237,7 @@ public class Fbos implements Serializable
 
             fboAssignmentFee = fbofee;
 
-            if( !checkonly )
+            if (!checkonly)
             {
                 // Divide fee equally between originating FBOs
                 int lotsTotal = 0;
@@ -1252,5 +1254,41 @@ public class Fbos implements Serializable
         }
 
         return fboAssignmentFee;
+    }
+
+    public static InputStream getInvoiceBackground(int fbo)
+    {
+        InputStream returnValue = null;
+        try
+        {
+            String qry = "SELECT invoice FROM fbo WHERE id = ?";
+            Blob image;
+            image = DALHelper.getInstance().ExecuteScalarBlob(qry, fbo);
+            if (image != null)
+                returnValue = image.getBinaryStream();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return returnValue;
+    }
+
+    public static void updateInvoiceBackground(FboBean fbo, InputStream data, int length, UserBean user) throws DataError
+    {
+        if (!fbo.updateAllowed(user))
+            throw new DataError("Permission denied.");
+
+        try
+        {
+            String qry = "SELECT invoice, id FROM fbo WHERE id = ?";
+            if (!DALHelper.getInstance().ExecuteUpdateBlob(qry, "invoice", data, length, fbo.getId()))
+                throw new DataError("Update to invoice failed!");
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

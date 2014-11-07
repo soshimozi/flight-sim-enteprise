@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
 	    import="java.util.*, org.apache.commons.lang3.math.*, net.fseconomy.beans.*, net.fseconomy.dto.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.util.Constants" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="airport" class="net.fseconomy.beans.AirportBean">
@@ -13,7 +14,9 @@
 
 	if(user == null || !user.isLoggedIn())
 	{
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
 		return;
 	}
 	
@@ -120,21 +123,21 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>	
 	
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
-	<link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
 	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
 
 	<% //regressed jquery so that lightbox would work %>
-	<script src="/scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.min.js"></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script src="/scripts/jquery.tablesorter.widgets.js"></script>
+	<script src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
-	<script src="/scripts/PopupWindow.js"></script>
+	<script src="scripts/PopupWindow.js"></script>
 	
 	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script charset="iso-8859-1" src="/scripts/js/highcharts.js"> </script>
+	<script charset="iso-8859-1" src="scripts/js/highcharts.js"> </script>
 	
 	<script type="text/javascript">
 		
@@ -409,12 +412,12 @@
 <%
 		if(airport.closestAirports != null)
 		{
-			for (int c=0; c< airport.closestAirports.length; c++)
+			for (CloseAirport ca : airport.closestAirports)
 			{		
-				String icao = airport.closestAirports[c].icao;
-				int value = (int)Math.round(airport.closestAirports[c].distance);
+				String icao = ca.icao;
+				int value = (int)Math.round(ca.distance);
 				String URL = "airport.jsp?icao=" + icao;
-				String image = Airports.getBearingImageURL(airport.closestAirports[c].bearing);
+				String image = Airports.getBearingImageURL(ca.bearing);
 %>
             <tr>
                 <td><a href="<%= response.encodeURL(URL) %>"><%= icao %></a></td>
@@ -541,11 +544,11 @@
                             <td><%= fboname %></td>
                             <td><%= fuel %></td>
                             <td>
-                                <%= (int) Math.floor(fuelleft != null ? fuelleft.getAmount() / Data.GALLONS_TO_KG : 0) %>
+                                <%= (int) Math.floor(fuelleft != null ? fuelleft.getAmount() / Constants.GALLONS_TO_KG : 0) %>
                             </td>
                             <td><%= jeta %></td>
                             <td>
-                                <%= (int) Math.floor(jetaleft != null ? jetaleft.getAmount() / Data.GALLONS_TO_KG : 0) %>
+                                <%= (int) Math.floor(jetaleft != null ? jetaleft.getAmount() / Constants.GALLONS_TO_KG : 0) %>
                             </td>
                             <td>
                                 <%= (aFbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? aFbo.getSServices() : "" %>
@@ -603,11 +606,11 @@
                             <td class="disabledtext"><%= fboname %></td>
                             <td class="disabledtext"><%= fuel %></td>
                             <td class="disabledtext">
-                                <%= (int) Math.floor(fuelleft != null ? fuelleft.getAmount() / Data.GALLONS_TO_KG : 0) %>
+                                <%= (int) Math.floor(fuelleft != null ? fuelleft.getAmount() / Constants.GALLONS_TO_KG : 0) %>
                             </td>
                             <td class="disabledtext"><%= jeta %></td>
                             <td class="disabledtext">
-                                <%= (int) Math.floor(jetaleft != null ? jetaleft.getAmount() / Data.GALLONS_TO_KG : 0) %>
+                                <%= (int) Math.floor(jetaleft != null ? jetaleft.getAmount() / Constants.GALLONS_TO_KG : 0) %>
                             </td>
                             <td class="disabledtext">&nbsp;</td>
                         </tr>
@@ -1135,12 +1138,13 @@
 			if (aircraft.isBroken())
             {
                 if (aircraft.isAllowRepair())
-                    out.print("<span style='background:green'>");
+                {
 %>
-                    <img src="img/repair.gif" style="border-style: none; vertical-align:middle;" />
+                    <span style="background: green">
+                        <img src="img/repair.gif" style="border-style: none; vertical-align:middle;" />
+                    </span>
 <%
-                if (aircraft.isAllowRepair())
-                    out.print("</span>");
+                }
             }
 %>
 		        </td>

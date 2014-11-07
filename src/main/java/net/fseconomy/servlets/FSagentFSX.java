@@ -42,7 +42,7 @@ public class FSagentFSX extends HttpServlet
 {	
 	private static final long serialVersionUID = 1L;
 
-	Data.SimType simType = Data.SimType.FSX;
+	SimClientRequests.SimType simType = SimClientRequests.SimType.FSX;
 	
 	Data data;
 	public void init()
@@ -62,7 +62,7 @@ public class FSagentFSX extends HttpServlet
 		throws ServletException, IOException
 	{
 		//used by doArrive()
-		simType = Data.SimType.FSX;
+		simType = SimClientRequests.SimType.FSX;
 
 		//See if this is an XPlane user
 		String md5sum = req.getParameter("md5sum");
@@ -70,7 +70,7 @@ public class FSagentFSX extends HttpServlet
 		
 		if(isXPlane)
 		{
-			simType = Data.SimType.XP;
+			simType = SimClientRequests.SimType.XP;
 			
 			//Setup for doing an MD5 CRC check on the script calling us from the python plugin
 			try 
@@ -105,7 +105,7 @@ public class FSagentFSX extends HttpServlet
 		String password = req.getParameter("pass");
 		UserBean userBean;
 		
-		if (user == null || password == null || (userBean=Accounts.userExists(user, password, false)) == null)
+		if (user == null || password == null || (userBean=Accounts.userExists(user, password)) == null)
 		{
 			//XPlane error return
 			if(isXPlane)
@@ -175,7 +175,7 @@ public class FSagentFSX extends HttpServlet
 		    }
 
 		    String client = isXPlane ? "XP" : "FSX";
-			data.addClientRequestEntry(ipAddress, userBean.getId(), userBean.getName(), client, action, reg, "lat=" + req.getParameter("lat")+", lon="+req.getParameter("lon")+ ", icao=" + icao);
+			SimClientRequests.addClientRequestEntry(ipAddress, userBean.getId(), userBean.getName(), client, action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
 		}		
 
 		
@@ -342,7 +342,7 @@ public class FSagentFSX extends HttpServlet
 	
 	String doCancel(UserBean user) throws DataError
 	{
-		data.cancelFlight(user);
+		Flights.cancelFlight(user);
 		return "<ok/>";
 	}
 	
@@ -367,7 +367,7 @@ public class FSagentFSX extends HttpServlet
 			throw new DataError("You have no rented aircraft at " + closest.icao);
 
 		// Check the aircraft name mapping to make sure we have a match, if not, exit
-		if (!data.aircraftOk(aircraft, FSAircraft))
+		if (!Aircraft.aircraftOk(aircraft, FSAircraft))
 			throw new DataError(FSAircraft + " is not compatible with your rented " + aircraft.getMakeModel());
 
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit
@@ -375,13 +375,13 @@ public class FSagentFSX extends HttpServlet
 			throw new DataError(aircraft.getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
 
 		// Check the number of hours the user has flown, if over 30 hours, exit
-		if (data.getNumberOfHours(user.getName(), 48) > 30)
+		if (Stats.getNumberOfHours(user.getName(), 48) > 30)
 			throw new DataError("Maximum pilot hours in a 48 hour period reached");
 
 		// Lets put together our aircraft data
 		
 		// Get the aircraft data
-		Object[] info = data.departAircraft(aircraft, user.getId(), closest.icao);
+		Object[] info = Flights.departAircraft(aircraft, user.getId(), closest.icao);
 		
 		// Reformat the data into typed variables
 		int payloadWeight = (Integer) info[0];
@@ -551,7 +551,7 @@ public class FSagentFSX extends HttpServlet
 			
 			int[][] damage = getDamage(req);
 	
-			assignmentsLeft = data.processFlight(user, closest, Integer.parseInt(engineTime), eticks, fuel, night, envFactor, damage, simType);
+			assignmentsLeft = Flights.processFlight(user, closest, Integer.parseInt(engineTime), eticks, fuel, night, envFactor, damage, simType);
 			
 			message = "Your flight is logged and the results can be found at the website.";
 			if (assignmentsLeft > 0)

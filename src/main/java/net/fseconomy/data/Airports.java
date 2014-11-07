@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import net.fseconomy.beans.*;
 import net.fseconomy.dto.CloseAirport;
 import net.fseconomy.dto.FlightOp;
-import net.fseconomy.dto.LatLonCount;
 import net.fseconomy.dto.LatLonSize;
 import net.fseconomy.util.Converters;
 
@@ -26,8 +25,30 @@ public class Airports implements Serializable
     static
     {
         initializeAirportCache();
+
+        //updateBuckets();
     }
-    
+
+    //Moved this here, not even sure it needs to be done at all.
+//    static void updateBuckets()
+//    {
+//        try
+//        {
+//            String qry = "SELECT * FROM airports WHERE bucket is null";
+//            ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
+//            while (rs.next())
+//            {
+//                int newbucket = AirportBean.bucket(rs.getDouble("lat"), rs.getDouble("lon"));
+//                qry = "UPDATE airports set bucket = ? WHERE icao = ?";
+//                dalHelper.ExecuteUpdate(qry, newbucket, rs.getString("icao"));
+//            }
+//        }
+//        catch (SQLException e)
+//        {
+//            e.printStackTrace();
+//        }
+//    }
+
     public static void initializeAirportCache()
     {
         if (cachedAPs.size() == 0)
@@ -145,8 +166,8 @@ public class Airports implements Serializable
     /**
      * This returns the computed distance for the passed in from/to latlons
      *
-     * @param from
-     * @param to
+     * @param from LatLonSize
+     * @param to LatLonSize
      * @param returnDistance - return distance if true, or 0 if false
      * @param returnBearing  - return beaing if true, or 0 if false
      * @return double[] - 0 = distance, 1 = bearing
@@ -194,9 +215,9 @@ public class Airports implements Serializable
     /**
      * This returns a hashtable of airports found with the passed in parameters
      *
-     * @param icao
+     * @param icao - center airport
      * @param clipLat - window in degrees latitude to search
-     * @param clipLat - window in degrees longitude to search adjusted for latitude
+     * @param clipLon - window in degrees longitude to search adjusted for latitude
      * @param minSize - minimum airport size to search for
      * @param maxSize - maximum airport size to search for
      * @param aptypes - airport types to include in the search
@@ -227,8 +248,8 @@ public class Airports implements Serializable
     /**
      * This returns a hashtable of airports found with the passed in parameters
      *
-     * @param lat
-     * @param lon
+     * @param lat - Center Lat
+     * @param lon - Center Lon
      * @param clipLat - window in degrees latitude to search
      * @param clipLon - window in degrees longitude to search adjusted for latitude
      * @param minSize - minimum airport size to search for
@@ -237,7 +258,7 @@ public class Airports implements Serializable
      */
     public static Hashtable<String, LatLonSize> getAirportsInRange(double lat, double lon, double clipLat, double clipLon, int minSize, int maxSize, boolean aptypes[])
     {
-        Hashtable<String, LatLonSize> results = new Hashtable<String, LatLonSize>();
+        Hashtable<String, LatLonSize> results = new Hashtable<>();
         String key;
         LatLonSize value;
         int minSz;
@@ -369,7 +390,7 @@ public class Airports implements Serializable
 
             //new code that filters the list of airports down to the ones that meet
             //the min/max distance criteria
-            Set<String> inrange = new HashSet<String>();
+            Set<String> inrange = new HashSet<>();
             for (String airport : airports)
             {
                 double[] distanceBearing = getDistanceBearing(id, airport);
@@ -512,7 +533,7 @@ public class Airports implements Serializable
             Collections.sort(result);
             if (result.size() > 10)
             {
-                result = new ArrayList<CloseAirport>(result.subList(0, 10));
+                result = new ArrayList<>(result.subList(0, 10));
             }
         }
         catch (SQLException e)
@@ -531,14 +552,14 @@ public class Airports implements Serializable
      * @param maxDistance - maximum distance to search for
      *                    Airboss 5/30/11
      */
-    public static CloseAirport[] fillCloseAirports(String id, double minDistance, double maxDistance)
+    public static List<CloseAirport> fillCloseAirports(String id, double minDistance, double maxDistance)
     {
         if (id == null)
         {
             return null;
         }
 
-        ArrayList<CloseAirport> result = new ArrayList<>();
+        List<CloseAirport> result = new ArrayList<>();
 
         String key;
         LatLonSize value;
@@ -588,10 +609,10 @@ public class Airports implements Serializable
 
         if (result.size() > 12)
         {
-            result = new ArrayList<CloseAirport>(result.subList(0, 12));
+            result = new ArrayList<>(result.subList(0, 12));
         }
 
-        return result.toArray(new CloseAirport[result.size()]);
+        return result;
     }
 
     public static List<AirportBean> getAirportsForFboConstruction(int owner)
@@ -628,7 +649,7 @@ public class Airports implements Serializable
 
     public static List<AirportBean> getAirportSQL(String sql)
     {
-        ArrayList<AirportBean> result = new ArrayList<AirportBean>();
+        ArrayList<AirportBean> result = new ArrayList<>();
         try
         {
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(sql);
@@ -647,7 +668,7 @@ public class Airports implements Serializable
 
     public static void FillZeroOps(ArrayList<FlightOp> ops, String icao, int startmon, int startyear, int endmon, int endyear)
     {
-        ArrayList<FlightOp> results = new ArrayList<FlightOp>();
+        ArrayList<FlightOp> results = new ArrayList<>();
 
         int curryear = startyear;
         int currmonth = startmon;
@@ -686,7 +707,7 @@ public class Airports implements Serializable
 
     public static String getAirportOperationDataJSON(String icao)
     {
-        List<FlightOp> ops = new ArrayList<FlightOp>();
+        List<FlightOp> ops = new ArrayList<>();
         if (icao != null && cachedAPs.get(icao.toUpperCase()) != null)
         {
             ops = getAirportOperationData(icao);
@@ -703,7 +724,7 @@ public class Airports implements Serializable
      */
     public static List<FlightOp> getAirportOperationData(String icao)
     {
-        ArrayList<FlightOp> results = new ArrayList<FlightOp>();
+        ArrayList<FlightOp> results = new ArrayList<>();
 
         //exit if icao does not exist
         if (!cachedAPs.containsKey(icao.toUpperCase()))
@@ -860,7 +881,7 @@ public class Airports implements Serializable
 
     public static List<AirportBean> findAirports(boolean assignments, int modelId, String name, int distance, String from, boolean ferry, boolean buy, int commodity, int minAmount, boolean fuel, boolean jeta, boolean repair, boolean acForSale, boolean fbo, boolean isRentable) throws DataError
     {
-        ArrayList<AirportBean> result = new ArrayList<AirportBean>();
+        ArrayList<AirportBean> result = new ArrayList<>();
         String qry;
         try
         {
@@ -1001,7 +1022,7 @@ public class Airports implements Serializable
 
     public static List<AirportBean> findCertainAirports(String region, String state, String country, String icao, String name, boolean fuel, boolean repair, boolean fbo, boolean fboInactive, boolean facilityPTRent, boolean facilityCTRent, int fboOwner) throws DataError
     {
-        ArrayList<AirportBean> result = new ArrayList<AirportBean>();
+        ArrayList<AirportBean> result = new ArrayList<>();
         try
         {
             StringBuilder tables = new StringBuilder("airports");
@@ -1049,10 +1070,6 @@ public class Airports implements Serializable
                     query.append(and);
                     query.append(" (fbo.fboSize * (case when airports.size < 1000 then 1 when airports.size < 3500 then 2 else 3 end) - pt.reservedSpace - (IF (pts.spaceInUse IS NULL,0,pts.spaceInUse)) > 0) ");
                     and = "AND ";
-                }
-                if (facilityCTRent)
-                {
-                    //??
                 }
             }
 

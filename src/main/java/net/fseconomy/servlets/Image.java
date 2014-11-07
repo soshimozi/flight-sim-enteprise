@@ -50,7 +50,7 @@ public class Image extends HttpServlet
 		resp.setContentType("image/jpeg");
 		if (id != null)
 		{
-			InputStream image = data.getInvoiceBackground(Integer.parseInt(id));
+			InputStream image = Fbos.getInvoiceBackground(Integer.parseInt(id));
 			if (image != null)
 			{
 				byte[] buffer = new byte[10240];

@@ -10,44 +10,51 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 {
 	Map memberships = user.getMemberships();
 
-	StringBuffer returnValue = new StringBuffer();
+	StringBuilder returnValue = new StringBuilder();
 	String menu = parent + "_sub_" + id;
 	
-	returnValue.append("oM.makeMenu('" + menu + "','" + parent + "','" + name + "','" + (includeBaseLink ? response.encodeURL(link) : "") + "');\n");
+	returnValue.append("oM.makeMenu('").append(menu).append("','").append(parent).append("','").append(name).append("','").append(includeBaseLink ? response.encodeURL(link) : "").append("');\n");
 	int count = 0;
 	int stringLen = 0;
 	boolean hasGroups = false;
-	if (memberships != null)
-		for (Iterator i = memberships.values().iterator(); i.hasNext(); )
-		{
-			Accounts.groupMemberData memberData = (Accounts.groupMemberData) i.next();
-			if (staffOnly == false || memberData.memberLevel >= UserBean.GROUP_STAFF)
-			{
-				int len = memberData.groupName.length();
-				if (len > stringLen) 
-					stringLen = len;
-				hasGroups = true;
-			}
-		}
-	if (!hasGroups)
-		return includeBaseLink ? returnValue.toString() : "";
+    if (memberships != null)
+    {
+        for (Object o : memberships.values())
+        {
+            Accounts.groupMemberData memberData = (Accounts.groupMemberData) o;
+            if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
+            {
+                int len = memberData.groupName.length();
+                if (len > stringLen)
+                {
+                    stringLen = len;
+                }
+                hasGroups = true;
+            }
+        }
+    }
+    if (!hasGroups)
+    {
+        return includeBaseLink ? returnValue.toString() : "";
+    }
 
 	int length = 6 * stringLen + 20;
 
-	for (Iterator i = memberships.values().iterator(); i.hasNext(); )
-	{
-        Accounts.groupMemberData memberData = (Accounts.groupMemberData) i.next();
-		if (staffOnly == false || memberData.memberLevel >= UserBean.GROUP_STAFF)
-			returnValue.append("oM.makeMenu('" + menu + "_" + count++ +"','" + menu + "','" + memberData.groupName.replaceAll("\'","\\\\'") + "','" + response.encodeURL(link + arg + memberData.groupId) + "', '', " + length + ");\n");
-	}
+    for (Object o : memberships.values())
+    {
+        Accounts.groupMemberData memberData = (Accounts.groupMemberData) o;
+        if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
+        {
+            returnValue.append("oM.makeMenu('").append(menu).append("_").append(count++).append("','").append(menu).append("','").append(memberData.groupName.replaceAll("\'", "\\\\'")).append("','").append(response.encodeURL(link + arg + memberData.groupId)).append("', '', ").append(length).append(");\n");
+        }
+    }
 
 	return returnValue.toString();
 }
 %>
 
-<link href="/theme/menu.css" rel="stylesheet" type="text/css" />
-<script src="/scripts/coolmenus4.js">
-</script>
+<link href="/css/menu.css" rel="stylesheet" type="text/css" />
+<script src="/scripts/coolmenus4.js"></script>
 
 <script >
 	menuheight = 17;
@@ -127,14 +134,14 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 	if (user.getLevel() == UserBean.LEV_MODERATOR || user.getLevel() == UserBean.LEV_ADMIN)
 	{
 %>
-		oM.makeMenu('m12','','Admin','<%= response.encodeURL("admin/index.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
+		oM.makeMenu('m12','','Admin','<%= response.encodeURL("admin/admin.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
 <%
 	}
 
 	if (user.getLevel() == UserBean.LEV_CSR)
 	{
 %>
-		oM.makeMenu('m13','','CSR','<%= response.encodeURL("admin/index.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
+		oM.makeMenu('m13','','CSR','<%= response.encodeURL("admin/admin.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
 		oM.makeMenu('sub13_0','m13','Add User','<%= response.encodeURL("createaccount.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
 		oM.makeMenu('sub13_1','m13','Edit User','<%= response.encodeURL("admin/accountedit.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
 		oM.makeMenu('sub13_2','m13','Client Ip Checks','<%= response.encodeURL("admin/checkclientip.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');

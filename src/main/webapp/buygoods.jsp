@@ -17,7 +17,9 @@
 	
 	if (owner.equals("0") && (type.equals("3") || type.equals("4")) )  
 	{
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
 		return;
 	}
 
@@ -52,9 +54,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 	
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-	<script src="/scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.min.js"></script>
 
 	<script>
 

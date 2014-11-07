@@ -20,6 +20,7 @@
 package net.fseconomy.beans;
 
 import net.fseconomy.data.Data;
+import net.fseconomy.util.Constants;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -176,7 +177,25 @@ public class ModelBean implements Serializable
 		rs.updateBoolean("canShip", getCanShip() == 1);
 		rs.updateBoolean("fuelSystemOnly", getFuelSystemOnly() == 1);
 	}
-	public void setCenter(int cap)
+
+    public static int hourEquipmentPrice(int equipment)
+    {
+        int returnValue = 0;
+
+        if ((equipment & ModelBean.EQUIPMENT_IFR_MASK) != 0)
+            returnValue += ModelBean.IFR_COST_HOUR;
+
+        if ((equipment & ModelBean.EQUIPMENT_GPS_MASK) != 0)
+            returnValue += ModelBean.GPS_COST_HOUR;
+
+        if ((equipment & ModelBean.EQUIPMENT_AP_MASK) != 0)
+            returnValue += ModelBean.AP_COST_HOUR;
+
+        return returnValue;
+    }
+
+
+    public void setCenter(int cap)
 	{
 		capacity[fuelTank.Center] = cap;
 	}	
@@ -570,7 +589,7 @@ public class ModelBean implements Serializable
 	
 	public int getMaxCargoWeight()
 	{
-		return (int) Math.round(maxWeight - emptyWeight - getTotalCapacity() * Data.GALLONS_TO_KG);
+		return (int) Math.round(maxWeight - emptyWeight - getTotalCapacity() * Constants.GALLONS_TO_KG);
 	}
 
 	public void setEmptyWeight(int i) {

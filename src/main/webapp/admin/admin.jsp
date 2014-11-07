@@ -1,17 +1,18 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.beans.UserBean, net.fseconomy.data.*"
 %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
     Data data = (Data)application.getAttribute("data");
 
-    if(!Data.needLevel(user, UserBean.LEV_MODERATOR))
+    if(!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="../index.jsp"</script>
+<%
         return;
     }
 
@@ -35,7 +36,7 @@
 
     <meta http-equiv="refresh" content="60" />
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
     <script type="text/javascript">
         function UpdateFilter()
@@ -50,8 +51,8 @@
 </head>
 <body>
 
-<jsp:include flush="true" page="/top.jsp" />
-<jsp:include flush="true" page="/menu.jsp" />
+<jsp:include flush="true" page="../top.jsp" />
+<jsp:include flush="true" page="../menu.jsp" />
 
 <div id="wrapper">
     <div class="content">
@@ -84,7 +85,7 @@
             <li><a href="/admin/signaturesedit.jsp">Signature Templates</a></li>
         </ul>
 
-        <form method="post" action="index.jsp" name="adminform">
+        <form method="post" action="admin.jsp" name="adminform">
             <div>
                 <input type="hidden" name="issubmit" value="true"/>
                 <input type="hidden" name="event" value="ResetFilter"/>

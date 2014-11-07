@@ -8,6 +8,7 @@
 package net.fseconomy.beans;
 
 import net.fseconomy.data.Data;
+import net.fseconomy.util.Constants;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -45,10 +46,10 @@ public class CommodityBean implements Serializable
 	
 	public double getWeightedPrice(int airportSize, double fuelPrice, int overstock, double JetAPrice)
 	{
-		double price = basePrice > 0 ? basePrice : (fuelPrice / Data.GALLONS_TO_KG);
+		double price = basePrice > 0 ? basePrice : (fuelPrice / Constants.GALLONS_TO_KG);
 
 		if (id == 4)
-			price = (JetAPrice / Data.GALLONS_TO_KG);
+			price = (JetAPrice / Constants.GALLONS_TO_KG);
 
 		double sizePart = Math.log(airportSize)/9.0;
 		sizePart = (sizePart - 1) * sizeFactor + 1;		

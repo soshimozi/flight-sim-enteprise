@@ -6,9 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
-	String returnPage = "";
+	String returnPage;
 	UserBean account = null;
 	boolean showActions = true;
 	String sGroupId = request.getParameter("id");
@@ -24,7 +22,7 @@
 		account = Accounts.getAccountById(groupId);
 		if (account != null)
 		{
-			if (account.isGroup() == false || user.groupMemberLevel(groupId) < UserBean.GROUP_INVITED)
+			if (!account.isGroup() || user.groupMemberLevel(groupId) < UserBean.GROUP_INVITED)
 				account = null;
 			
 			if (account != null)
@@ -46,17 +44,17 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link rel="stylesheet" type="text/css" href="/theme/Master.css" />
-	<link rel="stylesheet" type="text/css" href="/theme/tablesorter-style.css" />
+	<link rel="stylesheet" type="text/css" href="css/Master.css" />
+	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css" />
 
-	<script src="/scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.min.js"></script>
 	
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
-	<script src="/scripts/PopupWindow.js"></script>
+	<script src="scripts/PopupWindow.js"></script>
 	
 	<script type="text/javascript">
 		var gmapac = new PopupWindow();
@@ -74,7 +72,7 @@
 		{
 			var selItemText = sel[sel.selectedIndex].text;
 			var selItemVal = sel[sel.selectedIndex].value;
-			
+
 			if( selItemText.indexOf("Rent") >= 0)
 			{
 				var s = selItemVal.split(",");
@@ -98,8 +96,7 @@
 			}
 			else 
 			{
-				var url = selItemVal;
-				location.href = url;
+                location.href = selItemVal;
 			}		
 		}
 	</script>
@@ -142,7 +139,9 @@
 	if(aircraftList.size() > 0) 
 	{
 %>
-		<a href="#" onclick="gmapac.setSize(620,520);gmapac.setUrl('<%= response.encodeURL("gmapac.jsp?Id=" + account.getId()) %>');gmapac.showPopup('gmapac');return false;" id="gmapac"><img src="img/wmap.gif" style="border-style: none; vertical-align:middle;" /></a>	
+		<a href="#" onclick="gmapac.setSize(620,520);gmapac.setUrl('<%= response.encodeURL("gmapac.jsp?Id=" + account.getId()) %>');gmapac.showPopup('gmapac');return false;" id="gmapac">
+            <img src="img/wmap.gif" style="border-style: none; vertical-align:middle;">
+        </a>
 <%
 	}
 %>

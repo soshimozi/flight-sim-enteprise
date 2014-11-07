@@ -8,9 +8,11 @@
 <%
     Data data = (Data)application.getAttribute("data");
 
-    if(user == null || !user.isLoggedIn() || !Data.needLevel(user, UserBean.LEV_MODERATOR))
+    if(user == null || !user.isLoggedIn() || !Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 
@@ -85,7 +87,9 @@
             System.out.println("newnote = " + newnote);
             if(newnote == null || newnote.isEmpty())
             {
-                out.print("<script type=\"text/javascript\">document.location.href=\"/admin/serviceprovidersedit.jsp\"</script>");
+%>
+                <script type="text/javascript">document.location.href="/admin/serviceprovidersedit.jsp"</script>
+<%
                 return;
             }
         }
@@ -118,19 +122,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css" />
+    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="/scripts/jquery.min.js"></script>
-    <script src="/scripts/jquery-ui.min.js"></script>
-    <script src="/scripts/AutoComplete.js"></script>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/jquery-ui.min.js"></script>
+    <script src="../scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
         $(function()
         {
-            initAutoComplete("#ownername", "#owner", <%= Data.ACCT_TYPE_PERSON %>)
-            initAutoComplete("#altname", "#alt", <%= Data.ACCT_TYPE_PERSON %>)
+            initAutoComplete("#ownername", "#owner", <%= Accounts.ACCT_TYPE_PERSON %>)
+            initAutoComplete("#altname", "#alt", <%= Accounts.ACCT_TYPE_PERSON %>)
         });
 
     </script>
@@ -151,7 +155,9 @@
 <%
 	if(!error.equals(""))
 	{
-		out.print("<div class=\"error\">" + error + "<br/></div>");
+%>
+        <div class=\"error\"><%= error %><br/></div>
+<%
 	}
 %>		
 	<form method="post">

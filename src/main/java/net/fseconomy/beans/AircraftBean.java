@@ -5,6 +5,8 @@ import java.sql.*;
 import java.util.Date;
 
 import net.fseconomy.data.Data;
+import net.fseconomy.util.Constants;
+import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 
 public class AircraftBean implements Serializable
@@ -535,7 +537,7 @@ public class AircraftBean implements Serializable
 	
 	public int maxPayloadWeight()
 	{
-		return (int) Math.round(maxWeight - emptyWeight - (getTotalFuel() * Data.GALLONS_TO_KG) - 77);
+		return (int) Math.round(maxWeight - emptyWeight - (getTotalFuel() * Constants.GALLONS_TO_KG) - 77);
 	}
 	
 	public boolean fitsAboard(AssignmentBean assignment)
@@ -708,7 +710,7 @@ public class AircraftBean implements Serializable
 	 */
 	public void setRegistration(String registration)
 	{
-		this.registration = TruncateRegistration(Data.clearHtml(registration));
+		this.registration = TruncateRegistration(Converters.clearHtml(registration));
 	}
 
 	/**

@@ -21,13 +21,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
-    <link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
 
-    <script src="/scripts/jquery.min.js"></script>
+    <script src="scripts/jquery.min.js"></script>
     <script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-    <script src="/scripts/jquery.tablesorter.widgets.js"></script>
+    <script src="scripts/jquery.tablesorter.widgets.js"></script>
     <script type='text/javascript' src='scripts/parser-timeHrMin.js'></script>
 
     <script type="text/javascript">
@@ -73,12 +73,11 @@
 	    </thead>
 	    <tbody>
 <%	
-	Statistics[] stats = data.getStatistics();
+	List<Statistics> stats = Stats.getStatistics();
 	if(stats != null)
 	{
-		for (int c=0; c < stats.length; c++)
+		for (Statistics entry : stats)
 		{
-			Statistics entry = stats[c];
 			if (entry.group != group)
 				continue;
 			
@@ -86,7 +85,7 @@
 			String time = (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
 %>
 			<tr>
-			<td><%= stats[c].accountName  %></td>
+			<td><%= entry.accountName  %></td>
 <% 			if (group) 
 			{ 
 %>				<td><%= entry.owner %></td>

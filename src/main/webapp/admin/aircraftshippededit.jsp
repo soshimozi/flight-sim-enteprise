@@ -11,14 +11,15 @@
     Data data = (Data)application.getAttribute("data");
 
     //check that we have right permissions, toss to index if not
-    if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
+    if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 
     // registration is only passed when we are processing an admin command to reset a shipped aircraft
-    //System.out.println("reg: " + request.getParameter("registration"));
     if (request.getParameter("registration") != null)
     {
         int reassemToFrom = -1;
@@ -42,10 +43,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="/scripts/AnchorPosition.js"></script>
-    <script src="/scripts/PopupWindow.js"></script>
+    <script src="../scripts/AnchorPosition.js"></script>
+    <script src="../scripts/PopupWindow.js"></script>
     <script type='text/javascript' src='/scripts/common.js'></script>
     <script type='text/javascript' src='/scripts/css.js'></script>
     <script type='text/javascript' src='/scripts/standardista-table-sorting.js'></script>

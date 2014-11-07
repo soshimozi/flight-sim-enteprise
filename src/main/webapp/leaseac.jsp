@@ -26,18 +26,18 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-	<link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
-	<script src="/scripts/jquery.min.js"></script>
-	<script src="/scripts/jquery-ui.min.js"></script>
-	<script src="/scripts/AutoComplete.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
+	<script src="scripts/jquery.min.js"></script>
+	<script src="scripts/jquery-ui.min.js"></script>
+	<script src="scripts/AutoComplete.js"></script>
 
 	<script type="text/javascript">
 	
 		$(function() 
 		{
-			initAutoComplete("#lesseename", "#lessee", <%= Data.ACCT_TYPE_ALL %>);
+			initAutoComplete("#lesseename", "#lessee", <%= Accounts.ACCT_TYPE_ALL %>);
 		});
 	
 	</script>

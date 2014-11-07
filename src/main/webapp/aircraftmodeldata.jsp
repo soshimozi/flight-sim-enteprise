@@ -11,7 +11,10 @@
 	String sId = request.getParameter("id");
 	if(sId == null)
 	{
-		out.print("Invalid Model Id!");
+
+%>
+        "Invalid Model Id!"
+<%
 		return;
 	}
 

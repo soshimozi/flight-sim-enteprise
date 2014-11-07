@@ -19,11 +19,11 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
     <% // http://ivaynberg.github.io/select2/ %>
-    <link href="/theme/select2.css" rel="stylesheet"/>
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/select2.css" rel="stylesheet"/>
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="/scripts/select2.js"></script>
+    <script src="scripts/select2.js"></script>
 
     <script>
 

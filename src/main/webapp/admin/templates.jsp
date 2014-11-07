@@ -6,11 +6,11 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
-    if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
+    if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 %>
@@ -24,12 +24,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
-	<link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+	<link href="..css/Master.css" rel="stylesheet" type="text/css" />
+	<link href="..css/tablesorter-style.css" rel="stylesheet" type="text/css" />
 
-	<script src="/scripts/jquery.min.js"></script>
-	<script type='text/javascript' src='/scripts/jquery.tablesorter.js'></script>
-	<script src="/scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="../scripts/jquery.min.js"></script>
+	<script type='text/javascript' src='../scripts/jquery.tablesorter.js'></script>
+	<script type='text/javascript' src="../scripts/jquery.tablesorter.widgets.js"></script>
 	
 	<script type="text/javascript">
 		$(function()
@@ -61,7 +61,7 @@
 <div class="content">
 <div class="dataTable">	
 <%
-	List<TemplateBean> templates = data.getAllTemplates();
+	List<TemplateBean> templates = Templates.getAllTemplates();
 %>
 	<table class="templateTable tablesorter-default tablesorter">
 		<caption>Assignment Templates <input id="newTemplateButton" style="margin-left: 15px;" type="button" class="button" value="New Template"/></caption>
@@ -82,17 +82,16 @@
 		</thead>
 		<tbody>
 <%
-	String type = null;
+	String type;
 
 	for (TemplateBean template : templates)
 	{		
-		type = template.getSUnits().toLowerCase() == "kg" ? "Kg" : "Pax";
+		type = template.getSUnits().toLowerCase().equals("kg") ? "Kg" : "Pax";
 
-		int amount = 0;
-		Integer[] statArray = new Integer[4];
+        Integer[] statArray = new Integer[4];
 		if (MaintenanceCycle.assignmentsPerTemplate != null)
 		{
-			Integer[] tmpArray = (Integer[])MaintenanceCycle.assignmentsPerTemplate.get(new Integer(template.getId()));
+			Integer[] tmpArray = MaintenanceCycle.assignmentsPerTemplate.get(template.getId());
 			if (tmpArray != null)
 				statArray = tmpArray;
 		}		

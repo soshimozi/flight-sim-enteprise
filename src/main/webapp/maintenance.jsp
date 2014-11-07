@@ -39,7 +39,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 	
 	<script type="text/javascript">
 		function doSubmit(id, price, fbo)
@@ -101,15 +101,17 @@
 <%
    	int equipment = aircraft.getEquipment();
 
+    StringBuilder sb = new StringBuilder();
    	if ((equipment & ModelBean.EQUIPMENT_IFR_MASK) != 0)
-   		out.println("<li>NAV1, NAV2, NDB</li>");
+        sb.append("<li>NAV1, NAV2, NDB</li>");
    	
    	if ((equipment & ModelBean.EQUIPMENT_AP_MASK) != 0)
-   		out.println("<li>Autopilot</li>");
+   		sb.append("<li>Autopilot</li>");
    	
    	if ((equipment & ModelBean.EQUIPMENT_GPS_MASK) != 0)
-   		out.println("<li>GPS</li>");
+   		sb.append("<li>GPS</li>");
 %>
+                                <%= sb.toString() %>
 					  		</ul>
 					  	</td>
 					</tr>

@@ -25,12 +25,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
-    <link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
 
     <script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-    <script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
+    <script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
     <script type='text/javascript' src='scripts/parser-checkbox.js'></script>
     <script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 

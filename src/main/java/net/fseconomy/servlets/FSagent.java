@@ -64,7 +64,7 @@ public class FSagent extends HttpServlet
 		String password = req.getParameter("pass");
 		UserBean userBean;
 		
-		if (user == null || password == null || (userBean=Accounts.userExists(user, password, false)) == null)
+		if (user == null || password == null || (userBean=Accounts.userExists(user, password)) == null)
 		{
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid account information");
 			return;
@@ -97,7 +97,7 @@ public class FSagent extends HttpServlet
 		    {
 		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon")), 0).icao;
 		    }
-			data.addClientRequestEntry(ipAddress, userBean.getId(), userBean.getName(), "FS", action, reg, "lat=" + req.getParameter("lat")+", lon="+req.getParameter("lon")+ ", icao=" + icao);
+			SimClientRequests.addClientRequestEntry(ipAddress, userBean.getId(), userBean.getName(), "FS", action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
 		}		
 
 		try
@@ -119,7 +119,7 @@ public class FSagent extends HttpServlet
                     break;
                 case "test":
                     String version = req.getParameter("version");
-                    if (!data.GetFSUIPCClientVersion().equals(version))
+                    if (!SimClientRequests.GetFSUIPCClientVersion().equals(version))
                         throw new DataError("A new version of this program is available.");
                     break;
                 case "arrive":
@@ -189,7 +189,7 @@ public class FSagent extends HttpServlet
 		if (aircraft == null || !closest.icao.equals(aircraft.getLocation()))
 			throw new DataError("You have no active aircraft at " + closest.icao);
 		
-		if (!data.aircraftOk(aircraft, FSAircraft))
+		if (!Aircraft.aircraftOk(aircraft, FSAircraft))
 			throw new DataError(FSAircraft+" is not compatible with your active "+aircraft.getMakeModel());
 		
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit
@@ -198,10 +198,10 @@ public class FSagent extends HttpServlet
 			throw new DataError(aircraft.getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
 		}		
 
-		if (data.getNumberOfHours(user.getName(), 48) > 30)
+		if (Stats.getNumberOfHours(user.getName(), 48) > 30)
 			throw new DataError("Maximum pilot hours in a 48 hour period reached");
 		
-		Object[] info = data.departAircraft(aircraft, user.getId(), closest.icao);
+		Object[] info = Flights.departAircraft(aircraft, user.getId(), closest.icao);
 		int payloadWeight = (Integer) info[0];
 		int totalWeight = (Integer) info[1];
 		List<AssignmentBean> assignments = (List<AssignmentBean>)info[2];
@@ -266,7 +266,7 @@ public class FSagent extends HttpServlet
 	}
 	String doCancel(UserBean user) throws DataError
 	{
-		data.cancelFlight(user);
+		Flights.cancelFlight(user);
 		return "";
 	}
 	
@@ -390,7 +390,7 @@ public class FSagent extends HttpServlet
 			int[][] damage = getDamage(req);
 			
 			//assignmentsLeft = data.freeAircraft(user, closest, Integer.parseInt(engineTime), Integer.parseInt(engineTicks), fuel, night, envFactor, damage, false);
-			assignmentsLeft = data.processFlight(user, closest, Integer.parseInt(engineTime), Integer.parseInt(engineTicks), fuel, night, envFactor, damage, Data.SimType.FSUIPC);
+			assignmentsLeft = Flights.processFlight(user, closest, Integer.parseInt(engineTime), Integer.parseInt(engineTicks), fuel, night, envFactor, damage, SimClientRequests.SimType.FSUIPC);
 			
 			message = "Your flight is logged and the results can be found at the website.";
 			if (assignmentsLeft > 0)

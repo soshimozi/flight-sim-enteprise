@@ -47,22 +47,22 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 	<% //regressed jquery so that lightbox would work %>
-	<script src="/scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.min.js"></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script src="/scripts/jquery.tablesorter.widgets.js"></script>
+	<script src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
-	<link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+	<link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
 	
 	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script charset="iso-8859-1" src="/scripts/js/highcharts.js"> </script>
+	<script charset="iso-8859-1" src="scripts/js/highcharts.js"> </script>
 	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
 	
-	<script src="/scripts/PopupWindow.js"></script>
-	<script src="/scripts/Master.jsp"></script>
+	<script src="scripts/PopupWindow.js"></script>
+	<script src="scripts/Master.jsp"></script>
 	<script type="text/javascript"> var gmap = new PopupWindow(); </script>
 
 	<script type="text/javascript">

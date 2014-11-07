@@ -43,7 +43,9 @@
                 {
                     Fbos.createFbo(fbo, user);
                     Data.logger.info("FBO Constructed: loc = [" + location + "], owner=[" + sOwner + "], Name=["+ name + "]");
-                    out.print("<script type=\"text/javascript\">document.location.href=\"fbo.jsp?id=" + owner + "\"</script>");
+%>
+                    <script type="text/javascript">document.location.href="fbo.jsp?id=<%=owner%>"</script>
+<%
                     return;
                 }
                 catch (DataError e)
@@ -74,7 +76,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>

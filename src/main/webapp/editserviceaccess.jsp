@@ -29,7 +29,9 @@
     if (account.isGroup() && user.groupMemberLevel(accountId) != UserBean.GROUP_OWNER)
     {
         // We are not the owner of the group kick out to main menu.
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 
@@ -49,12 +51,12 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
-    <link href="/theme/bootstrap-switch.min.css" rel="stylesheet" />
-    <link href="/theme/Master.css" rel="stylesheet" />
+    <link href="css/bootstrap-switch.min.css" rel="stylesheet" />
+    <link href="css/Master.css" rel="stylesheet" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-    <script src="/scripts/bootstrap-switch.min.js"></script>
+    <script src="scripts/bootstrap-switch.min.js"></script>
 
     <script>
         $(document).ready(function() {

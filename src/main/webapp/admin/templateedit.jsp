@@ -11,9 +11,11 @@
 <%
     Data data = (Data)application.getAttribute("data");
 
-	if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
+	if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
 	{
-		out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
 		return; 
 	}
 	String error = null;
@@ -31,14 +33,14 @@
 		} 
 		else
 		{
-			template = data.getTemplateById(template.getId());
+			template = Templates.getTemplateById(template.getId());
 		}
 	} 
 	else if (error == null)
 	{
 		try
 		{
-			data.updateTemplate(template, user);
+			Templates.updateTemplate(template, user);
 %>
 			<jsp:forward page="/admin/templates.jsp"></jsp:forward>
 <%		
@@ -77,7 +79,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>

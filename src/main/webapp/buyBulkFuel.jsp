@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.util.Constants" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -16,7 +17,9 @@
 			
 	if (user == null || user.getId() == 0 || user.getId() == -1) 
 	{
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
 		return;
 	}
 	
@@ -42,9 +45,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 	
-	<script src="/scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.min.js"></script>
 
 	<script>
 		function checkForm()
@@ -118,8 +121,8 @@
 				<h2>Bulk Fuel Order</h2>
 				You currently have the following fuel levels at <span style="color: blue;"> <%=fboAccount.getLocation() %>:</span><br/>
 				<ul>
-				<li><span style="color: blue;">100LL: <%=(int)Math.floor(fuelleft != null ? fuelleft.getAmount() : 0) %> Kg | <%=(int)Math.floor(fuelleft != null ? fuelleft.getAmount()/Data.GALLONS_TO_KG : 0) %> gallons </span></li>
-			  	<li><span style="color: blue;">JetA: <%=(int)Math.floor(jetaleft != null ? jetaleft.getAmount() : 0) %> Kg | <%=(int)Math.floor(jetaleft != null ? jetaleft.getAmount()/Data.GALLONS_TO_KG : 0) %> gallons </span> </li>
+				<li><span style="color: blue;">100LL: <%=(int)Math.floor(fuelleft != null ? fuelleft.getAmount() : 0) %> Kg | <%=(int)Math.floor(fuelleft != null ? fuelleft.getAmount()/ Constants.GALLONS_TO_KG : 0) %> gallons </span></li>
+			  	<li><span style="color: blue;">JetA: <%=(int)Math.floor(jetaleft != null ? jetaleft.getAmount() : 0) %> Kg | <%=(int)Math.floor(jetaleft != null ? jetaleft.getAmount()/Constants.GALLONS_TO_KG : 0) %> gallons </span> </li>
 			  	</ul>
 				<br/>
 				<h3>Specify the quantity for each fuel type you want to order</h3>
@@ -129,7 +132,7 @@
 		int i;
 		for (i=0; i<=10; i++)
 		{
-%>					<option value="<%=baseBulkFuelKg*i %>"> <%=baseBulkFuelKg*i %> Kg | <%=(int)Math.round((baseBulkFuelKg*i)/Data.GALLONS_TO_KG) %> Gal  </option>
+%>					<option value="<%=baseBulkFuelKg*i %>"> <%=baseBulkFuelKg*i %> Kg | <%=(int)Math.round((baseBulkFuelKg*i)/Constants.GALLONS_TO_KG) %> Gal  </option>
 <%
 		}
 %> 
@@ -140,7 +143,7 @@
 		for (i=0; i<=10; i++)
 		{
 %>
-					<option value="<%=baseBulkFuelKg*i %>"> <%=baseBulkFuelKg*i  %> Kg | <%=(int)Math.round((baseBulkFuelKg*i)/Data.GALLONS_TO_KG)  %> Gal  </option>
+					<option value="<%=baseBulkFuelKg*i %>"> <%=baseBulkFuelKg*i  %> Kg | <%=(int)Math.round((baseBulkFuelKg*i)/Constants.GALLONS_TO_KG)  %> Gal  </option>
 <%
 		}
 %> 
@@ -171,7 +174,7 @@
 		for (i=1; i<=10; i++)
 		{
 %>	
-					<option value="<%=baseBulkFuelKg*i %>"> <%=baseBulkFuelKg*i %> Kg | <%=(int)Math.round((baseBulkFuelKg*i)/Data.GALLONS_TO_KG) %> Gal  </option>
+					<option value="<%=baseBulkFuelKg*i %>"> <%=baseBulkFuelKg*i %> Kg | <%=(int)Math.round((baseBulkFuelKg*i)/Constants.GALLONS_TO_KG) %> Gal  </option>
 <%
 		}
 %> 

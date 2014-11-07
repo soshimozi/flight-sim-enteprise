@@ -10,9 +10,11 @@
 <%
     Data data = (Data)application.getAttribute("data");
 
-    if(!Data.needLevel(user, UserBean.LEV_MODERATOR))
+    if(!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 
@@ -28,18 +30,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css" />
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css" />
+    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="/scripts/jquery.min.js"></script>
-    <script src="/scripts/jquery-ui.min.js"></script>
-    <script src="/scripts/AutoComplete.js"></script>
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/jquery-ui.min.js"></script>
+    <script src="../scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
         $(function()
         {
-            initAutoComplete("#username", "#user", <%= Data.ACCT_TYPE_PERSON %>)
+            initAutoComplete("#username", "#user", <%= Accounts.ACCT_TYPE_PERSON %>)
         });
 
     </script>
@@ -77,7 +79,7 @@
 <%
 	}
 %>
-    <a href="/admin/index.jsp">Return to Admin Page</a><br/>
+    <a href="/admin/admin.jsp">Return to Admin Page</a><br/>
 	<div class="form" style="width: 400px">
 	<h2>Change User Account Status</h2>
 	<p>

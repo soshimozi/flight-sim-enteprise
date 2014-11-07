@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     List<String> users = null;
     String message = null;
     try
@@ -37,7 +35,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>

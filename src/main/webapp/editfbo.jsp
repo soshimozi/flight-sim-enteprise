@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String returnPage = request.getHeader("referer");
 
 	String sId = request.getParameter("id");
@@ -102,7 +100,7 @@
 	
 	<title>FSEconomy terminal</title>
 	
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 	<script>
 		function submitBuildRepair(form){
@@ -150,7 +148,7 @@
 
 		<div class="invoiceInset">
 		<a title="Upload new invoice background" href="javascript:void(window.open('<%= response.encodeURL("updatebg.jsp?id=" + fbo.getId()) %>','InvoicePaper','status=no,toolbar=no,height=450,width=500'))">
-			<img width="200" src="<%= fbo.getInvoiceBackground() %>"/><br/>
+			<img width="200" src="<%= fbo.getInvoiceBackground() %>"><br>
 		</a>
 		Current invoice background
 		</div>
@@ -164,15 +162,15 @@
 <% 	
 	}
 %>
-			Name: <input name="name" type="text" class="textarea" value="<%= fbo.getName() %>" size="40" maxlength="255" />
+			Name: <input name="name" type="text" class="textarea" value="<%= fbo.getName() %>" size="40" maxlength="255">
 			<br/><br/><br/>
-			Sale Price: $<input name="price" type="text" class="textarea" style="text-align:right" value="<%= fbo.isForSale() ? fbo.getPrice() : "" %>" size="10" />.00<br/><br/>
+			Sale Price: $<input name="price" type="text" class="textarea" style="text-align:right" value="<%= fbo.isForSale() ? fbo.getPrice() : "" %>" size="10">.00<br/><br/>
 		</div>
 		<div class="formgroup high">
 			<h3>Fuel</h3>
-			100LL Price: <input name="fuel100ll" type="text" class="textarea" value="<%= fbo.getFuel100LL() %>" size="4" /> 
+			100LL Price: <input name="fuel100ll" type="text" class="textarea" value="<%= fbo.getFuel100LL() %>" size="4">
 			Per Gallon<br/>
-			JetA Price: <input name="fueljeta" type="text" class="textarea" value="<%= fbo.getFueljeta() %>" size="4" /> 
+			JetA Price: <input name="fueljeta" type="text" class="textarea" value="<%= fbo.getFueljeta() %>" size="4">
 			Per Gallon
 		</div>
 		<div class="formgroup high">
@@ -181,8 +179,8 @@
 	if ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0) 
 	{ 
 %>
-			Profit margin: <input name="margin" type="text" class="textarea" value="<%= fbo.getRepairShopMargin() %>" size="5"/>%<br/>
-			Equipment install margin: <input name="equipmentInstallMargin" type="text" class="textarea" value="<%= fbo.getEquipmentInstallMargin() %>" size="5"/>%
+			Profit margin: <input name="margin" type="text" class="textarea" value="<%= fbo.getRepairShopMargin() %>" size="5">%<br/>
+			Equipment install margin: <input name="equipmentInstallMargin" type="text" class="textarea" value="<%= fbo.getEquipmentInstallMargin() %>" size="5">%
 <%
 	} 
 	else 
@@ -260,12 +258,12 @@
 %>
 				<tr>
 					<td><%= commodity.getName() %></td>
-					<td><input name="<%= prefix %>buy" type="checkbox" value="true" <%= good.isBuy() ? "checked" :"" %>/></td>
-					<td><input name="<%= prefix %>bp" type="text" class="textarea" value="<%= Formatters.twoDecimals.format(good.getPriceBuy()) %>" size="7"/></td>
-					<td><input name="<%= prefix %>max" type="text" class="textarea" value="<%= good.getMax() %>" size="10"/></td>
-					<td><input name="<%= prefix %>sell" type="checkbox" value="true" <%= good.isSell() ? "checked" :"" %>/></td>
-					<td><input name="<%= prefix %>sp" type="text" class="textarea" value="<%= Formatters.twoDecimals.format(good.getPriceSell()) %>" size="7"/></td>
-					<td><input name="<%= prefix %>retain" type="text" class="textarea" value="<%= good.getRetain() %>" size="10"/></td>
+					<td><input name="<%= prefix %>buy" type="checkbox" value="true" <%= good.isBuy() ? "checked" :"" %>></td>
+					<td><input name="<%= prefix %>bp" type="text" class="textarea" value="<%= Formatters.twoDecimals.format(good.getPriceBuy()) %>" size="7"></td>
+					<td><input name="<%= prefix %>max" type="text" class="textarea" value="<%= good.getMax() %>" size="10"></td>
+					<td><input name="<%= prefix %>sell" type="checkbox" value="true" <%= good.isSell() ? "checked" :"" %>></td>
+					<td><input name="<%= prefix %>sp" type="text" class="textarea" value="<%= Formatters.twoDecimals.format(good.getPriceSell()) %>" size="7"></td>
+					<td><input name="<%= prefix %>retain" type="text" class="textarea" value="<%= good.getRetain() %>" size="10"></td>
 				</tr>
 <% 	
 	}

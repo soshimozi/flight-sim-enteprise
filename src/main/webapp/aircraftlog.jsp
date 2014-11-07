@@ -3,6 +3,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.dto.*,java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.util.Constants" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -20,7 +21,7 @@
 
     String linkOptions = "registration=" + aircraft + "&";
     AircraftBean aircraftData = Aircraft.getAircraftByRegistration(aircraft);
-    List<LogBean> logs = Logging.getLogForAircraft(aircraft, from, Data.stepSize);
+    List<LogBean> logs = Logging.getLogForAircraft(aircraft, from, Constants.stepSize);
     String owner = "-";
     if (aircraftData.getOwner() != 0)
     {
@@ -52,11 +53,11 @@
 
     double fuelCap = aircraftData.getTotalCapacity();
     double payLoad = aircraftData.getMaxWeight() - aircraftData.getEmptyWeight() - (77 * (1 + additionalcrew));
-    int payload25 = (int)Math.round(payLoad - fuelCap * 0.25 * Data.GALLONS_TO_KG);
-    int payload50 = (int)Math.round(payLoad - fuelCap * 0.50 * Data.GALLONS_TO_KG);
-    int payload75 = (int)Math.round(payLoad - fuelCap * 0.75 * Data.GALLONS_TO_KG);
-    int payload100 = (int)Math.round(payLoad - fuelCap * Data.GALLONS_TO_KG);
-    int payloadnow = (int)Math.round(payLoad - aircraftData.getTotalFuel() * Data.GALLONS_TO_KG);
+    int payload25 = (int)Math.round(payLoad - fuelCap * 0.25 * Constants.GALLONS_TO_KG);
+    int payload50 = (int)Math.round(payLoad - fuelCap * 0.50 * Constants.GALLONS_TO_KG);
+    int payload75 = (int)Math.round(payLoad - fuelCap * 0.75 * Constants.GALLONS_TO_KG);
+    int payload100 = (int)Math.round(payLoad - fuelCap * Constants.GALLONS_TO_KG);
+    int payloadnow = (int)Math.round(payLoad - aircraftData.getTotalFuel() * Constants.GALLONS_TO_KG);
     int crewseats;
     if (additionalcrew > 0)
         crewseats = 2;
@@ -85,7 +86,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript">
 
         function doSubmit(id)
@@ -231,13 +232,15 @@
 <%
         int equipment = aircraftData.getEquipment();
 
+        StringBuilder sb = new StringBuilder();
         if ((equipment & ModelBean.EQUIPMENT_IFR_MASK) != 0)
-            out.println("<td>IFR</td>");
+            sb.append("<td>IFR</td>");
         if ((equipment & ModelBean.EQUIPMENT_AP_MASK) != 0)
-            out.println("	<td>Autopilot</td>");
+            sb.append("	<td>Autopilot</td>");
         if ((equipment & ModelBean.EQUIPMENT_GPS_MASK) != 0)
-            out.println("	<td>GPS</td>");
+            sb.append("	<td>GPS</td>");
 %>
+            <%=sb.toString()%>
             </tr>
         </table><br>
         <table border="1">
@@ -335,25 +338,25 @@
 <%
         if (from > 0)
         {
-            int newFrom = from - 5*Data.stepSize;
+            int newFrom = from - 5*Constants.stepSize;
             if (newFrom < 0)
                 newFrom = 0;
 %>
 	<a href="<%= response.encodeURL("aircraftlog.jsp?" + linkOptions + "from=" + newFrom) %>">&lt;&lt;</a>
-	<a href="<%= response.encodeURL("aircraftlog.jsp?" + linkOptions + "from=" + (from-Data.stepSize)) %>">&lt;</a>
+	<a href="<%= response.encodeURL("aircraftlog.jsp?" + linkOptions + "from=" + (from-Constants.stepSize)) %>">&lt;</a>
 <%
         }
 %>
 		</td>
 		<td align="right">
 <%
-        if ((from+Data.stepSize) < amount)
+        if ((from+Constants.stepSize) < amount)
         {
-            int newFrom = from+5*Data.stepSize;
-            if ((newFrom + Data.stepSize) > amount)
-                newFrom = amount-Data.stepSize;
+            int newFrom = from+5*Constants.stepSize;
+            if ((newFrom + Constants.stepSize) > amount)
+                newFrom = amount-Constants.stepSize;
 %>
-	<a href="<%= response.encodeURL("aircraftlog.jsp?" + linkOptions + "from=" + (from+Data.stepSize)) %>">&gt;</a>
+	<a href="<%= response.encodeURL("aircraftlog.jsp?" + linkOptions + "from=" + (from+Constants.stepSize)) %>">&gt;</a>
 	<a href="<%= response.encodeURL("aircraftlog.jsp?" + linkOptions + "from=" + newFrom) %>">&gt;&gt;</a>
 <%
         }

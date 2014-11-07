@@ -55,7 +55,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
@@ -110,7 +110,7 @@ if (user.isLoggedIn())
 	if (user.getLevel() == UserBean.LEV_MODERATOR || user.getLevel() == UserBean.LEV_ADMIN)
 	{
 %>
-	<a href="admin/index.jsp">Admin</a><br/><br/>
+	<a href="admin/admin.jsp">Admin</a><br/><br/>
 	<a href="admin/aircraftmappings.jsp">Modify aircraft mappings</a><br/><br/>
 	<a href="admin/models.jsp">Modify aircraft models</a><br/><br/>
 	<a href="admin/templates.jsp">Modify assignment templates</a><br/><br/>

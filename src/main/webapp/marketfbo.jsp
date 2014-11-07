@@ -20,10 +20,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="/scripts/AnchorPosition.js"></script>
-    <script src="/scripts/PopupWindow.js"></script>
+    <script src="scripts/AnchorPosition.js"></script>
+    <script src="scripts/PopupWindow.js"></script>
     <script type='text/javascript' src='scripts/common.js'></script>
     <script type='text/javascript' src='scripts/css.js'></script>
     <script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>

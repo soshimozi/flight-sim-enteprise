@@ -11,7 +11,9 @@
 	String sId = request.getParameter("id");
 	if(sId == null)
 	{
-		out.print("Invalid Model Id!");
+%>
+		"Invalid Model Id!"
+<%
 		return;
 	}
 
@@ -44,7 +46,9 @@
 <%
 	for(int i=0; i<aliases.Aliases.length; i++)
 	{
-			out.print("<li>" + aliases.Aliases[i]+"</li>");
+%>
+			<li><%=aliases.Aliases[i]%></li>
+<%
 	}
 %>			
 		</ol>

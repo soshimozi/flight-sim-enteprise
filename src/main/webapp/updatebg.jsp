@@ -6,25 +6,25 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String message = null;
-	String content = "";
-	String style = "";
 	String sId;
 	FboBean fbo;
 	int id;
-	
-	if (FileUpload.isMultipartContent(request))
+
+    StringBuilder sb = new StringBuilder();
+
+    if (FileUpload.isMultipartContent(request))
 	{
 		DiskFileUpload upload = new DiskFileUpload();
 		List items = upload.parseRequest(request);
 		Map itemsMap = new HashMap();
-		for (Iterator i = items.iterator(); i.hasNext();)
-		{
-			FileItem item = (FileItem) i.next();
-			itemsMap.put(item.getFieldName(), item);
-		}
+
+        for (Object item1 : items)
+        {
+            FileItem item = (FileItem) item1;
+            itemsMap.put(item.getFieldName(), item);
+        }
+
 		sId = ((FileItem) itemsMap.get("id")).getString();
 		FileItem fClear = (FileItem) itemsMap.get("clear");
 		String sClear = fClear != null ? fClear.getString() : null;
@@ -32,35 +32,44 @@
 		fbo = Fbos.getFbo(id);
 		FileItem image = (FileItem) itemsMap.get("bg");
 		boolean clear = sClear != null && !sClear.equals("");
+
 		if (image != null)
 		{
 			try
 			{
-				if (clear)
-					data.updateInvoiceBackground(fbo, null, 0, user);
-				else if (image.getSize() > 0 && (image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png")))
-					data.updateInvoiceBackground(fbo, image.getInputStream(),(int) image.getSize(), user);
+                if (clear)
+                {
+                    Fbos.updateInvoiceBackground(fbo, null, 0, user);
+                }
+                else if (image.getSize() > 0 && (image.getContentType().equals("image/jpeg") || image.getContentType().equals("image/png")))
+                {
+                    Fbos.updateInvoiceBackground(fbo, image.getInputStream(), (int) image.getSize(), user);
+                }
 			}
 			catch(DataError e)
 			{
 				message = "Error: " + e.getMessage();
 			}
-			
-			out.println("<!DOCTYPE html>");
-			out.println("<html>");
-			out.println("<head>");
-			out.println("<script type='text/javascript'>");
-			
-			if(message != null)
-				out.println("alert('Error: " + message + "');");
-			
-			out.println("opener.location.reload();");
-			out.println("self.close();");
-			out.println("</script>");
-			out.println("</head>");
-			out.println("<body></body>");
-			out.println("</html>");
 
+			sb.append("<!DOCTYPE html>");
+            sb.append("<html>");
+            sb.append("<head>");
+            sb.append("<script type='text/javascript'>");
+
+            if (message != null)
+            {
+                sb.append("alert('Error: ").append(message).append("');");
+            }
+
+            sb.append("opener.location.reload();");
+            sb.append("self.close();");
+            sb.append("</script>");
+            sb.append("</head>");
+            sb.append("<body></body>");
+            sb.append("</html>");
+%>
+            <%= sb.toString() %>
+<%
 			return;
 		}
 	} 
@@ -73,18 +82,21 @@
 		//FSX Client for some reason does not pass session data
 		if(user.getId() == -1)
 		{
-			out.println("<!DOCTYPE html>");
-			out.println("<html>");
-			out.println("<head>");
-			out.println("<script type='text/javascript'>");			
-			out.println("alert('There is a error using the FSX client to upload Invoices. Please use a stand alone browser. Thank you.');");
-			out.println("opener.location.reload();");
-			out.println("self.close();");
-			out.println("</script>");
-			out.println("</head>");
-			out.println("<body></body>");
-			out.println("</html>");
+            sb.append("<!DOCTYPE html>");
+            sb.append("<html>");
+            sb.append("<head>");
+            sb.append("<script type='text/javascript'>");
+            sb.append("alert('There is a error using the FSX client to upload Invoices. Please use a stand alone browser. Thank you.');");
+            sb.append("opener.location.reload();");
+            sb.append("self.close();");
+            sb.append("</script>");
+            sb.append("</head>");
+            sb.append("<body></body>");
+            sb.append("</html>");
 
+%>
+            <%= sb.toString() %>
+<%
 			return;
 
 		}
@@ -100,7 +112,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>

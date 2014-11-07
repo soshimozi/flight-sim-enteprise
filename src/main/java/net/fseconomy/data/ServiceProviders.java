@@ -18,6 +18,27 @@ import java.util.List;
 
 public class ServiceProviders implements Serializable
 {
+    public static String createAccessKey()
+    {
+        return createAccessKey(10);
+    }
+
+    public static String createAccessKey(int len)
+    {
+        StringBuilder result = new StringBuilder();
+
+        for (int loop = 0; loop < len; loop++)
+        {
+            int ran=(int)Math.round(Math.random()*35);
+            if (ran < 10)
+                result.append(ran);
+            else
+                result.append((char)('A'+ran-10));
+        }
+
+        return result.toString();
+    }
+
     public static ServiceProviderBean getServiceProviderById(int serviceid)
     {
         List<ServiceProviderBean> result = null;
@@ -152,7 +173,7 @@ public class ServiceProviders implements Serializable
         Date date = new Date();
         String note = Formatters.dateyyyymmddhhmmss.format(date) + " - Created";
         service.setNotes(note);
-        service.setKey(Data.createAccessKey());
+        service.setKey(createAccessKey());
         try
         {
             conn = DALHelper.getInstance().getConnection();

@@ -1,18 +1,16 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import=" java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<%@ page import="net.fseconomy.beans.AirportBean" %>
-<%@ page import="net.fseconomy.beans.FboBean" %>
-<%@ page import="net.fseconomy.beans.GoodsBean" %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
-<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
-<%
-    Data data = (Data)application.getAttribute("data");
 
-    if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
+
+<%
+    if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 %>
@@ -25,18 +23,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="/theme/redmond/jquery-ui.css">
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="..css/redmond/jquery-ui.css">
+    <link href="..css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script type='text/javascript' src='/scripts/common.js'></script>
-    <script type='text/javascript' src='/scripts/css.js'></script>
-    <script type='text/javascript' src='/scripts/standardista-table-sorting.js'></script>
+    <script type='text/javascript' src='../scripts/common.js'></script>
+    <script type='text/javascript' src='../scripts/css.js'></script>
+    <script type='text/javascript' src='../scripts/standardista-table-sorting.js'></script>
 
-    <script type='text/javascript' src="/scripts/PopupWindow.js"></script>
+    <script type='text/javascript' src="../scripts/PopupWindow.js"></script>
 
-    <script type='text/javascript' src="/scripts/jquery.min.js"></script>
-    <script type='text/javascript' src="/scripts/jquery-ui.min.js"></script>
-    <script type='text/javascript' src="/scripts/AutoComplete.js"></script>
+    <script type='text/javascript' src="../scripts/jquery.min.js"></script>
+    <script type='text/javascript' src="../scripts/jquery-ui.min.js"></script>
+    <script type='text/javascript' src="../scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -48,7 +46,7 @@
 
         $(function()
         {
-            initAutoComplete("#ownername", "#owner", <%= Data.ACCT_TYPE_ALL %>)
+            initAutoComplete("#ownername", "#owner", <%= Accounts.ACCT_TYPE_ALL %>)
         });
 
     </script>
@@ -83,7 +81,8 @@
                     <input type="hidden" name="submit" value="true" />
                     <input type="hidden" name="return" value="/admin/fboedit.jsp" />
                 </div>
-                Owner Name: <input type="text" id="ownername" name="ownername"/> <input type="submit" class="button" value="GO" />
+                Owner Name:
+                <input type="text" id="ownername" name="ownername"/> <input type="submit" class="button" value="GO">
             </form>
         </div>
 <%
@@ -127,8 +126,12 @@
         </div>
     	<table id="sortableTablefbo0" class="sortable">
 	        <caption>
+                <div>
 	            FBO's owned by <%= account.getName() %>
-	            <A HREF="/gmapfbo.jsp?fboOwner=<%= account.getId() %>"><img src="/img/wmap.gif" width="50" height="32" border="0" align="absmiddle" /></a>
+	            <a href="../gmapfbo.jsp?fboOwner=<%= account.getId() %>">
+                    <img src="../img/wmap.gif" width="50" height="32" border="0" align="absmiddle">
+                </a>
+                </div>
 	        </caption>
 	        <thead>
                 <tr>
@@ -168,7 +171,7 @@
                     <td class="numeric"><%= fuel != null ? fuel.getAmount() : "" %></td>
                     <td class="numeric"><%= jeta != null ? jeta.getAmount() : "" %></td>
                     <td class="numeric"><%= buildingmaterials != null ? buildingmaterials.getAmount() : "" %></td>
-                    <td> | <a class="link" href="<%= response.encodeURL("/admin/fbotransfer.jsp?id=" + fbo.getId()) %>">Transfer</a></td>
+                    <td> | <a class="link" href="<%= response.encodeURL("/fbotransfer.jsp?id=" + fbo.getId()) %>">Transfer</a></td>
                 </tr>
 <%
         }

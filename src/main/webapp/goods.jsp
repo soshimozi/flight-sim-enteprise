@@ -17,18 +17,15 @@
 	if (group != null)
 		account = Accounts.getAccountById(Integer.parseInt(group));
 	
-	if (account.isGroup() && user.groupMemberLevel(Integer.parseInt(group)) < UserBean.GROUP_STAFF) 
+	if ((account.isGroup() && user.groupMemberLevel(Integer.parseInt(group)) < UserBean.GROUP_STAFF)
+            || (!account.isGroup() && (account.getId()!= user.getId())))
 	{
 		// If group account only allow group staff or higher to display goods screen.
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
-		return; 
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
+		return;
 	}
-	if (!account.isGroup() && (account.getId()!= user.getId())) 
-	{
-		// If user account only allow the signed in user to display the goods screen.
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
-		return; 
-	}	
 	List<GoodsBean> goods = Goods.getGoodsForAccountAvailable(account.getId());
 %>
 
@@ -41,7 +38,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 	
 	<script type='text/javascript' src='scripts/common.js'></script>
 	<script type='text/javascript' src='scripts/css.js'></script>

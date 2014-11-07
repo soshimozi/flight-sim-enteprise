@@ -2,6 +2,7 @@ package net.fseconomy.servlets;
 
 import net.fseconomy.data.Data;
 import net.fseconomy.data.Goods;
+import net.fseconomy.data.Stats;
 import net.fseconomy.dto.LatLonCount;
 import net.fseconomy.dto.PilotStatus;
 import net.fseconomy.services.serviceData;
@@ -166,7 +167,7 @@ public class RestServlet
     {
         //This is called A LOT.
         //The PilotStat class uses single character labels to reduce traffic.
-        List<LatLonCount> list = Data.getInstance().FlightSummaryList;
+        List<LatLonCount> list = Stats.FlightSummaryList;
 
         return createSuccessResponse(200, null, null, list);
     }

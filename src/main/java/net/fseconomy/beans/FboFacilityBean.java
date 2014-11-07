@@ -20,6 +20,7 @@
 package net.fseconomy.beans;
 
 import net.fseconomy.data.Data;
+import net.fseconomy.util.Converters;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -224,7 +225,7 @@ public class FboFacilityBean implements Serializable
 
 	public void setName(String s)
 	{
-		name = Data.clearHtml(s);
+		name = Converters.clearHtml(s);
 	}
 
 	public int getUnits()
@@ -352,7 +353,7 @@ public class FboFacilityBean implements Serializable
 
     public void setCommodity(String s)
 	{
-		commodity = Data.clearHtml(s);
+		commodity = Converters.clearHtml(s);
 	}
 
     public boolean getAllowWater()

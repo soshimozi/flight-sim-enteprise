@@ -12,8 +12,8 @@
     int flying = 0;
     try
     {
-        flying = data.getNumberOfUsers("flying");
-        parked = data.getNumberOfUsers("parked");
+        flying = Stats.getNumberOfUsers("flying");
+        parked = Stats.getNumberOfUsers("parked");
     }
     catch(DataError e)
     {
@@ -32,10 +32,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="/scripts/AnchorPosition.js"></script>
-    <script src="/scripts/PopupWindow.js"></script>
+    <script src="scripts/AnchorPosition.js"></script>
+    <script src="scripts/PopupWindow.js"></script>
     <script type="text/javascript">
 
         //Original javascript code by Daniel Insley at bravenet.com - modified by Paul Dahlen.

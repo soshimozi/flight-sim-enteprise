@@ -16,6 +16,8 @@ import java.util.List;
 
 public class Models implements Serializable
 {
+    static final int MAX_MODEL_TITLE_LENGTH = 128;
+
     public static String addModel(String aircraft, int[] fuelCapacities)
     {
         String result = null;
@@ -26,7 +28,7 @@ public class Models implements Serializable
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraft);
             if (!rs.next())
             {
-                String title = aircraft.length() > Data.MAX_MODEL_TITLE_LENGTH ? aircraft.substring(0, Data.MAX_MODEL_TITLE_LENGTH - 1) : aircraft;
+                String title = aircraft.length() > MAX_MODEL_TITLE_LENGTH ? aircraft.substring(0, MAX_MODEL_TITLE_LENGTH - 1) : aircraft;
 
                 qry = "INSERT INTO fsmappings (fsaircraft, fcapCenter, fcapLeftMain, fcapLeftAux, fcapLeftTip, fcapRightMain, fcapRightAux, fcapRightTip, fcapCenter2, fcapCenter3, fcapExt1, fcapExt2) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
                 DALHelper.getInstance().ExecuteUpdate(qry, title, fuelCapacities[ModelBean.fuelTank.Center], fuelCapacities[ModelBean.fuelTank.LeftMain], fuelCapacities[ModelBean.fuelTank.LeftAux], fuelCapacities[ModelBean.fuelTank.LeftTip], fuelCapacities[ModelBean.fuelTank.RightMain], fuelCapacities[ModelBean.fuelTank.RightAux], fuelCapacities[ModelBean.fuelTank.RightTip], fuelCapacities[ModelBean.fuelTank.Center2], fuelCapacities[ModelBean.fuelTank.Center3], fuelCapacities[ModelBean.fuelTank.Ext1], fuelCapacities[ModelBean.fuelTank.Ext2]);

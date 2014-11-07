@@ -41,16 +41,16 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>    
 	
-	<link rel="stylesheet" type="text/css" href="/theme/Master.css" />
-	<link rel="stylesheet" type="text/css" href="/theme/tablesorter-style.css" />
+	<link rel="stylesheet" type="text/css" href="css/Master.css" />
+	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css" />
 	
-	<script src="/scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.min.js"></script>
 	
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
-	<script src="/scripts/PopupWindow.js"></script>
+	<script src="scripts/PopupWindow.js"></script>
 
 	<script type="text/javascript"> var gmap = new PopupWindow(); </script>
 	
@@ -139,7 +139,7 @@
 			sizedesc = facility.getSize() + " gates";
 		}
 		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(ap);
-		int availJobs = data.getFacilityJobCount(facility.getOccupant(), facility.getLocation()); 
+		int availJobs = Fbos.getFacilityJobCount(facility.getOccupant(), facility.getLocation());
 %>
 				<tr>
 					<td style="width: 80px;"><%= Airports.airportLink(ap, ap, response) %></td>

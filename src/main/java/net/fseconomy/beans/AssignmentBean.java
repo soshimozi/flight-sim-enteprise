@@ -2,6 +2,7 @@ package net.fseconomy.beans;
 
 import net.fseconomy.data.Airports;
 import net.fseconomy.data.Data;
+import net.fseconomy.util.Converters;
 
 import java.io.Serializable;
 import java.sql.*;
@@ -687,7 +688,7 @@ public class AssignmentBean implements Serializable
 
 	public void setComment(String string)
 	{
-		comment = "".equals(string) ? null : Data.clearHtml(string);
+		comment = "".equals(string) ? null : Converters.clearHtml(string);
 	}
 
 	public int getCommodityId()

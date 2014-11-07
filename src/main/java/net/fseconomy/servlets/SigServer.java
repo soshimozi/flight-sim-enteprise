@@ -123,33 +123,33 @@ public class SigServer extends HttpServlet
 	        long ifModifiedSince = request.getDateHeader("If-Modified-Since");
 	        if (ifModifiedSince != -1 && !hasExpired && !hasChanged) 
 	        {
-	        	Data.cacheCount++;
+	        	Stats.cacheCount++;
 	            response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 	            response.setDateHeader("Expires", expires); // Postpone cache with 1 week.
 	            return;
 	        }
 	        
-    		if( Data.statsmap != null && Data.statsmap.containsKey(user))
+    		if( Stats.statsmap != null && Stats.statsmap.containsKey(user))
     		{
-    			Data.createCount++;
+                Stats.createCount++;
     			createSignature(user);
     		}
     		else
     		{
-    			Data.defaultCount++;
+                Stats.defaultCount++;
     			filename = defaultTemplate;
     		}
         }
         else
         {
-    		if( Data.statsmap != null && Data.statsmap.containsKey(user))
+    		if( Stats.statsmap != null && Stats.statsmap.containsKey(user))
     		{
-    			Data.createCount++;
+                Stats.createCount++;
     			createSignature(user);
     		}
     		else
     		{
-    			Data.defaultCount++;
+                Stats.defaultCount++;
     			filename = defaultTemplate;
     		}
         }
@@ -187,8 +187,8 @@ public class SigServer extends HttpServlet
         String eTag = fileName + "_" + length + "_" + lastModified;
         long expires = System.currentTimeMillis() + cacheAge*1000;
 
-        Data.bytesServed += length;
-        Data.totalImagesSent++;
+        Stats.bytesServed += length;
+        Stats.totalImagesSent++;
         
 		response.setContentType("image/jpeg");
         response.setHeader("ETag", eTag);
@@ -213,11 +213,11 @@ public class SigServer extends HttpServlet
 	//Determine if the statistics have updated
 	private boolean hasSignatureChanged(String user)
 	{
-		if(Data.prevstatsmap == null)
+		if(Stats.prevstatsmap == null)
 			return false;
 		
-		Statistics curr = Data.statsmap.get(user);
-		Statistics prev = Data.prevstatsmap.get(user);
+		Statistics curr = Stats.statsmap.get(user);
+		Statistics prev = Stats.prevstatsmap.get(user);
 
         return !(curr.flights == prev.flights && curr.totalFlightTime == prev.totalFlightTime);
 
@@ -239,7 +239,7 @@ public class SigServer extends HttpServlet
         }
 
 		//Compute the text to embed
-		Statistics s = Data.statsmap.get(user);
+		Statistics s = Stats.statsmap.get(user);
 		String stats = "1st Flight: " + Formatters.datemmyyyy.format(s.firstFlight) + "       Flights: " + s.flights + "       Hours: " + s.totalFlightTime/3600;
 		
 		//do it

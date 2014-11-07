@@ -6,7 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
     String error = null;
 
     //setup return page if action used
@@ -22,7 +21,9 @@
         if (user.groupMemberLevel(group.getId()) < UserBean.GROUP_OWNER)
         {
             // We are not a member of the group kick out to main menu.
-            out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+%>
+            <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
             return;
         }
     }
@@ -35,7 +36,7 @@
             group.setBanList(request.getParameter("banList"));
             Accounts.updateGroup(group, user);
 %>
-<jsp:forward page="groups.jsp"></jsp:forward>
+            <jsp:forward page="groups.jsp" />
 <%
         }
         catch (DataError e)
@@ -56,7 +57,7 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="theme/Master.css" rel="stylesheet" type="text/css" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
@@ -85,22 +86,22 @@
 	<table>
 	<caption>Edit Flight Group</caption>
 	<tr>
-		<td>Name</td><td><input name="name" type="text" class="textarea" value="<%= group.getName().replaceAll("\"","''") %>" size="40"/></td>
+		<td>Name</td><td><input name="name" type="text" class="textarea" value="<%= group.getName().replaceAll("\"","''") %>" size="40"></td>
 	</tr>
 
 	<tr>
-		<td>Comment</td><td><input name="comment" type="text" class="textarea" value="<%= group.getComment() == null?"" : group.getComment() %>" size="40"/></td>
+		<td>Comment</td><td><input name="comment" type="text" class="textarea" value="<%= group.getComment() == null?"" : group.getComment() %>" size="40"></td>
 	</tr>
 	<tr>
-		<td>Url of website</td><td><input name="url" type="text" class="textarea" value="<%= group.getUrl() == null?"":group.getUrl() %>" size="40"/></td>
+		<td>Url of website</td><td><input name="url" type="text" class="textarea" value="<%= group.getUrl() == null?"":group.getUrl() %>" size="40"></td>
 	</tr>	
 	<tr>
-		<td>Default pilot fee</td><td><input name="defaultPilotFee" type="text" class="textarea" value="<%= group.getDefaultPilotFee() %>" size="5"/> 
+		<td>Default pilot fee</td><td><input name="defaultPilotFee" type="text" class="textarea" value="<%= group.getDefaultPilotFee() %>" size="5">
 		%</td>
 	</tr>
 	<tr>
 		<td>Rental Ban List</td>
-		<td colspan="5"><input name="banList" type="text" class="textarea" value="<%= group.getBanList() %>" maxlength="255" size="80" /> <br>* names separated by a space</td>
+		<td colspan="5"><input name="banList" type="text" class="textarea" value="<%= group.getBanList() %>" maxlength="255" size="80"> <br>* names separated by a space</td>
 	</tr>
 				
 	<tr><td colspan="2"><input type="checkbox" name="exposedJoin" value="true" <%= group.isExposedJoin()?"checked" : "" %>>Group is private</td></tr>

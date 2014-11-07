@@ -10,9 +10,11 @@
 <%
     Data data = (Data)application.getAttribute("data");
 
-    if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
+    if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 
@@ -37,7 +39,7 @@
         {
             try
             {
-                requests = data.getClientRequestsByAccountId(inputuser.getId());
+                requests = SimClientRequests.getClientRequestsByAccountId(inputuser.getId());
             }
             catch(DataError e)
             {
@@ -49,7 +51,7 @@
     {
         try
         {
-            requests = data.getClientRequestsByIp(searchfor);
+            requests = SimClientRequests.getClientRequestsByIp(searchfor);
         }
         catch(DataError e)
         {
@@ -67,7 +69,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
@@ -89,7 +91,7 @@
 %>		
 		<div class="dataTable">	
 		<h2>User - <%= "account".equals(searchby) ? inputuser.getName() : request.getParameter("ip") %> - Client request log last 100 entries</h2><br/>
-		<a href="index.jsp">Return to Admin Page</a><br/><br/>
+		<a href="admin.jsp">Return to Admin Page</a><br/><br/>
 		<a href="/admin/checkclientiplisting.jsp">Select new account or IP</a><br/>
 		<table id="sortableTableStats" class="sortable">
 		<thead>

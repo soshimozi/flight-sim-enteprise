@@ -15,6 +15,24 @@ import java.util.List;
 
 public class Banking implements Serializable
 {
+    public static void reloadMoney(UserBean bean)
+    {
+        try
+        {
+            String qry = "SELECT money, bank FROM accounts WHERE id = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, bean.getId());
+            if (rs.next())
+            {
+                bean.setMoney(rs.getDouble("money"));
+                bean.setBank(rs.getDouble("bank"));
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public static double getAccountFundsById(int id) throws DataError
     {
         double money = 0;

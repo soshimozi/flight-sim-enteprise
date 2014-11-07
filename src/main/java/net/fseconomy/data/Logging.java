@@ -1,5 +1,6 @@
 package net.fseconomy.data;
 
+import net.fseconomy.beans.AssignmentBean;
 import net.fseconomy.beans.LogBean;
 import net.fseconomy.beans.UserBean;
 import net.fseconomy.util.Converters;
@@ -12,6 +13,19 @@ import java.util.*;
 
 public class Logging implements Serializable
 {
+    public static void logTemplateAssignment(AssignmentBean assignment, int payee)
+    {
+        try
+        {
+            String qry = "INSERT INTO templatelog (created, expires, templateid, fromicao, toicao, pay, payee) VALUES (?,?,?,?,?,?,?)";
+            DALHelper.getInstance().ExecuteUpdate(qry, assignment.getCreation(), assignment.getExpires(),assignment.getFromTemplate(), assignment.getFrom(), assignment.getTo(), assignment.calcPay(), payee);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public static int getAmountLogForGroup(int groupId)
     {
         int result = -1;

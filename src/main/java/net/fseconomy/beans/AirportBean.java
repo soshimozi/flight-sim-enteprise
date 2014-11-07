@@ -40,7 +40,7 @@ public class AirportBean implements Serializable
 	int longestRwy, surfaceType;
 	double fuelPrice,landingFee,JetAPrice,JetAMult;
 	double lat, lon;
-	public CloseAirport[] closestAirports;
+	public List<CloseAirport> closestAirports = null;
 	int bucket;
 	boolean avgas;
 	boolean jeta;

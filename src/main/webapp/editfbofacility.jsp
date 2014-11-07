@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String returnPage =  request.getHeader("referer");
 
 	int facilityId = Integer.parseInt(request.getParameter("facilityId"));		
@@ -28,12 +26,9 @@
 		else 
 			landlord = Fbos.getFboDefaultFacility(fbo);
 		
-		int iSessionRent=0;
-		
 		if (session.getAttribute(facility.getLocation() + "Rent") == null)
 		{
 			session.setAttribute(facility.getLocation() + "Rent", facility.getRent());
-			iSessionRent=facility.getRent();
 		}
 		
 		session.setAttribute(facility.getLocation() + "Rent", request.getParameter("pd_rent"));
@@ -56,7 +51,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 	
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
@@ -91,7 +86,7 @@
 				<td>Location</td><td colspan="2"><%= airport.getIcao() %> - <%= fbo.getName() %></td>
 			</tr>
 <%
-	String sizedesc = null;
+	String sizedesc;
 	if (facility.getIsDefault())
 	{
 		int totalSpace = fbo.getFboSize() * airport.getFboSlots();
@@ -131,14 +126,14 @@
 			<tr>
 				<td>Monthly Rent</td>
 				<td>
-					$<input name="pd_rent" type="text" class="textarea" value="<%= facility.getRent() %>" size="5"/>.00
+					$<input name="pd_rent" type="text" class="textarea" value="<%= facility.getRent() %>" size="5">.00
 				</td>
 				<td>per gate.</td>
 			</tr>
 			<tr>
 				<td>Renewals</td>
 				<td colspan="2">
-					<input name="pd_allowRenew" type="checkbox" value="true" <%= facility.getAllowRenew() ? "checked" :"" %> /> allowed*
+					<input name="pd_allowRenew" type="checkbox" value="true" <%= facility.getAllowRenew() ? "checked" :"" %>> allowed*
 				</td>
 			</tr>
 			<tr>
@@ -165,8 +160,8 @@
 %>			
 			<tr>
 				<td>
-					<input type="hidden" name="pr_<%= renter.getId() %>_facilityId" value="<%= renter.getId() %>"/>
-					<input name="pr_<%= renter.getId() %>_allowRenew" type="checkbox" value="true" <%= renter.getAllowRenew() ? "checked" :"" %> />
+					<input type="hidden" name="pr_<%= renter.getId() %>_facilityId" value="<%= renter.getId() %>">
+					<input name="pr_<%= renter.getId() %>_allowRenew" type="checkbox" value="true" <%= renter.getAllowRenew() ? "checked" :"" %>>
 				</td>
 				<td>
 					<%= renter.getSize() %> gates
@@ -224,7 +219,7 @@
 			</tr>
 			<tr>
 				<td>Auto renew every month</td>
-				<td colspan="2"><input name="pd_renew" type="checkbox" value="true" <%= facility.getRenew() ? "checked" :"" %> /></td>
+				<td colspan="2"><input name="pd_renew" type="checkbox" value="true" <%= facility.getRenew() ? "checked" :"" %>></td>
 			</tr>
 <%	
 	}
@@ -244,7 +239,7 @@
 			</tr>
 			<tr>
 				<td valign="top">
-					<input name="pd_name" type="text" class="textarea" value="<%= facility.getName() %>" maxlength="45" size="30"/>
+					<input name="pd_name" type="text" class="textarea" value="<%= facility.getName() %>" maxlength="45" size="30">
 				</td>
 				<td valign="top">&nbsp;</td>
 				<td valign="top">
@@ -261,8 +256,8 @@
 		{ 
 			output += items[i].trim() + (i < items.length - 1 ? ", " : "");
 		}
-		out.print(output);
 %>
+                        <%= output %>
 					</textarea>
 					<br />
 					<i>
@@ -273,12 +268,12 @@
 			</tr>
 			<tr>
 				<td colspan="3">
-				Don't accept parties of more than <input name="pd_maxUnitsPerTrip" type="text" class="textarea" value="<%= facility.getMaxUnitsPerTrip() %>" maxlength="2" size="3" /> passengers
+				Don't accept parties of more than <input name="pd_maxUnitsPerTrip" type="text" class="textarea" value="<%= facility.getMaxUnitsPerTrip() %>" maxlength="2" size="3"> passengers
 				</td>
 			</tr>
 			<tr>
 				<td colspan="3">
-				Unclaimed jobs expire in <input name="pd_daysActive" type="text" class="textarea" value="<%= facility.getDaysActive() %>" maxlength="2" size="3" /> days&nbsp;&nbsp;&nbsp;&nbsp;
+				Unclaimed jobs expire in <input name="pd_daysActive" type="text" class="textarea" value="<%= facility.getDaysActive() %>" maxlength="2" size="3"> days&nbsp;&nbsp;&nbsp;&nbsp;
 				<!-- Claimed jobs expire in <input name="pd_daysClaimedActive" type="text" class="textarea" value="<%= facility.getDaysClaimedActive() %>" maxlength="2" size="3" /> 
 				additional days -->
 				</td>
@@ -303,7 +298,7 @@
 				<td colspan="5">ICAO list of destinations</td>
 			</tr>
 			<tr>
-				<td colspan="5"><input name="pd_icaoset" type="text" class="textarea" value="<%= (facility.getIcaoSet() != null ? facility.getIcaoSet() : "") %>" maxlength="255" size="50" /></td>
+				<td colspan="5"><input name="pd_icaoset" type="text" class="textarea" value="<%= (facility.getIcaoSet() != null ? facility.getIcaoSet() : "") %>" maxlength="255" size="50"></td>
 			</tr>
 			<tr>
 				<td colspan="5"><i><span class="small">ex: KBOS, KJFK, KBWI</span></i></td>
@@ -327,8 +322,8 @@
 				<td width="30%">Max</td>
 			</tr>
 			<tr>
-				<td><input name="pd_minDistance" type="text" class="textarea" value="<%= facility.getMinDistance() %>" maxlength="4" size="3"/></td>
-				<td><input name="pd_maxDistance" type="text" class="textarea" value="<%= facility.getMaxDistance() %>" maxlength="4" size="3"/></td>
+				<td><input name="pd_minDistance" type="text" class="textarea" value="<%= facility.getMinDistance() %>" maxlength="4" size="3"></td>
+				<td><input name="pd_maxDistance" type="text" class="textarea" value="<%= facility.getMaxDistance() %>" maxlength="4" size="3"></td>
 				<td>&nbsp;</td>
 				<td>
 <%
@@ -366,7 +361,7 @@
 			</tr>
 			<tr>
 				<td colspan="5">
-					<input name="pd_allowWater" type="checkbox" value="true" <%= facility.getAllowWater() ? "checked" :"" %> />
+					<input name="pd_allowWater" type="checkbox" value="true" <%= facility.getAllowWater() ? "checked" :"" %>>
 					Allow Seabases to be selected
 				</td>
 			</tr>

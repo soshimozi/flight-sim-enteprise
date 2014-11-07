@@ -22,6 +22,14 @@ import java.sql.Timestamp;
  */
 public class Converters
 {
+    public static String clearHtml(String input)
+    {
+        if (input == null)
+            return null;
+
+        return input.replaceAll("<[^>]*>", "").trim();
+    }
+
 	public static String escapeJavaScript(String input)
 	{
 		if (input == null)

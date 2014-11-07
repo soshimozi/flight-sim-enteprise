@@ -52,15 +52,15 @@
 	} 
 	else 
 	{
-		data.reloadMoney(user);
+		Banking.reloadMoney(user);
 		int hours = 48;
 		double totalhours = 0;
 		String stotalhours = null;
 
 		try
 		{
-			totalhours = data.getNumberOfHours(user.getName(), hours);
-			stotalhours = Formatters.twoDecimals.format(data.getNumberOfHours(user.getName(), hours));
+			totalhours = Stats.getNumberOfHours(user.getName(), hours);
+			stotalhours = Formatters.twoDecimals.format(Stats.getNumberOfHours(user.getName(), hours));
 		}
 		catch(DataError e)
 		{

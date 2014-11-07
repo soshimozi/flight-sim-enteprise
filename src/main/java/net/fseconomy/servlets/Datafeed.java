@@ -22,6 +22,7 @@ package net.fseconomy.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.Map.Entry;
@@ -64,7 +65,7 @@ CREATE TABLE `serviceproviders` (
 
 public class Datafeed extends HttpServlet 
 {
-	Data data;
+    public static String DataFeedUrl = "";
 
 	private static final long serialVersionUID = 1L;
 	static final int MINFEEDDELAYMS = 1100; //default 1100 milliseconds (1.1 seconds)
@@ -87,23 +88,13 @@ public class Datafeed extends HttpServlet
 	static final int USERLOCKOUT = 60; //Live
 	static final int USERLOCKOUTMINS = 120; //Live
 	
-	//---------------------
-	//TEST Settings
-	//---------------------
-	//static final int USERLOCKOUT = 60; //Testing
-	//static final int USERLOCKOUTMINS = 15; //Testing
-	
-	//static final String XSDURL = "http://www.theflighthangar.com:8080/fseconomy";
-	static String XSDURL = "http://www.fseconomy.net:81";
+	static String XSDURL = "";
 	
 	public void init()
 	{
-		//Get Data Context, create it if null
-		data = (Data) getServletContext().getAttribute("data");
-		if (data == null)
-			getServletContext().setAttribute("data", data = Data.getInstance());		
+        SetDatafeedUrl();
 
-		XSDURL = Data.DataFeedUrl;
+		XSDURL = DataFeedUrl;
 		
 		//Create a CacheManager using defaults
 		if( cacheManager == null)
@@ -137,11 +128,25 @@ public class Datafeed extends HttpServlet
 		   //Lets add our new caches to the manager for access
 		   if( cacheManager.getCache("DataFeeds5Min") == null) //Added for local rebuilding, and orion initializing when it loads the war
 			   cacheManager.addCache(cache5min);
+
 		   if( cacheManager.getCache("DataFeeds15Min") == null) //Added for local rebuilding, and orion initializing when it loads the war
 			   cacheManager.addCache(cache15min);
 		}
 	}
-	
+
+    public void SetDatafeedUrl()
+    {
+        try
+        {
+            String qry = "SELECT svalue from sysvariables where variablename='DataFeedUrl'";
+            DataFeedUrl = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 	//Entry point for Servelet
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
 	{
@@ -652,6 +657,7 @@ public class Datafeed extends HttpServlet
                 }
             }
 		}
+
 		if(csvformat)
 			return csvoutput.toString();
 		else
@@ -1026,7 +1032,7 @@ public class Datafeed extends HttpServlet
 		int flights = 0;
 		int totalMiles = 0;
 		String time = "";
-		Statistics[] stats = data.getStatistics();
+		List<Statistics> stats = Stats.getStatistics();
 		if(stats == null)
 		{
 			throw new DataError("Statistics not calculated yet. Try again in a few minutes.");
@@ -2541,7 +2547,7 @@ public class Datafeed extends HttpServlet
             AircraftBean aircraft = Aircraft.getAircraftForUser(id);
             if (aircraft != null)
             {
-                flightsMap = data.getMyFlightInfo(aircraft, id);
+                flightsMap = Flights.getMyFlightInfo(aircraft, id);
             }
 
             UserBean lockedBy = null;
@@ -2602,7 +2608,7 @@ public class Datafeed extends HttpServlet
             AircraftBean aircraft = Aircraft.getAircraftForUser(id);
             if (aircraft != null)
             {
-                flightsMap = data.getMyFlightInfo(aircraft, id);
+                flightsMap = Flights.getMyFlightInfo(aircraft, id);
             }
 
             UserBean lockedBy = null;

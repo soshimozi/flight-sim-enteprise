@@ -1,12 +1,10 @@
 package net.fseconomy.dto;
 
-import net.fseconomy.data.Data;
-
 public class CloseAirport implements Comparable<CloseAirport>
 {
-    public static String icao;
-    public static double distance;
-    public static double bearing;
+    public String icao;
+    public double distance;
+    public double bearing;
 
     public CloseAirport(String icao, double distance, double bearing)
     {

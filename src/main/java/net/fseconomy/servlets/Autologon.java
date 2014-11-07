@@ -49,7 +49,7 @@ public class Autologon extends HttpServlet {
 		String sOffset = request.getParameter("offset");
 		UserBean userBean;
 
-		if (user == null || password == null || sOffset == null || ((userBean = Accounts.userExists(user, password, true)) == null))
+		if (user == null || password == null || sOffset == null || ((userBean = Accounts.userExists(user, password)) == null))
 		{
 			response.sendRedirect("/welcome.jsp");
 			return;			
@@ -64,7 +64,7 @@ public class Autologon extends HttpServlet {
 		HttpSession s = request.getSession();
 		s.setAttribute("user", userBean);
 
-		response.sendRedirect("/index.jsp");
+		response.sendRedirect("/admin.jsp");
 	}
 	
 

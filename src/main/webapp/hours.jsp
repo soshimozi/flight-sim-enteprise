@@ -11,7 +11,7 @@
     List<PendingHours> pendingList = null;
     try
     {
-        pendingList = data.getPendingHours(user.getName(), 48);
+        pendingList = Stats.getPendingHours(user.getName(), 48);
     }
     catch(DataError e)
     {
@@ -28,7 +28,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
     <script type='text/javascript' src='scripts/common.js'></script>
     <script type='text/javascript' src='scripts/css.js'></script>

@@ -5,6 +5,7 @@ import net.fseconomy.dto.AircraftAlias;
 import net.fseconomy.dto.AircraftConfigs;
 import net.fseconomy.dto.CloseAirport;
 import net.fseconomy.dto.LatLonSize;
+import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 
@@ -262,7 +263,7 @@ public class Aircraft implements Serializable
         return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND (owner=" + userId + " OR lessor=" + userId + ") ORDER BY make,models.model");
     }
 
-    public static List<AircraftBean> getAircraftInArea(String location, CloseAirport[] locations)
+    public static List<AircraftBean> getAircraftInArea(String location, List<CloseAirport> locations)
     {
         StringBuilder where = new StringBuilder("'" + location + "'");
 
@@ -274,7 +275,7 @@ public class Aircraft implements Serializable
         return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND location in (" + where.toString() + ")");
     }
 
-    public static List<AircraftBean> getAircraftOfTypeInArea(String location, CloseAirport[] locations, int type)
+    public static List<AircraftBean> getAircraftOfTypeInArea(String location, List<CloseAirport> locations, int type)
     {
         StringBuilder where = new StringBuilder("'" + location + "'");
         for (CloseAirport location1 : locations)
@@ -818,7 +819,7 @@ public class Aircraft implements Serializable
 
         FboBean fbo = null;
         double added = amount - fuelBefore;
-        int kg = (int) Math.floor(Data.GALLONS_TO_KG * added);
+        int kg = (int) Math.floor(Constants.GALLONS_TO_KG * added);
         int fboId = -1;
         if (provider > 0)                            // Refuel from FBO
         {
@@ -1451,7 +1452,7 @@ public class Aircraft implements Serializable
             if (modelId != -1)
             {
                 HashMap<String, CloseAirport> airportMap = new HashMap<String, CloseAirport>();
-                CloseAirport[] closeAirports = Airports.fillCloseAirports(airport.icao, 0, 100);
+                List<CloseAirport> closeAirports = Airports.fillCloseAirports(airport.icao, 0, 100);
                 for (CloseAirport closeAirport : closeAirports)
                 {
                     airportMap.put(closeAirport.icao.toLowerCase(), closeAirport);

@@ -16,7 +16,7 @@
 
     int fbo = Integer.parseInt(sFbo);
     String linkOptions = "id=" + fbo + "&";
-    List<LogBean> logs = Logging.getLogForFbo(fbo, from, Data.stepSize);
+    List<LogBean> logs = Logging.getLogForFbo(fbo, from, Constants.stepSize);
     int amount = Logging.getAmountLogForFbo(fbo);
     FboBean fboinfo = Fbos.getFbo(fbo);
     AirportBean airport = Airports.getAirport(fboinfo.getLocation());
@@ -30,10 +30,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 <meta name="GENERATOR" content="IBM WebSphere Studio" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
-<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+<link href="css/Master.css" rel="stylesheet" type="text/css" />
 <title>FSEconomy terminal</title>
 
-<script src="/scripts/PopupWindow.js"></script>
+<script src="scripts/PopupWindow.js"></script>
 <script type="text/javascript"> var gmap = new PopupWindow(); </script>
 
 </head>
@@ -104,23 +104,23 @@
 				<td align="left">
 <% 	if (from > 0) 
 	{ 
-		int newFrom = from - 5*Data.stepSize;
+		int newFrom = from - 5*Constants.stepSize;
 		if (newFrom < 0)
 			newFrom = 0;
 %>
 					<a href="<%= response.encodeURL("fbolog.jsp?" + linkOptions + "from=" + newFrom) %>">&lt;&lt;</a>
-					<a href="<%= response.encodeURL("fbolog.jsp?" + linkOptions + "from=" + (from-Data.stepSize)) %>">&lt;</a>
+					<a href="<%= response.encodeURL("fbolog.jsp?" + linkOptions + "from=" + (from-Constants.stepSize)) %>">&lt;</a>
 <% 	} 
 %>
 				</td>
 				<td align="right">
-<% 	if ((from+Data.stepSize) < amount) 
+<% 	if ((from+Constants.stepSize) < amount)
 	{ 
-		int newFrom = from+5*Data.stepSize;
-		if ((newFrom + Data.stepSize) > amount)
-			newFrom = amount-Data.stepSize;
+		int newFrom = from+5*Constants.stepSize;
+		if ((newFrom + Constants.stepSize) > amount)
+			newFrom = amount-Constants.stepSize;
 %>
-					<a href="<%= response.encodeURL("fbolog.jsp?" + linkOptions + "from=" + (from+Data.stepSize)) %>">&gt;</a>
+					<a href="<%= response.encodeURL("fbolog.jsp?" + linkOptions + "from=" + (from+Constants.stepSize)) %>">&gt;</a>
 					<a href="<%= response.encodeURL("fbolog.jsp?" + linkOptions + "from=" + newFrom) %>">&gt;&gt;</a>
 <% } %>
 				</td>

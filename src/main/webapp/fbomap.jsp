@@ -22,13 +22,13 @@
 	<meta name="GENERATOR" content="IBM WebSphere Studio" />
 	<meta http-equiv="Content-Style-Type" content="text/css" />
 	
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 	
 	<title>FS Economy Terminal</title>
 
 
-	<script src="/scripts/AnchorPosition.js"></script>
-	<script src="/scripts/PopupWindow.js"></script>
+	<script src="scripts/AnchorPosition.js"></script>
+	<script src="scripts/PopupWindow.js"></script>
 
 	<script type="text/javascript">
 		var gmapfbo = new PopupWindow();

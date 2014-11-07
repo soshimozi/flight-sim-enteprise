@@ -101,9 +101,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="/scripts/PopupWindow.js"></script>
+    <script src="scripts/PopupWindow.js"></script>
     <script type="text/javascript">
         var gmap = new PopupWindow();
     </script>
@@ -240,7 +240,7 @@
     else
     {
 		int amount = Banking.getAmountPaymentsForUser(account, fboId, aircraft, user.getShowPaymentsToSelf());
-		List<PaymentBean> logs = Banking.getPaymentsForUser(account, from, Data.stepSize, fboId, aircraft, user.getShowPaymentsToSelf());
+		List<PaymentBean> logs = Banking.getPaymentsForUser(account, from, Constants.stepSize, fboId, aircraft, user.getShowPaymentsToSelf());
 		if (logs.size() > 0)
 		{
 			GregorianCalendar now = new GregorianCalendar();
@@ -296,24 +296,24 @@
 <%
                 if (from > 0)
                 {
-                    int newFrom = from - 5*Data.stepSize;
+                    int newFrom = from - 5*Constants.stepSize;
                     if (newFrom < 0)
                         newFrom = 0;
 %>
                         <a href="<%= response.encodeURL("paymentlog.jsp?" + linkOptions + "from=" + newFrom) %>">&lt;&lt;</a>
-                        <a href="<%= response.encodeURL("paymentlog.jsp?" + linkOptions + "from=" + (from-Data.stepSize)) %>">&lt;</a>
+                        <a href="<%= response.encodeURL("paymentlog.jsp?" + linkOptions + "from=" + (from-Constants.stepSize)) %>">&lt;</a>
 <%
                 }
 %>
                             </td>
                             <td align="right">
-<% 			    if ((from+Data.stepSize) < amount)
+<% 			    if ((from+Constants.stepSize) < amount)
                 {
-                    int newFrom = from+5*Data.stepSize;
-                    if ((newFrom + Data.stepSize) > amount)
-                        newFrom = amount-Data.stepSize;
+                    int newFrom = from+5*Constants.stepSize;
+                    if ((newFrom + Constants.stepSize) > amount)
+                        newFrom = amount-Constants.stepSize;
 %>
-                        <a href="<%= response.encodeURL("paymentlog.jsp?" + linkOptions + "from=" + (from+Data.stepSize)) %>">&gt;</a>
+                        <a href="<%= response.encodeURL("paymentlog.jsp?" + linkOptions + "from=" + (from+Constants.stepSize)) %>">&gt;</a>
                         <a href="<%= response.encodeURL("paymentlog.jsp?" + linkOptions + "from=" + newFrom) %>">&gt;&gt;</a>
 <%
                 }

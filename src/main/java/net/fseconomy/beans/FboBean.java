@@ -20,6 +20,7 @@
 package net.fseconomy.beans;
 
 import net.fseconomy.data.Data;
+import net.fseconomy.util.Converters;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
@@ -221,7 +222,7 @@ public class FboBean implements Serializable
 
 	public void setName(String string)
 	{
-		name = Data.clearHtml(string);
+		name = Converters.clearHtml(string);
 	}
 
 	public int getServices()

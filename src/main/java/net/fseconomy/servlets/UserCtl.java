@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 public class UserCtl extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
-	DALHelper dalHelper;
 	Data data;
 	private static ScheduledFuture<?> future = null;
 	public static MaintenanceCycle maintenanceObject = null;	
@@ -334,8 +333,8 @@ public class UserCtl extends HttpServlet
 					resp.sendRedirect(returnToPage);
 					//req.getRequestDispatcher(returnToPage).forward(req, resp);
 				else
-					resp.sendRedirect("index.jsp");
-					//req.getRequestDispatcher("index.jsp").forward(req, resp);
+					resp.sendRedirect("admin.jsp");
+					//req.getRequestDispatcher("admin.jsp").forward(req, resp);
 			} 
 			catch (NumberFormatException e)
 			{
@@ -345,7 +344,7 @@ public class UserCtl extends HttpServlet
 		catch (DataError e)
 		{
 			req.setAttribute("error", e.getMessage());
-			req.setAttribute("back", returnToPage != null ? returnToPage : returnToPageOverride != null ? returnToPageOverride : "index.jsp");
+			req.setAttribute("back", returnToPage != null ? returnToPage : returnToPageOverride != null ? returnToPageOverride : "admin.jsp");
 			req.getRequestDispatcher("error.jsp").forward(req, resp);
 		}
 	}
@@ -923,7 +922,7 @@ public class UserCtl extends HttpServlet
 	void cancelFlight(HttpServletRequest req)
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		data.cancelFlight(user);
+		Flights.cancelFlight(user);
 	}
 	
 	void doLogout(HttpServletRequest req)
@@ -941,7 +940,7 @@ public class UserCtl extends HttpServlet
 			return false;
 		}
 
-		UserBean user = Accounts.userExists(userName, password, true);
+		UserBean user = Accounts.userExists(userName, password);
 		if (user == null)
 		{
 			return false;
@@ -1062,10 +1061,7 @@ public class UserCtl extends HttpServlet
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
 
-        if(aircraft != null)
-            Aircraft.leasereturnac(reg, aircraft.getOwner(), aircraft.getLessor(), aircraft.getLocation());
-		else
-			throw new DataError("Unable to find leased aircraft!");
+        Aircraft.leasereturnac(reg, aircraft.getOwner(), aircraft.getLessor(), aircraft.getLocation());
 	}
 	
 	void doRefuel(HttpServletRequest req) throws DataError
@@ -1167,7 +1163,7 @@ public class UserCtl extends HttpServlet
     void editUser(HttpServletRequest req) throws DataError
     {
         UserBean user = (UserBean) req.getSession().getAttribute("user");
-        if (!Data.needLevel(user, UserBean.LEV_CSR) && !Data.needLevel(user, UserBean.LEV_MODERATOR))
+        if (!Accounts.needLevel(user, UserBean.LEV_CSR) && !Accounts.needLevel(user, UserBean.LEV_MODERATOR))
             throw new DataError("You do not have permission.");
 
         String suser = req.getParameter("user");
@@ -1200,7 +1196,7 @@ public class UserCtl extends HttpServlet
 		if (user != null && email != null)
 		{		
 			//See if the name and email exists
-			boolean flgExists = Accounts.userExists(user, email);
+			boolean flgExists = Accounts.userEmailExists(user, email);
 			
 			// if not throw an error
 			if (!flgExists)

@@ -10,7 +10,9 @@
 
     if(user == null || !user.isLoggedIn())
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 %>
@@ -24,7 +26,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
@@ -92,9 +94,11 @@
 			{
 				error = e.getMessage();
 			}
-			
-			out.print("<script type=\"text/javascript\">document.location.href=\"datafeeds.jsp\"</script>");
-			return; 
+
+%>
+    <script type="text/javascript">document.location.href="datafeeds.jsp"</script>
+<%
+			return;
 		}
 	}
 	if(desc == null || desc.isEmpty())
@@ -119,7 +123,9 @@
 <%
 	if(!error.equals(""))
 	{
-		out.print("<div class=\"error\">" + error + "<br/></div>");
+%>
+		<div class=\"error\"><%= error %><br/></div>
+<%
 	}
 %>		
 	<form method="post">
@@ -142,10 +148,12 @@
 <%
 		for (UserBean account : accounts)
 		{
+            String selected = "";
 			if(altid == account.getId())
-				out.print("<option class=\"formselect\" selected=\"selected\" value=\"" + account.getId() + "\">" + account.getName() + "</option>");
-			else
-				out.print("<option class=\"formselect\" value=\"" + account.getId() + "\">" + account.getName() + "</option>");
+                selected = "selected=\"selected\"";
+%>
+                    <option class="formselect" <%= selected %> value="<%= account.getId() %>"> <%= account.getName() %> </option>
+<%
 		}
 %>		
 		    	</select>

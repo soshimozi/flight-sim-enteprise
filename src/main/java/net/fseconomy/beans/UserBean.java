@@ -32,6 +32,7 @@ import java.util.TimeZone;
 
 import net.fseconomy.data.Accounts.groupMemberData;
 import net.fseconomy.data.Data;
+import net.fseconomy.util.Converters;
 
 // Airboss 11/27/2011
 // DB Change for new xmlfeed access
@@ -272,7 +273,7 @@ public class UserBean implements Serializable
 		if(name != null) 
 			name = name.trim();
 		
-		this.name = TruncateName(Data.clearHtml(name));
+		this.name = TruncateName(Converters.clearHtml(name));
 	}
 
 	/**
@@ -325,7 +326,7 @@ public class UserBean implements Serializable
 
 	public void setComment(String string)
 	{
-		comment = TruncateComment(Data.clearHtml(string));
+		comment = TruncateComment(Converters.clearHtml(string));
 	}
 
 	public Map<Integer, groupMemberData> getMemberships()

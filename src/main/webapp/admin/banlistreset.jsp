@@ -9,9 +9,11 @@
 <%
     Data data = (Data)application.getAttribute("data");
 
-    if (!Data.needLevel(user, UserBean.LEV_MODERATOR))
+    if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"/index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
         return;
     }
 
@@ -34,18 +36,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="../theme/redmond/jquery-ui.css" />
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="..css/redmond/jquery-ui.css" />
+    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script type="text/javascript" src="/scripts/jquery.min.js"></script>
-    <script type="text/javascript" src="/scripts/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="/scripts/AutoComplete.js"></script>
+    <script type="text/javascript" src="../scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../scripts/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
         $(function()
         {
-            initAutoComplete("#accountname", "#account", <%= Data.ACCT_TYPE_ALL %>);
+            initAutoComplete("#accountname", "#account", <%= Accounts.ACCT_TYPE_ALL %>);
         });
 
     </script>

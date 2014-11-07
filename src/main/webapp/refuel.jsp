@@ -52,7 +52,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 </head>
 <body>
@@ -109,7 +109,7 @@
 %>
 				<tr>
 					<td><%= fbo.getName() %></td>
-					<td><%= (int)Math.floor(fuelQty / Data.GALLONS_TO_KG) %> Gallons</td>
+					<td><%= (int)Math.floor(fuelQty / Constants.GALLONS_TO_KG) %> Gallons</td>
 					<td><%= fueltype > 0 ? Formatters.currency.format(fbo.getFueljeta()) : Formatters.currency.format(fbo.getFuel100LL()) %></td>
 				</tr>
 <%	 		
@@ -130,7 +130,7 @@
 %>
 				<tr>
 					<td>Local fuel drum</td>
-					<td><%= (int)Math.floor(fuelDrums.getAmount()/Data.GALLONS_TO_KG) %> Gallons</td>
+					<td><%= (int)Math.floor(fuelDrums.getAmount()/Constants.GALLONS_TO_KG) %> Gallons</td>
 					<td>-</td>
 				</tr>
 <%			

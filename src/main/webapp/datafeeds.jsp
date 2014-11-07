@@ -10,7 +10,7 @@
 
     if(user == null || !user.isLoggedIn())
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+        out.print("<script type=\"text/javascript\">document.location.href=\"admin.jsp\"</script>");
         return;
     }
 
@@ -52,7 +52,7 @@
             int userid = Integer.parseInt(request.getParameter("id"));
             try
             {
-                String newAccessKey = Data.createAccessKey();
+                String newAccessKey = ServiceProviders.createAccessKey();
 
                 //User is changing his access key
                 if(userid == user.getId())
@@ -126,7 +126,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
     <script type="text/javascript">
         var isservice = <%=isServiceKey%>;
@@ -370,8 +370,8 @@
 		</form> 
 	</div>
 <%
-	String base = Data.DataFeedUrl + "/data?" + (isServiceKey ? "servicekey" : "userkey") + "=" + requestorKey + "&format=" + format + "&";
-	String staticbase = Data.DataFeedUrl + "/static";
+	String base = net.fseconomy.servlets.Datafeed.DataFeedUrl + "/data?" + (isServiceKey ? "servicekey" : "userkey") + "=" + requestorKey + "&format=" + format + "&";
+	String staticbase = net.fseconomy.servlets.Datafeed.DataFeedUrl + "/static";
 %>
 	<br/>
 	<div style="font-weight: bold;font-size: 10pt;color: blue;">Note: All timestamps are returned in GMT</div>

@@ -46,20 +46,20 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
-	<link href="/theme/tablesorter-style.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
 	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
 	
 	
-	<script type="text/javascript" src="/scripts/jquery.min.js" ></script>
+	<script type="text/javascript" src="scripts/jquery.min.js" ></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type="text/javascript" src="/scripts/jquery.tablesorter.widgets.js"></script>
+	<script type="text/javascript" src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 	
-	<script type="text/javascript" src="/scripts/PopupWindow.js"></script>
+	<script type="text/javascript" src="scripts/PopupWindow.js"></script>
 	<script type="text/javascript" src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script type="text/javascript" src="/scripts/js/highcharts.js"> </script>
+	<script type="text/javascript" src="scripts/js/highcharts.js"> </script>
 	
 	<script type="text/javascript"> 
         var gmap = new PopupWindow(); 
@@ -249,7 +249,7 @@
 		GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
 		GoodsBean buildingmaterials = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
 		AirportBean ap = Airports.getAirport(fbo.getLocation());
-		int availJobs = data.getFacilityJobCount(fbo.getOwner(), fbo.getLocation()); 
+		int availJobs = Fbos.getFacilityJobCount(fbo.getOwner(), fbo.getLocation());
 %>
 	<tr>
 	<td><%= Airports.airportLink(ap, ap, response) %></td>

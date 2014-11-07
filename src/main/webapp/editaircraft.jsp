@@ -6,15 +6,13 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String returnPage = request.getHeader("referer");
 
 	String error = null;
 
 	String registration = request.getParameter("registration");
-	String mPrice="";
-	String iPrice="";
+	String mPrice;
+	String iPrice;
 	
 	AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
 
@@ -42,9 +40,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="/scripts/jquery.min.js"></script>
+    <script src="scripts/jquery.min.js"></script>
 
 	<script type="text/javascript">
 		function sellNow(price)
@@ -116,16 +114,19 @@
 %>	
 					<tbody>
 					<tr>
-						<td>New registration</td><td><input name="newreg" type="text" class="textarea regCheck" size="8" /></td>
+						<td>New registration</td>
+                        <td><input name="newreg" type="text" class="textarea regCheck" size="8"></td>
 					</tr>	
 <%
 		}
 %>	
 					<tr>
-						<td>Home base</td><td><input name="home" type="text" class="textarea" value="<%= aircraft.getHome()%>" size="4"/></td>
+						<td>Home base</td>
+                        <td><input name="home" type="text" class="textarea" value="<%= aircraft.getHome()%>" size="4"></td>
 					</tr>
 					<tr>
-						<td>Distance bonus</td><td>$ <input name="bonus" type="text" class="textarea" value="<%= aircraft.getBonus()%>" size="4"/></td>
+						<td>Distance bonus</td>
+                        <td>$ <input name="bonus" type="text" class="textarea" value="<%= aircraft.getBonus()%>" size="4"></td>
 					</tr>
 					<tr>
 						<td>Accounting</td>	
@@ -134,10 +135,12 @@
 						</td>
 					</tr>
 					<tr>
-						<td>Wet price</td><td>$ <input name="rentalPriceWet" type="text" class="textarea" value="<%= aircraft.getRentalPriceWet()%>" size="4"/></td>
+						<td>Wet price</td>
+                        <td>$ <input name="rentalPriceWet" type="text" class="textarea" value="<%= aircraft.getRentalPriceWet()%>" size="4"></td>
 					</tr>
 					<tr>
-						<td>Dry price</td><td>$ <input name="rentalPriceDry" type="text" class="textarea" value="<%= aircraft.getRentalPriceDry()%>" size="4"/></td>
+						<td>Dry price</td>
+                        <td>$ <input name="rentalPriceDry" type="text" class="textarea" value="<%= aircraft.getRentalPriceDry()%>" size="4"></td>
 					</tr>
 					<tr>
 						<td>Max Rental Time</td>
@@ -166,20 +169,23 @@
 		{
 %>	
 					<tr>
-						<td>On sale for</td><td>$ <input name="sellPrice" type="text" class="textarea" value="<%= aircraft.getSellPrice() == 0 ? "" : (""+aircraft.getSellPrice()) %>" size="6"/></td>
+						<td>On sale for</td>
+                        <td>$ <input name="sellPrice" type="text" class="textarea" value="<%= aircraft.getSellPrice() == 0 ? "" : (""+aircraft.getSellPrice()) %>" size="6"></td>
 					</tr>
 <%
 		}
 %>	
 					<tr>
-						<td>Advertise for ferry flight</td><td><input type="checkbox" name="advertiseFerry" value="true" <%= aircraft.isAdvertiseFerry() ? "checked" : "" %>/></td>
+						<td>Advertise for ferry flight</td>
+                        <td><input type="checkbox" name="advertiseFerry" value="true" <%= aircraft.isAdvertiseFerry() ? "checked" : "" %>></td>
 					</tr>
 			  		<tr>
-			    		<td>Allow renters to make repairs</td><td><input type="checkbox" name="allowRepair" value="true" <%= aircraft.isAllowRepair() ? "checked" : "" %>/></td>
+			    		<td>Allow renters to make repairs</td>
+                        <td><input type="checkbox" name="allowRepair" value="true" <%= aircraft.isAllowRepair() ? "checked" : "" %>></td>
 			  		</tr>
 			  
 					<tr>
-						<td><input type="button" class="button" onclick="checkprice()" value="Update"/>
+						<td colspan="2"><input type="button" class="button" onclick="checkprice()" value="Update"/>
 <%
 		if(aircraft.getLessor() == 0)
 		{

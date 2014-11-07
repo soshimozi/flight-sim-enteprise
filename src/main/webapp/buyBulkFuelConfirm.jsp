@@ -3,6 +3,7 @@
 	    errorPage="errorpage.jsp"
 	    import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.util.Constants" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="fbo" class="net.fseconomy.beans.FboBean" scope="session" />
@@ -17,8 +18,8 @@
 	String amount100ll = request.getParameter("100LLAmount");
 	String amountJetA = request.getParameter("JetAAmount");
 	
-	double dAmount100ll = Integer.parseInt(amount100ll) / Data.GALLONS_TO_KG;
-	double dAmountJetA = Integer.parseInt(amountJetA) / Data.GALLONS_TO_KG;
+	double dAmount100ll = Integer.parseInt(amount100ll) / Constants.GALLONS_TO_KG;
+	double dAmountJetA = Integer.parseInt(amountJetA) / Constants.GALLONS_TO_KG;
 	
 	String fboID = request.getParameter("id");
 	int days = Fbos.calculateShippingDay();
@@ -46,7 +47,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="/theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 	
 	<script>
 		function checkDecline(form) {

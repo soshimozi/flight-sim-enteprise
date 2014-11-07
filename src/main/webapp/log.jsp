@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.List, net.fseconomy.util.Formatters, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
+<%@ page import="net.fseconomy.util.Constants" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
@@ -29,7 +30,7 @@
     if (!groupPage)
     {
         selector = "pilot " + user.getName();
-        logs = Logging.getLogForUser(user, from, Data.stepSize);
+        logs = Logging.getLogForUser(user, from, Constants.stepSize);
         amount = Logging.getAmountLogForUser(user);
         mapViewer = "pilot=" + user.getName();
     }
@@ -37,7 +38,7 @@
     {
         int groupId = Integer.parseInt(sGroup);
         amount = Logging.getAmountLogForGroup(groupId);
-        logs = Logging.getLogForGroup(groupId, from, Data.stepSize);
+        logs = Logging.getLogForGroup(groupId, from, Constants.stepSize);
         UserBean group = Accounts.getGroupById(groupId);
 
         selector = "group " + group.getName();
@@ -55,7 +56,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="/theme/Master.css" rel="stylesheet" type="text/css"/>
+    <link href="css/Master.css" rel="stylesheet" type="text/css"/>
 
 </head>
 <body>
@@ -294,29 +295,29 @@
 <%
         if (from > 0)
         {
-            int newFrom = from - 5 * Data.stepSize;
+            int newFrom = from - 5 * Constants.stepSize;
             if (newFrom < 0)
             {
                 newFrom = 0;
             }
 %>
                                     <a href="<%= response.encodeURL("log.jsp?" + linkOptions + "from=" + newFrom) %>">&lt;&lt;</a>
-                                    <a href="<%= response.encodeURL("log.jsp?" + linkOptions + "from=" + (from-Data.stepSize)) %>">&lt;</a>
+                                    <a href="<%= response.encodeURL("log.jsp?" + linkOptions + "from=" + (from-Constants.stepSize)) %>">&lt;</a>
 <%
         }
 %>
                                 </td>
                                 <td align="right">
 <%
-        if ((from + Data.stepSize) < amount)
+        if ((from + Constants.stepSize) < amount)
         {
-            int newFrom = from + 5 * Data.stepSize;
-            if ((newFrom + Data.stepSize) > amount)
+            int newFrom = from + 5 * Constants.stepSize;
+            if ((newFrom + Constants.stepSize) > amount)
             {
-                newFrom = amount - Data.stepSize;
+                newFrom = amount - Constants.stepSize;
             }
 %>
-                                    <a href="<%= response.encodeURL("log.jsp?" + linkOptions + "from=" + (from+Data.stepSize)) %>">&gt;</a>
+                                    <a href="<%= response.encodeURL("log.jsp?" + linkOptions + "from=" + (from+Constants.stepSize)) %>">&gt;</a>
                                     <a href="<%= response.encodeURL("log.jsp?" + linkOptions + "from=" + newFrom) %>">&gt;&gt;</a>
 <%
         }

@@ -1,6 +1,7 @@
 package net.fseconomy.data;
 
 import net.fseconomy.beans.UserBean;
+import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
 
 import javax.mail.internet.AddressException;
@@ -11,6 +12,10 @@ import java.util.*;
 
 public class Accounts implements Serializable
 {
+    public static final int ACCT_TYPE_ALL = 1;
+    public static final int ACCT_TYPE_PERSON = 2;
+    public static final int ACCT_TYPE_GROUP = 3;
+
     public static class groupMemberData implements Serializable
     {
         private static final long serialVersionUID = 1L;
@@ -32,10 +37,10 @@ public class Accounts implements Serializable
 
     static String createPassword()
     {
-        return Data.createAccessKey(8);
+        return ServiceProviders.createAccessKey(8);
     }
 
-    public static boolean userExists(String user, String email)
+    public static boolean userEmailExists(String user, String email)
     {
         boolean result = false;
         try
@@ -50,7 +55,12 @@ public class Accounts implements Serializable
         return result;
     }
 
-    public static UserBean userExists(String user, String password, boolean updateLoginTime)
+    public static boolean needLevel(UserBean user, int level)
+    {
+        return (user.getLevel() == level);
+    }
+
+    public static UserBean userExists(String user, String password)
     {
         UserBean result = null;
         try
@@ -182,7 +192,7 @@ public class Accounts implements Serializable
         {
             boolean hasItems = false;
 
-            String qry = "SELECT * FROM groupmembership, accounts WHERE groupId = Accounts.id AND userId = ? order by Accounts.name";
+            String qry = "SELECT * FROM groupmembership, accounts WHERE groupId = accounts.id AND userId = ? order by accounts.name";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user.getId());
             while (rs.next())
             {
@@ -455,7 +465,7 @@ public class Accounts implements Serializable
                 throw new DataError("Invalid user name.");
             }
 
-            if (userExists(user, email))
+            if (userEmailExists(user, email))
             {
                 throw new DataError("User already exists!");
             }
@@ -473,7 +483,7 @@ public class Accounts implements Serializable
 
             String messageText = "Welcome to FSEconomy.\nYour account has been created. ";
 
-            messageText += "You can login at " + Data.systemLocation +
+            messageText += "You can login at " + Constants.systemLocation +
                     " with the following account:\n\nUser: " +
                     user + "\nPassword: " + password;
 
@@ -505,7 +515,7 @@ public class Accounts implements Serializable
                 throw new DataError("Invalid user name.");
             }
 
-            if (!userExists(user, email))
+            if (!userEmailExists(user, email))
             {
                 throw new DataError("User not found!");
             }
@@ -518,7 +528,7 @@ public class Accounts implements Serializable
 
             String messageText = "A new password has been generated for you. ";
 
-            messageText += "You can login at " + Data.systemLocation +
+            messageText += "You can login at " + Constants.systemLocation +
                     " with the following account:\n\nUser: " +
                     user + "\nPassword: " + password;
 
@@ -756,11 +766,11 @@ public class Accounts implements Serializable
         try
         {
             String accttype = ""; // ACCT_TYPE_ALL
-            if (acctType == Data.ACCT_TYPE_PERSON)
+            if (acctType == ACCT_TYPE_PERSON)
             {
                 accttype = " AND type = 'person' ";
             }
-            else if (acctType == Data.ACCT_TYPE_GROUP)
+            else if (acctType == ACCT_TYPE_GROUP)
             {
                 accttype = " AND type = 'group' ";
             }

@@ -233,7 +233,7 @@ function load()
 				fuelleft = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
 				int fuelgallons = 0;
 				if (fuelleft != null)
-					fuelgallons = (int)Math.floor(fuelleft.getAmount()/Data.GALLONS_TO_KG);
+					fuelgallons = (int)Math.floor(fuelleft.getAmount()/Constants.GALLONS_TO_KG);
 				
 				temp = Converters.escapeJavaScript(fbo.getName())+" |  Fuel: " + Formatters.currency.format(fbo.getFuel100LL())+" | "+ fuelgallons + " gals";
 				if ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0)

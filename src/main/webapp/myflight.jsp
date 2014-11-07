@@ -10,7 +10,9 @@
 
 	if(user == null || !user.isLoggedIn())
 	{
-		out.print("<script type=\"text/javascript\">document.location.href=\"index.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="index.jsp"</script>
+<%
 		return;
 	}
 
@@ -48,7 +50,7 @@
 	
 	try
 	{
-		pilothours = data.getNumberOfHours(user.getName(), 48);
+		pilothours = Stats.getNumberOfHours(user.getName(), 48);
 	}
 	catch(DataError e)
 	{
@@ -65,23 +67,23 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link rel="stylesheet" type="text/css" href="/theme/Master.css" />
-	<link rel="stylesheet" type="text/css" href="/theme/tablesorter-style.css" />
+	<link rel="stylesheet" type="text/css" href="css/Master.css" />
+	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css" />
 
 	<% //regressed jquery so that lightbox would work %>
-	<script src="/scripts/jquery.min.js"></script>
-	<script src="/scripts/jquery-ui.min.js"></script>
+	<script src="scripts/jquery.min.js"></script>
+	<script src="scripts/jquery-ui.min.js"></script>
 	<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
 
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type='text/javascript' src="/scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
 
-	<script src="/scripts/PopupWindow.js"></script>
+	<script src="scripts/PopupWindow.js"></script>
 	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
 	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
-	<script src="/scripts/location-mapper.js"></script>
+	<script src="scripts/location-mapper.js"></script>
 
 	<script>
 		var gmap = new PopupWindow();
@@ -636,7 +638,6 @@
            		}
            		else 
            		{
-           			//System.out.println("now in the All-In processing area...");
            			if (isAllInPresent && assignment.getType() == 1 && assignment.getActive() == 0) //this isthe actual All-In job so set it to Ready to Depart
            			{
                			status = "Onboard";
@@ -766,7 +767,7 @@
      			int additionalcrew = aircraft.getCrew();
      			int crewseats;
      			double payLoad = aircraft.getMaxWeight() - aircraft.getEmptyWeight() - (77 * (1 + additionalcrew));
-     			int payloadnow = (int)Math.round(payLoad - aircraft.getTotalFuel() * Data.GALLONS_TO_KG);
+     			int payloadnow = (int)Math.round(payLoad - aircraft.getTotalFuel() * Constants.GALLONS_TO_KG);
 
                 if (additionalcrew > 0)
                 {
@@ -928,9 +929,9 @@
 	 double fuelCap = aircraft.getTotalCapacity();
 	 double payLoad = aircraft.getMaxWeight() - aircraft.getEmptyWeight() - (77 * (1 + additionalcrew));
 	 int fuelCapInt = (int)fuelCap;
-	 int payload75 = (int)Math.round(payLoad - fuelCap * 0.75 * Data.GALLONS_TO_KG);
-	 int payload100 = (int)Math.round(payLoad - fuelCap * Data.GALLONS_TO_KG);
-	 int payloadnow = (int)Math.round(payLoad - aircraft.getTotalFuel() * Data.GALLONS_TO_KG);
+	 int payload75 = (int)Math.round(payLoad - fuelCap * 0.75 * Constants.GALLONS_TO_KG);
+	 int payload100 = (int)Math.round(payLoad - fuelCap * Constants.GALLONS_TO_KG);
+	 int payloadnow = (int)Math.round(payLoad - aircraft.getTotalFuel() * Constants.GALLONS_TO_KG);
 	 int crewseats;
     if (additionalcrew > 0)
     {

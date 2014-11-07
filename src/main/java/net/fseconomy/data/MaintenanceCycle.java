@@ -147,7 +147,7 @@ public class MaintenanceCycle implements Runnable
 		long starttime = System.currentTimeMillis();			
 		int cycletype = CycleType30Min;
 
-        data.FlightSummaryList = data.getFlightSummary();
+        Stats.FlightSummaryList = Stats.getFlightSummary();
 
         logSignatureStats();
 		
@@ -190,11 +190,11 @@ public class MaintenanceCycle implements Runnable
 	
 	void logSignatureStats()
 	{
-		long defaultCount = Data.defaultCount;
-		long createCount = Data.createCount;
-		long cacheCount = Data.cacheCount;
-		long bytesServed = Data.bytesServed;
-		long totalImagesSent = Data.totalImagesSent;
+		long defaultCount = Stats.defaultCount;
+		long createCount = Stats.createCount;
+		long cacheCount = Stats.cacheCount;
+		long bytesServed = Stats.bytesServed;
+		long totalImagesSent = Stats.totalImagesSent;
 
 		Data.logger.info("Signature stats: defaultCount = " + defaultCount + ", createCount = " + createCount + " , cacheCount = " + cacheCount + ", totalImagesSent = " + totalImagesSent + ", totalBytes = " + bytesServed);
 	}
@@ -283,9 +283,9 @@ public class MaintenanceCycle implements Runnable
 			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
 			if(rs.next())
 			{
-				data.setMinutesFlown(rs.getLong(1)/60);
-				data.setMilesFlown(rs.getLong(2));
-				data.setTotalIncome((long)rs.getDouble(3));
+                Stats.setMinutesFlown(rs.getLong(1) / 60);
+                Stats.setMilesFlown(rs.getLong(2));
+                Stats.setTotalIncome((long) rs.getDouble(3));
 			}
 			
 			Map<Integer, Set<AircraftBean>> aircraft = new HashMap<>();
@@ -337,7 +337,7 @@ public class MaintenanceCycle implements Runnable
 					continue;
 				
 				if ((thisUser.getExposure() & UserBean.EXPOSURE_SCORE) > 0)
-					stats.add(new Statistics(thisUser.getId(), thisUser.getName(), null, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(thisUser.getId()), false));
+					stats.add(new net.fseconomy.dto.Statistics(thisUser.getId(), thisUser.getName(), null, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(thisUser.getId()), false));
 				
 				//Loan check, if 10 flights and current limit is 0, add name to update list
 				if (thisUser.getLoanLimit() == 0 && rs.getInt(2) >= 10)
@@ -361,7 +361,7 @@ public class MaintenanceCycle implements Runnable
 					stats.add(new Statistics(thisUser.getId(), thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getTimestamp(5), aircraft.get(thisUser.getId()), true));
 			}
 
-			qry = "SELECT id FROM accounts WHERE type='group' AND NOT EXISTS (SELECT * FROM log WHERE log.groupid = accounts.id)";
+			qry = "SELECT id FROM accounts WHERE type='group' AND NOT EXISTS (SELECT * FROM log WHERE log.groupid = accounts.id) order by name";
 			rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{
@@ -371,17 +371,16 @@ public class MaintenanceCycle implements Runnable
 				String owner = ownersByGroup.get(new Integer(rs.getInt(1)));
 				if ((thisUser.getExposure() & UserBean.EXPOSURE_SCORE) > 0)
 					stats.add(new Statistics(thisUser.getId(), thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), 0, 0, 0, null, aircraft.get(thisUser.getId()), true));
-			}				
+			}
 
-			data.statistics = stats.toArray(new Statistics[stats.size()]);
-			Arrays.sort(data.statistics);
-			
+            Stats.statistics = stats;
+
 			HashMap<String, Statistics> hm = new HashMap<>();
-			for( Statistics s : stats)
+			for( net.fseconomy.dto.Statistics s : stats)
 				hm.put(s.accountName.toLowerCase(), s);
-			
-			Data.prevstatsmap = Data.statsmap;
-			Data.statsmap = hm;
+
+            Stats.prevstatsmap = Stats.statsmap;
+            Stats.statsmap = hm;
 			
 			if (idSet.length() > 0)
 			{
