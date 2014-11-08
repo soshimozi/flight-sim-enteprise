@@ -20,8 +20,8 @@ public class CloseAirport implements Comparable<CloseAirport>
         this.bearing = Double.NaN;
     }
 
-    public int compareTo(CloseAirport ca)
+    public int compareTo(CloseAirport cairport)
     {
-        return ca.distance == distance ? 0 : ca.distance < distance ? 1 : -1;
+        return cairport.distance == distance ? 0 : cairport.distance < distance ? 1 : -1;
     }
 }

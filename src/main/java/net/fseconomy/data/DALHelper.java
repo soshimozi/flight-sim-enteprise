@@ -109,21 +109,21 @@ public class DALHelper
 	    }
 	}
 
-    int getIntSQL(String qry)
-    {
-        try
-        {
-            ResultSet rs = ExecuteReadOnlyQuery(qry);
-            if (rs.next())
-                return rs.getInt(1);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return -1;
-    }
+//    int getIntSQL(String qry)
+//    {
+//        try
+//        {
+//            ResultSet rs = ExecuteReadOnlyQuery(qry);
+//            if (rs.next())
+//                return rs.getInt(1);
+//        }
+//        catch (SQLException e)
+//        {
+//            e.printStackTrace();
+//        }
+//
+//        return -1;
+//    }
 
     public boolean ExecuteStoredProcedureWithStatus(String qry, Object... args) throws SQLException
     {
@@ -202,7 +202,7 @@ public class DALHelper
 			}
 			else
 			{
-				throw new SQLException("Invalid query paramenter. Expecting multiple statments seperated by ';'");
+				throw new SQLException("Invalid query parameter. Expecting multiple statements separated by ';'");
 			}
 		}
 		finally
@@ -356,48 +356,48 @@ public class DALHelper
 		}
 	}
 
-	public CachedRowSet ExecuteUpdatableQuery(String qry, Object... args) throws SQLException
-	{
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		
-		try
-		{
-			conn = getConnection();
-			
-			stmt = createPreparedStatement(conn, qry, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, args);
-			rs = stmt.executeQuery();
-            //still broke
-            //CachedRowSet crs = RowSetProvider.newFactory("com.sun.rowset.RowSetFactoryImpl",null).createCachedRowSet();
-            System.err.println("Here");
-            CachedRowSet crs = new FixedCachedRowSetImpl();
-			crs.populate(rs);
-			return crs;
-		}
-		finally
-		{
-			tryClose(rs);
-			tryClose(stmt);
-			tryClose(conn);
-		}
-	}
+//	public CachedRowSet ExecuteUpdatableQuery(String qry, Object... args) throws SQLException
+//	{
+//		Connection conn = null;
+//		PreparedStatement stmt = null;
+//		ResultSet rs = null;
+//
+//		try
+//		{
+//			conn = getConnection();
+//
+//			stmt = createPreparedStatement(conn, qry, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE, args);
+//			rs = stmt.executeQuery();
+//            //still broke
+//            //CachedRowSet crs = RowSetProvider.newFactory("com.sun.rowset.RowSetFactoryImpl",null).createCachedRowSet();
+//            System.err.println("Here");
+//            CachedRowSet crs = new FixedCachedRowSetImpl();
+//			crs.populate(rs);
+//			return crs;
+//		}
+//		finally
+//		{
+//			tryClose(rs);
+//			tryClose(stmt);
+//			tryClose(conn);
+//		}
+//	}
 
-	public void ExecuteUpdateCachedRowSet(CachedRowSet crs) throws SQLException
-	{
-		Connection conn = null;
-		try
-		{
-			conn = getConnection();
-			conn.setAutoCommit(false);
-			crs.acceptChanges(conn);
-		}
-		finally
-		{
-			tryClose(conn);
-		}
-	}
-	
+//	public void ExecuteUpdateCachedRowSet(CachedRowSet crs) throws SQLException
+//	{
+//		Connection conn = null;
+//		try
+//		{
+//			conn = getConnection();
+//			conn.setAutoCommit(false);
+//			crs.acceptChanges(conn);
+//		}
+//		finally
+//		{
+//			tryClose(conn);
+//		}
+//	}
+//
 	public boolean ExecuteUpdateBlob(String qry, String blobcolumn, InputStream stream, int length, Object...args) throws SQLException
 	{
 		Connection conn = getConnection();

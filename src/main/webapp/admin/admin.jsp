@@ -79,7 +79,7 @@
         </ul>
 
         <ul><b>User Account Utilities</b>
-            <li><a href="createaccount.jsp">Add User Account</a></li>
+            <li><a href="/admin/createaccount.jsp">Add User Account</a></li>
             <li><a href="/admin/accountedit.jsp">Edit User Account</a></li>
             <li><a href="/admin/accountstatusedit.jsp">Change Account Status (lock/unlock)</a></li>
             <li><a href="/admin/checkuser48hourtrend.jsp">User 48 Hour Trend</a></li>

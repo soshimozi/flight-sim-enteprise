@@ -54,7 +54,7 @@ public class ServiceProviders implements Serializable
             e.printStackTrace();
         }
 
-        return result.size() == 0 ? null : result.get(0);
+        return result == null || result.size() == 0 ? null : result.get(0);
     }
 
     public static ServiceProviderBean getServiceProviderByOwner(int userid)
@@ -72,7 +72,7 @@ public class ServiceProviders implements Serializable
             e.printStackTrace();
         }
 
-        return result.size() == 0 ? null : result.get(0);
+        return result == null || result.size() == 0 ? null : result.get(0);
     }
 
     public static List<ServiceProviderBean> getServiceProviders()
@@ -108,29 +108,29 @@ public class ServiceProviders implements Serializable
             e.printStackTrace();
         }
 
-        return result.size() == 0 ? null : result.get(0);
+        return result == null || result.size() == 0 ? null : result.get(0);
     }
 
-    public static String getServiceProviderNameByKey(String key)
-    {
-        String result = null;
-
-        try
-        {
-            String qry = "select name from serviceproviders where `key`= ?";
-            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), key);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return result;
-    }
+//    public static String getServiceProviderNameByKey(String key)
+//    {
+//        String result = null;
+//
+//        try
+//        {
+//            String qry = "select name from serviceproviders where `key`= ?";
+//            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), key);
+//        }
+//        catch (SQLException e)
+//        {
+//            e.printStackTrace();
+//        }
+//
+//        return result;
+//    }
 
     static List<ServiceProviderBean> getServiceProviderList(ResultSet rs)
     {
-        ArrayList<ServiceProviderBean> result = new ArrayList<ServiceProviderBean>();
+        ArrayList<ServiceProviderBean> result = new ArrayList<>();
         try
         {
             while (rs.next())
@@ -144,24 +144,6 @@ public class ServiceProviders implements Serializable
             e.printStackTrace();
         }
         return result;
-    }
-
-    ServiceProviderBean[] getServiceProviderArrayXX(ResultSet rs)
-    {
-        ArrayList<ServiceProviderBean> result = new ArrayList<ServiceProviderBean>();
-        try
-        {
-            while (rs.next())
-            {
-                ServiceProviderBean item = new ServiceProviderBean(rs);
-                result.add(item);
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-        return result.toArray(new ServiceProviderBean[result.size()]);
     }
 
     public static void addServiceProvider(ServiceProviderBean service)
@@ -226,7 +208,7 @@ public class ServiceProviders implements Serializable
 
     public static void doServiceProviderNotification(ServiceProviderBean service, String subject, String messageText, boolean adminonly) throws DataError
     {
-        List<String> toList = new ArrayList<String>();
+        List<String> toList = new ArrayList<>();
 
         Emailer emailer = Emailer.getInstance();
 
@@ -292,7 +274,7 @@ public class ServiceProviders implements Serializable
 
     static ServiceAccessBean[] getServiceAccessArray(CachedRowSet rs)
     {
-        ArrayList<ServiceAccessBean> result = new ArrayList<ServiceAccessBean>();
+        ArrayList<ServiceAccessBean> result = new ArrayList<>();
         try
         {
             while (rs.next())
