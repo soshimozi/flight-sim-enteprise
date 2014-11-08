@@ -194,7 +194,7 @@
 	{
 		try
 		{
-			info = data.getMyFlightInfo(aircraft, user.getId());
+			info = Flights.getMyFlightInfo(aircraft, user.getId());
 		}
 		catch(DataError e)
 		{

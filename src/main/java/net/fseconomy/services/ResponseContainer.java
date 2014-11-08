@@ -2,9 +2,6 @@ package net.fseconomy.services;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-/**
- * Created by smobley on 10/21/2014.
- */
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class ResponseContainer
 {

@@ -44,8 +44,6 @@ public class Image extends HttpServlet
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 		throws ServletException, IOException
 	{
-		Data data;
-		data = (Data) getServletContext().getAttribute("data");
 		String id = req.getParameter("id");
 		resp.setContentType("image/jpeg");
 		if (id != null)

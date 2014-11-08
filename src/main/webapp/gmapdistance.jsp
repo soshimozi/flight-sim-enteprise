@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+<%@ page import="net.fseconomy.dto.DistanceBearing" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -11,9 +12,9 @@
     String depart = request.getParameter("depart");
     String dest = request.getParameter("dest");
 
-    double[] distanceBearing = Airports.getDistanceBearing(depart, dest);
-    int distance = (int)(distanceBearing[0] + .5);
-    int bearing = (int)(distanceBearing[1] + .5);
+    DistanceBearing distanceBearing = Airports.getDistanceBearing(depart, dest);
+    int distance = (int)(distanceBearing.distance + .5);
+    int bearing = (int)(distanceBearing.bearing + .5);
 
     AirportBean apDepart = Airports.getAirport(depart);
     AirportBean apDest = Airports.getAirport(dest);

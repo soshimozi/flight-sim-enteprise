@@ -168,14 +168,12 @@ public class SigServer extends HttpServlet
 	private boolean isValidImageRequest(String imageUri)
 	{
 		//check the following formatting is correct
-		if( imageUri.length() < 7
-			|| !imageUri.endsWith(fileExt)
-			|| imageUri.substring(1).contains("/")
-			|| imageUri.substring(1).contains("\\"))
-			return false;
+        return !(imageUri.length() < 7
+                || !imageUri.endsWith(fileExt)
+                || imageUri.substring(1).contains("/")
+                || imageUri.substring(1).contains("\\"));
 
-		return true;
-	}
+    }
 	
 	private void sendImage(HttpServletResponse response, String filename) throws IOException
 	{

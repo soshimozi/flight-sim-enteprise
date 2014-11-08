@@ -1389,9 +1389,9 @@ else
 
                 if (fromParam != null)
                 {
-                    double[] distanceBearing = Airports.getDistanceBearing(fromAirport, ap);
-                    int toDistance = (int)Math.round(distanceBearing[0]);
-                    int toBearing = (int)Math.round(distanceBearing[1]);
+                    DistanceBearing distanceBearing = Airports.getDistanceBearing(fromAirport, ap);
+                    int toDistance = (int)Math.round(distanceBearing.distance);
+                    int toBearing = (int)Math.round(distanceBearing.bearing);
                     String image = Airports.getBearingImageURL(toBearing);
 %>
                     <td class="numeric"><%= toDistance %></td>

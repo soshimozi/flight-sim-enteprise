@@ -1,10 +1,7 @@
 package net.fseconomy.data;
 
 import net.fseconomy.beans.*;
-import net.fseconomy.dto.AircraftAlias;
-import net.fseconomy.dto.AircraftConfigs;
-import net.fseconomy.dto.CloseAirport;
-import net.fseconomy.dto.LatLonSize;
+import net.fseconomy.dto.*;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
@@ -269,7 +266,7 @@ public class Aircraft implements Serializable
 
         for (CloseAirport location1 : locations)
         {
-            where.append(", '" + location1.icao + "'");
+            where.append(", '").append(location1.icao).append("'");
         }
 
         return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND location in (" + where.toString() + ")");
@@ -280,7 +277,7 @@ public class Aircraft implements Serializable
         StringBuilder where = new StringBuilder("'" + location + "'");
         for (CloseAirport location1 : locations)
         {
-            where.append(", '" + location1.icao + "'");
+            where.append(", '").append(location1.icao).append("'");
         }
 
         return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND models.id = " + type + " AND location in (" + where.toString() + ")");
@@ -315,7 +312,7 @@ public class Aircraft implements Serializable
      */
     public static List<AircraftBean> findAircraftForSale(int modelId, int lowPrice, int highPrice, int lowTime, int highTime, int lowPax, int highPax, int lowLoad, int highLoad, int distance, String fromParam, boolean hasVfr, boolean hasIfr, boolean hasAp, boolean hasGps, boolean isSystemOwned, boolean isPlayerOwned, String equipment) throws DataError
     {
-        ArrayList<AircraftBean> result = new ArrayList<AircraftBean>();
+        ArrayList<AircraftBean> result = new ArrayList<>();
 
         try
         {
@@ -482,7 +479,7 @@ public class Aircraft implements Serializable
                 lon = lls.lon;
             }
 
-            Map<String, Double> distanceMap = new HashMap<String, Double>();
+            Map<String, Double> distanceMap = new HashMap<>();
             double lat1, lon1;
 
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(query2.toString());
@@ -544,7 +541,7 @@ public class Aircraft implements Serializable
 
     public static List<AircraftBean> getAircraftSQL(String qry)
     {
-        ArrayList<AircraftBean> result = new ArrayList<AircraftBean>();
+        ArrayList<AircraftBean> result = new ArrayList<>();
         try
         {
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
@@ -1139,9 +1136,9 @@ public class Aircraft implements Serializable
                 throw new DataError("Registration already in use.");
             }
 
-            double[] distanceFromHome = Airports.getDistanceBearing(aircraft.getLocation(), aircraft.getHome());
-            aircraft.setDistance((int) Math.round(distanceFromHome[0]));
-            aircraft.setBearing((int) Math.round(distanceFromHome[1]));
+            DistanceBearing distanceFromHome = Airports.getDistanceBearing(aircraft.getLocation(), aircraft.getHome());
+            aircraft.setDistance((int) Math.round(distanceFromHome.distance));
+            aircraft.setBearing((int) Math.round(distanceFromHome.bearing));
             aircraft.writeBean(rs);
             if (newRegistration != null)
             {
@@ -1309,7 +1306,7 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static AircraftAlias[] getAircraftAliasesOld()
+    public static List<AircraftAlias> getAircraftAliases()
     {
         ArrayList<AircraftAlias> result = new ArrayList<>();
         String qry;
@@ -1324,37 +1321,6 @@ public class Aircraft implements Serializable
             {
                 AircraftAlias aircraft = new AircraftAlias(rs.getString(1), rs.getString(2) + " " + rs.getString(3));
                 result.add(aircraft);
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return result.toArray(new AircraftAlias[result.size()]);
-    }
-
-    public static Map<String, Set<String>> getAircraftAliases()
-    {
-        Map<String, Set<String>> result = new TreeMap<String, Set<String>>();
-        String qry;
-        ResultSet rs = null;
-
-        try
-        {
-            qry = "SELECT models.make, models.model, models.id FROM models ORDER BY models.make, models.model";
-            rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
-            while (rs.next())
-            {
-                Set<String> aliases = new HashSet<String>();
-                result.put(rs.getString(1) + " " + rs.getString(2), aliases);
-
-                qry = "SELECT fsaircraft FROM fsmappings WHERE  model=? ORDER BY fsaircraft";
-                ResultSet rsAlias = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, rs.getInt(3));
-                while (rsAlias.next())
-                {
-                    aliases.add(rsAlias.getString(1));
-                }
             }
         }
         catch (SQLException e)
@@ -1519,9 +1485,9 @@ public class Aircraft implements Serializable
                 throw new DataError("Registration already in use.");
             }
 
-            double[] distanceFromHome = Airports.getDistanceBearing(aircraft.getLocation(), aircraft.getHome());
-            aircraft.setDistance((int) Math.round(distanceFromHome[0]));
-            aircraft.setBearing((int) Math.round(distanceFromHome[1]));
+            DistanceBearing distanceFromHome = Airports.getDistanceBearing(aircraft.getLocation(), aircraft.getHome());
+            aircraft.setDistance((int) Math.round(distanceFromHome.distance));
+            aircraft.setBearing((int) Math.round(distanceFromHome.bearing));
             rs.updateString("home", aircraft.getHome());
             rs.updateString("location", aircraft.getLocation());
             rs.updateInt("owner", aircraft.getOwner());

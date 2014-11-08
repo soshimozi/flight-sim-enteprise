@@ -2,6 +2,8 @@ package net.fseconomy.data;
 
 import net.fseconomy.beans.*;
 import net.fseconomy.dto.CloseAirport;
+import net.fseconomy.dto.DepartFlight;
+import net.fseconomy.dto.DistanceBearing;
 import net.fseconomy.util.Constants;
 
 import java.sql.*;
@@ -10,14 +12,11 @@ import java.util.*;
 import static net.fseconomy.data.Airports.getDistance;
 import static net.fseconomy.data.Airports.getDistanceBearing;
 
-/**
- * Created by smobley on 11/7/2014.
- */
 public class Flights
 {
-    public static Object[] departAircraft(AircraftBean bean, int user, String location) throws DataError
+    public static DepartFlight departAircraft(AircraftBean bean, int user, String location) throws DataError
     {
-        ArrayList<AssignmentBean> result = new ArrayList<AssignmentBean>();
+        ArrayList<AssignmentBean> result = new ArrayList<>();
         int totalWeight = 0;
         double fuelWeight = 0;
         boolean rentedDry = false;
@@ -105,13 +104,13 @@ public class Flights
             e.printStackTrace();
         }
 
-        return new Object[]
-                {
-                        Math.round(totalWeight),
-                        (int) Math.round(totalWeight + fuelWeight + bean.getEmptyWeight()),
-                        result,
-                        rentedDry
-                };
+        DepartFlight depart = new DepartFlight();
+        depart.payloadWeight = Math.round(totalWeight);
+        depart.totalWeight = (int)Math.round(totalWeight + fuelWeight + bean.getEmptyWeight());
+        depart.assignments = result;
+        depart.rentedDry = rentedDry;
+
+        return depart;
     }
 
     /**
@@ -230,7 +229,7 @@ public class Flights
                 int totalPilotFee = 0;
 
                 //Distance from home ICAO bonus charges
-                double[] distanceFromHome = new double[] {0.0,0.0};
+                DistanceBearing distanceFromHome = new DistanceBearing(0.0,0.0);
 
                 float toPayOwner = 0;
 
@@ -306,8 +305,8 @@ public class Flights
                         double b = aircraft.getBonus();
 
                         // If both distance and distanceFromHome are 0, bonus is 0
-                        if( dist != 0 || distanceFromHome[0] != 0.0 )
-                            bonus =(float)((b * (dist - distanceFromHome[0])/100.0));
+                        if( dist != 0 || distanceFromHome.distance != 0.0 )
+                            bonus =(float)((b * (dist - distanceFromHome.distance)/100.0));
                     }
 
                     //Bonus can be positive or negative, if the plane moves toward home,
@@ -553,8 +552,8 @@ public class Flights
 
                 // update the aircraft parameters
                 /////////////////////////////////////////////////////
-                int totalEngineTime = 0;
-                int totalAirframeTime = 0;
+                int totalEngineTime;
+                int totalAirframeTime;
 
                 // Get an updatable recordset for the current aircraft
                 stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
@@ -568,12 +567,12 @@ public class Flights
                 rs.updateInt("airframe", totalAirframeTime);
                 rs.updateNull("departedFrom");
                 rs.updateString("location", location.icao);
-                rs.updateInt("distanceFromHome", (int)Math.round(distanceFromHome[0]));
+                rs.updateInt("distanceFromHome", (int)Math.round(distanceFromHome.distance));
 
-                if (distanceFromHome[0] == 0)
+                if (distanceFromHome.distance == 0)
                     rs.updateNull("bearingToHome");
                 else
-                    rs.updateInt("bearingToHome", (int)Math.round(distanceFromHome[1]));
+                    rs.updateInt("bearingToHome", (int)Math.round(distanceFromHome.bearing));
 
                 if (!invalidFuel)
                     aircraft.writeFuel(rs);
@@ -601,8 +600,8 @@ public class Flights
                 // Update any damage conditions
                 //////////////////////////////////////////////////////
                 // Currently only Heat, and Mixture > 95% above 1000ft is checked in client
-                for (int c=0; c< damage.length; c++)
-                    Aircraft.addAircraftDamage(aircraft.getRegistration(), damage[c][0], damage[c][1], damage[c][2]);
+                for (int[] aDamage : damage)
+                    Aircraft.addAircraftDamage(aircraft.getRegistration(), aDamage[0], aDamage[1], aDamage[2]);
 
                 for (int c=1; c<= aircraft.getEngines(); c++)
                     Aircraft.addAircraftDamage(aircraft.getRegistration(), c, AircraftMaintenanceBean.DAMAGE_RUNTIME, engineTime);
@@ -742,7 +741,7 @@ public class Flights
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user.getId());
             if (rs.next())
             {
-                String location = "";
+                String location;
                 if(rs.getString("location") != null)
                 {
                     location = rs.getString("location");
@@ -848,11 +847,12 @@ public class Flights
                     }
                 }
             }
-            result.put("weight", new Integer(totalWeight));
-            result.put("passengers", new Integer(passengerCount));
+
+            result.put("weight", totalWeight);
+            result.put("passengers", passengerCount);
 
             if (group != -1)
-                result.put("group", new Integer(group));
+                result.put("group", group);
         }
         catch (SQLException e)
         {

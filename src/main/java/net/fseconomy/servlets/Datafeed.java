@@ -25,7 +25,6 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -1486,7 +1485,7 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//get list of aliases, returned sorted by model
-		AircraftAlias[] aircraft = Aircraft.getAircraftAliasesOld();
+		List<AircraftAlias> aliasList = Aircraft.getAircraftAliases();
 		
 		//dump out our HashMap data
 		if(csvformat)
@@ -1497,7 +1496,7 @@ public class Datafeed extends HttpServlet
 		
 		if(csvformat)
 		{
-            for (AircraftAlias anAircraft : aircraft)
+            for (AircraftAlias anAircraft : aliasList)
             {
                 csvoutput.append(anAircraft.model);
                 csvoutput.append(anAircraft.fsName);
@@ -1505,23 +1504,25 @@ public class Datafeed extends HttpServlet
             }
 		}
 		else
-		{		
+		{
+            //TODO needs to be rewritten for List
+            AircraftAlias[] aliasArray = (AircraftAlias[])aliasList.toArray();
 			//create an aircraft tag section for each alias
-			for (int c=0; c < aircraft.length; c++)
+			for (int c=0; c < aliasArray.length; c++)
 			{
 				xmloutput.append("<AircraftAliases>\n");
-				xmloutput.append("MakeModel", aircraft[c].model);	
-				xmloutput.append("Alias", Converters.XMLHelper.protectSpecialCharacters(aircraft[c].fsName));
+				xmloutput.append("MakeModel", aliasArray[c].model);
+				xmloutput.append("Alias", Converters.XMLHelper.protectSpecialCharacters(aliasArray[c].fsName));
 					
 				while( true ) //loop thru all the aliases for this model
 				{
-					if( c >= (aircraft.length-1)) break; // if we are at the end exit
+					if( c >= (aliasArray.length-1)) break; // if we are at the end exit
 					
 					// if the same model add the alias and continue
-					if( aircraft[c+1].model.contentEquals(aircraft[c].model) ) 
+					if( aliasArray[c+1].model.contentEquals(aliasArray[c].model) )
 					{
 						c++;
-						xmloutput.append("Alias", Converters.XMLHelper.protectSpecialCharacters(aircraft[c].fsName));
+						xmloutput.append("Alias", Converters.XMLHelper.protectSpecialCharacters(aliasArray[c].fsName));
 					}
 					else
 						break; // model change

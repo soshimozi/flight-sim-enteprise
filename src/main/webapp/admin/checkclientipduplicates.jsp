@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.text.*, net.fseconomy.data.*, java.util.*"
+        import="net.fseconomy.data.*, java.util.*"
 %>
 <%@ page import="net.fseconomy.beans.UserBean" %>
 
@@ -67,20 +67,20 @@
 		
 			<tbody>
 <%
-			for (int c=0; c < list.size(); c++)
-			{
-				String[] s = list.get(c).split("\\|");
+    for (String aList : list)
+    {
+        String[] s = aList.split("\\|");
 %>
-				<tr>
-					<td>
-						<%= s[0] %>
-					</td>
-					<td>
-						<%= s[1] %>
-					</td>
-				</tr>
-<%		
-			}
+                <tr>
+                    <td>
+                        <%= s[0] %>
+                    </td>
+                    <td>
+                        <%= s[1] %>
+                    </td>
+                </tr>
+<%
+    }
 %>
 			</tbody>
 		</table>

@@ -26,7 +26,6 @@ import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
 
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
 import java.sql.*;

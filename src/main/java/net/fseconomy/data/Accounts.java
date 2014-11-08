@@ -187,7 +187,7 @@ public class Accounts implements Serializable
 
     public static void reloadMemberships(UserBean user)
     {
-        LinkedHashMap<Integer, groupMemberData> memberships = new LinkedHashMap<Integer, groupMemberData>();
+        LinkedHashMap<Integer, groupMemberData> memberships = new LinkedHashMap<>();
         try
         {
             boolean hasItems = false;
@@ -334,24 +334,6 @@ public class Accounts implements Serializable
         }
     }
 
-    public static void unlockAccount(String login) throws DataError
-    {
-        try
-        {
-            String qry = "UPDATE accounts SET email = trim(leading 'LockedAccount-' from email) where name = ?";
-            int count = DALHelper.getInstance().ExecuteUpdate(qry, login);
-
-            if (count == 0)
-            {
-                throw new DataError("Account Unlock Operation Failed.");
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     public static void unlockAccount(int accountId) throws DataError
     {
         try
@@ -478,7 +460,7 @@ public class Accounts implements Serializable
             String qry = "INSERT INTO accounts (name, password, email, exposure) VALUES(?, password(?), ?, ?)";
             DALHelper.getInstance().ExecuteUpdate(qry, user, password, email, UserBean.EXPOSURE_SCORE);
 
-            List<String> toList = new ArrayList<String>();
+            List<String> toList = new ArrayList<>();
             toList.add(email);
 
             String messageText = "Welcome to FSEconomy.\nYour account has been created. ";
@@ -523,7 +505,7 @@ public class Accounts implements Serializable
             String qry = "UPDATE accounts SET password = password(?) WHERE name = ? AND email = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, password, user, email);
 
-            List<String> toList = new ArrayList<String>();
+            List<String> toList = new ArrayList<>();
             toList.add(email);
 
             String messageText = "A new password has been generated for you. ";
@@ -554,7 +536,7 @@ public class Accounts implements Serializable
 
     public static List<String> getUsers(String usertype) throws DataError
     {
-        ArrayList<String> result = new ArrayList<String>();
+        ArrayList<String> result = new ArrayList<>();
         String qry;
 
         try
@@ -703,11 +685,6 @@ public class Accounts implements Serializable
         }
     }
 
-    public static List<UserBean> getExposedAccounts()
-    {
-        return getAccountsSQL("SELECT * from accounts WHERE exposure <> 0 ORDER BY name");
-    }
-
     public static boolean isGroupOwnerStaff(int groupid, int userid)
     {
         boolean result = false;
@@ -762,7 +739,7 @@ public class Accounts implements Serializable
 
     public static List<UserBean> getAccountNames(String partialName, int acctType, int limit, boolean displayHidden)
     {
-        ArrayList<UserBean> result = new ArrayList<UserBean>();
+        ArrayList<UserBean> result = new ArrayList<>();
         try
         {
             String accttype = ""; // ACCT_TYPE_ALL
@@ -822,7 +799,7 @@ public class Accounts implements Serializable
 
     private static List<UserBean> getAccountsSQL(String qry)
     {
-        ArrayList<UserBean> result = new ArrayList<UserBean>();
+        ArrayList<UserBean> result = new ArrayList<>();
         try
         {
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);

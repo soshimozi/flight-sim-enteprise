@@ -38,6 +38,7 @@ import net.fseconomy.beans.AssignmentBean;
 import net.fseconomy.beans.UserBean;
 import net.fseconomy.data.*;
 import net.fseconomy.dto.CloseAirport;
+import net.fseconomy.dto.DepartFlight;
 
 public class FSagent extends HttpServlet
 {	
@@ -87,7 +88,7 @@ public class FSagent extends HttpServlet
 		    	ipAddress = req.getRemoteAddr();
 		    
 		    AircraftBean aircraft = Aircraft.getAircraftForUser(userBean.getId());
-		    if(aircraft == null)
+		    if(aircraft != null)
 		    	reg = aircraft.getRegistration();
 		    else
 		    	reg="-";
@@ -200,14 +201,11 @@ public class FSagent extends HttpServlet
 
 		if (Stats.getNumberOfHours(user.getName(), 48) > 30)
 			throw new DataError("Maximum pilot hours in a 48 hour period reached");
-		
-		Object[] info = Flights.departAircraft(aircraft, user.getId(), closest.icao);
-		int payloadWeight = (Integer) info[0];
-		int totalWeight = (Integer) info[1];
-		List<AssignmentBean> assignments = (List<AssignmentBean>)info[2];
-		
+
+        DepartFlight info = Flights.departAircraft(aircraft, user.getId(), closest.icao);
+
 		StringBuilder buffer = new StringBuilder();
-        for (AssignmentBean assignment : assignments)
+        for (AssignmentBean assignment : info.assignments)
         {
             String item, commodity = assignment.getCommodity();
             if (commodity == null)
@@ -236,8 +234,8 @@ public class FSagent extends HttpServlet
 		sb.append("\nexpiry="); sb.append(maxrenttime);
 		sb.append("\naccount="); sb.append(aircraft.getAccounting());
 		sb.append("\nequip="); sb.append(aircraft.getEquipment());
-		sb.append("\npayload="); sb.append(payloadWeight);
-		sb.append("\nweight="); sb.append(totalWeight);
+		sb.append("\npayload="); sb.append(info.payloadWeight);
+		sb.append("\nweight="); sb.append(info.totalWeight);
 
 		//append fuel
 		float[] fuel = aircraft.getFuel();
@@ -264,6 +262,7 @@ public class FSagent extends HttpServlet
 //			"\nweight=" + totalWeight + "\n" +
 //			buffer.toString();
 	}
+
 	String doCancel(UserBean user) throws DataError
 	{
 		Flights.cancelFlight(user);

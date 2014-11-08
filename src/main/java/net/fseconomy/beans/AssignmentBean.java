@@ -2,6 +2,7 @@ package net.fseconomy.beans;
 
 import net.fseconomy.data.Airports;
 import net.fseconomy.data.Data;
+import net.fseconomy.dto.DistanceBearing;
 import net.fseconomy.util.Converters;
 
 import java.io.Serializable;
@@ -115,10 +116,10 @@ public class AssignmentBean implements Serializable
 	
 	public void updateData()
 	{
-		double distanceBearing[] = Airports.getDistanceBearing(getFrom(), getTo());
+		DistanceBearing distanceBearing = Airports.getDistanceBearing(getFrom(), getTo());
 
-		setDistance((int)Math.round(distanceBearing[0]));
-		setBearing((int)Math.round(distanceBearing[1]));
+		setDistance((int)Math.round(distanceBearing.distance));
+		setBearing((int)Math.round(distanceBearing.bearing));
 	}
 	
 	/**
@@ -460,9 +461,9 @@ public class AssignmentBean implements Serializable
 			*/
 			if (loc != null)
 			{
-				double db[] = Airports.getDistanceBearing(loc, getDestinationAirport(data));
-				actualDistance = (int)Math.round(db[0]);
-				actualBearing = (int)Math.round(db[1]);
+				DistanceBearing distanceBearing = Airports.getDistanceBearing(loc, getDestinationAirport(data));
+				actualDistance = (int)Math.round(distanceBearing.distance);
+				actualBearing = (int)Math.round(distanceBearing.bearing);
 			} else {
 				actualDistance = distance;
 				actualBearing = bearing;

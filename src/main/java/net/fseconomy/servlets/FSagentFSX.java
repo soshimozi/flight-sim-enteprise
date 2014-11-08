@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
 import net.fseconomy.dto.CloseAirport;
+import net.fseconomy.dto.DepartFlight;
 
 public class FSagentFSX extends HttpServlet
 {	
@@ -381,12 +382,7 @@ public class FSagentFSX extends HttpServlet
 		// Lets put together our aircraft data
 		
 		// Get the aircraft data
-		Object[] info = Flights.departAircraft(aircraft, user.getId(), closest.icao);
-		
-		// Reformat the data into typed variables
-		int payloadWeight = (Integer) info[0];
-		int totalWeight = (Integer) info[1];
-		boolean rentedDry = (Boolean) info[3];
+		DepartFlight info = Flights.departAircraft(aircraft, user.getId(), closest.icao);
 		
 		float[] fuel = aircraft.getFuelInGallons();
 		StringBuilder fuelString = new StringBuilder();
@@ -400,24 +396,20 @@ public class FSagentFSX extends HttpServlet
 			maxrenttime = 100*3600; // unlimited for owner
 		else
 			maxrenttime = aircraft.getMaxRentTime();
-		
 
-		// This data is where the assignments are shown as selected or Awaiting departure
-        List<AssignmentBean> assignments = (List<AssignmentBean>) info[2];
-		
 		// Alright, lets form up our return XML data to the client
-		result.append(xmlNode("payloadWeight", payloadWeight));
-		result.append(xmlNode("totalWeight", totalWeight));
+		result.append(xmlNode("payloadWeight", info.payloadWeight));
+		result.append(xmlNode("totalWeight", info.totalWeight));
 		result.append(xmlNode("registration", aircraft.getRegistration()));
 		result.append(xmlNode("fuel", fuelString.toString()));
 		result.append(xmlNode("equipment", aircraft.getEquipment()));
 		result.append(xmlNode("leaseExpires", Long.toString(maxrenttime)));
 		result.append(xmlNode("accounting", aircraft.getAccounting() == AircraftBean.ACC_HOUR ? "hour" : "tacho"));
-		result.append(xmlNode("rentedDry", rentedDry ? "true" : "false"));
-		result.append(xmlNode("rentalPrice", rentedDry ? aircraft.getRentalPriceDry() : aircraft.getRentalPriceWet()));
+		result.append(xmlNode("rentedDry", info.rentedDry ? "true" : "false"));
+		result.append(xmlNode("rentalPrice", info.rentedDry ? aircraft.getRentalPriceDry() : aircraft.getRentalPriceWet()));
 		
 		// List all our assignments
-        for (AssignmentBean as : assignments)
+        for (AssignmentBean as : info.assignments)
         {
             result.append("<assignment>\n");
             result.append(xmlNode("from", as.getFrom()));
