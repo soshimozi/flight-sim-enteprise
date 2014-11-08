@@ -10,7 +10,7 @@
 	if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
 	{
 %>
-        <script type="text/javascript">document.location.href="index.jsp"</script>
+        <script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
 		return; 
 	}

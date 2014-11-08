@@ -40,41 +40,16 @@ import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
-import net.sf.ehcache.config.CacheConfiguration;
-import net.sf.ehcache.store.MemoryStoreEvictionPolicy;
-
-/* service provider table - airboss 12/27/11
-delimiter ;
-CREATE TABLE `serviceproviders` (
-  `id` int(1) unsigned NOT NULL AUTO_INCREMENT,
-  `owner` int(1) NOT NULL,
-  `alternate` int(1) DEFAULT NULL,
-  `name` varchar(45) NOT NULL DEFAULT '',
-  `ip` varchar(40) NOT NULL DEFAULT '',
-  `url` varchar(200) NOT NULL DEFAULT '',
-  `description` varchar(255) NOT NULL DEFAULT '',
-  `notes` text,
-  `key` char(10) DEFAULT NULL,
-  `status` int(1) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=latin1 COMMENT='User service providers that access the data feeds frequently';
-*/
-
-public class Datafeed extends HttpServlet 
+public class Datafeed extends HttpServlet
 {
     public static String DataFeedUrl = "";
 
-	private static final long serialVersionUID = 1L;
 	static final int MINFEEDDELAYMS = 1100; //default 1100 milliseconds (1.1 seconds)
 
-	CacheManager cacheManager;  
-		
-	private HashMap<String, Requestor> dataFeedRequestors = new HashMap<>();
-	private HashMap<String, Request> dataFeedRequests = new HashMap<>();
-	private HashMap<String, FeedHitData> userFeedProcessTimes = new HashMap<>();
+    //Datafeed hit tracking variables
+	public static HashMap<String, Requestor> dataFeedRequestors = new HashMap<>();
+    public static HashMap<String, Request> dataFeedRequests = new HashMap<>();
+    public static HashMap<String, FeedHitData> userFeedProcessTimes = new HashMap<>();
 
 	//---------------------
 	//Throttler settings!!
@@ -87,54 +62,16 @@ public class Datafeed extends HttpServlet
 	//---------------------
 	static final int USERLOCKOUT = 60; //Live
 	static final int USERLOCKOUTMINS = 120; //Live
-	
-	static String XSDURL = "";
+
+    public static long StatsFrom = System.currentTimeMillis();
 	
 	public void init()
 	{
-        SetDatafeedUrl();
+        SetDatafeedUrls();
 
-		XSDURL = DataFeedUrl;
-		
-		//Create a CacheManager using defaults
-		if( cacheManager == null)
-		{
-		   cacheManager = CacheManager.create();
-
-		   //Lets create our caches
-		   
-		   //Max number of items in the each cache, this will need to change
-		   //as the cache is used more
-		   int maxElements = 10;
-		   
-		   //Our 5 minute cache
-		   Cache cache5min = new Cache(
-				     new CacheConfiguration("DataFeeds5Min", maxElements)
-				       .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
-				       .eternal(false)
-				       .timeToLiveSeconds(300)
-				       .timeToIdleSeconds(300)
-				       .diskExpiryThreadIntervalSeconds(0));
-		   
-		   //Our 15 minute cache
-		   Cache cache15min = new Cache(
-				     new CacheConfiguration("DataFeeds15Min", maxElements)
-				       .memoryStoreEvictionPolicy(MemoryStoreEvictionPolicy.LFU)
-				       .eternal(false)
-				       .timeToLiveSeconds(900)
-				       .timeToIdleSeconds(900)
-				       .diskExpiryThreadIntervalSeconds(0));
-
-		   //Lets add our new caches to the manager for access
-		   if( cacheManager.getCache("DataFeeds5Min") == null) //Added for local rebuilding, and orion initializing when it loads the war
-			   cacheManager.addCache(cache5min);
-
-		   if( cacheManager.getCache("DataFeeds15Min") == null) //Added for local rebuilding, and orion initializing when it loads the war
-			   cacheManager.addCache(cache15min);
-		}
 	}
 
-    public void SetDatafeedUrl()
+    public void SetDatafeedUrls()
     {
         try
         {
@@ -147,6 +84,14 @@ public class Datafeed extends HttpServlet
         }
     }
 
+    public static  void ResetDatafeedStats()
+    {
+        dataFeedRequestors.clear();
+        dataFeedRequests.clear();
+        userFeedProcessTimes.clear();
+        StatsFrom = System.currentTimeMillis();
+    }
+
 	//Entry point for Servelet
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
 	{
@@ -157,7 +102,7 @@ public class Datafeed extends HttpServlet
 	 * Stores DataFeed hit and timing information
 	 * @author Airboss 10/1/10
 	 */
-	private class FeedHitData
+	public class FeedHitData
 	{
 		public String name;
 		public long hitcount;
@@ -168,9 +113,8 @@ public class Datafeed extends HttpServlet
 
 	/**
 	 * Stores DataFeed User Request information
-	 * @author Airboss 12/4/11
 	 */
-	class RequestItem
+	public class RequestItem
 	{
 		public String searchparam;
 		public String accesskey;
@@ -179,7 +123,7 @@ public class Datafeed extends HttpServlet
 		public Timestamp lasthit;
 	}
 
-	private class Request
+	public class Request
 	{
 		public String query;
 		public int servedcount;
@@ -188,7 +132,7 @@ public class Datafeed extends HttpServlet
 		public Hashtable<String, RequestItem> subqueries = new Hashtable<>();
 	}
 
-	private class Requestor
+	public class Requestor
 	{
 		public String key;
 		public String requestorname;
@@ -330,7 +274,7 @@ public class Datafeed extends HttpServlet
 				ndfi.searchparam = searchparam;
 				ndfi.accesskey = accesskey;
 				ndfi.accountname = accountname;
-				ndfi.servedcount++;
+				//ndfi.servedcount++;
 				ndfi.lasthit = ts;
 				request.subqueries.put(searchparam, ndfi);
 				
@@ -344,7 +288,7 @@ public class Datafeed extends HttpServlet
 				requestitem.searchparam = searchparam;
 				requestitem.accesskey = accesskey;
 				requestitem.accountname = accountname;
-				requestitem.servedcount++;
+				//requestitem.servedcount++;
 				requestitem.lasthit = ts;
 				request.subqueries.put(searchparam, requestitem);
 			}
@@ -508,18 +452,10 @@ public class Datafeed extends HttpServlet
 				output = Assignments(req);
 			else if (query.equalsIgnoreCase("Commodities"))
 				output = Commodities(req);
-			else if (query.equalsIgnoreCase("CycleTimeStats"))
-				output = CycleTimeStats(req);
 			else if (query.equalsIgnoreCase("Facilities"))
 				output = Facilities(req);
 			else if (query.equalsIgnoreCase("Fbos"))
 				output = Fbos(req);
-			else if (query.equalsIgnoreCase("FeedRequestStats"))
-				output = FeedRequestStats(req);
-			else if (query.equalsIgnoreCase("FeedHitStats"))
-				output = FeedHitStats(req);
-			else if (query.equalsIgnoreCase("FeedStatsReset"))
-				output = FeedStatsReset(req);
 			else if (query.equalsIgnoreCase("FlightLogs"))
 				output = FlightLogs(req);
 			else if (query.equalsIgnoreCase("Group"))
@@ -528,8 +464,6 @@ public class Datafeed extends HttpServlet
 				output = Icao(req);
 			else if (query.equalsIgnoreCase("Payments"))
 				output = Payments(req);
-			else if (query.equalsIgnoreCase("ServiceRequestStats"))
-				output = ServiceRequestStats(req);
 			else if (query.equalsIgnoreCase("Statistics"))
 				output = Statistics(req);
 			else
@@ -662,209 +596,6 @@ public class Datafeed extends HttpServlet
 			return csvoutput.toString();
 		else
 			return GetXMLHeader() + "<AllInItems>\n" + xmloutput.toString() + "</AllInItems>\n";
-	}
-
-	//Returns Maintenance Cycle timing data, XML only
-	private String CycleTimeStats(HttpServletRequest req) throws DataError
-	{
-		Converters.xmlBuffer xmloutput;
-		
-		//Get key parameter to authorize access
-		String key = req.getParameter("admin");
-
-		//generate output buffer
-		xmloutput = new Converters.xmlBuffer();
-
-		if( !key.contentEquals("notforeveryone"))
-		{
-			throw new DataError("No Access!");
-		}
-		else
-		{		
-			MaintenanceCycle.CycleTimeData ctd = MaintenanceCycle.getCycleTimeData();			
-			
-			if(ctd == null)
-			{
-				xmloutput.append("No Data Available Yet. Try again later.");
-			}
-			else
-			{
-				xmloutput.append("<RoutineCycle>\n");
-				xmloutput.append("LogStart", Formatters.dateyyyymmddhhmmss.format(ctd.logstarttime[0]));			
-				xmloutput.append("HitCount", ctd.hitcount[0]);			
-				xmloutput.append("TotalTime", ctd.totaltime[0]);			
-				xmloutput.append("MinTime", ctd.mintime[0]);
-				xmloutput.append("MaxTime", ctd.maxtime[0]);
-				xmloutput.append("Avg", ctd.hitcount[0] == 0 ? 0 : ctd.totaltime[0] / ctd.hitcount[0]);
-				xmloutput.append("</RoutineCycle>\n");
-				xmloutput.append("<DailyCycle>\n");
-				xmloutput.append("LogStart", Formatters.dateyyyymmddhhmmss.format(ctd.logstarttime[1]));
-				xmloutput.append("HitCount", ctd.hitcount[1]);			
-				xmloutput.append("TotalTime", ctd.totaltime[1]);			
-				xmloutput.append("MinTime", ctd.mintime[1]);
-				xmloutput.append("MaxTime", ctd.maxtime[1]);
-				xmloutput.append("Avg", ctd.hitcount[1] == 0 ? 0 : ctd.totaltime[1] / ctd.hitcount[1]);
-				xmloutput.append("</DailyCycle>\n");
-			}
-		}		
-		return "<DataFeedCycleTimeData>\n" + xmloutput.toString() + "</DataFeedCycleTimeData>\n";	
-	}
-
-	//Resets All feed timing data, XML only
-	private String FeedStatsReset(HttpServletRequest req) throws DataError
-	{
-		//generate output buffer
-		Converters.xmlBuffer xmloutput;
-
-		//Get key parameter to authorize access
-		String key = req.getParameter("admin");
-
-		//generate output buffer
-		xmloutput = new Converters.xmlBuffer();
-
-		if( !key.contentEquals("notforeveryone"))
-		{
-			throw new DataError("You do not have permission to access this feed!");
-		}
-		else
-		{
-			dataFeedRequestors.clear();
-			dataFeedRequests.clear();
-			userFeedProcessTimes.clear();
-			
-			xmloutput.append("<Message>XMLFeed Stats cleared!</Message>\n");			
-		}
-		return "<DataFeedStatsClear>\n" + xmloutput.toString() + "</DataFeedStatsClear>\n";	
-	}
-
-	//Returns Timing data for serving the distinct feed requests
-	private String FeedHitStats(HttpServletRequest req) throws DataError
-	{
-		Converters.xmlBuffer xmloutput;
-		
-		//Get key parameter to authorize access
-		String key = req.getParameter("admin");
-		
-		//generate output buffer
-		xmloutput = new Converters.xmlBuffer();
-
-		if( !key.contentEquals("notforeveryone"))
-		{
-			throw new DataError("You do not have permission to access this feed!");
-		}
-		else
-		{		
-			Set<Entry<String, FeedHitData>> myset = userFeedProcessTimes.entrySet();
-
-            //dump out our HashMap data
-            for (Entry<String, FeedHitData> aMyset : myset)
-            {
-                FeedHitData fd = aMyset.getValue();
-
-                xmloutput.append("<DataFeed>\n");
-                xmloutput.append("Name", fd.name);
-                xmloutput.append("HitCount", fd.hitcount);
-                xmloutput.append("AvgTime", fd.totaltime / fd.hitcount);
-                xmloutput.append("MinTime", fd.mintime);
-                xmloutput.append("MaxTime", fd.maxtime);
-                xmloutput.append("</DataFeed>\n");
-            }
-		}
-
-		return "<DataFeedHitStats>\n" + xmloutput.toString() + "</DataFeedHitStats>\n";	
-	}
-
-	//Returns service request data
-	private String ServiceRequestStats(HttpServletRequest req) throws DataError
-	{
-		Converters.xmlBuffer xmloutput;
-		
-		//Get key parameter to authorize access
-		String key = req.getParameter("admin");
-		
-		//generate output buffer
-		xmloutput = new Converters.xmlBuffer();
-
-		if( !key.contentEquals("notforeveryone"))
-		{
-			throw new DataError("You do not have permission to access this feed!");
-		}
-		else
-		{		
-			Set<Entry<String, Requestor>> myset = dataFeedRequestors.entrySet();
-
-            //dump out our HashMap data
-            for (Entry<String, Requestor> aMyset : myset)
-            {
-                Requestor rd = aMyset.getValue();
-
-                xmloutput.append("<Requester>\n");
-                xmloutput.append("Name", Converters.XMLHelper.protectSpecialCharacters(rd.requestorname));
-                xmloutput.append("LastTimestamp", rd.ts.toString());
-                xmloutput.append("ServedCount", rd.servedcount);
-                xmloutput.append("RejectedCount", rd.rejectedcount);
-                xmloutput.append("</Requester>\n");
-            }
-		}
-
-		return "<ServiceFeedRequests>\n" +xmloutput.toString() + "</ServiceFeedRequests>\n";	
-	}
-
-	//Returns User Request data
-	private String FeedRequestStats(HttpServletRequest req) throws DataError
-	{
-		Converters.xmlBuffer xmloutput;
-		
-		//Get key parameter to authorize access
-		String key = req.getParameter("admin");
-		
-		//generate output buffer
-		xmloutput = new Converters.xmlBuffer();
-
-		if( !key.contentEquals("notforeveryone"))
-		{
-			throw new DataError("You do not have permission to access this feed!");
-		}
-		else
-		{		
-			Set<Entry<String, Requestor>> myset = dataFeedRequestors.entrySet();
-
-            //dump out our HashMap data
-            for (Entry<String, Requestor> aMyset : myset)
-            {
-                Requestor requestor = aMyset.getValue();
-
-                Set<Entry<String, Request>> myset2 = requestor.requests.entrySet();
-                Iterator<Entry<String, Request>> it2 = myset2.iterator();
-
-                xmloutput.append("<Requester>\n");
-                xmloutput.append("RequestorName", Converters.XMLHelper.protectSpecialCharacters(requestor.requestorname));
-                xmloutput.append("LastTimestamp", requestor.ts.toString());
-                xmloutput.append("ServedCount", requestor.servedcount);
-                xmloutput.append("RejectedCount", requestor.rejectedcount);
-
-                while (it2.hasNext())
-                {
-                    Request request = it2.next().getValue();
-
-                    Set<Entry<String, RequestItem>> myset3 = request.subqueries.entrySet();
-                    Iterator<Entry<String, RequestItem>> it3 = myset3.iterator();
-
-                    xmloutput.append("<Request servedcount=\"" + request.servedcount + "\" query=\"" + request.query + "\">\n");
-
-                    while (it3.hasNext())
-                    {
-                        RequestItem item = it3.next().getValue();
-
-                        xmloutput.append("<Item searchparam=\"" + item.searchparam + "\" accountname=\"" + item.accountname + "\" servedcount=\"" + item.servedcount + "\"/>\n");
-                    }
-                    xmloutput.append("</Request>\n");
-                }
-
-                xmloutput.append("</Requester>\n");
-            }
-		}		
-		return "<DataFeedRequests>\n" + xmloutput.toString() + "</DataFeedRequests>\n";	
 	}
 
 	//Return assignment data, from either myflight for pilots, or group assignment queue
@@ -1984,31 +1715,6 @@ public class Datafeed extends HttpServlet
 			throw new DataError("Missing parameters found! [" + error + "]");
 	}
 	
-	/**
-	 * Helper function that returns a cached XML feed from the supplied cache name, and cache item
-	 * @param cacheName - string identifying the cache in CacheManager cacheManager
-	 * @param cacheItem - string identifying the item from the cache to return if available
-	 * @return String - cached string value, or "" if not found
-	 */
-	public String CheckCacheForItem(String cacheName, String cacheItem)
-	{
-		//holds our default return value
-		String s = "";
-
-		//Lets get the passed in cache
-		Cache cache = cacheManager.getCache(cacheName);
-		
-		//if( cache == null)
-		//	throw new UserException("cache object not found");
-		
-		//Get our stored item
-		Element e = cache.get(cacheItem);
-		if( e != null) //Found it!, otherwise default is returned
-			s = (String) e.getObjectValue();
-		
-		return s;
-	}
-	
 	String TimeToHrsMins(int time)
 	{
 		int minutes = (int)((time + 30) / 60.0);
@@ -2249,16 +1955,16 @@ public class Datafeed extends HttpServlet
 	{
 		if( query.equalsIgnoreCase("AircraftConfigs"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_aircraftconfigs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_aircraftconfigs.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("AircraftAliases"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_aircraftaliases.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_aircraftaliases.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("AircraftForSale") ||
@@ -2268,84 +1974,84 @@ public class Datafeed extends HttpServlet
 			query.equalsIgnoreCase("AircraftByKey") ||
 			query.equalsIgnoreCase("IcaoAircraft"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_aircraft.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_aircraft.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Assignments"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_assignments.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_assignments.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("Commodities"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_commodities.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_commodities.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("Facilities")) 
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_facilities.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_facilities.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Fbos") ||
 			query.equalsIgnoreCase("FbosForSale") ||
 			query.equalsIgnoreCase("IcaoFbos"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_fbos.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_fbos.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("FboMonthlySummary"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_fbomonthlysummary.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_fbomonthlysummary.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("FlightLogsByMonthYear") ||
 			query.equalsIgnoreCase("FlightLogsFromId")) 
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_FlightLogs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_FlightLogs.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("IcaoJobsTo") ||
 			query.equalsIgnoreCase("IcaoJobsFrom")) 
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_jobs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_jobs.xsd\"\n";
 		}
 			
 		if( query.equalsIgnoreCase("Members"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_members.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_members.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("PaymentsByMonthYear") ||
 			query.equalsIgnoreCase("PaymentsFromId"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_payments.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_payments.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Statistics"))
 		{
-			return "\nxmlns=\""+ XSDURL + "\"\n"
+			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + XSDURL + "/static/datafeed_statistics.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_statistics.xsd\"\n";
 		}
 
 		return "";

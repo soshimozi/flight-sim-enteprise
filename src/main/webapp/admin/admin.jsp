@@ -22,6 +22,8 @@
         String event = request.getParameter("event");
         if(event.equals("ResetFilter"))
             net.fseconomy.servlets.FullFilter.updateFilter(data.dalHelper);
+        if(event.equals("ResetDatafeedStats"))
+            net.fseconomy.servlets.Datafeed.ResetDatafeedStats();
     }
 %>
 
@@ -43,6 +45,14 @@
         {
             if (window.confirm("Do you really want to update the filter settings?"))
             {
+                document.adminform.submit();
+            }
+        }
+        function ResetDatafeedStats()
+        {
+            if (window.confirm("Do you really want to reset the Datafeed stats?"))
+            {
+                document.adminform.event.value = "ResetDatafeedStats";
                 document.adminform.submit();
             }
         }
@@ -85,6 +95,12 @@
             <li><a href="/admin/signaturesedit.jsp">Signature Templates</a></li>
         </ul>
 
+        <ul><b>Reports</b>
+            <li><a href="/admin/maintenancecyclestats.jsp">Maintenance Cycle Stats</a></li>
+            <li><a href="/admin/datafeedstats.jsp">Data Feed Stats</a></li>
+            <li><a href="/admin/datafeedrequests.jsp">Data Feed Requests</a></li>
+            <li><a href="/admin/serviceproviderrequests.jsp">Service Provider Requests</a></li>
+        </ul>
         <form method="post" action="admin.jsp" name="adminform">
             <div>
                 <input type="hidden" name="issubmit" value="true"/>
@@ -94,6 +110,7 @@
                     <li><a href="/admin/serviceproviders.jsp">Data Feed Service Providers</a></li>
                     <br><br>
                     <li><input type="button" class="button" onclick="UpdateFilter()" value="Update Filter Parameters"/></li>
+                    <li><input type="button" class="button" onclick="ResetDatafeedStats()" value="Reset Datafeed Stats"/></li>
                 </ul>
             </div>
         </form>
