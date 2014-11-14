@@ -6,10 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	//setup return page if action used
-	String returnPage = request.getRequestURI();
     response.addHeader("referer", request.getRequestURI());
 
 	String group = request.getParameter("groupId");

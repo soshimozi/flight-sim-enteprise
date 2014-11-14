@@ -9,8 +9,6 @@
 </jsp:useBean>
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
 	{
 %>

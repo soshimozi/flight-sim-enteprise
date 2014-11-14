@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String registration = request.getParameter("registration");
 
 	//setup return page if action used
@@ -19,7 +17,7 @@
     int tetminutes = (aircraft.getTotalEngineTime()) / 60;
  	int lcminutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck()) / 60;
     int afminutes = (aircraft.getAirframe()) / 60;
-    int minutes = 0;
+    int minutes;
     
     String totalEngineTime = (Formatters.twoDigits.format(tetminutes / 60) + ":" + Formatters.twoDigits.format(tetminutes % 60));
  	String lastCheck = (Formatters.twoDigits.format(lcminutes / 60) + ":" + Formatters.twoDigits.format(lcminutes % 60));

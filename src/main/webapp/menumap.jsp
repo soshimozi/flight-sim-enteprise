@@ -16,7 +16,6 @@
         if( includeBaseLink )
             returnValue.append("<a href=\"" + link + "\" >" + name + "</a><br/><br/>\n");
 
-        int count = 0;
         int stringLen = 0;
         boolean hasGroups = false;
         if (memberships != null)

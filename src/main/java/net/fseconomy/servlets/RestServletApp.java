@@ -5,21 +5,23 @@ import java.util.HashSet;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-@ApplicationPath("/rs")
+
+@ApplicationPath("/rest")
 public class RestServletApp extends Application
 {
     private Set<Object> singletons = new HashSet<>();
-    private Set<Class<?>> empty = new HashSet<>();
+    private Set<Class<?>> perCall = new HashSet<>();
 
     public RestServletApp()
     {
         singletons.add(new RestServlet());
+        singletons.add(new AdminRestServlet());
     }
 
     @Override
     public Set<Class<?>> getClasses()
     {
-        return empty;
+        return perCall;
     }
 
     @Override

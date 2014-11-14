@@ -7,15 +7,13 @@
 <jsp:useBean id="goods" class="net.fseconomy.beans.GoodsBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String fromICAO = request.getParameter("fromICAO");
 	int owner = Integer.parseInt(request.getParameter("owner"));
 	int commodityId = Integer.parseInt(request.getParameter("commodityId"));
 
 	String error = null;
 
-	UserBean owneraccount = null;
+	UserBean owneraccount;
 	owneraccount = Accounts.getAccountById(owner);
 	
 	List<GoodsBean> goodslist = Goods.getGoodsForAccountAvailable(owner);

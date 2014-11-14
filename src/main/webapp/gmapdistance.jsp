@@ -1,14 +1,11 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*, net.fseconomy.dto.DistanceBearing"
 %>
-<%@ page import="net.fseconomy.dto.DistanceBearing" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     String depart = request.getParameter("depart");
     String dest = request.getParameter("dest");
 
@@ -18,7 +15,6 @@
 
     AirportBean apDepart = Airports.getAirport(depart);
     AirportBean apDest = Airports.getAirport(dest);
-
 %>
 
 <!DOCTYPE html>
@@ -42,12 +38,6 @@
           document.getElementById("endTime").innerHTML=a;
         }
     </script>
-
-<style type="text/css">
-div.infowindow-content {
-    min-width: 200px;
-}
-</style>
 
 </head>
 <body text="#000080" bgcolor="#FFFFFF" background="">

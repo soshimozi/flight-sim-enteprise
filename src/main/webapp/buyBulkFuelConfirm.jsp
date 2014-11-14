@@ -1,20 +1,16 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
 	    errorPage="errorpage.jsp"
-	    import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+	    import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%@ page import="net.fseconomy.util.Constants" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="fbo" class="net.fseconomy.beans.FboBean" scope="session" />
 <jsp:useBean id="dataError" class="net.fseconomy.data.DataError" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String returnPage = request.getParameter("returnpage");
 
-	String icao = request.getParameter("icao");
 	String amount100ll = request.getParameter("100LLAmount");
 	String amountJetA = request.getParameter("JetAAmount");
 	

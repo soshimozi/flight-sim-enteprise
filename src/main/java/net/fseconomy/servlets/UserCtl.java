@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 public class UserCtl extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
-	Data data;
 	private static ScheduledFuture<?> future = null;
 	public static MaintenanceCycle maintenanceObject = null;	
 
@@ -54,17 +53,10 @@ public class UserCtl extends HttpServlet
 		//This is called after we know data 
 		logger.info("UserCtl init() called");
 
-		//This provides access to the DATA class in the jsp pages
-		data = (Data) getServletContext().getAttribute("data");
-		if (data == null)
-			getServletContext().setAttribute("data", data = new Data());
-
-		data.setPathToWeb(getServletContext().getRealPath(File.separator));
-
 		FullFilter.updateFilter(DALHelper.getInstance());
 		
 		//do last as this kicks off the timer
-		maintenanceObject = new MaintenanceCycle(data);			
+		maintenanceObject = new MaintenanceCycle();
 		
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
@@ -895,16 +887,16 @@ public class UserCtl extends HttpServlet
 			try
 			{				
 				String qry = "SELECT svalue FROM sysvariables where variablename='XPlaneScriptMD5Passcode'";
-				String code = (String)data.dalHelper.ExecuteScalar(qry);
+				String code = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
 				if(code.equals(passcode))
 				{
 					qry = "SELECT svalue FROM sysvariables where variablename='XPlaneScriptMD5'";
-					String currMD5 = (String)data.dalHelper.ExecuteScalar(qry);
+					String currMD5 = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
 				
 					if(!MD5.equals(currMD5))
 					{
 						qry = "UPDATE sysvariables SET svalue = ? WHERE variablename='XPlaneScriptMD5'";
-						data.dalHelper.ExecuteUpdate(qry, MD5);
+                        DALHelper.getInstance().ExecuteUpdate(qry, MD5);
 					}
 					else
 						throw new DataError("No change detected!");

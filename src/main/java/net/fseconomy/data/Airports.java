@@ -1057,9 +1057,9 @@ public class Airports implements Serializable
                 }
                 if (fboInactive)
                 {
-                    tables.append(" LEFT JOIN accounts ON Accounts.id = fbo.owner ");
+                    tables.append(" LEFT JOIN accounts ON accounts.id = fbo.owner ");
                     query.append(and);
-                    query.append(" (fbo.active = 0 AND Accounts.id >0)");
+                    query.append(" (fbo.active = 0 AND accounts.id >0)");
                     and = "AND ";
                 }
                 if (facilityPTRent)

@@ -8,8 +8,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     //check that we have right permissions, toss to index if not
     if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {

@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     if(user == null || !user.isLoggedIn())
     {
         out.print("<script type=\"text/javascript\">document.location.href=\"admin.jsp\"</script>");

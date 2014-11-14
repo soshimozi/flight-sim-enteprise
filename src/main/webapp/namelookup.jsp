@@ -6,13 +6,11 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     response.setContentType("text/html");
 
-    String query = (String)request.getParameter("startsWith");
-    String accountType = (String)request.getParameter("accountType");
-    String displayHidden = (String)request.getParameter("displayHidden");
+    String query = request.getParameter("startsWith");
+    String accountType = request.getParameter("accountType");
+    String displayHidden = request.getParameter("displayHidden");
 
     if(query == null)
     {

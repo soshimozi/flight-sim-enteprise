@@ -7,15 +7,13 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
 <%
-    Data data = (Data) application.getAttribute("data");
-
     List<LogBean> logs;
     String sGroup = request.getParameter("groupId");
     String sFrom = request.getParameter("from");
 
     String linkOptions = "";
     String groupName = "";
-    String mapViewer = "";
+    String mapViewer;
     String selector;
     int from = 0;
     int amount;

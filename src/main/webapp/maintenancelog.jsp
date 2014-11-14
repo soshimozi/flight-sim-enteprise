@@ -5,13 +5,11 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
-    String content = "";
+    String content;
     String style = "";
     String sId = request.getParameter("id");
     AircraftMaintenanceBean maintenance = null;
-    int id = 0;
+    int id;
 
     try
     {

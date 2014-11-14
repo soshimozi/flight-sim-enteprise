@@ -45,12 +45,8 @@ public class FSagentFSX extends HttpServlet
 
 	SimClientRequests.SimType simType = SimClientRequests.SimType.FSX;
 	
-	Data data;
 	public void init()
 	{
-		data = (Data) getServletContext().getAttribute("data");
-		if (data == null)
-			getServletContext().setAttribute("data", data = Data.getInstance());
 	}
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -77,10 +73,10 @@ public class FSagentFSX extends HttpServlet
 			try 
 			{
 				String qry = "SELECT svalue FROM sysvariables WHERE variablename='XPlaneScriptMD5'";
-				String currXP10MD5 = (String)data.dalHelper.ExecuteScalar(qry);
+				String currXP10MD5 = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
 	
 				qry = "SELECT svalue FROM sysvariables WHERE variablename='XPlane9ScriptMD5'";
-				String currXP9MD5 = (String)data.dalHelper.ExecuteScalar(qry);
+				String currXP9MD5 = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
 	
 				if (!currXP10MD5.equals(md5sum) && !currXP9MD5.equals(md5sum)) 
 				{

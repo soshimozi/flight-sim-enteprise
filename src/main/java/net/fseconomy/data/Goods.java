@@ -121,14 +121,14 @@ public class Goods implements Serializable
     {
         return getGoodsAtAirportSQL("SELECT goods.*, commodities.name, Accounts.name FROM " +
                 "goods, commodities, accounts WHERE ( goods.owner = 0 or exists (select * from fbo WHERE fbo.location = goods.location AND fbo.owner = goods.owner AND " +
-                " fbo.active = 1 AND (saleFlag&" + GoodsBean.SALEFLAG_BUY + ") > 0)) AND goods.owner = Accounts.id AND goods.type = commodities.id AND goods.type = " + type +
+                " fbo.active = 1 AND (saleFlag&" + GoodsBean.SALEFLAG_BUY + ") > 0)) AND goods.owner = accounts.id AND goods.type = commodities.id AND goods.type = " + type +
                 " AND (max = 0 OR max > amount) AND goods.location = '" + icao + "'", icao, type, size, fuelPrice, JetAPrice);
     }
 
     public static List<GoodsBean> getGoodsForFbo(String icao, int owner)
     {
         return getGoodsAtAirportSQL("SELECT goods.*, commodities.name, Accounts.name FROM " +
-                "goods, commodities, accounts WHERE goods.owner = Accounts.id AND goods.type = commodities.id AND owner = " +
+                "goods, commodities, accounts WHERE goods.owner = accounts.id AND goods.type = commodities.id AND owner = " +
                 owner + " AND location = '" + icao + "'", icao, 0, -1, 0, 0);
     }
 
@@ -137,7 +137,7 @@ public class Goods implements Serializable
         return getGoodsAtAirportSQL("SELECT goods.*, commodities.name, Accounts.name FROM " +
                 "goods, commodities, accounts WHERE (goods.owner = 0 OR exists (select * from fbo WHERE fbo.location = goods.location AND fbo.owner = goods.owner AND " +
                 "fbo.active = 1  AND saleFlag > 0)) AND commodities.id between 1 and 2 AND " +  //only showing BMs and Supplies after fuel everywhere update - changed by airboss - 8/15/12
-                "goods.location = '" + icao + "' AND goods.owner = Accounts.id", icao, 0, size, fuelPrice, JetAPrice);
+                "goods.location = '" + icao + "' AND goods.owner = accounts.id", icao, 0, size, fuelPrice, JetAPrice);
     }
 
     public static List<GoodsBean> getGoodsAtAirport(String icao, int size, double fuelPrice, double JetAPrice)
@@ -145,7 +145,7 @@ public class Goods implements Serializable
         return getGoodsAtAirportSQL("SELECT goods.*, commodities.name, Accounts.name FROM " +
                 "goods, commodities, accounts WHERE (goods.owner = 0 OR exists (select * from fbo WHERE fbo.location = goods.location AND fbo.owner = goods.owner AND " +
                 "fbo.active = 1  AND saleFlag > 0)) AND goods.type = commodities.id AND " +
-                "goods.location = '" + icao + "' AND goods.owner = Accounts.id", icao, 0, size, fuelPrice, JetAPrice);
+                "goods.location = '" + icao + "' AND goods.owner = accounts.id", icao, 0, size, fuelPrice, JetAPrice);
     }
 
     public static List<GoodsBean> getGoodsAtAirportSQL(String SQL, String icao, int type, int size, double fuelPrice, double JetAPrice)
@@ -183,12 +183,12 @@ public class Goods implements Serializable
 
     public static List<GoodsBean> getGoodsForAccountAvailable(int id)
     {
-        return getGoodsSQL("SELECT goods.*, commodities.name, Accounts.name FROM goods, commodities, accounts WHERE goods.owner = Accounts.id AND goods.type = commodities.id AND amount > 0 AND owner=" + id);
+        return getGoodsSQL("SELECT goods.*, commodities.name, Accounts.name FROM goods, commodities, accounts WHERE goods.owner = accounts.id AND goods.type = commodities.id AND amount > 0 AND owner=" + id);
     }
 
     public static GoodsBean getGoods(String location, int owner, int type)
     {
-        List<GoodsBean> returnValue = getGoodsSQL("SELECT goods.*, commodities.name, Accounts.name FROM goods, commodities, accounts WHERE goods.owner = Accounts.id AND goods.type = commodities.id AND goods.type = " + type + " AND goods.owner = " + owner + " AND goods.location = '" + location + "'");
+        List<GoodsBean> returnValue = getGoodsSQL("SELECT goods.*, commodities.name, Accounts.name FROM goods, commodities, accounts WHERE goods.owner = accounts.id AND goods.type = commodities.id AND goods.type = " + type + " AND goods.owner = " + owner + " AND goods.location = '" + location + "'");
 
         return returnValue.size() == 0 ? null : returnValue.get(0);
     }

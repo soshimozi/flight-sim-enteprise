@@ -6,9 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
-    AssignmentBean assignment = null;
+    AssignmentBean assignment;
     String sId = request.getParameter("id");
     String from = request.getParameter("from");
     String to = request.getParameter("to");
@@ -25,9 +23,8 @@
     String error = null;
     int id = -1;
     int cnt = 1;
-    int errCnt = 0;
-    int distance = 0;
-    double ppscale = 0;
+    int distance;
+    double ppscale;
 
     if (sId != null && !sId.equals(""))
         id = Integer.parseInt(sId);
@@ -152,7 +149,6 @@ else
         catch (DataError e)
         {
             error = e.getMessage();
-            errCnt = i;
         }
     }
 %>

@@ -12,9 +12,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * Created by smobley on 11/6/2014.
- */
 public class Stats
 {
     //sig stats
@@ -82,13 +79,13 @@ public class Stats
             switch (usertype)
             {
                 case "onsite":
-                    qry = "SELECT count(*) AS number FROM accounts WHERE Accounts.logon >= date_sub(curdate(), interval 24 hour)";
+                    qry = "SELECT count(*) AS number FROM accounts WHERE accounts.logon >= date_sub(curdate(), interval 24 hour)";
                     break;
                 case "flying":
-                    qry = "SELECT count(*) AS number FROM aircraft LEFT JOIN accounts on aircraft.userlock = Accounts.id WHERE aircraft.location is null";
+                    qry = "SELECT count(*) AS number FROM aircraft LEFT JOIN accounts on aircraft.userlock=accounts.id WHERE aircraft.location is null";
                     break;
                 case "parked":
-                    qry = "SELECT count(*) AS number FROM aircraft LEFT JOIN accounts on aircraft.userlock = Accounts.id WHERE aircraft.location is not null AND aircraft.userlock is not null";
+                    qry = "SELECT count(*) AS number FROM aircraft LEFT JOIN accounts on aircraft.userlock = accounts.id WHERE aircraft.location is not null AND aircraft.userlock is not null";
                     break;
                 default:
                     throw new DataError(usertype + " not known.");

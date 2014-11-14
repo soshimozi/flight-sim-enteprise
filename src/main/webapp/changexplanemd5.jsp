@@ -4,7 +4,6 @@
 %>
 
 <%
-    Data data = (Data)application.getAttribute("data");
 %>
 
 <!DOCTYPE html>
@@ -34,7 +33,7 @@
 	else
 	{
 		String qry = "SELECT svalue FROM sysvariables where variablename='XPlaneScriptMD5'";
-		String currMD5 = (String)data.dalHelper.ExecuteScalar(qry);
+		String currMD5 = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
 %>
 
 

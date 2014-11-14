@@ -1,10 +1,7 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
-<%@ page import="net.fseconomy.beans.FSMappingBean" %>
-<%@ page import="net.fseconomy.beans.ModelBean" %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="model" class="net.fseconomy.beans.ModelBean">
@@ -12,8 +9,6 @@
 </jsp:useBean>
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
 %>
@@ -23,7 +18,6 @@
     }
 
     String error = null;
-    int dummy = 1;
 
     if (request.getParameter("submit") == null)
     {

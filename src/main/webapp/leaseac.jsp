@@ -6,14 +6,12 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String returnPage = request.getHeader("referer");
 
 	String reg = request.getParameter("registration");
 	AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
 
-	UserBean owneraccount = null;
+	UserBean owneraccount;
 	owneraccount = Accounts.getAccountById(aircraft.getOwner());
 %>
 

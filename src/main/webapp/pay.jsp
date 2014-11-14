@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     String sId = request.getParameter("groupId");
     int id = Integer.parseInt(sId);
     UserBean account = Accounts.getAccountById(id);

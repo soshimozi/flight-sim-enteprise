@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     int modelId = (request.getParameter("modelId") == null || request.getParameter("modelId").equals("")) ? -1 : Integer.parseInt(request.getParameter("modelId"));
     int lowPrice = (request.getParameter("lowPrice") == null || request.getParameter("lowPrice").equals("")) ? -1 : Integer.parseInt(request.getParameter("lowPrice"));
     int highPrice = (request.getParameter("highPrice") == null || request.getParameter("highPrice").equals("")) ? -1: Integer.parseInt(request.getParameter("highPrice"));

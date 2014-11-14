@@ -25,12 +25,8 @@ import java.sql.*;
 import java.util.*;
 import java.util.Date;
 
-import static net.fseconomy.data.Airports.*;
-
-import net.fseconomy.beans.*;
 import net.fseconomy.dto.*;
-import net.fseconomy.util.Constants;
-import net.fseconomy.util.Formatters;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,16 +34,14 @@ public class Data implements Serializable
 {
 	private static final long serialVersionUID = 3L;
 
-    private String pathToWeb = "";
-
     //for Signature template selection
     public static int currMonth = 1;
 
-
+    //Current Admin rest api key
+    public static String adminApiKey = "";
+    
     public final static Logger logger = LoggerFactory.getLogger(Data.class);
-
 	private static Data singletonInstance = null;
-	public DALHelper dalHelper = null;
 	
 	public static Data getInstance()
 	{
@@ -57,32 +51,20 @@ public class Data implements Serializable
 	public Data()
 	{
 		logger.info("Data constructor called");
-
-		dalHelper = DALHelper.getInstance();
 		
 		Locale.setDefault(Locale.US);
 		
 		singletonInstance = this;
 	}
 
-    public void setPathToWeb(String path)
-	{
-		pathToWeb = path;
-	}
-	
-	public String getPathToWeb()
-	{
-		return pathToWeb;
-	}
-	
-	public List<String> getDistinctColumnData(String field, String table)throws DataError
+	public static List<String> getDistinctColumnData(String field, String table)throws DataError
 	{
 		ArrayList<String> result = new ArrayList<>();
 		String qry = "";
 		try
 		{
 			qry = "SELECT DISTINCT "+ field +" FROM "+ table +" ORDER BY " + field;
-			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
+			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{
 				String nfield = rs.getString(field);
@@ -101,16 +83,10 @@ public class Data implements Serializable
 		return result;
 	}
 
-
-
-
-
-
 	public static String sortHelper(String helper)
 	{
 		return "<span style=\"display: none\">" + helper + "</span>";
-	}	
-
+	}
 
 	/**
 	* return a mysql resultset as an ArrayList. Mysql query of log table to return a users last 500 flights 
@@ -119,13 +95,13 @@ public class Data implements Serializable
 	* @ return Mysql Resulset as an ArrayList to checkuser48hourtrend.jsp
 	* @ author - chuck229
 	*/ 		
-	public TrendHours[] getTrendHoursQuery(String user) throws DataError
+	public static TrendHours[] getTrendHoursQuery(String user) throws DataError
 	{
 		ArrayList<TrendHours> result = new ArrayList<>();
 		try
 		{
 			String qry = "SELECT `time` as LOGDATE, cast(flightenginetime as signed) as Duration, cast((SELECT SUM(flightenginetime) FROM `log` where user = ? and `time` <= LOGDATE and `time` > DATE_SUB(LOGDATE, INTERVAL 48 HOUR)) as signed) as last48hours FROM log WHERE `user` = ? and TYPE = 'flight' ORDER BY TIME DESC Limit 500";
-			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, user, user);
+			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user, user);
 			while (rs.next())
 			{
 				TrendHours trend = new TrendHours(rs.getString("LOGDATE"),rs.getInt("Duration"), rs.getInt("last48hours"));
@@ -140,25 +116,9 @@ public class Data implements Serializable
 		return result.toArray(new TrendHours[result.size()]);
 	}
 
-	/**
-	 * Fuel Exploit Check container class
-	 */
-	public class FuelExploitCheck
-	{
-		public int PaymentId;
-		public Date Time;
-		public float TotalAmount;
-		public String FuelType;
-		public BigDecimal PerGal;
-		public String Location;
-		public String Aircraft;
-		public String User;
-		public String OtherParty;
-		public String Buyer;	
-		public String Comment;
-	}
+
 	
-	public List<FuelExploitCheck> getFuelExploitCheckData(int pricepoint, int count) 
+	public static  List<FuelExploitCheck> getFuelExploitCheckData(int pricepoint, int count)
 	{
 		List<FuelExploitCheck> list = new ArrayList<>();
 		String qry;
@@ -172,7 +132,7 @@ public class Data implements Serializable
 			"join accounts a3 on  a3.id=p.buyer " +
 			"order by id desc " +
 			"limit ?";
-			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry, pricepoint, count);
+			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, pricepoint, count);
 			
 			while(rs.next())
 			{
@@ -201,14 +161,14 @@ public class Data implements Serializable
 
 
 
-	public List<PilotStatus> getPilotStatus()
+	public static List<PilotStatus> getPilotStatus()
 	{
 		List<PilotStatus> toList = new ArrayList<>();
 		
 		try
 		{
 			String qry = "select  a.name, Concat(m.make,  \" \", m.model) as makemodel, case when d.location is not null then  \"p\" else \"f\" end as status, case when d.location is not null then  d.location else d.departedfrom end as icao,  case when d.location is not null then  loc.lat else dep.lat end as lat, case when d.location is not null then  loc.lon else dep.lon end as lon  from (select model, location, departedfrom, userlock from aircraft where userlock is not null) d left join accounts a on d.userlock=a.id left join models m on m.id=d.model left join airports loc on loc.icao=d.location left join airports dep on dep.icao=d.departedfrom order by status";
-			ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
+			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 
 			while(rs.next())
 			{
@@ -230,6 +190,4 @@ public class Data implements Serializable
 		
 		return toList;
 	}
-
-
 }

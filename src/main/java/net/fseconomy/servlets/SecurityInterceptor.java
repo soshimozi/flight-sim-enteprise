@@ -2,6 +2,7 @@ package net.fseconomy.servlets;
 
 import static net.fseconomy.services.common.*;
 
+import net.fseconomy.data.Data;
 import org.jboss.resteasy.core.interception.PostMatchContainerRequestContext;
 
 import javax.annotation.security.DenyAll;
@@ -13,9 +14,13 @@ import javax.ws.rs.container.ContainerRequestFilter;
 //import javax.ws.rs.core.HttpHeaders;
 //import javax.ws.rs.core.MultivaluedMap;
 //import javax.ws.rs.core.Response;
+import javax.ws.rs.container.PreMatching;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URI;
 //import java.util.Arrays;
 //import java.util.HashMap;
 //import java.util.HashSet;
@@ -29,6 +34,13 @@ public class SecurityInterceptor implements ContainerRequestFilter
     {
         PostMatchContainerRequestContext pmContext = (PostMatchContainerRequestContext) ctx;
 
+        // When HttpMethod comes as OPTIONS, just acknowledge that it accepts...
+        if ( ctx.getRequest().getMethod().equals( "OPTIONS" ) )
+        {
+            // Just send a OK signal back to the browser
+            ctx.abortWith( Response.status(Response.Status.OK).build() );
+        }
+
         Method method = pmContext.getResourceMethod().getMethod();
 
         //Access allowed for all
@@ -39,11 +51,24 @@ public class SecurityInterceptor implements ContainerRequestFilter
         if(method.isAnnotationPresent(DenyAll.class))
             ctx.abortWith(ResponseAccessDenied());
 
-        //get key
-        String key = ctx.getHeaders().getFirst("servicekey");
-        if(key == null)
+        UriInfo ui = ctx.getUriInfo();
+        URI uri = ui.getRequestUri();
+        if(uri.getPath().contains("/rest/sst"))
+        {
+            //get key
+            String key = ctx.getHeaders().getFirst("adminkey");
+            if (key == null || !key.equals(Data.adminApiKey))
+                ctx.abortWith(ResponseAccessDenied());
+        }
+        else if(uri.getPath().contains("/rest/api"))
+        {
+            //get key
+            String key = ctx.getHeaders().getFirst("servicekey");
+            if (key == null)
+                ctx.abortWith(ResponseAccessDenied());
+        }
+        else
             ctx.abortWith(ResponseAccessDenied());
-
          //check if correct permissions for method
 
         //deny on invalid role

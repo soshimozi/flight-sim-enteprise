@@ -5,8 +5,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     String error = null;
     String sOwner = request.getParameter("owner");
     String location = request.getParameter("location");

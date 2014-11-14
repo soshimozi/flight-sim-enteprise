@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     if(!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
 %>
@@ -21,7 +19,7 @@
     {
         String event = request.getParameter("event");
         if(event.equals("ResetFilter"))
-            net.fseconomy.servlets.FullFilter.updateFilter(data.dalHelper);
+            net.fseconomy.servlets.FullFilter.updateFilter(DALHelper.getInstance());
         if(event.equals("ResetDatafeedStats"))
             net.fseconomy.servlets.Datafeed.ResetDatafeedStats();
     }

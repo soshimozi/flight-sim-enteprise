@@ -8,8 +8,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
 %>
@@ -97,7 +95,7 @@
         TrendHours[] trend = null;
         try
         {
-            trend = data.getTrendHoursQuery(inputuser.getName());
+            trend = Data.getTrendHoursQuery(inputuser.getName());
         }
         catch(DataError e)
         {

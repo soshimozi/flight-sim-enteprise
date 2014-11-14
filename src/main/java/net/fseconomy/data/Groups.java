@@ -238,7 +238,7 @@ public class Groups implements Serializable
             list.append(")");
 
             List<String> toList = new ArrayList<String>();
-            String qry = "SELECT email FROM accounts, groupmembership WHERE Accounts.id = groupmembership.userId AND groupId = ? AND Accounts.id IN " + list.toString();
+            String qry = "SELECT email FROM accounts, groupmembership WHERE accounts.id = groupmembership.userId AND groupId = ? AND accounts.id IN " + list.toString();
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, group);
             while (rs.next()) //add recipients to receive this message
             {

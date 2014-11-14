@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     List<FboBean> fbos = Fbos.getFboForSale();
 %>
 
@@ -30,12 +28,6 @@
           document.getElementById("endTime").innerHTML=a;
         }
     </script>
-
-    <style type="text/css">
-        div.infowindow-content {
-            min-width: 200px;
-        }
-    </style>
 
 </head>
 <body text="#000080" bgcolor="#FFFFFF" background="">
@@ -62,12 +54,10 @@ for (FboBean fbo : fbos)
 	AirportBean airport = Airports.getAirport(fbo.getLocation());
 	double lat = airport.getLat();
 	double lon = airport.getLon();
-	String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
 	int sizeIcon = fbo.getFboSize() - 1;
 	
 	StringBuilder sb = new StringBuilder();
 	sb.append("<div class=\"infowindow-content\">");
-	//sb.append(airportLink);
 	sb.append(airport.getIcao());
 	sb.append("<br>");
 	sb.append(Converters.escapeJavaScript(airport.getName()));

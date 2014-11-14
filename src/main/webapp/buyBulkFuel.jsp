@@ -1,20 +1,15 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%@ page import="net.fseconomy.util.Constants" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String returnPage = request.getHeader("referer");
 
 	int baseBulkFuelKg=5000;
-	int baseBulkFuelGal=1860;
-	UserBean account = user;			
-			
+
 	if (user == null || user.getId() == 0 || user.getId() == -1) 
 	{
 %>
@@ -24,13 +19,10 @@
 	}
 	
 	String fboID = request.getParameter("id");
-	String location = request.getParameter("icao");
-	boolean orderExists;
-	
+
 	//use the account for the owner of the FBO
 	FboBean fboAccount = Fbos.getFboByID(Integer.parseInt(fboID));
-	account = Accounts.getAccountById(fboAccount.getOwner());
-	
+
 	//get current fuel levels
 	GoodsBean fuelleft = Goods.getGoods(fboAccount.getLocation(), fboAccount.getOwner(), GoodsBean.GOODS_FUEL100LL);
 	GoodsBean jetaleft = Goods.getGoods(fboAccount.getLocation(), fboAccount.getOwner(), GoodsBean.GOODS_FUELJETA);

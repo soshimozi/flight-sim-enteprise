@@ -6,10 +6,8 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     boolean isDest = false;
-    boolean isFBO = false;
+    boolean isFBO;
     double latd=0;
     double lond=0;
 
@@ -20,7 +18,6 @@
     List<FboBean> fboList;
     AssignmentBean assignment;
     AirportBean destination;
-    AirportBean location;
     GoodsBean fuelleft;
 
     double latl = airportl.getLat();
@@ -30,10 +27,8 @@
     String type;
     String[] jobs;
     String image;
-    String[] fbos;
 
     double fuelprice;
-
 
     if(icaod != null)
     {
@@ -206,13 +201,13 @@ function load()
 			for (AssignmentBean bean : assignments)
 			{
 				assignment = bean;
-				destination = assignment.getDestinationAirport(data);
-				location = assignment.getLocationAirport(data);
+				destination = assignment.getDestinationAirport();
 				image = "<img src='img/set2_"+ assignment.getBearingImage() + ".gif'>";
 				type = assignment.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T";
 				jobs[counter] = image+" | $"+assignment.calcPay()+" | "+destination.getIcao()+" | "+assignment.getDistance()+"nm | "+
 				Converters.escapeJavaScript(assignment.getSCargo())+" | "+type+" | Ex: "+assignment.getSExpires();
-%>				jobstring+="<%=jobs[counter]%>"+"<br>";
+%>
+                jobstring+="<%=jobs[counter]%>"+"<br>";
 <%
                 counter++;
             }
@@ -221,7 +216,6 @@ function load()
 		fboList = Fbos.getFboByLocation(icaod);
 		fuelprice = airportd.getFuelPrice();
 		String fuel = Formatters.currency.format(fuelprice);
-		//fbos = new String[fboList.size()];
 		isFBO = false;
 		
 		if(fboList.size() != 0)

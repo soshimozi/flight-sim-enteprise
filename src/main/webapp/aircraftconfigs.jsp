@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     List<AircraftConfigs> aircraftList = Aircraft.getAircraftConfigs();
 
     String sview = request.getParameter("view");

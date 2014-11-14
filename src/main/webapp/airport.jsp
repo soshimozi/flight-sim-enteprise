@@ -1,8 +1,7 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.*, org.apache.commons.lang3.math.*, net.fseconomy.beans.*, net.fseconomy.dto.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+	    import="java.util.*, org.apache.commons.lang3.math.*, net.fseconomy.beans.*, net.fseconomy.dto.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%@ page import="net.fseconomy.util.Constants" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="airport" class="net.fseconomy.beans.AirportBean">
@@ -10,8 +9,6 @@
 </jsp:useBean>
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	if(user == null || !user.isLoggedIn())
 	{
 %>
@@ -814,9 +811,9 @@
                 if (aircraftReg != null)
                     assignmentAircraftList.add(aircraftReg);
 
-				String image = "img/set2_" + assignment.getActualBearingImage(data) + ".gif";
-				AirportBean destination = assignment.getDestinationAirport(data);
-				AirportBean location = assignment.getLocationAirport(data);
+				String image = "img/set2_" + assignment.getActualBearingImage() + ".gif";
+				AirportBean destination = assignment.getDestinationAirport();
+				AirportBean location = assignment.getLocationAirport();
 				
 				String ap = airport.getIcao();
 				String locap = location.getIcao();
@@ -886,8 +883,8 @@
 					</td>
 <%				}
 %>				  					
-                    <td class="numeric"><%= assignment.getActualDistance(data) %></td>
-                    <td class="numeric"><%= assignment.getActualBearing(data) %><img src="<%= image %>" /></td>
+                    <td class="numeric"><%= assignment.getActualDistance() %></td>
+                    <td class="numeric"><%= assignment.getActualBearing() %><img src="<%= image %>" /></td>
                     <td><%= assignment.getSCargo() %></td>
                     <!-- AllIn Change -->
                     <td id="assignmentType-<%= id %>"><%= assignment.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>

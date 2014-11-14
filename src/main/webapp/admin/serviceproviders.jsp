@@ -1,24 +1,20 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*,java.util.*, net.fseconomy.util.Formatters"
+        import="net.fseconomy.data.*,java.util.*, net.fseconomy.util.*, net.fseconomy.beans.ServiceProviderBean, net.fseconomy.beans.UserBean"
 %>
-<%@ page import="net.fseconomy.beans.ServiceProviderBean" %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
 %>
-        <script type="text/javascript">document.location.href="index.jsp"</script>
+<script type="text/javascript">document.location.href="index.jsp"</script>
 <%
         return;
     }
 
-    String error = "";
+    String error = null;
 
     Date date = new Date();
 
@@ -61,7 +57,7 @@
             error = e.getMessage();
         }
 %>
-        <script type="text/javascript">document.location.href="/admin/serviceprovidersedit.jsp"</script>
+        <script type="text/javascript">document.location.href="serviceproviders.jsp"</script>
 <%
         return;
     }
@@ -99,7 +95,7 @@
             {
                 if (window.confirm("Are you sure you want to APPROVE this request?"))
                 {
-                    var url = "/admin/serviceprovidersedit.jsp?id=" + id + "&action=approve";
+                    var url = "/admin/serviceproviders.jsp?id=" + id + "&action=approve";
                     location.href = url;
                 }
             }
@@ -107,7 +103,7 @@
             {
                 if (window.confirm("Are you sure you want to DISABLE this service?"))
                 {
-                    var url = "/admin/serviceprovidersedit.jsp?id=" + id + "&action=disable";
+                    var url = "/admin/serviceproviders.jsp?id=" + id + "&action=disable";
                     location.href = url;
                 }
             }
@@ -115,7 +111,7 @@
             {
                 if (window.confirm("Are you sure you want to REJECT this request?"))
                 {
-                    var url = "/admin/serviceprovidersedit.jsp?id=" + id + "&action=reject";
+                    var url = "/admin/serviceproviders.jsp?id=" + id + "&action=reject";
                     location.href = url;
                 }
             }
@@ -123,7 +119,7 @@
             {
                 if (window.confirm("Are you sure you want to BAN this service?"))
                 {
-                    var url = "/admin/serviceprovidersedit.jsp?id=" + id + "&action=ban";
+                    var url = "/admin/serviceproviders.jsp?id=" + id + "&action=ban";
                     location.href = url;
                 }
             }

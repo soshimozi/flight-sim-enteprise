@@ -9,8 +9,6 @@
 </jsp:useBean>
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     String error = null;
 
     //initial page load

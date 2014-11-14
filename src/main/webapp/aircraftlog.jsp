@@ -8,8 +8,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     String aircraft = request.getParameter("registration");
     String sFrom = request.getParameter("from");
     int from = 0;

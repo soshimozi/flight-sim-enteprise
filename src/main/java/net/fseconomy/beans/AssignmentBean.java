@@ -221,7 +221,7 @@ public class AssignmentBean implements Serializable
 		this.from = from.toUpperCase();
 	}
 	
-	public AirportBean getFromAirport(Data data)
+	public AirportBean getFromAirport()
 	{
 		if (fromAirport == null)
 			setFromAirport(Airports.getAirport(from));
@@ -446,11 +446,11 @@ public class AssignmentBean implements Serializable
 			return Duration + note;
 	}
 	
-	public int getActualDistance(Data data)
+	public int getActualDistance()
 	{
 		if (actualDistance == 0)
 		{
-			AirportBean loc = getLocationAirport(data);
+			AirportBean loc = getLocationAirport();
 			/*
 			if (loc == null)
 			{
@@ -461,7 +461,7 @@ public class AssignmentBean implements Serializable
 			*/
 			if (loc != null)
 			{
-				DistanceBearing distanceBearing = Airports.getDistanceBearing(loc, getDestinationAirport(data));
+				DistanceBearing distanceBearing = Airports.getDistanceBearing(loc, getDestinationAirport());
 				actualDistance = (int)Math.round(distanceBearing.distance);
 				actualBearing = (int)Math.round(distanceBearing.bearing);
 			} else {
@@ -524,9 +524,9 @@ public class AssignmentBean implements Serializable
 		this.active = active;
 	}
 
-	public int getActualBearing(Data data)
+	public int getActualBearing()
 	{
-		getActualDistance(data); // initializes
+		getActualDistance(); // initializes
 		return actualBearing;
 	}
 	
@@ -537,9 +537,9 @@ public class AssignmentBean implements Serializable
 	public void setBearing(int i) {
 		bearing = i;
 	}
-	public int getActualBearingImage(Data data)
+	public int getActualBearingImage()
 	{
-		return (int)Math.round(getActualBearing(data)/45.0)%8;
+		return (int)Math.round(getActualBearing()/45.0)%8;
 	}
 	public int getBearingImage()
 	{
@@ -642,7 +642,7 @@ public class AssignmentBean implements Serializable
 		setUnits(AssignmentBean.unitsId(s));
 	}
 
-	public AirportBean getDestinationAirport(Data data)
+	public AirportBean getDestinationAirport()
 	{
 		if (destinationAirport == null)
 			setDestinationAirport(Airports.getAirport(to));
@@ -669,7 +669,7 @@ public class AssignmentBean implements Serializable
 		location = string;
 	}
 
-	public AirportBean getLocationAirport(Data data)
+	public AirportBean getLocationAirport()
 	{
 		if (locationAirport == null)
 			setLocationAirport(Airports.getAirport(location));

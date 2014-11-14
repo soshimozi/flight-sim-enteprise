@@ -7,42 +7,6 @@
 <jsp:useBean id="userMap" class="java.util.HashMap" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-%>
-<%!
-    String getUser(int id, Map<Integer, String> userMap, Data data)
-    {
-        if (id == 0)
-            return "FS Economy";
-
-        String value = (String) userMap.get(new Integer(id));
-        if (value == null)
-        {
-            UserBean thisUser = Accounts.getAccountById(id);
-            if (thisUser != null)
-                value = thisUser.getName();
-            userMap.put(new Integer(id), value);
-        }
-        return value == null ? " - " : value;
-    }
-
-    String[] monthNames = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-    double subTotal = 0;
-
-    String lineitem(double amount)
-    {
-        subTotal += amount;
-        return Formatters.currency.format(amount);
-    }
-
-    String doSubTotal()
-    {
-        String returnValue = Formatters.currency.format(subTotal);
-        subTotal = 0;
-        return returnValue;
-    }
-%>
-<%
     long tsStart = System.nanoTime();
     String sGroup = request.getParameter("groupId");
     String sFboId = request.getParameter("fboId");
@@ -69,15 +33,17 @@
     {
         account = user.getId();
         selector = "pilot " + user.getName();
-    } else
+    }
+    else
     {
         groupId = Integer.parseInt(sGroup);
         account = groupId;
-        selector = "group " + getUser(account, userMap, data);
+        selector = "group " + getUser(account, userMap);
         linkOptions = "groupId=" + sGroup + "&";
     }
     String sFilter = "";
-    FboBean filterFbo = null;
+    FboBean filterFbo;
+
     if (sFboId != null)
     {
         fboId = Integer.parseInt(sFboId);
@@ -85,12 +51,48 @@
         filterFbo = Fbos.getFbo(fboId);
         sFilter = filterFbo.getLocation() + " - " + filterFbo.getName();
     }
+
     if ((aircraft != null) && !aircraft.equals(""))
     {
         linkOptions = linkOptions + "aircraft=" + aircraft + "&";
         sFilter = sFilter + " - " + aircraft;
     }
 %>
+
+<%!
+    String getUser(int id, Map<Integer, String> userMap)
+    {
+        if (id == 0)
+            return "FS Economy";
+
+        String value = userMap.get(new Integer(id));
+        if (value == null)
+        {
+            UserBean thisUser = Accounts.getAccountById(id);
+            if (thisUser != null)
+                value = thisUser.getName();
+            userMap.put(new Integer(id), value);
+        }
+        return value == null ? " - " : value;
+    }
+
+    String[] monthNames = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+    double subTotal = 0;
+
+    String lineitem(double amount)
+    {
+        subTotal += amount;
+        return Formatters.currency.format(amount);
+    }
+
+    String doSubTotal()
+    {
+        String returnValue = Formatters.currency.format(subTotal);
+        subTotal = 0;
+        return returnValue;
+    }
+%>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -159,7 +161,7 @@
 %>
 	<div class="dataTable">
 	<table class="flightLog">
-	<caption><%= getUser(account, userMap, data) %> - <%= monthNames[month-1] %> <%= year%> <%= !sFilter.equals("") ? " - " + sFilter : "" %></caption>
+	<caption><%= getUser(account, userMap) %> - <%= monthNames[month-1] %> <%= year%> <%= !sFilter.equals("") ? " - " + sFilter : "" %></caption>
 	<tbody>
 	<tr><td class="type">Assignments</td><td></td></tr>
 	<tr><td class="type indent">Rental expenses</td><td class="cost"><%= lineitem(statement[PaymentBean.RENTAL][1]) %></td></tr>
@@ -276,8 +278,8 @@
 %>
                 <tr>
                     <td><%= Formatters.getUserTimeFormat(user).format(log.getTime()) %></td>
-                    <td><%= getUser(log.getOtherParty(), userMap, data) %></td>
-                    <td><%= getUser(log.getUser(), userMap, data) %></td>
+                    <td><%= getUser(log.getOtherParty(), userMap) %></td>
+                    <td><%= getUser(log.getUser(), userMap) %></td>
                     <td class="numeric"><%= account != log.getOtherParty() ? Formatters.currency.format(log.getAmount()) : "<span style=\"color: red;\">" + Formatters.currency.format(-log.getAmount()) + "</span>" %></td>
                     <td><%= log.getSReason() %></td>
                     <td><%= Airports.airportLink(airport, response) %></td>

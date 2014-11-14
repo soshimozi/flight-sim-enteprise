@@ -6,7 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
     boolean isTestServer = request.getRequestURL().toString().contains("8080");
 %>
 

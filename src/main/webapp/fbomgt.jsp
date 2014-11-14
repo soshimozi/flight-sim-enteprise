@@ -6,14 +6,11 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	UserBean account = null;
 	String sId = request.getParameter("id");
 	
 	//setup return page if action used
 	String groupParam = sId != null ? "?id="+sId : "";
-	String returnPage = request.getRequestURI() + groupParam;
 	response.addHeader("referer", request.getRequestURI() + groupParam);
 
 	if (sId != null)

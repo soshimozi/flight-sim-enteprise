@@ -9,10 +9,6 @@
 </jsp:useBean>
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
-	String icao="";
-	String icaod="";
 %>
 
 <!DOCTYPE html>
@@ -61,8 +57,6 @@
 </jsp:include>
 
 <%
-	String state = null;
-	String airports = null;
 	List<String> noDupeStates = null;
 	List<String> noDupeCountries = null;
 	
@@ -70,7 +64,7 @@
 	
 	try
 	{
-		noDupeStates = data.getDistinctColumnData("state", "airports");
+		noDupeStates = Data.getDistinctColumnData("state", "airports");
 	} catch (DataError e)
 	{
 %>
@@ -80,7 +74,7 @@
 
 	try
 	{
-		noDupeCountries = data.getDistinctColumnData("country", "airports");
+		noDupeCountries = Data.getDistinctColumnData("country", "airports");
 	} catch (DataError e)
 	{
 %>

@@ -31,7 +31,7 @@ import javax.ws.rs.core.Response;
 import java.sql.*;
 
 
-public class serviceData
+public class ServiceData
 {
     public static Response getBalance(PermissionCategory type, int account)
     {

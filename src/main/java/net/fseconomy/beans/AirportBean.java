@@ -77,13 +77,13 @@ public class AirportBean implements Serializable
 		setServices(rs.getInt("services"));
 	}
 
-	public boolean hasServices(Data data)
+	public boolean hasServices()
 	{
         return size >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE
                 || Fbos.hasRepairShop(icao);
     }
 	
-	public boolean hasGoodsForSale(Data data)
+	public boolean hasGoodsForSale()
 	{
 		if(size > MIN_SIZE_BIG)
 			return true;

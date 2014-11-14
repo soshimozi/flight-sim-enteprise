@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	if(user == null || !user.isLoggedIn())
 	{
 %>
@@ -429,7 +427,7 @@
      	{
      		if (bean.getActive() == 2)
      		{
-                String image = "img/set2_" + bean.getActualBearingImage(data) + ".gif";
+                String image = "img/set2_" + bean.getActualBearingImage() + ".gif";
            		String aircraftReg = bean.getAircraft();
            		String status;
            		
@@ -455,9 +453,9 @@
            		
            		assignmentsHoldPay += bean.calcPay();
            		
-           		AirportBean destination = bean.getDestinationAirport(data);
-           		AirportBean from = bean.getFromAirport(data);
-           		AirportBean location = bean.getLocationAirport(data);
+           		AirportBean destination = bean.getDestinationAirport();
+           		AirportBean from = bean.getFromAirport();
+           		AirportBean location = bean.getLocationAirport();
 %>
 		     	<tr>
 		     	<td>
@@ -491,9 +489,9 @@
 		        		<%=bean.getTo() %>
 		        	</a>
 		        </td>
-		        <td class="numeric"><%= bean.getActualDistance(data)%></td>
+		        <td class="numeric"><%= bean.getActualDistance()%></td>
 		        <td class="numeric">
-		        	<%= bean.getActualBearing(data) %>
+		        	<%= bean.getActualBearing() %>
 		        	<img src="<%= image %>">
 		        </td>
 		        <td><%= bean.getSCargo() %></td>
@@ -609,7 +607,7 @@
      		if (assignment.getActive() != 2)
      		{
            		//AssignmentBean assignment = assignments[c];
-           		String image = "img/set2_" +assignment.getActualBearingImage(data) + ".gif";
+           		String image = "img/set2_" +assignment.getActualBearingImage() + ".gif";
            		String aircraftReg = assignment.getAircraft();
            		String status;
            		
@@ -663,9 +661,9 @@
            		}
            		assignmentsTotalPay += assignment.calcPay();
 
-           		AirportBean destination = assignment.getDestinationAirport(data);
-           		AirportBean from = assignment.getFromAirport(data);
-           		AirportBean location = assignment.getLocationAirport(data);
+           		AirportBean destination = assignment.getDestinationAirport();
+           		AirportBean from = assignment.getFromAirport();
+           		AirportBean location = assignment.getLocationAirport();
 
 				String icao = location.getIcao();
 				String destIcao = destination.getIcao();
@@ -691,7 +689,7 @@
 		loc['<%=icao%>'][len].cargo = "<%=assignment.getSCargo()%>";
 		loc['<%=icao%>'][len].status =
 		"<%=status%>".replace(/\s/g,'').toLowerCase();
-		loc['<%=icao%>'][len].dist = <%=assignment.getActualDistance(data)%>;
+		loc['<%=icao%>'][len].dist = <%=assignment.getActualDistance()%>;
 		loc['<%=icao%>'][len].dest = [];
 		loc['<%=icao%>'][len].dest.icao = '<%=destIcao%>';
 		loc['<%=icao%>'][len].dest.latl = <%=destLatl%>;
@@ -731,9 +729,9 @@
 		        			<%=assignment.getTo() %>
 		        		</a>
 		        	</td>
-		        	<td class="numeric"><%= assignment.getActualDistance(data)%></td>
+		        	<td class="numeric"><%= assignment.getActualDistance()%></td>
 		        	<td class="numeric">
-		        		<%= assignment.getActualBearing(data) %> 
+		        		<%= assignment.getActualBearing() %>
 		        		<img src="<%= image %>">
 		        	</td>
 		        	<td><%= assignment.getSCargo() %></td>

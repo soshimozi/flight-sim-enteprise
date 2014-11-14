@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	//setup return page if action used
 	String returnPage = request.getHeader("referer");
 
@@ -21,14 +19,12 @@
 	int type = Integer.parseInt(sType);
 	List<GoodsBean> salesPoints = Goods.getGoodsAtAirportToSell(location, type, airport.getSize(), airport.getFuelPrice(), airport.getJetAPrice());
 	
-	String groupParam = "";
 	if (owner != null)
 	{
 		int id = Integer.parseInt(owner);
 		if (id != user.getId())
 		{
 			account = Accounts.getAccountById(id);
-			 groupParam = "?groupId=" + id;
 		}
 	}
 %>

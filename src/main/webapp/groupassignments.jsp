@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	List<AssignmentBean> assignments = null;
 	
 	boolean groupMode = false;
@@ -290,12 +288,12 @@
 		for (AssignmentBean assignment : assignments)
 		{
 			String aircraftReg = assignment.getAircraft();
-			String image = "img/set2_" + assignment.getActualBearingImage(data) + ".gif";
+			String image = "img/set2_" + assignment.getActualBearingImage() + ".gif";
 			String cargo;
 			AssignmentBean as = assignment;
 					  
-			AirportBean destination = as.getDestinationAirport(data);
-			AirportBean location = as.getLocationAirport(data);
+			AirportBean destination = as.getDestinationAirport();
+			AirportBean location = as.getLocationAirport();
 		
 			UserBean lockedBy = null;
 			if (as.getUserlock() != 0) 
@@ -338,7 +336,7 @@
 				loc['<%=icao%>'][len].pay = "<%=Formatters.currency.format(as.calcPay())%>";
 				loc['<%=icao%>'][len].cargo = "<%=as.getSCargo()%>";
 				loc['<%=icao%>'][len].status = "selected";
-				loc['<%=icao%>'][len].dist = <%=as.getActualDistance(data)%>;
+				loc['<%=icao%>'][len].dist = <%=as.getActualDistance()%>;
 				loc['<%=icao%>'][len].dest = [];
 				loc['<%=icao%>'][len].dest.icao = '<%=destIcao%>';
 				loc['<%=icao%>'][len].dest.latl = <%=destLatl%>;
@@ -380,8 +378,8 @@
 %>
 			<td><img src="img/blankap.gif" style="vertical-align:middle;" /><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getFrom()) %>"><%= as.getFrom() %></a></td>
 			<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap1"><img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(as.getTo())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= destination.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getTo()) %>"><%= as.getTo() %></a></td>
-			<td class="numeric"><%= as.getActualDistance(data) %></td>
-			<td class="numeric"><%= as.getActualBearing(data) %> <img src="<%= image %>" /></td>
+			<td class="numeric"><%= as.getActualDistance() %></td>
+			<td class="numeric"><%= as.getActualBearing() %> <img src="<%= image %>" /></td>
 			<td><%= as.getSCargo() %></td>
 			<td><%= as.getComment() %></td>
 			<td><%= as.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>

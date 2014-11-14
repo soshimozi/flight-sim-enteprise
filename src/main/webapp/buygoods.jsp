@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
 	String returnPage  = request.getHeader("referer");
 
 	UserBean account = user;
@@ -34,14 +32,6 @@
 	if (type != null)
 		goods = Goods.commodities[Integer.parseInt(type)].getName();
 	
-    String pricequote = (String)request.getAttribute("price");	
-    if (pricequote == null)
-    	pricequote ="$0";
-    
-    String amountquoted = (String)request.getAttribute("samount");	
-    if (amountquoted == null)
-	    amountquoted ="0";
-    
     int goodsavail = Goods.getGoodsQty(location,(account.getId ()),(Integer.parseInt(type)));
 %>
 

@@ -64,14 +64,13 @@ public class Emailer
 	
 	protected void init() 
 	{	
-		Data data = Data.getInstance();
 		mailProperties = new Properties();
 		
 		//now get the values from the sysvariables table
 		try 
 		{
 			String qry = "select variableName, sValue from sysvariables where variableName LIKE \'mail.%\'";			
-			ResultSet rs = data.dalHelper.ExecuteReadOnlyQuery(qry);
+			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{				
 				mailProperties.put(rs.getString(1), rs.getString(2));

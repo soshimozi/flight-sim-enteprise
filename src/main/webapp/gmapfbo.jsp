@@ -6,8 +6,6 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    Data data = (Data)application.getAttribute("data");
-
     boolean showFbo = request.getParameter("fboCheck")!= null;
     boolean showFuel = request.getParameter("fuelCheck") != null;
     boolean showRepair = request.getParameter("repairCheck") != null;
@@ -115,8 +113,8 @@
 
         String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
 
-        boolean hasServices = airport.hasServices(data);
-        boolean hasGoodsForSale = airport.hasGoodsForSale(data);
+        boolean hasServices = airport.hasServices();
+        boolean hasGoodsForSale = airport.hasGoodsForSale();
 
         int iconToUse = hasGoodsForSale ? 2 : hasServices ? 1 : 0;
         StringBuilder sb = new StringBuilder();

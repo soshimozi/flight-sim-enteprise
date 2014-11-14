@@ -106,7 +106,6 @@ public class common
 
         return Response.status(code)
                 .cacheControl(NoCache)
-                .header("Access-Control-Allow-Origin", "*")
                 .entity(createResponse(""+code, error, message, null))
                 .build();
     }
@@ -118,7 +117,6 @@ public class common
 
         return Response.status(code)
                 .cacheControl(NoCache)
-                .header("Access-Control-Allow-Origin", "*")
                 .entity(createResponse("" + code, error, message, object))
                 .build();
     }
