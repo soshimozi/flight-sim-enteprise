@@ -44,7 +44,7 @@
 		</div> 
 		<div style="float:right;">
 			<input type="submit" name="event" width="30" height="25" style="margin-top:7px;" value="Agree & Log in" /><br>
-			<input type="button" onClick="location.href='/requestnewpassword.jsp';" style="margin-top:8px;" width="30" class="button" value="Forgot Password" />
+			<input type="button" onClick="location.href='requestnewpassword.jsp';" style="margin-top:8px;" width="30" class="button" value="Forgot Password" />
 		</div>
 	</form>
 <%
@@ -66,7 +66,7 @@
 			//eat it
 		}
 %>
-	<form class="top" method="post" action="userctl">
+	<form class="top" method="post" action="/userctl">
 		<strong>Logged in as</strong>
 		<span class="text"><jsp:getProperty name="user" property="name"/></span><br>
 		<strong>Cash Balance:</strong> <span class="text"><%= Formatters.currency.format(user.getMoney()) %></span><br>

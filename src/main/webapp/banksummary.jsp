@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.beans.*, java.util.Calendar, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+	    import="java.util.List, net.fseconomy.beans.*, java.util.Calendar, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -10,7 +10,6 @@
 	String returnPage = request.getRequestURI();
     response.addHeader("referer", request.getRequestURI());
 
-	String error = (String) request.getAttribute("message");
 
 	List<UserBean> groups = null;
 	
@@ -49,14 +48,15 @@
 
 <div id="wrapper">
 <%
-	if (error != null) 
-	{ 
+    String message = Helpers.getSessionMessage(request);
+	if (message != null)
+	{
 %>
-	<div class="error"><%= error %></div>
+	<div class="error"><%= message %></div>
 <%	
-		return;
-	} 
+	}
 %>
+
 <div class="dataTable">	
 	<table>
 	
@@ -183,25 +183,25 @@
 %>
 		</tbody>
 	</table>
-<p />
-        <form method="post" action="userctl">
-        	<div>
-        		<div>
-	            	<input type="hidden" name="event" value="bankTransfer" />
-					<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
-				</div>
-	            <p>
-	            <b>Summary Page Transfers</b><br/>
-	            <span style="color: #666666; font-size: 9pt;">Transfers on this page are only allowed <span style="text-decoration: underline">from</span> accounts you own or have staff rights to, and <span style="text-decoration: underline">to</span> accounts you own or have membership in.</span>
-	            </p>
-	            <div class="tf_form">
-	                <table>
-	                    <tr>
-	                    	<td>From Account:</td>
-	                            <td>
-	                            <select name="id" class="formselect">
-	                                <option class="formselect" value=""></option>
-	                                <option class="formselect" value="<%=user.getId()%>"><%= user.getName()%></option>
+    <br>
+    <form method="post" action="userctl">
+        <div>
+            <div>
+                <input type="hidden" name="event" value="bankTransfer" />
+                <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+            </div>
+            <p>
+            <b>Summary Page Transfers</b><br/>
+            <span style="color: #666666; font-size: 9pt;">Transfers on this page are only allowed <span style="text-decoration: underline">from</span> accounts you own or have staff rights to, and <span style="text-decoration: underline">to</span> accounts you own or have membership in.</span>
+            </p>
+            <div class="tf_form">
+                <table>
+                    <tr>
+                        <td>From Account:</td>
+                        <td>
+                            <select name="id" class="formselect">
+                                <option class="formselect" value=""></option>
+                                <option class="formselect" value="<%=user.getId()%>"><%= user.getName()%></option>
 <% 		
 		for (UserBean group : groups)
 		{ 
@@ -210,48 +210,48 @@
 			if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
 			{ 
 %>
-                                	<option class="formselect" value="<%=group.getId()%>"><%= group.getName()%></option>
+                               	<option class="formselect" value="<%=group.getId()%>"><%= group.getName()%></option>
 <% 			
 			}
 %>
 <% 		
 		}
 %>        
-        	                    </select>
-								</td>
-						</tr>
-	                    <tr>
-	                        <td>To Account:</td>                        
-	                        <td>
-	                            <select name="account" class="formselect">
-	                                <option class="formselect" value=""></option>
-	                                <option class="formselect" value="<%=user.getId()%>"><%= user.getName()%></option>
+        	                </select>
+			    		</td>
+					</tr>
+	                <tr>
+                        <td>To Account:</td>
+                        <td>
+                            <select name="account" class="formselect">
+                                <option class="formselect" value=""></option>
+                                <option class="formselect" value="<%=user.getId()%>"><%= user.getName()%></option>
 <% 		
 		for (UserBean group : groups)
 		{ 
 %>
-	     							<option class="formselect" value="<%=group.getId()%>"><%= group.getName()%></option>
+                                <option class="formselect" value="<%=group.getId()%>"><%= group.getName()%></option>
 <% 		
 		} 
 %>  
-        	                	</select>
-            	            </td>
-                	    </tr>                    
-	                    <tr>
-	                    	<td>Amount:&nbsp;</td><td><input name="amount" type="text" class="textarea" size="10" /></td>
-	                    </tr>
-	                    <tr>
-	                    	<td>Comment:&nbsp;</td><td><input name="comment" type="text" class="textarea" size="50" /></td>
-	                    </tr>
-	                </table>
-	            </div>
-	            
-	            <div class="tf_form">
-	                <input type="submit" class="button" value="Transfer" />
-	            </div>
-	            
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Amount:&nbsp;</td><td><input name="amount" type="text" class="textarea" size="10" /></td>
+                    </tr>
+                    <tr>
+                        <td>Comment:&nbsp;</td><td><input name="comment" type="text" class="textarea" size="50" /></td>
+                    </tr>
+                </table>
             </div>
-        </form>
+	            
+            <div class="tf_form">
+                <input type="submit" class="button" value="Transfer" />
+            </div>
+
+        </div>
+    </form>
 </div>
 </div>
 </body>

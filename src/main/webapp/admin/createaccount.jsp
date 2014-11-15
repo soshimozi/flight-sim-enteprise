@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="net.fseconomy.beans.*, net.fseconomy.data.*"
+	    import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Helpers"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -15,8 +15,6 @@
 	}
 
 	String returnPage = request.getRequestURI();
-
-    String message = (String) request.getAttribute("message");
 %>
 
 <!DOCTYPE html>
@@ -38,6 +36,7 @@
 
 <div id="wrapper">
 <%
+    String message = Helpers.getSessionMessage(request);
     if (message != null)
     {
 %>

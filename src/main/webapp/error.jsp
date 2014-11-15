@@ -1,5 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
+        import="net.fseconomy.util.Helpers"
 %>
 
 <!DOCTYPE html>
@@ -21,8 +22,8 @@
 
 <div id="wrapper">
     <div class="content error">
-    <%= (String) request.getAttribute("error") %><br/>
-    <a href="<%= (String) request.getAttribute("back") %>">Back</a>
+    <%= (Helpers.getSessionMessage(request) %><br/>
+    <a href="<%= (String) request.getSession().getAttribute("back") %>">Back</a>
     </div>
 </div>
 </body>

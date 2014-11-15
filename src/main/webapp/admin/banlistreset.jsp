@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.data.*, net.fseconomy.util.Helpers"
 %>
 <%@ page import="net.fseconomy.beans.UserBean" %>
 
@@ -13,15 +13,6 @@
         <script type="text/javascript">document.location.href="index.jsp"</script>
 <%
         return;
-    }
-
-    String message = (String) request.getAttribute("message");
-    if (message != null)
-    {
-%>
-<div class="message"><%= message %></div>
-<%
-    return;
     }
 %>
 
@@ -58,6 +49,16 @@
 
 <div id="wrapper">
     <div class="content">
+
+<%
+    if (message != null)
+    {
+%>
+        <div class="message"><%= message %></div>
+<%
+    }
+%>
+
         <div class="form" style="width: 400px">
             <h2>Reset User Aircraft Rental Ban List</h2>
 

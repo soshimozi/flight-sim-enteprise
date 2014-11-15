@@ -1,9 +1,7 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.data.*, net.fseconomy.beans.UserBean, net.fseconomy.dto.TrendHours, net.fseconomy.util.Helpers"
 %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
-<%@ page import="net.fseconomy.dto.TrendHours" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -54,7 +52,7 @@
 <div id="wrapper">
 <div class="content">
 <%
-    String message = (String) request.getAttribute("message");
+    String message = Helpers.getSessionMessage(request);
     if (message != null)
     {
 %>
@@ -62,6 +60,7 @@
 <%
     }
 %>
+
 <%
     if (request.getParameter("submit") == null && (message == null))
     {

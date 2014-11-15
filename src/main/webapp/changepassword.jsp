@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.Data"
+        import="net.fseconomy.util.*"
 %>
 
 <%
@@ -26,47 +26,41 @@
 <div id="wrapper">
 <div class="content">
 <%
-	String message = (String) request.getAttribute("message");
-	if (message != null) {
+	String message = Helpers.getSessionMessage(request);
+	if (message != null)
+    {
 %>
-	<div class="message"><%= message %></div>
+	    <div class="message"><%= message %></div>
 <%
-	} else {
+	}
 %>
-
 
 	<div class="form" style="width: 400px">
-	<h2>Change your password</h2>
-	<p>
-	Enter your old and your new password.
-	</p>
+    	<h2>Change your password</h2>
+	    <p>Enter your old and your new password.</p>
 	
-	<form method="post" action="userctl">
-	<div class="formgroup">
-	Old Password<br/>
-	<input name="password" type="password" class="textarea" size="10" />
-	<br/>
+	    <form method="post" action="userctl">
+            <div>
+                <input type="hidden" name="event" value="changePassword"/>
+                <input type="hidden" name="return" value="changepassword.jsp"/>
+            </div>
+	        <div class="formgroup">
+	            Old Password<br>
+	            <input name="password" type="password" class="textarea" size="10" /><br>
+	        </div>
+	        <div class="formgroup">
+	            New Password<br>
+	            <input name="newPassword" type="password" class="textarea" size="10" /><br>
+	            New Password (again)<br/>
+	            <input name="newPassword2" type="password" class="textarea" size="10" /><br>
+	        </div>
+	        <div class="formgroup">
+	            <input type="submit" class="button" value="Change password" />
+	        </div>
+	    </form>
 	</div>
-	<div class="formgroup">
-	New Password<br/>
-	<input name="newPassword" type="password" class="textarea" size="10" />
-	<br/>
-	New Password (again)<br/>
-	<input name="newPassword2" type="password" class="textarea" size="10" />
-	<br/>
-	</div>
-	<div class="formgroup">
-	<input type="submit" class="button" value="Change password" />
-	<input type="hidden" name="event" value="changePassword"/>
-	<input type="hidden" name="return" value="changepassword.jsp"/>
-	</div>
-	</form>
-	</div>
-<%
-}
-%>
-</div>
 
+</div>
 </div>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.text.*, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+	    import="java.text.*, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -11,12 +11,12 @@
 	
 	UserBean account;
 	String sGroupId = request.getParameter("id");
-	String message = (String) request.getAttribute("message");
 
 	String groupParam = sGroupId != null ? "?id=" + sGroupId : "";
 	returnPage = request.getRequestURI() + groupParam;
     response.addHeader("referer", request.getRequestURI() + groupParam);
 
+    String localMessage = null;
 	if (sGroupId != null)
 	{
 		int id = Integer.parseInt(sGroupId);
@@ -28,11 +28,11 @@
 		{
 			account = Accounts.getAccountById(id);
 			if (account == null)
-				message="Account not found";
+                localMessage="Account not found";
 			else
 			{
 				if (account.isGroup() == false || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
-					message="Permission denied";
+                    localMessage="Permission denied";
 			}
 		}
 	} 
@@ -76,17 +76,26 @@
 <div id="wrapper">
 <div class="content">
 <%
-	if (message != null) 
+    String message = Helpers.getSessionMessage(request);
+    if (message != null)
+    {
+%>
+<div class="message"><%= message %></div>
+<%
+    }
+%>
+
+<%
+	if (localMessage != null)
 	{
 %>
-	<div class="message"><%= message %></div>
+	<div class="message"><%= localMessage %></div>
 	
 <%
 	} 
 	else 
 	{
 		double current = account.getBank();
-		NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
 %>
 	<div class="form" style="width: 500px">
 		<h2>Bank account <%= account.getName() %></h2>

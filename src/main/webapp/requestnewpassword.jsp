@@ -1,18 +1,10 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
+        import="net.fseconomy.util.Helpers"
 %>
 
 <%
     String returnPage = request.getRequestURI();
-
-    String message = (String) request.getAttribute("message");
-    if (message != null)
-    {
-%>
-        <div class="message"><%= message %></div>
-<%
-        return;
-    }
 %>
 
 <!DOCTYPE html>
@@ -34,7 +26,20 @@
 
 <div id="wrapper">
 <div class="content">
-	<h2>Login incorrect</h2>
+<%
+    String message = Helpers.getSessionMessage(request);
+    if (message != null)
+    {
+%>
+        <div class="message"><%= message %></div>
+        <br>
+        <a href="<%=returnPage%>">Return to Home</a>
+<%
+        return;
+    }
+%>
+
+    <h2>Login incorrect</h2>
 	<p>
 	    If you don't remember your password you can request a new password here:
 	</p>

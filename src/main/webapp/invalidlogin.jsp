@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.util.Helpers"
 %>
 
 <%
@@ -26,16 +26,15 @@
 <div id="wrapper">
 <div class="content">
 <%
-	String message = (String) request.getAttribute("message");
+	String message = Helpers.getSessionMessage(request);
 	if (message != null)
     {
 %>
 	<div class="message"><%= message %></div>
 <%
 	}
-    else
-    {
 %>
+
 	<h2>Login incorrect</h2>
 	<p>
 	    If you don't remember your password you can request a new password here:
@@ -51,11 +50,8 @@
             <input type="hidden" name="return" value="invalidlogin.jsp"/>
         </form>
 	</div>
-<%
-    }
-%>
-</div>
 
+</div>
 </div>
 </body>
 </html>

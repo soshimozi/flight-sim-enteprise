@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import=" java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import=" java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -23,8 +23,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="..css/redmond/jquery-ui.css">
-    <link href="..css/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css">
+    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
     <script type='text/javascript' src='../scripts/common.js'></script>
     <script type='text/javascript' src='../scripts/css.js'></script>
@@ -60,8 +60,7 @@
 <div id="wrapper">
     <div class="content">
 <%
-    String message = (String) request.getAttribute("message");
-
+    String message = Helpers.getSessionMessage(request);
     if (message != null)
     {
 %>

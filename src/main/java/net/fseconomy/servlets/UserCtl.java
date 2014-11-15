@@ -50,12 +50,11 @@ public class UserCtl extends HttpServlet
 	
 	public void init()
 	{		
-		//This is called after we know data 
 		logger.info("UserCtl init() called");
 
 		FullFilter.updateFilter(DALHelper.getInstance());
 		
-		//do last as this kicks off the timer
+		//do this section last as this kicks off the timer
 		maintenanceObject = new MaintenanceCycle();
 		
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -71,8 +70,8 @@ public class UserCtl extends HttpServlet
 			
 			logger.info("Restart: Main cycle starts in (minutes): " + delay);
 
-			//if delay is 4 minutes or greater then run the cycle now to update stats
-			if(delay > 3)
+			//if delay is 3 minutes or greater then run the cycle now to update stats
+			if(delay >= 3)
 			{
 				//Do it now, then setup the schedule runs
 				maintenanceObject.SetOneTimeStatsOnly(true);
@@ -126,18 +125,6 @@ public class UserCtl extends HttpServlet
 		String returnToPage = req.getParameter("returnpage");
 		String returnToPageOverride = null;
 				
-//		Cookie[] cookies = req.getCookies();
-//		for( Cookie cookie : cookies)
-//		{
-//			if("returnpage".equals(cookie.getName()))
-//			{
-//				returnToPage = cookie.getValue();
-//				cookie.setMaxAge(-1);
-//                resp.addCookie(cookie);
-//				break;
-//			}
-//		}
-
 		try
 		{
 			try
@@ -146,40 +133,40 @@ public class UserCtl extends HttpServlet
                 {
                     case "Agree & Log in":
                         if (!doLogin(req))
-                            returnToPage = "requestnewpassword.jsp";
+                            returnToPage = "/requestnewpassword.jsp";
                         else
-                            returnToPageOverride = "index.jsp";
+                            returnToPageOverride = "/index.jsp";
                         break;
                     case "Log out":
                         doLogout(req);
-                        returnToPageOverride = "index.jsp";
+                        returnToPageOverride = "/index.jsp";
                         break;
                     case "create":
                         newUser(req);
-                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
                     case "updateAcct":
                         updateAcct(req);
-                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
                     case "editUser":
                         editUser(req);
-                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
                     case "password":
                         newPassword(req);
-                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
                     case "changePassword":
                         changePassword(req);
                         break;
                     case "lockAccount":
                         lockAccount(req);
-                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
                     case "unlockAccount":
                         unlockAccount(req);
-                        req.getRequestDispatcher(returnToPage).forward(req, resp);
+                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
                         return;
                     case "Assignment":
                         processAssignment(req);
@@ -320,14 +307,11 @@ public class UserCtl extends HttpServlet
 
 				if(returnToPageOverride != null)
 					resp.sendRedirect(returnToPageOverride);
-					//req.getRequestDispatcher(returnToPageOverride).forward(req, resp);
 				else if(returnToPage != null)
 					resp.sendRedirect(returnToPage);
-					//req.getRequestDispatcher(returnToPage).forward(req, resp);
 				else
-					resp.sendRedirect("admin.jsp");
-					//req.getRequestDispatcher("admin.jsp").forward(req, resp);
-			} 
+					resp.sendRedirect("/index.jsp");
+			}
 			catch (NumberFormatException e)
 			{
 				throw new DataError("Invalid input");
@@ -335,8 +319,8 @@ public class UserCtl extends HttpServlet
 		} 
 		catch (DataError e)
 		{
-			req.setAttribute("error", e.getMessage());
-			req.setAttribute("back", returnToPage != null ? returnToPage : returnToPageOverride != null ? returnToPageOverride : "admin.jsp");
+			req.getSession().setAttribute("message", e.getMessage());
+			req.setAttribute("back", returnToPage != null ? returnToPage : returnToPageOverride != null ? returnToPageOverride : "/index.jsp");
 			req.getRequestDispatcher("error.jsp").forward(req, resp);
 		}
 	}
@@ -1125,7 +1109,7 @@ public class UserCtl extends HttpServlet
 
         Accounts.createUser(user, email);
 		
-		req.setAttribute("message", "An account has been created.<br /><br /><strong>User:</strong> " + user + "<br /><strong>Email:</strong> " + email);	
+		req.getSession().setAttribute("message", "An account has been created.<br /><br /><strong>User:</strong> " + user + "<br /><strong>Email:</strong> " + email);
 	}
 
     void updateAcct(HttpServletRequest req) throws DataError

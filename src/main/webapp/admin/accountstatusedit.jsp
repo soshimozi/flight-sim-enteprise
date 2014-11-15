@@ -1,7 +1,7 @@
 <%@ page
         language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*"
+        import="net.fseconomy.data.*, net.fseconomy.util.Helpers"
 %>
 <%@ page import="net.fseconomy.beans.UserBean" %>
 
@@ -15,8 +15,6 @@
 <%
         return;
     }
-
-    String message = (String) request.getAttribute("message");
 %>
 
 <!DOCTYPE html>
@@ -70,6 +68,7 @@
 <div id="wrapper">
 <div class="content">
 <%
+    String message = Helpers.getSessionMessage(request);
 	if (message != null)
     {
 %>

@@ -44,14 +44,6 @@ public class FSagent extends HttpServlet
 {	
 	private static final long serialVersionUID = 1L;
 	
-	Data data;
-	public void init()
-	{
-		data = (Data) getServletContext().getAttribute("data");
-		if (data == null)
-			getServletContext().setAttribute("data", data = Data.getInstance());
-	}
-
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 		throws ServletException, IOException
 	{

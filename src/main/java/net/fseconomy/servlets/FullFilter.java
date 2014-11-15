@@ -182,13 +182,13 @@ public class FullFilter implements Filter
         if(s != null && (s.contentEquals("/fseconomy/top.jsp") || s.contentEquals("/fseconomy/menu.jsp")))
         	skipInclude = true;
         
-        //find the extention, if any, that are used to compare to ignore items
+        //find the extension, if any, that are used to compare to ignore items
         String reqUri = request.getRequestURI();
         int extindex = reqUri.lastIndexOf('.');
         if(extindex != -1)
         	ext = reqUri.substring(extindex);
         
-        //If no extention found, or no ignore items found and not skip top.jsp/menu.jsp, then log it
+        //If no extension found, or no ignore items found and not skip top.jsp/menu.jsp, then log it
         if((extindex == -1 || !ignoreItems.contains(ext)) && !skipInclude)
         {
         	//get any attached parameters
