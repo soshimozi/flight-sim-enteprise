@@ -94,13 +94,16 @@ public class Data implements Serializable
 	* @ param users - user name input from checkuser48hourtrend.jsp. Access this screen from admin.jsp
 	* @ return Mysql Resulset as an ArrayList to checkuser48hourtrend.jsp
 	* @ author - chuck229
-	*/ 		
-	public static TrendHours[] getTrendHoursQuery(String user) throws DataError
+	*/
+	public static List<TrendHours> getTrendHoursQuery(String user, int limit)
 	{
+        if(limit <= 0)
+            limit = 1; //minimum
+
 		ArrayList<TrendHours> result = new ArrayList<>();
 		try
 		{
-			String qry = "SELECT `time` as LOGDATE, cast(flightenginetime as signed) as Duration, cast((SELECT SUM(flightenginetime) FROM `log` where user = ? and `time` <= LOGDATE and `time` > DATE_SUB(LOGDATE, INTERVAL 48 HOUR)) as signed) as last48hours FROM log WHERE `user` = ? and TYPE = 'flight' ORDER BY TIME DESC Limit 500";
+			String qry = "SELECT `time` as LOGDATE, cast(flightenginetime as signed) as Duration, cast((SELECT SUM(flightenginetime) FROM `log` where user = ? and `time` <= LOGDATE and `time` > DATE_SUB(LOGDATE, INTERVAL 48 HOUR)) as signed) as last48hours FROM log WHERE `user` = ? and TYPE = 'flight' ORDER BY TIME DESC Limit " + limit;
 			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user, user);
 			while (rs.next())
 			{
@@ -113,7 +116,7 @@ public class Data implements Serializable
 			e.printStackTrace();
 		} 
 
-		return result.toArray(new TrendHours[result.size()]);
+		return result;
 	}
 
 

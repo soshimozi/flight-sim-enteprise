@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, net.fseconomy.beans.UserBean, net.fseconomy.dto.TrendHours, net.fseconomy.util.Helpers"
 %>
+<%@ page import="java.util.List" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -91,15 +92,8 @@
             message = "User Not Found";
         }
 
-        TrendHours[] trend = null;
-        try
-        {
-            trend = Data.getTrendHoursQuery(inputuser.getName());
-        }
-        catch(DataError e)
-        {
-            message = "Error retrieving trend hours.";
-        }
+        List<TrendHours> trend = null;
+        trend = Data.getTrendHoursQuery(inputuser.getName(), 500);
 
         if (message != null)
         {
@@ -108,7 +102,8 @@
         }
         else if (inputuser != null)
         {
-%>		<div class="dataTable">	
+%>
+        <div class="dataTable">
 		<h2>User - <%= inputuser.getName() %> - 48 Hour Trend - Last 500 Flights</h2><br/>
 		<a href="/admin/admin.jsp">Return to Admin Page</a><br/>
 		<table id="sortableTableStats" class="sortable">
@@ -122,14 +117,14 @@
 		</thead>
 		<tbody>
 <%
-            for (int c=0; c < trend.length; c++)
+            for (TrendHours item: trend)
             {
 %>
             <tr>
-			<td><%= trend[c].logdate %></td>
-			<td><%= trend[c].duration %></td>
-			<td><%= ((trend[c].last48Hours > 20.0) ? "<HTML><font color=Red><b>" : "") + trend[c].last48Hours + ((trend[c].last48Hours > 20.0) ? "</font></HTML></b>" : "") %></td>
-		   	<td><%= ((trend[c].last48Hours > 30.0) ? "<b>**</b>" : "") %></td>	
+			<td><%= item.logdate %></td>
+			<td><%= item.duration %></td>
+			<td><%= ((item.last48Hours > 20.0) ? "<HTML><font color=Red><b>" : "") + item.last48Hours + ((item.last48Hours > 20.0) ? "</font></HTML></b>" : "") %></td>
+		   	<td><%= ((item.last48Hours > 30.0) ? "<b>**</b>" : "") %></td>
 			</tr>
 <%
             }

@@ -142,15 +142,15 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 	{
 %>
 		oM.makeMenu('m13','','CSR','<%= response.encodeURL("admin/admin.jsp") %>', '', null, null, null, null, 'cl0gold','cl0overgold');
-		oM.makeMenu('sub13_0','m13','Add User','<%= response.encodeURL("createaccount.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
+		oM.makeMenu('sub13_0','m13','Add User','<%= response.encodeURL("admin/accountcreate.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
 		oM.makeMenu('sub13_1','m13','Edit User','<%= response.encodeURL("admin/accountedit.jsp") %>', '', null, null, null, null, 'cl1gold','cl1overgold');
-		oM.makeMenu('sub13_2','m13','Client Ip Checks','<%= response.encodeURL("admin/checkclientip.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
+		oM.makeMenu('sub13_2','m13','Client Ip Checks','<%= response.encodeURL("checkclientip.jsp") %>', '',230, null, null, null, 'cl1gold','cl1overgold');
 <% 
 	}
 	if (user.getLevel() == UserBean.LEV_ACA)
 	{
 %>
-		oM.makeMenu('m14','','Aircraft Mapping','<%= response.encodeURL("aircraftmappings.jsp") %>', '', 120, null, null, null, 'cl0gold','cl0overgold');
+		oM.makeMenu('m14','','Aircraft Mapping','<%= response.encodeURL("/admin/aircraftmappings.jsp") %>', '', 120, null, null, null, 'cl0gold','cl0overgold');
 <% 
 	}
 } 

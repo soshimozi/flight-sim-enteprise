@@ -10,10 +10,11 @@
 	String returnPage = request.getRequestURI();
     response.addHeader("referer", request.getRequestURI());
 
+	//String error = (String) request.getSession().getAttribute("message");
 
 	List<UserBean> groups = null;
 	
-	if(error == null)
+	//if(error == null)
 		groups = Accounts.getGroupsForUser(user.getId());
 
 	Calendar cal = Calendar.getInstance();

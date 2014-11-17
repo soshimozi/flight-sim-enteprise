@@ -1,20 +1,31 @@
 package net.fseconomy.data;
 
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import net.fseconomy.beans.UserBean;
+import net.fseconomy.dto.AccountNote;
+import net.fseconomy.dto.LinkedAccount;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
+import net.fseconomy.util.Formatters;
 
 import javax.mail.internet.AddressException;
+import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 public class Accounts implements Serializable
 {
     public static final int ACCT_TYPE_ALL = 1;
     public static final int ACCT_TYPE_PERSON = 2;
     public static final int ACCT_TYPE_GROUP = 3;
+
+    public static final int LINK_INACTIVE = 0;
+    public static final int LINK_ACTIVE = 1;
+
+    private static Object lock = new Object();
 
     public static class groupMemberData implements Serializable
     {
@@ -215,8 +226,9 @@ public class Accounts implements Serializable
         }
     }
 
-    public static void updateUser(UserBean user) throws DataError
+    public static boolean updateUser(UserBean user, HttpSession session) throws DataError
     {
+        boolean success = false;
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -228,11 +240,15 @@ public class Accounts implements Serializable
             rs = stmt.executeQuery("SELECT * FROM accounts WHERE type = 'person' AND id = '" + user.getId() + "'");
             if (!rs.next())
             {
-                throw new DataError("User not found.");
+                return false;
             }
+            else
+            {
+                user.writeBean(rs);
+                rs.updateRow();
 
-            user.writeBean(rs);
-            rs.updateRow();
+                success = true;
+            }
         }
         catch (SQLException e)
         {
@@ -244,6 +260,7 @@ public class Accounts implements Serializable
             DALHelper.getInstance().tryClose(stmt);
             DALHelper.getInstance().tryClose(conn);
         }
+        return success;
     }
 
     public static void updateUserOrGroup(UserBean user) throws DataError
@@ -298,25 +315,7 @@ public class Accounts implements Serializable
         }
     }
 
-    public static void lockAccount(String login) throws DataError
-    {
-        try
-        {
-            String qry = "UPDATE accounts SET email = concat('LockedAccount-', email), password = '*B2C37C48A693188842BC5F24929A4C99209652A5' where name = ?";
-            int count = DALHelper.getInstance().ExecuteUpdate(qry, login);
-
-            if (count == 0)
-            {
-                throw new DataError("Account Lock Operation Failed.");
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public static void lockAccount(int accountId) throws DataError
+    public static void lockAccount(int accountId, int userId) throws DataError
     {
         try
         {
@@ -327,6 +326,7 @@ public class Accounts implements Serializable
             {
                 throw new DataError("Account Lock Operation Failed.");
             }
+            addAccountNote(accountId, userId, "Locked account.");
         }
         catch (SQLException e)
         {
@@ -334,7 +334,7 @@ public class Accounts implements Serializable
         }
     }
 
-    public static void unlockAccount(int accountId) throws DataError
+    public static void unlockAccount(int accountId, int userId) throws DataError
     {
         try
         {
@@ -345,6 +345,7 @@ public class Accounts implements Serializable
             {
                 throw new DataError("Account Unlock Operation Failed.");
             }
+            addAccountNote(accountId, userId, "Unlocked account.");
         }
         catch (SQLException e)
         {
@@ -359,7 +360,7 @@ public class Accounts implements Serializable
      * @ return none
      * @ author - chuck229
      */
-    public static void updateAccount(String currUserName, String editedUserName, String email, int exposure, String newpassword) throws DataError
+    public static void updateAccount(String currUserName, String editedUserName, String email, int exposure, String newpassword, int linkToId, int userId) throws DataError
     {
         String qry;
         int count;
@@ -387,6 +388,11 @@ public class Accounts implements Serializable
                 qry = "UPDATE log SET user = ? WHERE user = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, editedUserName, currUserName);
             }
+
+            int accountId = getAccountIdByName(editedUserName);
+
+            if(linkToId != 0)
+                linkAccount(linkToId, accountId, userId);
 
             if (count == 0)
             {
@@ -431,36 +437,36 @@ public class Accounts implements Serializable
         return !exists;
     }
 
-    public static void createUser(String user, String email) throws DataError
+    public static void createAccount(String user, String email, int linkedId, int userId) throws DataError
     {
         String password = createPassword();
 
         try
         {
             if (email.indexOf('@') < 0)
-            {
                 throw new AddressException();
-            }
 
             if (user.length() < 3 || user.indexOf(' ') >= 0)
-            {
                 throw new DataError("Invalid user name.");
-            }
 
             if (userEmailExists(user, email))
-            {
                 throw new DataError("User already exists!");
-            }
 
             if (!accountNameIsUnique(user))
-            {
                 throw new DataError("User name already exists!");
-            }
 
             String qry = "INSERT INTO accounts (name, password, email, exposure) VALUES(?, password(?), ?, ?)";
             DALHelper.getInstance().ExecuteUpdate(qry, user, password, email, UserBean.EXPOSURE_SCORE);
 
-            List<String> toList = new ArrayList<>();
+            int accountId = getAccountIdByName(user);
+
+            addAccountNote(accountId, userId, "Created Account");
+
+            if(linkedId != 0)
+                linkAccount(linkedId, accountId, userId);
+
+
+                List<String> toList = new ArrayList<>();
             toList.add(email);
 
             String messageText = "Welcome to FSEconomy.\nYour account has been created. ";
@@ -479,6 +485,233 @@ public class Accounts implements Serializable
         {
             e.printStackTrace();
         }
+    }
+
+    public static void addAccountNote(int accountId, int userId, String note)
+    {
+        try
+        {
+            //Check if accountId exists in the table
+            String qry = "INSERT INTO accountnotes (accountid, createdby, note) VALUES(?,?,?)";
+            DALHelper.getInstance().ExecuteNonQuery(qry, accountId, userId, note);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void linkAccount(int linkToId, int accountId, int userId) throws DataError
+    {
+        //if it does get the set id and add the new account
+        try
+        {
+            //check if account already linked
+            if (checkAccountLinked(accountId))
+                throw new DataError("Account already linked");
+
+            //setup for inserts
+            Date date = new Date();
+
+            //Check if linkTo already belongs to a set
+            String qry = "SELECT linkid FROM linkedaccounts WHERE accountid = ?";
+            int setId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), linkToId);
+
+            //if it doesn't create a new set and add the two accounts
+            if (setId == 0)
+            {
+                synchronized (lock)
+                {
+                    qry = "SELECT max(linkid) FROM linkedaccounts";
+                    int newSetId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer());
+
+                    //have to have for brand new table, no records returns 0
+                    if(newSetId == 0)
+                        newSetId = 1;
+
+                    qry = "INSERT INTO linkedaccounts (linkid, accountid, status) VALUES(?,?,?);";
+                    DALHelper.getInstance().ExecuteNonQuery(qry, newSetId, linkToId, LINK_ACTIVE);
+                    DALHelper.getInstance().ExecuteNonQuery(qry, newSetId, accountId, LINK_ACTIVE);
+
+                    String note = "Account linked to: " + getAccountNameById(linkToId);
+                    addAccountNote(accountId, userId, note);
+
+                    note = "Account linked to: " + getAccountNameById(accountId);
+                    addAccountNote(linkToId, userId, note);
+                }
+            }
+            else
+            {
+                qry = "INSERT INTO linkedaccounts (linkid, accountid, status) VALUES(?,?,?);";
+                DALHelper.getInstance().ExecuteNonQuery(qry, setId, accountId, LINK_ACTIVE);
+
+                String note = "Account linked to: " + getAccountNameById(linkToId);
+                addAccountNote(accountId, userId, note);
+
+                note = "Account linked to: " + getAccountNameById(accountId);
+                addAccountNote(linkToId, userId, note);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean checkAccountLinked(int accountId)
+    {
+        boolean result = false;
+
+        try
+        {
+            //Check if accountId exists in the table
+            String qry = "SELECT (sum(accountid) > 0) as found FROM linkedaccounts WHERE accountid = ?";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), accountId);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static void unlinkAccount(int accountId, int userId)
+    {
+        try
+        {
+            //Check if accountId exists in the table
+            String qry = "DELETE FROM linkedaccounts WHERE accountid = ?";
+            DALHelper.getInstance().ExecuteNonQuery(qry, accountId);
+
+            String note = "Account unlinked";
+            addAccountNote(accountId, userId, note);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static String getLinkedAccounts(int accountId)
+    {
+        String result = "";
+
+        try
+        {
+            //Check if linkTo already belongs to a set
+            String qry = "SELECT linkid FROM linkedaccounts WHERE accountid = ?";
+            int setId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), accountId);
+
+            if(setId != 0)
+            {
+                //Check if accountId exists in the table
+                qry = "SELECT name FROM linkedaccounts la, accounts a WHERE a.id=la.accountid AND la.linkid = ?";
+                ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, setId);
+                while (rs.next())
+                    result += rs.getString("name") + " ";
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static List<LinkedAccount> getLinkedAccountList()
+    {
+        List<LinkedAccount> result = new ArrayList<>();
+
+        try
+        {
+            //Check if accountId exists in the table
+            String qry = "SELECT la.*, a.name as accountname FROM linkedaccounts la, accounts a WHERE a.id=la.accountid";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+            while (rs.next())
+            {
+                LinkedAccount la = new LinkedAccount();
+                la.linkId = rs.getInt("linkid");
+                la.accountId = rs.getInt("accountid");
+                la.status = rs.getInt("status");
+                la.accountName = rs.getString("accountname");
+
+                result.add(la);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static List<LinkedAccount> getLinkedAccountList(int accountId)
+    {
+        List<LinkedAccount> result = new ArrayList<>();
+
+        try
+        {
+            //Check if linkTo already belongs to a set
+            String qry = "SELECT linkid FROM linkedaccounts WHERE accountid = ?";
+            int setId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), accountId);
+
+            if(setId != 0)//no sets found
+            {
+                //Check if accountId exists in the table
+                qry = "SELECT la.*, a.name as accountname FROM linkedaccounts la, accounts a WHERE a.id=la.accountid AND la.linkid=?";
+                ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, setId);
+                while (rs.next())
+                {
+                    LinkedAccount la = new LinkedAccount();
+                    la.linkId = rs.getInt("linkid");
+                    la.accountId = rs.getInt("accountid");
+                    la.status = rs.getInt("status");
+                    la.accountName = rs.getString("accountname");
+
+                    result.add(la);
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static List<AccountNote> getAccountNoteList(int accountId)
+    {
+        List<AccountNote> result = new ArrayList<>();
+
+        try
+        {
+            //Check if accountId exists in the table
+            String qry = "SELECT an.*, a1.name as accountname, a2.name as createdbyname FROM accountnotes an, accounts a1, accounts a2 WHERE a1.id=an.accountid AND a2.id=an.createdby AND an.accountid = ? order by created desc";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, accountId);
+            while (rs.next())
+            {
+                AccountNote an = new AccountNote();
+                an.accountId = rs.getInt("accountid");
+                an.created = rs.getTimestamp("created");
+                an.createdBy = rs.getInt("createdby");
+                an.note = rs.getString("note");
+
+                an.accountName = rs.getString("accountName");
+                an.createdByName = rs.getString("createdbyname");
+
+                result.add(an);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     public static void resetPassword(String user, String email) throws DataError
@@ -641,7 +874,24 @@ public class Accounts implements Serializable
     public static UserBean getAccountByName(String name)
     {
         return getAccountSQL("SELECT * FROM accounts WHERE type = 'person' AND name = '" + name + "'");
-    }//Added by Airboss 5/8/11
+    }
+
+    public static int getAccountIdByName(String name)
+    {
+        int retval = 0;
+
+        try
+        {
+            String qry = "SELECT id FROM accounts WHERE name = ?";
+            retval = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), name);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return retval;
+    }
 
     public static UserBean getAccountGroupOrUserByName(String name)
     {

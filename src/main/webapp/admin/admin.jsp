@@ -42,9 +42,7 @@
         function UpdateFilter()
         {
             if (window.confirm("Do you really want to update the filter settings?"))
-            {
                 document.adminform.submit();
-            }
         }
         function ResetDatafeedStats()
         {
@@ -77,10 +75,7 @@
         </ul>
 
         <ul><b>User Account Utilities</b>
-            <li><a href="/admin/createaccount.jsp">Add User Account</a></li>
-            <li><a href="/admin/accountedit.jsp">Edit User Account</a></li>
-            <li><a href="/admin/accountstatusedit.jsp">Change Account Status (lock/unlock)</a></li>
-            <li><a href="/admin/checkuser48hourtrend.jsp">User 48 Hour Trend</a></li>
+            <li><a href="/admin/usermanager.jsp">User manager</a></li>
             <li><a href="/admin/checkfuelexploit.jsp?numitems=100&pricepoint=10">Check for Fuel Exploit</a></li>
             <li><a href="/admin/checkclientip.jsp">Client IP Checks</a></li>
             <li><a href="/admin/checkclientipduplicates.jsp">Client IPs used by multiple users</a></li>

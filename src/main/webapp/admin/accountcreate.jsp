@@ -25,9 +25,23 @@
 	
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    
+
+    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css" />
 	<link href="../css/Master.css" rel="stylesheet" type="text/css" />
-	
+
+    <script src="../scripts/jquery.min.js"></script>
+    <script src="../scripts/jquery-ui.min.js"></script>
+    <script src="../scripts/AutoComplete.js"></script>
+
+    <script type="text/javascript">
+
+        $(function()
+        {
+            initAutoComplete("#linkedname", "#linkedid", <%= Accounts.ACCT_TYPE_PERSON %>)
+        });
+
+    </script>
+
 </head>
 <body>
 
@@ -40,7 +54,7 @@
     if (message != null)
     {
 %>
-    <div class="message"><%= message %></div>
+    <div class="error"><%= message %></div>
 <%
     }
 %>
@@ -50,13 +64,18 @@
             <p>To sign up, enter your email address and a user name in the form below.</p>
 
 			<form method="post" action="/userctl">
-				Username<br/>
-				<input name="user" type="text" class="textarea" size="50" maxlength="45"/><br/>
+                <div>
+                    <input type="hidden" name="event" value="create">
+                    <input type="hidden" name="returnpage" value="<%=returnPage%>">
+                </div>
+				Username<br>
+				<input name="user" type="text" class="textarea" size="50" maxlength="45"><br>
 				Email<br/>
-				<input name="email" type="text" class="textarea" size="50"  maxlength="45"/><br/><br/>
-				<input type="submit" class="button" value="Sign up" />
-				<input type="hidden" name="event" value="create"/>
-				<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+				<input name="email" type="text" class="textarea" size="50"  maxlength="45"><br><br>
+                Linked Account (optional)<br>
+                <input type="hidden" id="linkedid" name="linkedid" value="">
+                <input type="text" id="linkedname" name="linkedname"><br><br>
+				<input type="submit" class="button" value="Sign up">
 			</form>
 		</div>
 	</div>

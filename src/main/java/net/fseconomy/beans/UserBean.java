@@ -22,6 +22,7 @@ package net.fseconomy.beans;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -61,6 +62,8 @@ public class UserBean implements Serializable
 	
 
 	int id;
+    Timestamp created;
+    Timestamp logon;
 	String name, email;
 	int level;
 	double money;
@@ -95,6 +98,8 @@ public class UserBean implements Serializable
 	public UserBean(ResultSet rs) throws SQLException
 	{
 		setId(rs.getInt("id"));
+        setCreated(rs.getTimestamp("created"));
+        setLogon(rs.getTimestamp("logon"));
 		setName(rs.getString("name"));
 		setMoney(rs.getDouble("money"));
 		setEmail(rs.getString("email"));
@@ -124,7 +129,26 @@ public class UserBean implements Serializable
 		rs.updateString("readAccessKey", readAccessKey); //Added by Airboss 11/28/2011
 		rs.updateString("writeAccessKey", writeAccessKey); //Added by Airboss 11/28/2011
 	}
-	
+
+    private void setCreated(Timestamp ts)
+    {
+        created = ts;
+    }
+    private void setLogon(Timestamp ts)
+    {
+        logon = ts;
+    }
+
+    public Timestamp getCreated()
+    {
+        return created;
+    }
+
+    public Timestamp getLogon()
+    {
+        return logon;
+    }
+
 	public void setLevel(String level)
 	{
 		if (level == null)
@@ -578,5 +602,10 @@ public class UserBean implements Serializable
 	public String getWriteAccessKey()
 	{
 		return writeAccessKey;
-	}	
+	}
+
+    public boolean isLocked()
+    {
+        return email.contains("LockedAccount");
+    }
 }

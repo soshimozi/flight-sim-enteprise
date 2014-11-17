@@ -3,6 +3,9 @@
         import="net.fseconomy.util.Helpers"
 %>
 
+<%
+
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +25,7 @@
 
 <div id="wrapper">
     <div class="content error">
-    <%= (Helpers.getSessionMessage(request) %><br/>
+    <%= Helpers.getSessionMessage(request) %><br/>
     <a href="<%= (String) request.getSession().getAttribute("back") %>">Back</a>
     </div>
 </div>

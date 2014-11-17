@@ -1,5 +1,6 @@
 package net.fseconomy.data;
 
+import net.fseconomy.dto.ClientIP;
 import net.fseconomy.dto.ClientRequest;
 
 import java.sql.ResultSet;
@@ -80,7 +81,6 @@ public class SimClientRequests
 
         return list;
     }
-
 
     public static List<ClientRequest> getClientRequestsByAccountId(int id) throws DataError
     {

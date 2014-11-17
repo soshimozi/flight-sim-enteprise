@@ -113,7 +113,7 @@ if (user.isLoggedIn())
 	<a href="admin/aircraftmappings.jsp">Modify aircraft mappings</a><br/><br/>
 	<a href="admin/models.jsp">Modify aircraft models</a><br/><br/>
 	<a href="admin/templates.jsp">Modify assignment templates</a><br/><br/>
-	<a href="admin/createaccount.jsp">Add New User</a><br/><br/>
+	<a href="admin/accountcreate.jsp">Add New User</a><br/><br/>
 	<a href="admin/accountstatusedit.jsp">Lock Account</a><br/><br/>
 	<a href="admin/accountunlock.jsp">Unlock Account</a><br/><br/>
 	<a href="admin/banlistreset.jsp">Reset Rental Ban List</a><br/><br/>
@@ -123,7 +123,7 @@ if (user.isLoggedIn())
 	{
 %>
 	<br/><br/>
-	<a href="admin/createaccount.jsp">Add User</a><br/><br/>
+	<a href="admin/accountcreate.jsp">Add User</a><br/><br/>
 	<a href="admin/accountedit.jsp">Edit User</a><br/><br/>
 <% 
 	}

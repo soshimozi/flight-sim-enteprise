@@ -19,7 +19,6 @@
 
 package net.fseconomy.servlets;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
@@ -143,31 +142,34 @@ public class UserCtl extends HttpServlet
                         break;
                     case "create":
                         newUser(req);
-                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
-                        return;
+                        break;
                     case "updateAcct":
                         updateAcct(req);
-                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
-                        return;
+                        break;
                     case "editUser":
                         editUser(req);
-                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
-                        return;
+                        break;
+                    case "linkAccount":
+                        linkAccount(req);
+                        break;
+                    case "unlinkAccount":
+                        unlinkAccount(req);
+                        break;
+                    case "addAccountNote":
+                        addAccountNote(req);
+                        break;
                     case "password":
                         newPassword(req);
-                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
-                        return;
+                        break;
                     case "changePassword":
                         changePassword(req);
                         break;
                     case "lockAccount":
                         lockAccount(req);
-                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
-                        return;
+                        break;
                     case "unlockAccount":
                         unlockAccount(req);
-                        //req.getRequestDispatcher(returnToPage).forward(req, resp);
-                        return;
+                        break;
                     case "Assignment":
                         processAssignment(req);
                         break;
@@ -320,10 +322,63 @@ public class UserCtl extends HttpServlet
 		catch (DataError e)
 		{
 			req.getSession().setAttribute("message", e.getMessage());
-			req.setAttribute("back", returnToPage != null ? returnToPage : returnToPageOverride != null ? returnToPageOverride : "/index.jsp");
+			req.getSession().setAttribute("back", returnToPage != null ? returnToPage : returnToPageOverride != null ? returnToPageOverride : "/index.jsp");
 			req.getRequestDispatcher("error.jsp").forward(req, resp);
 		}
 	}
+
+    void addAccountNote(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        if(user.getLevel() != UserBean.LEV_MODERATOR && user.getLevel() != UserBean.LEV_CSR && user.getLevel() != UserBean.LEV_ADMIN)
+            throw new DataError("Permission denied.");
+
+        String sUserId = req.getParameter("userid");
+
+        if(sUserId == null)
+            throw new DataError("Missing Parameter!");
+
+        int accountId = Integer.parseInt(sUserId);
+
+        Accounts.addAccountNote(accountId, user.getId(), req.getParameter("note"));
+    }
+
+    void linkAccount(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        if(user.getLevel() != UserBean.LEV_MODERATOR && user.getLevel() != UserBean.LEV_CSR && user.getLevel() != UserBean.LEV_ADMIN)
+            throw new DataError("Permission denied.");
+
+        String sUserId = req.getParameter("userid");
+        String sLinkId = req.getParameter("linkid");
+
+        if(sUserId == null || sLinkId == null)
+            throw new DataError("Missing Parameter!");
+
+        int accountId = Integer.parseInt(sUserId);
+        int linkId = Integer.parseInt(sLinkId);
+
+        Accounts.linkAccount(linkId, accountId, user.getId());
+    }
+
+    void unlinkAccount(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        if(user.getLevel() != UserBean.LEV_MODERATOR && user.getLevel() != UserBean.LEV_CSR && user.getLevel() != UserBean.LEV_ADMIN)
+            throw new DataError("Permission denied.");
+
+        String sUserId = req.getParameter("userid");
+
+        if(sUserId == null)
+            throw new DataError("Missing Parameter!");
+
+        int accountId = Integer.parseInt(sUserId);
+
+        Accounts.unlinkAccount(accountId, user.getId());
+    }
 
     void doUpdateServiceProviderAccess(HttpServletRequest req) throws DataError
     {
@@ -1092,23 +1147,31 @@ public class UserCtl extends HttpServlet
 	
 	void newUser(HttpServletRequest req) throws DataError
 	{
-		String user = req.getParameter("user");
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+		String newusername = req.getParameter("user");
 		String email = req.getParameter("email");
+        String linkedid = req.getParameter("linkedid");
+        String linkedname = req.getParameter("linkedname");
+
 		if (user == null || email == null)
-			return;
+            throw new DataError("Missing parameter, name and email are required.");
 		
 		//Added to remove extra spaces at end of copy/pasted text (email addresses mainly) 
-		user = user.trim();
+        newusername = newusername.trim();
 		email = email.trim();
-		
-		if (!Accounts.accountNameIsUnique(user))
+
+		if (!Accounts.accountNameIsUnique(newusername))
 			throw new DataError("There is already an account with that name.");
-		
+
 		if (!Accounts.accountEmailIsUnique(email))
 			throw new DataError("There is already an account with that email.");
 
-        Accounts.createUser(user, email);
-		
+        int linkedId = 0;
+        if(linkedid != null && !linkedid.equals(""))
+            linkedId = Integer.parseInt(linkedid);
+
+        Accounts.createAccount(newusername, email, linkedId, user.getId());
+
 		req.getSession().setAttribute("message", "An account has been created.<br /><br /><strong>User:</strong> " + user + "<br /><strong>Email:</strong> " + email);
 	}
 
@@ -1122,7 +1185,7 @@ public class UserCtl extends HttpServlet
 
         if (user == null || email == null)
         {
-            req.setAttribute("message", "Invalid user, or missing email");
+            req.getSession().setAttribute("message", "Invalid user, or missing email");
             return;
         }
 
@@ -1131,9 +1194,10 @@ public class UserCtl extends HttpServlet
         user.setShowPaymentsToSelf(showPaymentsToSelf.contains("1"));
         user.setBanList(banList);
 
-        Accounts.updateUser(user);
-
-        req.setAttribute("message", "Account (" + user.getName() + ") updated successfully");
+        if(!Accounts.updateUser(user, req.getSession()))
+            req.getSession().setAttribute("message", "User not found.");
+        else
+            req.getSession().setAttribute("message", "Account (" + user.getName() + ") updated successfully");
     }
 
     void editUser(HttpServletRequest req) throws DataError
@@ -1147,6 +1211,8 @@ public class UserCtl extends HttpServlet
         String email = req.getParameter("email");
         String sExposure = req.getParameter("exposure");
         String password = req.getParameter("password");
+        String linkedid = req.getParameter("linkedid");
+        String linkedname = req.getParameter("linkedname");
 
         int exposure = Integer.parseInt(sExposure);
         if (user == null || email == null)
@@ -1158,7 +1224,11 @@ public class UserCtl extends HttpServlet
                 throw new DataError("There is already an account with that name.");
         }
 
-        Accounts.updateAccount(suser, newuser, email, exposure, password);
+        int linkedId = 0;
+        if(linkedid != null && !linkedid.equals(""))
+            linkedId = Integer.parseInt(linkedid);
+
+        Accounts.updateAccount(suser, newuser, email, exposure, password, linkedId, user.getId());
         req.setAttribute("message", "Account (" + suser + ") updated successfully");
     }
 
@@ -1205,47 +1275,34 @@ public class UserCtl extends HttpServlet
 	
 	void lockAccount(HttpServletRequest req) throws DataError
 	{
-        String sAccountName = req.getParameter("username");
-		String sAccountId = req.getParameter("user");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 
+        if (!Accounts.needLevel(user, UserBean.LEV_CSR) && !Accounts.needLevel(user, UserBean.LEV_MODERATOR))
+            throw new DataError("You do not have permission.");
+
+        String sAccountId = req.getParameter("userid");
+
         if (sAccountId == null)
-			return;
+            throw new DataError("Missing parameter.");
 
         int accountId = Integer.parseInt(sAccountId);
-		
-		if (user.getLevel() != UserBean.LEV_MODERATOR)
-		{
-			throw new DataError("Permission denied");
-		}
-		else
-		{
-            Accounts.lockAccount(accountId);
-			req.setAttribute("message", "Account: " + sAccountName + ", was locked.");
-		}
+        Accounts.lockAccount(accountId, user.getId());
 	}
 	
 	void unlockAccount(HttpServletRequest req) throws DataError
 	{
-        String sAccountName = req.getParameter("username");
-        String sAccountId = req.getParameter("user");
-
         UserBean user = (UserBean) req.getSession().getAttribute("user");
 
+        if (!Accounts.needLevel(user, UserBean.LEV_CSR) && !Accounts.needLevel(user, UserBean.LEV_MODERATOR))
+            throw new DataError("You do not have permission.");
+
+        String sAccountId = req.getParameter("userid");
+
         if (sAccountId == null)
-            return;
+            throw new DataError("Missing parameter.");
 
         int accountId = Integer.parseInt(sAccountId);
-
-        if (user.getLevel() != UserBean.LEV_MODERATOR)
-		{
-			throw new DataError("Permission denied");
-		}
-		else
-		{
-            Accounts.unlockAccount(accountId);
-			req.setAttribute("message", "Account: " + sAccountName + ", was unlocked.");
-		}
+        Accounts.unlockAccount(accountId, user.getId());
 	}
 
 	/**
