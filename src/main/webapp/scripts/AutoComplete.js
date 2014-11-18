@@ -27,7 +27,7 @@ function initAutoComplete(myname, myvalue, mytype)
                         }
                     });
                 },
-                minLength: 3,
+                minLength: 1,
                 delay: 450,
                 selectFirst: false,
                 autoFocus: true,        

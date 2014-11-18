@@ -14,7 +14,7 @@
         return;
     }
 
-    String returnPage = request.getHeader("referer");
+    String returnPage = request.getParameter("returnpage");
 
     int userId = Integer.parseInt(request.getParameter("id"));
 

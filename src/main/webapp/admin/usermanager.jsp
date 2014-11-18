@@ -8,7 +8,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    if(!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
+    if(!Accounts.needLevel(user, UserBean.LEV_CSR) && !Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
 %>
 <script type="text/javascript">document.location.href="../index.jsp"</script>
@@ -37,21 +37,27 @@
     <script src="../scripts/jquery.min.js"></script>
     <script src="../scripts/jquery-ui.min.js"></script>
     <script src="../scripts/AutoComplete.js"></script>
+    <script src="../scripts/AutoCompleteEmail.js"></script>
 
     <script type="text/javascript">
 
         $(function()
         {
-            initAutoComplete("#username", "#userid", <%= Accounts.ACCT_TYPE_PERSON %>)
+            initAutoComplete("#username", "#userid", <%= Accounts.ACCT_TYPE_PERSON %>);
+            initAutoCompleteEmail("#email", "#emailuserid", <%= Accounts.ACCT_TYPE_PERSON %>);
         });
 
     </script>
 
     <script type="text/javascript">
 
-        function doViewAccount()
+        function doViewAccount(name)
         {
-            var form = document.getElementById("usermanager");
+            var form = document.getElementById(name);
+
+            if(name == 'SearchByEmail')
+                form.userid.value = form.emailuserid.value;
+
             form.submit();
         }
 
@@ -69,11 +75,11 @@
         <p><%= message %></p>
 
         <div class="form" style="width: 400px">
-            <h2>View User Account</h2>
+            <h2>Search by User Account</h2>
             <p>
             </p>
 
-            <form id="usermanager" method="post" action="usermanageredit.jsp">
+            <form id="SearchByName" method="post" action="usermanageredit.jsp">
                 <div class="formgroup">
                     Enter Account:
                     <input type="hidden" id="userid" name="userid" value=""/>
@@ -82,7 +88,28 @@
                 </div>
 
                 <div class="formgroup">
-                    <input type="button" class="button" onclick="doViewAccount()" value="View Account" />&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="button" class="button" onclick="doViewAccount('SearchByName')" value="View Account" />&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="hidden" name="returnpage" value="<%= returnPage %>"/>
+                </div>
+            </form>
+        </div>
+
+        <div class="form" style="width: 400px">
+            <h2>Search by Email</h2>
+            <p>
+            </p>
+
+            <form id="SearchByEmail" method="post" action="usermanageredit.jsp">
+                <div class="formgroup">
+                    Enter Account:
+                    <input type="hidden" id="emailuserid" name="emailuserid" value=""/>
+                    <input type="hidden" id="userid" name="userid" value=""/>
+                    <input type="text" id="email" name="email"/>
+                    <br/>
+                </div>
+
+                <div class="formgroup">
+                    <input type="button" class="button" onclick="doViewAccount('SearchByEmail')" value="View Account" />&nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="hidden" name="returnpage" value="<%= returnPage %>"/>
                 </div>
             </form>

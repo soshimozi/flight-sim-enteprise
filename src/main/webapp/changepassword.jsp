@@ -42,7 +42,7 @@
 	    <form method="post" action="userctl">
             <div>
                 <input type="hidden" name="event" value="changePassword"/>
-                <input type="hidden" name="return" value="changepassword.jsp"/>
+                <input type="hidden" name="returnpage" value="changepassword.jsp"/>
             </div>
 	        <div class="formgroup">
 	            Old Password<br>

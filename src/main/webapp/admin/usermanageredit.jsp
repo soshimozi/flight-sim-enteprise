@@ -6,7 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
+    if (!Accounts.needLevel(user, UserBean.LEV_CSR) && !Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
 %>
 <script type="text/javascript">document.location.href="/index.jsp"</script>
@@ -77,14 +77,14 @@
             </div>
         </div>
 
-        <div class="row clearfix">
+        <div class="row clearfix" style="margin: 10px">
             <div class="col-md-4 column">
-                <div class="datatable">
-                    <b>User Information</b>
+                <div class="datatable" style="border: 1px solid">
+                    <b>User Information</b> <a href="accountedit.jsp?userid=<%= accountId %>">Edit Account</a>
                     <table>
                         <tr>
                             <td>User: </td>
-                            <td><%=account.getName()%> <a href="accountedit.jsp?userid=<%= accountId %>">Edit Account</a></td>
+                            <td><%=account.getName()%> </td>
                         </tr>
                         <tr>
                             <td>Email: </td>
@@ -111,7 +111,7 @@
                 </div>
             </div>
             <div class="col-md-4 column">
-                <div class="datatable">
+                <div class="datatable" style="border: 1px solid">
                     <b>User Stats</b>
                     <table>
                         <tr>
@@ -141,11 +141,11 @@
             </div>
         </div>
 
-        <div class="row clearfix">
+        <div class="row clearfix" style="margin: 10px">
             <div class="col-md-12 column">
                 <div class="row clearfix">
                     <div class="col-md-4 column">
-                        <div class="datatable">
+                        <div class="datatable" style="border: 1px solid">
                             <b>IP Addresses</b>
                             <table>
                                 <thead>
@@ -175,31 +175,32 @@
 
                     </div>
                     <div class="col-md-4 column">
-                        <div class="datatable">
-                            <b>Account Links</b><br><br>
-                            <%
-                                if(linkedList == null || linkedList.size() == 0)
-                                {
-                            %>
+                        <div class="datatable" style="border: 1px solid">
+                            <b>Account Links</b>
+<%
+    if(linkedList == null || linkedList.size() == 0)
+    {
+%>
+                            <a href="accountlink.jsp?id=<%= accountId %>">Link Account</a><br>
                             <ul>
                                 <li>No account links.</li>
                             </ul>
-                            <a href="accountlink.jsp?id=<%= accountId %>">Link Account</a>
-                            <%
-                            }
-                            else
-                            {
-                            %>
+
+<%
+    }
+    else
+    {
+%>
                             <b>Linked Accounts (LinkId: <%= linkedList.get(0).linkId%>)</b>
                             <ul>
-                                <%
-                                    for (LinkedAccount item : linkedList)
-                                    {
-                                %>
+<%
+      for (LinkedAccount item : linkedList)
+        {
+%>
                                 <li><%=item.accountName%></li>
-                                <%
-                                    }
-                                %>
+<%
+        }
+%>
                             </ul>
                             <form method="post" action="/userctl">
                                 <div>
@@ -209,10 +210,9 @@
                                 </div>
                                 <input type="submit" class="button" value="Unlink Account" />
                             </form>
-                            <%
-                                }
-                            %>
-
+<%
+    }
+%>
                         </div>
 
                     </div>
@@ -221,9 +221,12 @@
                 </div>
             </div>
         </div>
-        <div class="row clearfix">
+        <div class="row clearfix" style="margin: 10px">
             <div class="col-md-12 column">
-                <div class="dataTable">
+                <div style="margin-bottom: 10px">
+                    <b>Rental Ban List:</b> <span><%=account.getBanList() == null ? "none" : account.getBanList()%></span>
+                </div>
+                <div class="dataTable" style="border: 1px solid">
                     <b>Recent 48 Hour Trend</b><br/>
 <%
     if(trendList == null || trendList.size() == 0)
@@ -269,7 +272,7 @@
         </div>
         <div class="row clearfix">
             <div class="col-md-12 column">
-                <div class="datatable">
+                <div class="datatable" style="margin-bottom: 10px">
                     <form method="post" action="/userctl">
                         <div>
                             <input type="hidden" name="event" value="addAccountNote"/>
@@ -290,7 +293,7 @@
     else
     {
 %>
-                    <table id="sortableTableStats" class="sortable" cellpadding="5">
+                    <table id="sortableTableStats" class="sortable" cellpadding="5"  style="border: 1px solid; min-width: 500px">
                         <thead>
                         <tr>
                             <th>Created by</th>

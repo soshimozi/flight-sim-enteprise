@@ -44,21 +44,21 @@ public class SimClientRequests
         }
     }
 
-    public static List<String> getClientRequestCountsByAccountId(int id) throws DataError
+    public static List<String> getClientRequestCountsByAccountId(int id)
     {
         String qry = "select ip, count(ip) from (select ip from clientrequests where pilotid=?) a group by ip";
 
         return getClientRequestCounts(qry, id, "");
     }
 
-    public static List<String> getClientRequestCountsByIp(String ip) throws DataError
+    public static List<String> getClientRequestCountsByIp(String ip)
     {
         String qry = "select pilot, count(pilot) from (select pilot from clientrequests where ip=?) a group by pilot";
 
         return getClientRequestCounts(qry, 0, ip);
     }
 
-    public static List<String> getClientRequestCounts(String qry, int id, String ip) throws DataError
+    public static List<String> getClientRequestCounts(String qry, int id, String ip)
     {
         List<String> list = new ArrayList<>();
         try
@@ -76,7 +76,6 @@ public class SimClientRequests
         catch (SQLException e)
         {
             e.printStackTrace();
-            throw new DataError("getClientRequestCounts: SQL Error");
         }
 
         return list;

@@ -1151,7 +1151,6 @@ public class UserCtl extends HttpServlet
 		String newusername = req.getParameter("user");
 		String email = req.getParameter("email");
         String linkedid = req.getParameter("linkedid");
-        String linkedname = req.getParameter("linkedname");
 
 		if (user == null || email == null)
             throw new DataError("Missing parameter, name and email are required.");
@@ -1194,7 +1193,7 @@ public class UserCtl extends HttpServlet
         user.setShowPaymentsToSelf(showPaymentsToSelf.contains("1"));
         user.setBanList(banList);
 
-        if(!Accounts.updateUser(user, req.getSession()))
+        if(!Accounts.updateUser(user))
             req.getSession().setAttribute("message", "User not found.");
         else
             req.getSession().setAttribute("message", "Account (" + user.getName() + ") updated successfully");
@@ -1212,7 +1211,6 @@ public class UserCtl extends HttpServlet
         String sExposure = req.getParameter("exposure");
         String password = req.getParameter("password");
         String linkedid = req.getParameter("linkedid");
-        String linkedname = req.getParameter("linkedname");
 
         int exposure = Integer.parseInt(sExposure);
         if (user == null || email == null)
@@ -1258,11 +1256,12 @@ public class UserCtl extends HttpServlet
 	
 	void changePassword(HttpServletRequest req) throws DataError
 	{
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
 		String password = req.getParameter("password");
 		String newPassword = req.getParameter("newPassword");
 		String newPassword2 = req.getParameter("newPassword2");
-		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		
+
 		if (password == null || newPassword == null || newPassword2 == null || user == null)
 			return;
 		

@@ -1,20 +1,16 @@
 package net.fseconomy.data;
 
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import net.fseconomy.beans.UserBean;
 import net.fseconomy.dto.AccountNote;
 import net.fseconomy.dto.LinkedAccount;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
-import net.fseconomy.util.Formatters;
 
 import javax.mail.internet.AddressException;
-import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 public class Accounts implements Serializable
 {
@@ -25,7 +21,7 @@ public class Accounts implements Serializable
     public static final int LINK_INACTIVE = 0;
     public static final int LINK_ACTIVE = 1;
 
-    private static Object lock = new Object();
+    private static final Object lock = new Object();
 
     public static class groupMemberData implements Serializable
     {
@@ -226,7 +222,7 @@ public class Accounts implements Serializable
         }
     }
 
-    public static boolean updateUser(UserBean user, HttpSession session) throws DataError
+    public static boolean updateUser(UserBean user) throws DataError
     {
         boolean success = false;
         Connection conn = null;
@@ -308,6 +304,8 @@ public class Accounts implements Serializable
             {
                 throw new DataError("Invalid password specified.");
             }
+
+            addAccountNote(user.getId(), user.getId(), "Password changed.");
         }
         catch (SQLException e)
         {
@@ -326,6 +324,7 @@ public class Accounts implements Serializable
             {
                 throw new DataError("Account Lock Operation Failed.");
             }
+
             addAccountNote(accountId, userId, "Locked account.");
         }
         catch (SQLException e)
@@ -345,6 +344,7 @@ public class Accounts implements Serializable
             {
                 throw new DataError("Account Unlock Operation Failed.");
             }
+
             addAccountNote(accountId, userId, "Unlocked account.");
         }
         catch (SQLException e)
@@ -353,19 +353,13 @@ public class Accounts implements Serializable
         }
     }
 
-    /**
-     * Update account table - user name and email
-     *
-     * @ param user = user name newuser = new user name email = email address
-     * @ return none
-     * @ author - chuck229
-     */
     public static void updateAccount(String currUserName, String editedUserName, String email, int exposure, String newpassword, int linkToId, int userId) throws DataError
     {
         String qry;
         int count;
         try
         {
+            UserBean account = getAccountByName(currUserName);
             if (currUserName.equals(editedUserName)) //not a name change
             {
                 if (newpassword.length() != 0)
@@ -373,11 +367,25 @@ public class Accounts implements Serializable
                     newpassword = Converters.escapeSQL(newpassword);
                     qry = "UPDATE accounts SET email = ?, exposure = ?, password = password(?) where name = ?";
                     count = DALHelper.getInstance().ExecuteUpdate(qry, email, exposure, newpassword, currUserName);
+
+                    addAccountNote(account.getId(), userId, "Password changed.");
+
+                    if(account.getExposure() != exposure)
+                        addAccountNote(account.getId(), userId, "Exposure changed: [" + account.getExposure() + "] to [" + exposure + "]");
+
+                    if(!account.getEmail().equals(email))
+                        addAccountNote(account.getId(), userId, "Email changed: [" + account.getEmail() + "] to [" + email + "]");
                 }
                 else
                 {
                     qry = "UPDATE accounts SET email = ?, exposure = ? where name = ?";
                     count = DALHelper.getInstance().ExecuteUpdate(qry, email, exposure, currUserName);
+
+                    if(account.getExposure() != exposure)
+                        addAccountNote(account.getId(), userId, "Exposure changed: [" + account.getExposure() + "] to [" + exposure + "]");
+
+                    if(!account.getEmail().equals(email))
+                        addAccountNote(account.getId(), userId, "Email changed: [" + account.getEmail() + "] to [" + email + "]");
                 }
             }
             else //name has changed
@@ -387,12 +395,16 @@ public class Accounts implements Serializable
 
                 qry = "UPDATE log SET user = ? WHERE user = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, editedUserName, currUserName);
+
+                addAccountNote(account.getId(), userId, "Name changed: [" + account.getName() + "] to [" + editedUserName + "]");
             }
 
             int accountId = getAccountIdByName(editedUserName);
 
             if(linkToId != 0)
+            {
                 linkAccount(linkToId, accountId, userId);
+            }
 
             if (count == 0)
             {
@@ -510,9 +522,6 @@ public class Accounts implements Serializable
             if (checkAccountLinked(accountId))
                 throw new DataError("Account already linked");
 
-            //setup for inserts
-            Date date = new Date();
-
             //Check if linkTo already belongs to a set
             String qry = "SELECT linkid FROM linkedaccounts WHERE accountid = ?";
             int setId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), linkToId);
@@ -591,33 +600,6 @@ public class Accounts implements Serializable
         {
             e.printStackTrace();
         }
-    }
-
-    public static String getLinkedAccounts(int accountId)
-    {
-        String result = "";
-
-        try
-        {
-            //Check if linkTo already belongs to a set
-            String qry = "SELECT linkid FROM linkedaccounts WHERE accountid = ?";
-            int setId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), accountId);
-
-            if(setId != 0)
-            {
-                //Check if accountId exists in the table
-                qry = "SELECT name FROM linkedaccounts la, accounts a WHERE a.id=la.accountid AND la.linkid = ?";
-                ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, setId);
-                while (rs.next())
-                    result += rs.getString("name") + " ";
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return result;
     }
 
     public static List<LinkedAccount> getLinkedAccountList()
@@ -1011,6 +993,46 @@ public class Accounts implements Serializable
             {
                 qry = "SELECT * FROM accounts WHERE exposure <> 0 AND name like ? " + accttype + " ORDER BY name LIMIT " + limit;
             }
+
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, partialName + "%");
+            while (rs.next())
+            {
+                UserBean template = new UserBean(rs);
+                result.add(template);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static List<UserBean> getAccountEmails(String partialName, int acctType, int limit, boolean displayHidden)
+    {
+        ArrayList<UserBean> result = new ArrayList<>();
+        try
+        {
+            String accttype = ""; // ACCT_TYPE_ALL
+            if (acctType == ACCT_TYPE_PERSON)
+            {
+                accttype = " AND type = 'person' ";
+            }
+            else if (acctType == ACCT_TYPE_GROUP)
+            {
+                accttype = " AND type = 'group' ";
+            }
+
+            String qry;
+            if (displayHidden)
+            {
+                qry = "SELECT * FROM accounts WHERE email like ? " + accttype + " ORDER BY name LIMIT " + limit;
+            }
+            else
+            {
+                qry = "SELECT * FROM accounts WHERE exposure <> 0 AND email like ? " + accttype + " ORDER BY email LIMIT " + limit;
+        }
 
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, partialName + "%");
             while (rs.next())
