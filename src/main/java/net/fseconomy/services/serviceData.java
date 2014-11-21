@@ -108,7 +108,7 @@ public class ServiceData
         }
     }
 
-    public static Response TransferCashToAccount(String serviceKey, int account, float amount, int transferto)
+    public static Response TransferCashToAccount(String serviceKey, int account, float amount, int transferto, String note)
     {
         try
         {
@@ -126,7 +126,7 @@ public class ServiceData
             int serviceid = getServiceId(serviceKey);
 
             String qry = "{call TransferCash(?,?,?,?,?)}";
-            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, account, amount, transferto, "Service: " + serviceid);
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, account, amount, transferto, "Service(" + serviceid + "): " + note);
 
             if(success)
                 return createSuccessResponse(200, null, null, "Transfer successful.");
@@ -144,7 +144,7 @@ public class ServiceData
         }
     }
 
-    public static Response PurchaseAircraft(String serviceKey, int account, String reg)
+    public static Response PurchaseAircraft(String serviceKey, int account, String reg, String note)
     {
         try
         {
@@ -163,7 +163,7 @@ public class ServiceData
             int serviceid = getServiceId(serviceKey);
 
             String qry = "{call PurchaseAircraft(?,?,?,?)}";
-            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, account, "Service: " + serviceid);
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, account, "Service(" + serviceid + "): " + note);
 
             if(success)
                 return createSuccessResponse(200, null, null, "Aircraft purchase successful.");
@@ -181,7 +181,7 @@ public class ServiceData
         }
     }
 
-    public static Response TransferAircraft(String serviceKey, String reg, int transferto)
+    public static Response TransferAircraft(String serviceKey, String reg, int account, int transferto, String note)
     {
         try
         {
@@ -191,10 +191,13 @@ public class ServiceData
             if(aircraft == null)
                 return createErrorResponse(400, "Bad Request", "Registration not found.");
 
+            if(aircraft.getOwner() != account)
+                return createErrorResponse(400, "Bad Request", "Not the owner.");
+
             int serviceid = getServiceId(serviceKey);
 
             String qry = "{call AircraftTransfer(?,?,?,?)}";
-            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, transferto, "Transfer, Service: " + serviceid);
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, transferto, "Service(" + serviceid + "): " + note);
 
             if (success)
                 return createSuccessResponse(200, null, null, "Aircraft transfer successful.");
@@ -212,7 +215,7 @@ public class ServiceData
         }
     }
 
-    public static Response LeaseAircraft(String serviceKey, int account, String reg, int leaseto)
+    public static Response LeaseAircraft(String serviceKey, int account, String reg, int leaseto, String note)
     {
         boolean success;
         String mode;
@@ -231,13 +234,13 @@ public class ServiceData
             {
                 mode = "lease";
                 String qry = "{call AircraftLease(?,?,?,?)}";
-                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, leaseto, "Lease, Service: " + serviceid);
+                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, leaseto, "Service(" + serviceid + "): " + note);
             }
             else if(aircraft.getLessor() == account) //return lease
             {
                 mode = "unlease";
                 String qry = "{call AircraftUnlease(?,?,?)}";
-                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, "Lease return, Service: " + serviceid);
+                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, "Service(" + serviceid + "): " + note);
             }
             else
                 return createErrorResponse(400, "Bad Request", "Account not lessor.");

@@ -38,7 +38,7 @@
                 else
                     firstLoop = false;
 
-                output += "{\"label\":\"" + account.getEmail().replaceAll("\"","\\\\\"") + "\", \"value\":" + account.getId() + "}\n";
+                output += "{\"label\":\"" + (account.getEmail() + " [" + account.getName() + "]").replaceAll("\"","\\\\\"") + "\", \"value\":" + account.getId() + "}\n";
             }
             output += "]}";
 

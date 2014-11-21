@@ -44,6 +44,15 @@
             initAutoComplete("#linkname", "#linkid", <%= Accounts.ACCT_TYPE_PERSON %>)
         });
 
+        function checkIdSet()
+        {
+            var linkid = document.getElementById("linkid");
+            if(linkid.value == "")
+            {
+                alert("Incorrect selection. Try again.(Tab, Arrow keys, Click on name)");
+                return false;
+            }
+        }
     </script>
 
 </head>
@@ -57,7 +66,7 @@
         <h2>Account link</h2>
 
         <div class="form" style="width: 600px">
-            <form method="post" action="/userctl">
+            <form method="post" action="/userctl" onsubmit="return checkIdSet(this.form)">
                 <div>
                     <input type="hidden" name="event" value="linkAccount"/>
                     <input type="hidden" name="userid" value="<%= userId %>"/>

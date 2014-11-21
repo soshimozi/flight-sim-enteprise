@@ -15,7 +15,7 @@ public class RestServletApp extends Application
     public RestServletApp()
     {
         singletons.add(new RestServlet());
-        singletons.add(new AdminRestServlet());
+        singletons.add(new FSERestServlet());
     }
 
     @Override

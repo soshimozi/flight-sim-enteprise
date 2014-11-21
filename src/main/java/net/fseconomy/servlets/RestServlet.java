@@ -70,31 +70,31 @@ public class RestServlet
 
     @POST
     @Path("/account/transfer/{account}")
-    public Response getTransferFromCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("transferto") final int transferto, @FormParam("amount") final String amount)
+    public Response getTransferFromCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("transferto") final int transferto, @FormParam("amount") final String amount, @FormParam("note") final String note)
     {
         PermissionCategory category = PermissionCategory.CASH;
 
         if(!hasPermission(servicekey, account, category, PermissionSet.TRANSFER))
             return ResponseAccessDenied();
 
-        return ServiceData.TransferCashToAccount(servicekey, account, new Float(amount), transferto);
+        return ServiceData.TransferCashToAccount(servicekey, account, new Float(amount), transferto, note);
     }
 
     @POST
     @Path("/aircraft/purchase/{account}")
-    public Response PurchaseAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg)
+    public Response PurchaseAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("note") final String note)
     {
         PermissionCategory category = PermissionCategory.AIRCRAFT;
 
         if(!hasPermission(servicekey, account, category, PermissionSet.PURCHASE))
             return ResponseAccessDenied();
 
-        return ServiceData.PurchaseAircraft(servicekey, account, reg);
+        return ServiceData.PurchaseAircraft(servicekey, account, reg, note);
     }
 
     @POST
     @Path("/aircraft/transfer/{account}")
-    public Response TransferAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("transferto") final int transferto)
+    public Response TransferAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("transferto") final int transferto, @FormParam("note") final String note)
     {
         PermissionCategory category = PermissionCategory.AIRCRAFT;
 
@@ -104,19 +104,19 @@ public class RestServlet
         if(transferto == 0) //no transfers to bank
             return createErrorResponse(400, "Bad Request", "No transfer account specified.");
 
-        return ServiceData.TransferAircraft(servicekey, reg, transferto);
+        return ServiceData.TransferAircraft(servicekey, reg, account, transferto, note);
     }
 
     @POST
     @Path("/aircraft/lease/{account}")
-    public Response LeaseAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("leaseto") final int leaseto)
+    public Response LeaseAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("leaseto") final int leaseto, @FormParam("note") final String note)
     {
         PermissionCategory category = PermissionCategory.AIRCRAFT;
 
         if(!hasPermission(servicekey, account, category, PermissionSet.LEASE))
             return ResponseAccessDenied();
 
-        return ServiceData.LeaseAircraft(servicekey, account, reg, leaseto);
+        return ServiceData.LeaseAircraft(servicekey, account, reg, leaseto, note);
     }
 
     @PermitAll

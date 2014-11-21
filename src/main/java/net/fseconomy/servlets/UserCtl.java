@@ -36,6 +36,10 @@ import javax.servlet.http.HttpSession;
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
+import org.infinispan.Cache;
+import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.manager.EmbeddedCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,14 +50,18 @@ public class UserCtl extends HttpServlet
 	public static MaintenanceCycle maintenanceObject = null;	
 
 	public final static Logger logger = LoggerFactory.getLogger(UserCtl.class);
-	
-	public void init()
+
+    public static EmbeddedCacheManager cacheManager;
+
+    public void init()
 	{		
 		logger.info("UserCtl init() called");
 
 		FullFilter.updateFilter(DALHelper.getInstance());
-		
-		//do this section last as this kicks off the timer
+
+        createCache();
+
+        //do this section last as this kicks off the timer
 		maintenanceObject = new MaintenanceCycle();
 		
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -81,7 +89,15 @@ public class UserCtl extends HttpServlet
 			future = executor.scheduleAtFixedRate(maintenanceObject, delay, 30, TimeUnit.MINUTES);
 		}
 	}
-	
+
+    private void createCache()
+    {
+        cacheManager = new DefaultCacheManager();
+        cacheManager.defineConfiguration("ServiceKey-cache", new ConfigurationBuilder()
+                .eviction().expiration().lifespan(5, TimeUnit.MINUTES)
+                .build());
+    }
+
 	private static long minutesToNextHalfHour() 
 	{
 		Calendar calendar = Calendar.getInstance();
@@ -100,7 +116,8 @@ public class UserCtl extends HttpServlet
 	public void destroy()
 	{
 		logger.info("UserCtl destroy() called");
-		
+
+        cacheManager.stop();
 		future.cancel(false);
 	}
 	
