@@ -94,7 +94,7 @@ public class FullFilter implements Filter
 	public void init(FilterConfig arg0) throws ServletException 
 	{
 		filterconfig = arg0;
-		setupLogging();
+		//setupLogging();
 		//DALHelper.initDataSource();
 		//updateFilter();
 	}
@@ -102,7 +102,7 @@ public class FullFilter implements Filter
 	@Override
 	public void destroy() 
 	{
-		logfile.close();
+		//logfile.close();
 	}
 
 	private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";

@@ -2,6 +2,8 @@ package net.fseconomy.services;
 
 import net.fseconomy.data.DALHelper;
 import net.fseconomy.data.Data;
+import net.fseconomy.dto.AuthInfo;
+import net.fseconomy.encryption.Encryption;
 import net.fseconomy.servlets.UserCtl;
 import org.infinispan.Cache;
 
@@ -16,7 +18,7 @@ public final class Authenticator
     private static Authenticator authenticator = null;
 
     // An authentication token storage which stores <service_key, auth_token>.
-    private final Map<String, String> authorizationTokensStorage = new HashMap<>();
+    private final Map<String, AuthInfo> authorizationTokensStorage = new HashMap<>();
 
     private Authenticator()
     {
@@ -32,10 +34,14 @@ public final class Authenticator
 
     public String login( String username, String password )
     {
-        if (isUsernamePasswordValid(username, password))
+        AuthInfo authInfo = new AuthInfo();
+        authInfo.name = username;
+
+        if (isUsernamePasswordValid(username, password, authInfo))
         {
-            String authToken = UUID.randomUUID().toString();
-            authorizationTokensStorage.put( authToken, username );
+            authInfo.guid = UUID.randomUUID().toString();
+            String authToken = Encryption.getInstance().encryptAuthInfo(authInfo);
+            authorizationTokensStorage.put( authToken, authInfo );
 
             return authToken;
         }
@@ -50,18 +56,19 @@ public final class Authenticator
      * @param authToken The authorization token generated after login
      * @return TRUE for acceptance and FALSE for denied.
      */
-    public boolean isAuthTokenValid( String authToken )
+    public boolean isAuthTokenValid(String authToken)
     {
         return authorizationTokensStorage.containsKey(authToken);
     }
 
-    public boolean logout(String userName, String authToken )
+    public boolean logout(String authToken )
     {
         if ( !isAuthTokenValid( authToken ) )
             return false;
 
-        String username = authorizationTokensStorage.get(authToken);
-        if(!username.equals(userName))
+        AuthInfo tokenAuthInfo = Encryption.getInstance().decryptAuthInfo(authToken);
+        AuthInfo authInfo = authorizationTokensStorage.get(authToken);
+        if(!authInfo.name.equals(tokenAuthInfo.name))
             return false;
 
         authorizationTokensStorage.remove( authToken );
@@ -69,14 +76,19 @@ public final class Authenticator
         return true;
     }
 
-    public boolean isUsernamePasswordValid(String userName, String password)
+    public boolean isUsernamePasswordValid(String userName, String password, AuthInfo authInfo)
     {
         boolean result = false;
 
         try
         {
-            String qry = "SELECT count(`id`) > 0 as found FROM accounts a WHERE name = ? and password = PASSWORD(?)";
-            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), userName, password);
+            String qry = "SELECT id FROM accounts a WHERE name = ? and password = PASSWORD(?)";
+            int id = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), userName, password);
+            if(id > 0)
+            {
+                authInfo.userId = id;
+                result = true;
+            }
         }
         catch(SQLException e)
         {
@@ -88,7 +100,8 @@ public final class Authenticator
 
     public String getUsernameFromToken(String authToken)
     {
-        return authorizationTokensStorage.get(authToken);
+        AuthInfo authInfo = authorizationTokensStorage.get(authToken);
+        return authInfo.name;
     }
 
     public boolean isServiceKeyValid(String serviceKey)

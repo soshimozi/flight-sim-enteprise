@@ -49,12 +49,13 @@ public class UserCtl extends HttpServlet
 	private static ScheduledFuture<?> future = null;
 	public static MaintenanceCycle maintenanceObject = null;	
 
-	public final static Logger logger = LoggerFactory.getLogger(UserCtl.class);
+	public static Logger logger = null;
 
     public static EmbeddedCacheManager cacheManager;
 
     public void init()
-	{		
+	{
+        logger = LoggerFactory.getLogger(UserCtl.class);
 		logger.info("UserCtl init() called");
 
 		FullFilter.updateFilter(DALHelper.getInstance());

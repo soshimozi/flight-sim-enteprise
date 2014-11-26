@@ -13,6 +13,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import static net.fseconomy.services.common.ResponseAccessDenied;
 import static net.fseconomy.services.common.createErrorResponse;
 import static net.fseconomy.services.common.createSuccessResponse;
 
@@ -38,10 +39,20 @@ public class FSERestServlet
     @Path("/logout")
     public Response logout(@HeaderParam("authtoken") String authToken, @FormParam("username") final String username)
     {
-        if (Authenticator.getInstance().logout(username, authToken))
+        if (Authenticator.getInstance().logout(authToken))
             return createSuccessResponse(200, null, null, "Logged out.");
         else
             return createErrorResponse(400, "Bad Request", "Invalid username and authtoken.");
+    }
+
+    @POST
+    @Path("/pilotinfo")
+    public Response pilotInfo(@HeaderParam("authtoken") String authToken)
+    {
+//        if (Authenticator.getInstance().isAuthTokenValid(authToken))
+//            return FSEServiceData.getPilotInfo();
+//        else
+            return ResponseAccessDenied();
     }
 
     @RolesAllowed({"admin", "moderator"})

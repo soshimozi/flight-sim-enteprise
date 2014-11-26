@@ -3,6 +3,7 @@
         import="net.fseconomy.data.*, net.fseconomy.util.Helpers, java.util.*"
 %>
 <%@ page import="net.fseconomy.beans.UserBean" %>
+<%@ page import="net.fseconomy.dto.ClientRequest" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -30,14 +31,14 @@
 
 	<script src="../scripts/jquery.min.js"></script>
 	<script src="../scripts/jquery-ui.min.js"></script>
-	<script src="../scripts/AutoComplete.js"></script>
+	<script src="../scripts/AutoCompleteIP.js"></script>
 
 	<script type="text/javascript">
-	
+
 	$(function() {
-		initAutoComplete("#username", "#user", <%= Accounts.ACCT_TYPE_PERSON %>);
+		initAutoCompleteIP("#ip", "#searchby");
 	});
-	
+
 	</script>
 
 </head>
@@ -60,83 +61,30 @@
 %>
 <%
 	String searchby = request.getParameter("searchby");
-	String searchfor = request.getParameter("searchfor");
-	if (searchby == null) 
-	{ 
+	String searchfor = "ip";
 %>
 	<h2>Client IP Checker</h2>
 	<h4>Enter User Account</h4>
-	<div class="form" style="width: 400px">
-		<form method="post">
-			<div>
-				Account Name : 
-			    <input type="text" id="username" name="username"/>
-			    <input type="hidden" id="user" name="user"/>
-				<input type="hidden" name="searchby" value="account"/>
-				<br/>
-				<input type="submit" class="button" value="GO" />
-			</div>
-		</form>
-	</div>
 	<h4>Select Ip</h4>
 	<div class="form" style="width: 400px">
 		<form method="post">
 			<div>
-				IP : 
+				IP:
 			    <input type="text" id="ip" name="ip"/>
 				<br/>
 				<input type="submit" class="button" value="GO" />
-				<input type="hidden" name="searchby" value="ip"/>
+				<input type="hidden" id="searchby" name="searchby" value=""/>
 			</div>
 		</form>
 	</div>
 <%
-	} 
-	else if (searchby != null) 
+	if ( searchby != null && !searchby.equals(""))
 	{
-		List<String> list = null;
-		UserBean inputuser = null;
-			
-		if("account".equals(searchby))
-		{
-			searchfor = request.getParameter("searchfor");
-			if(searchfor == null)
-				searchfor = request.getParameter("username");
-			inputuser = Accounts.getAccountByName(searchfor);
-			
-			if (inputuser == null)
-			{
-				message = "User Not Found";
-			}
-			else
-			{	
-				try
-				{
-					list = SimClientRequests.getClientRequestCountsByAccountId(inputuser.getId());
-				}
-				catch(DataError e)
-				{
-					message = "Error retrieving trend hours.";	
-				}
-			}
-		}
-		else if("ip".equals(searchby))
-		{
-			try
-			{
-				searchfor = request.getParameter("searchfor");
-				if(searchfor == null)
-					searchfor = request.getParameter("ip");
-				
-				list = SimClientRequests.getClientRequestCountsByIp(searchfor);
-			}
-			catch(DataError e)
-			{
-				message = "Error retrieving trend hours.";	
-			}
-		}
-		
-		if (message != null) 
+		List<ClientRequest> list = null;
+
+        list = SimClientRequests.getClientRequestsByAccountId(Integer.parseInt(searchby));
+
+		if (message != null)
 		{ 
 %>	
 	<div class="message"><%= message %></div>
@@ -145,7 +93,7 @@
 		else if (list.size() > 0) 
 		{
 %>	<div class="dataTable">	
-		<h2>User/ip - <%= searchfor %></h2><br/>
+		<h2>User/ip - <%= searchby %></h2><br/>
 <%
 			if (Accounts.needLevel(user, UserBean.LEV_MODERATOR))
 			{
@@ -158,37 +106,22 @@
 		<table id="sortableTableStats" class="sortable">
 			<thead>
 			<tr>
-<%
-			if("ip".equals(searchby))
-			{
-%>
 				<th>name</th>
 				<th>hits</th>
-<%
-			}
-			else
-			{
-%>
-				<th>ip</th>
-				<th>hits</th>
-<%
-			}
-%>
 			</tr>
 			</thead>
 		
 			<tbody>
 <%
-			for (int c=0; c < list.size(); c++)
+			for (ClientRequest item: list)
 			{
-				String[] s = list.get(c).split("\\|");
 %>
 				<tr>
 					<td>
-						<a href="/admin/checkclientip.jsp?searchby=<%="ip".equals(searchby) ? "account" : "ip"%>&searchfor=<%=s[0]%>"><%= s[0] %></a>
+						<%= item.name %>
 					</td>
 					<td>
-						<a href="/admin/checkclientiplisting.jsp?searchby=<%="ip".equals(searchby) ? "account" : "ip"%>&searchfor=<%=s[0]%>"><%= s[1] %></a>
+						<%= item.ip %>
 					</td>
 				</tr>
 <%		

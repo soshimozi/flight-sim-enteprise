@@ -150,19 +150,19 @@
                             <table>
                                 <thead>
                                 <th>IP</th>
-                                <th>Hits</th>
+                                <th style="padding-left: 20px">Hits</th>
                                 </thead>
                                 <tbody>
                                 <%
-                                    for (int c=0;ipList != null && c < ipList.size(); c++)
+                                    for (String item: ipList)
                                     {
-                                        String[] s = ipList.get(c).split("\\|");
+                                        String[] s = item.split("\\|");
                                 %>
                                 <tr>
                                     <td>
-                                        <a href="/admin/checkclientip.jsp?searchby=account&searchfor=<%= account.getName() %>"><%= s[0] %></a>
+                                        <%= s[0] %>
                                     </td>
-                                    <td>
+                                    <td style="padding-left: 20px">
                                         <a href="/admin/checkclientiplisting.jsp?searchby=account&searchfor=<%= account.getName() %>"><%= s[1] %></a>
                                     </td>
                                 </tr>

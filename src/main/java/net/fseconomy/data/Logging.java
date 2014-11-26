@@ -3,16 +3,44 @@ package net.fseconomy.data;
 import net.fseconomy.beans.AssignmentBean;
 import net.fseconomy.beans.LogBean;
 import net.fseconomy.beans.UserBean;
+import net.fseconomy.dto.DbLog;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class Logging implements Serializable
 {
+    public static List<DbLog> getDbLog(int offset, int size)
+    {
+        List<DbLog> result = new ArrayList<>();
+
+        try
+        {
+            String qry = "SELECT timestmp, level_string, caller_class, formatted_message FROM logging_event order by timestmp desc limit ?, ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, offset, size);
+            while (rs.next())
+            {
+                DbLog log = new DbLog();
+                log.timestamp = new Timestamp(rs.getLong(1));
+                log.level = rs.getString(2);
+                log.callerClass = rs.getString(3);
+                log.message = rs.getString(4);
+                result.add(log);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public static void logTemplateAssignment(AssignmentBean assignment, int payee)
     {
         try

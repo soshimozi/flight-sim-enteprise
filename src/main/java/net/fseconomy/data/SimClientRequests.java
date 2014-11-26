@@ -131,16 +131,16 @@ public class SimClientRequests
         return list;
     }
 
-    public static List<String> getClientRequestIps() throws DataError
+    public static List<String> getClientRequestIps(String query) throws DataError
     {
         List<String> list = new ArrayList<>();
         try
         {
-            String qry = "Select DISTINCT ip from clientrequests order by ip";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+            String qry = "Select DISTINCT ip, pilotid, pilot from clientrequests where ip like CONCAT(?, '%') order by ip";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, query);
 
             while(rs.next())
-                list.add(rs.getString("ip"));
+                list.add(rs.getString("ip") + "|" + rs.getInt("pilotid") + "|" + rs.getString("pilot"));
         }
         catch (SQLException e)
         {

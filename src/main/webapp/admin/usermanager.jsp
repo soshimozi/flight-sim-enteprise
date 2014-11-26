@@ -38,6 +38,7 @@
     <script src="../scripts/jquery-ui.min.js"></script>
     <script src="../scripts/AutoComplete.js"></script>
     <script src="../scripts/AutoCompleteEmail.js"></script>
+    <script src="../scripts/AutoCompleteIP.js"></script>
 
     <script type="text/javascript">
 
@@ -45,6 +46,7 @@
         {
             initAutoComplete("#username", "#userid", <%= Accounts.ACCT_TYPE_PERSON %>);
             initAutoCompleteEmail("#email", "#emailuserid", <%= Accounts.ACCT_TYPE_PERSON %>);
+            initAutoCompleteIP("#ip", "#ipuserid");
         });
 
     </script>
@@ -57,6 +59,9 @@
 
             if(name == 'SearchByEmail')
                 form.userid.value = form.emailuserid.value;
+
+            if(name == 'SearchByIP')
+                form.userid.value = form.ipuserid.value;
 
             form.submit();
         }
@@ -110,6 +115,26 @@
 
                 <div class="formgroup">
                     <input type="button" class="button" onclick="doViewAccount('SearchByEmail')" value="View Account" />&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="hidden" name="returnpage" value="<%= returnPage %>"/>
+                </div>
+            </form>
+        </div>
+
+        <div class="form" style="width: 400px">
+            <h2>Search by IP</h2>
+            <p>
+            </p>
+            <form id="SearchByIP" method="post" action="usermanageredit.jsp">
+                <div>
+                    Enter IP:
+                    <input type="text" id="ip" name="ip"/>
+                    <br/>
+                    <input type="hidden" id="searchby" name="searchby" value=""/>
+                    <input type="hidden" id="userid" name="userid" value=""/>
+                    <input type="hidden" id="ipuserid" name="ipuserid" value=""/>
+                </div>
+                <div class="formgroup">
+                    <input type="button" class="button" onclick="doViewAccount('SearchByIP')" value="View Account" />&nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="hidden" name="returnpage" value="<%= returnPage %>"/>
                 </div>
             </form>

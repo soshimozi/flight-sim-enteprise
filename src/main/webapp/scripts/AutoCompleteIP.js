@@ -1,4 +1,4 @@
-function initAutoCompleteEmail(myname, myvalue)
+function initAutoCompleteIP(myname, myvalue)
 {
     $(myname).autocomplete(
         {
@@ -6,7 +6,7 @@ function initAutoCompleteEmail(myname, myvalue)
             {
                 $.ajax(
                     {
-                        url: "/emaillookup.jsp",
+                        url: "/lookupip.jsp",
                         data: {
                             startsWith: request.term,
                             accountType: 2 //2 = person
@@ -17,7 +17,7 @@ function initAutoCompleteEmail(myname, myvalue)
                         {
                             var results = [];
 
-                            $.map(data.accounts, function (item)
+                            $.map(data.ips, function (item)
                             {
                                 var itemToAdd =  { label: item.label, id: item.value };
                                 results.push(itemToAdd);
