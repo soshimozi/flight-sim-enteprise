@@ -104,7 +104,7 @@
 
     if ("true".equals(request.getParameter("submit")))
     {
-        int i =0;
+        int i;
         try
         {
             if (repC != null && !repC.matches("[0-9]+"))
@@ -117,7 +117,7 @@
                 throw new DataError("Goods already at destination");
 
             if (assignment.getId() <= 0 && assignment.getCommodityId() > 0 && !Goods.checkGoodsAvailable(from, goodsOwner.getId(), assignment.getCommodityId(), assignment.getAmount()*cnt))
-                throw new DataError("Not enough Goods available!");;
+                throw new DataError("Not enough Goods available!");
 
             if (Airports.getAirport(assignment.getFrom()) == null)
                 throw new DataError("From airport not found.");

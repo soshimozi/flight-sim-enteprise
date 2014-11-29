@@ -484,7 +484,7 @@ public class Goods implements Serializable
             stmt.close();
             stmt = null;
             short logType = type == GoodsBean.GOODS_BUILDING_MATERIALS ? PaymentBean.SALE_GOODS_BUILDING_MATERIALS : type == GoodsBean.GOODS_FUEL100LL ? PaymentBean.SALE_GOODS_FUEL : type == GoodsBean.GOODS_FUELJETA ? PaymentBean.SALE_GOODS_JETA : PaymentBean.SALE_GOODS_SUPPLIES;
-            Banking.doPayment(to, from, price, logType, 0, fboId, location, "", "", false);
+            Banking.doPayment(to, from, price, logType, 0, fboId, location, 0, "", false);
 
             changeGoodsRecord(location, type, from, -amount, false);
             changeGoodsRecord(location, type, to, amount, false);

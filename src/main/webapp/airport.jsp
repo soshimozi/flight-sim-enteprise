@@ -100,7 +100,7 @@
 
 	if (registration != null && !registration.equals("") && isSearch)
 	{
-		AircraftBean ac = Aircraft.getAircraftByRegistration(registration);
+		AircraftBean ac = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(registration));
         if (ac != null)
             airport.setIcao(ac.getLocation());
 	}
@@ -453,10 +453,14 @@
                             <h1><jsp:getProperty name="airport" property="icao" /></h1>
                         </td>
                         <td>
-                            <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= airport.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img style="border-style: none;" src="<%= airport.getDescriptiveImage(fbos) %>" /></a>
+                            <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= airport.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap">
+                                <img style="border-style: none;" src="<%= airport.getDescriptiveImage(fbos) %>" />
+                            </a>
                         </td>
                         <td>
-                            <a href="http://www.fscharts.com/?action=search&type=icao&term=<%= airport.getIcao() %>" onclick="this.target='_blank'"><img style="border-style: none;" src="img/fscharts.gif"/></a>
+                            <a href="http://www.fscharts.com/?action=search&type=icao&term=<%= airport.getIcao() %>" onclick="this.target='_blank'">
+                                <img style="border-style: none;" src="img/fscharts.gif"/>
+                            </a>
                         </td>
                     </tr>
                 </table>
@@ -806,7 +810,7 @@
                 if (id == capable)
                     capableAssignment = assignment;
 
-				String aircraftReg = assignment.getAircraft();
+				String aircraftReg = Aircraft.getAircraftRegistrationById(assignment.getAircraftId());
 
                 if (aircraftReg != null)
                     assignmentAircraftList.add(aircraftReg);
@@ -1374,13 +1378,23 @@ else
                 if (fromParam == null || fromAirport.getIcao().equals(ap.getIcao()))
                 {
 %>
-                    <td><a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + ap.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap"><img src="<%= ap.getDescriptiveImage(Fbos.getFboByLocation(ap.getIcao())) %>" style="border-style: none; vertical-align:middle;" /></a><a href="<%= response.encodeURL("airport.jsp?icao=" + ap.getIcao()) %>"><%= ap.getIcao() %></a></td>
+                    <td>
+                        <a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + ap.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
+                            <img src="<%= ap.getDescriptiveImage(Fbos.getFboByLocation(ap.getIcao())) %>" style="border-style: none; vertical-align:middle;" /></a><a href="<%= response.encodeURL("airport.jsp?icao=" + ap.getIcao()) %>"><%= ap.getIcao() %>
+                        </a>
+                    </td>
 <%
                 }
                 else
                 {
 %>
-                    <td><a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + fromAirport.getIcao()+"&icaod="+ ap.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap"><img src="<%= ap.getDescriptiveImage(Fbos.getFboByLocation(ap.getIcao())) %>" style="border-style: none; vertical-align:middle;" /></a><a href="<%= response.encodeURL("airport.jsp?icao=" + ap.getIcao()) %>"><%= ap.getIcao() %></a></td>
+                    <td>
+                        <a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + fromAirport.getIcao()+"&icaod="+ ap.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
+                            <img src="<%= ap.getDescriptiveImage(Fbos.getFboByLocation(ap.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
+                        </a>
+                        <a href="<%= response.encodeURL("airport.jsp?icao=" + ap.getIcao()) %>">
+                            <%= ap.getIcao() %>
+                        </a></td>
 <%
                 }
 

@@ -45,7 +45,7 @@
 <body>
 
 <jsp:include flush="true" page="top.jsp" />
-<jsp:include flush="true" page="menu.jsp"></jsp:include>
+<jsp:include flush="true" page="menu.jsp" />
 
 <div id="wrapper">
 <div class="content">
@@ -100,27 +100,35 @@
 			GoodsBean supplies = Goods.getGoods(icao, owner, GoodsBean.GOODS_SUPPLIES);
 			GoodsBean buildingmaterials = Goods.getGoods(icao, owner, GoodsBean.GOODS_BUILDING_MATERIALS);
 
-			if ((fuel != null ? fuel.getAmount() : 0) > 0)
-				goodsincluded = "100LL Fuel: " + Formatters.oneDigit.format(fuel.getAmount()) + " KG";
+            if ((fuel != null ? fuel.getAmount() : 0) > 0)
+            {
+                goodsincluded = "100LL Fuel: " + Formatters.oneDigit.format(fuel.getAmount()) + " KG";
+            }
 
 			if ((jeta != null ? jeta.getAmount() : 0) > 0)
             {
-				if (!"".equals(goodsincluded))
-					goodsincluded = goodsincluded + "<br>";
+                if (!"".equals(goodsincluded))
+                {
+                    goodsincluded = goodsincluded + "<br>";
+                }
 
 				goodsincluded = goodsincluded + "JetA Fuel: " + Formatters.oneDigit.format(jeta.getAmount()) + " KG";
 			}
 			if ((supplies != null ? supplies.getAmount() : 0) != 0)
             {
-				if (!"".equals(goodsincluded))
-					goodsincluded = goodsincluded + "<br>";
+                if (!"".equals(goodsincluded))
+                {
+                    goodsincluded = goodsincluded + "<br>";
+                }
 
 				goodsincluded = goodsincluded + "Supplies: " + Formatters.oneDigit.format(supplies.getAmount()) + " KG";
 			}
 			if ((buildingmaterials != null ? buildingmaterials.getAmount() : 0) > 0)
             {
-				if (!"".equals(goodsincluded))
-					goodsincluded = goodsincluded + "<br>";
+                if (!"".equals(goodsincluded))
+                {
+                    goodsincluded = goodsincluded + "<br>";
+                }
 
 				goodsincluded = goodsincluded + "Building Materials: " + Formatters.oneDigit.format(buildingmaterials.getAmount()) + " KG";
 			}
@@ -129,15 +137,18 @@
 	<tr>
 	<td><%= fboname %></td>
 	<td><%= Airports.airportLink(airport, airport, response) %></td>
-	<td><%= data.sortHelper(airport.getCountry() + ", " + airport.getState() + ", " + airport.getCity()) %><%= location %></td>
+	<td><%= Data.sortHelper(airport.getCountry() + ", " + airport.getState() + ", " + airport.getCity()) %><%= location %></td>
 	<td><%= goodsincluded %></td>
 	<td style="text-align: right;"><%= price %></td>
 	<td><a class="link" href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fboid %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
-        for (int loop=0; loop < staffGroups.length; loop++)
+        for (Accounts.groupMemberData staffGroup : staffGroups)
         {
 %>
-		| <a class="link" href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fboid %>', '<%= price %>', <%= staffGroups[loop].groupId %>)">Buy for <%= staffGroups[loop].groupName %></a>
+        | <a class="link"
+             href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fboid %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
+            for <%= staffGroup.groupName %>
+        </a>
 <%
         }
 %>

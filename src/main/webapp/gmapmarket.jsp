@@ -33,7 +33,7 @@
     boolean isSystemOwned = request.getParameter("isSystemOwned") != null;
     boolean isPlayerOwned = request.getParameter("isPlayerOwned") != null;
 
-    boolean isSearch = (modelId != -1) || (lowPrice != -1) || (highPrice != -1) || (lowTime != -1) || (highTime != -1) || (distance != -1) || (lowPax != -1) || (highPax != -1) || (lowLoad != -1) || (highLoad != -1) || hasVfr || hasIfr || hasGps || hasAp || isSystemOwned || isPlayerOwned || equipment != "all";
+    boolean isSearch = (modelId != -1) || (lowPrice != -1) || (highPrice != -1) || (lowTime != -1) || (highTime != -1) || (distance != -1) || (lowPax != -1) || (highPax != -1) || (lowLoad != -1) || (highLoad != -1) || hasVfr || hasIfr || hasGps || hasAp || isSystemOwned || isPlayerOwned || !equipment.equals("all");
 
     List<AircraftBean> aircraftList = null;
     String message = null;

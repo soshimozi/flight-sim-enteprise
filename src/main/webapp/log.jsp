@@ -245,15 +245,8 @@
 
             double total = (log.getIncome()) - log.getRentalCost() - log.getFuelCost() - log.getLandingCost() - log.getCrewCost() - log.getFboAssignmentFee() + log.getBonus() - log.getmptTax();
 
-            String type;
-            try
-            {
-                type = Aircraft.getAircraftByRegistration(log.getAircraft()).getMakeModel();
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                type = "None";
-            }
+            AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
+            String username = Accounts.getAccountNameById(log.getUserId());
 %>
                 <tr>
                     <td><%= Formatters.getUserTimeFormat(user).format(log.getTime()) %></td>
@@ -261,7 +254,7 @@
             if (groupPage)
             {
 %>
-                    <td><%= log.getUser() %></td>
+                    <td><%= username %></td>
 <%
             }
 %>
@@ -272,9 +265,9 @@
                         <a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + log.getTo()) %>"><%= log.getTo() %></a>
                     </td>
                     <td>
-                        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + log.getAircraft()) %>"><%= log.getAircraft() %></a>
+                        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>"><%= aircraft.getRegistration() %></a>
                     </td>
-                    <td><%= type %></td>
+                    <td><%= aircraft.getMakeModel() %></td>
                     <td><%= flightTime %></td>
                     <td><%= log.getDistance() %></td>
                     <td><%= Formatters.currency.format(total) %></td>

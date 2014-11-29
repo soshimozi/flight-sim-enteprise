@@ -11,8 +11,8 @@
 	//setup return page if action used
 	String returnPage = "maintenance.jsp?registration=" + registration;
 
- 	AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
- 	List<LogBean> logs = Logging.getLogForMaintenanceAircraft(aircraft.getRegistration());
+ 	AircraftBean aircraft = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(registration));
+ 	List<LogBean> logs = Logging.getLogForMaintenanceAircraft(aircraft.getId());
   
     int tetminutes = (aircraft.getTotalEngineTime()) / 60;
  	int lcminutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck()) / 60;
@@ -24,8 +24,10 @@
     String airFrameTime = (Formatters.twoDigits.format(afminutes / 60) + ":" + Formatters.twoDigits.format(afminutes % 60));
     
 	List<FboBean> fbos = null;
-	if(aircraft.getLocation() != null && !aircraft.getLocation().equals(""))
-		fbos = Fbos.getFboForRepair(Airports.getAirport(aircraft.getLocation()));
+    if (aircraft.getLocation() != null && !aircraft.getLocation().equals(""))
+    {
+        fbos = Fbos.getFboForRepair(Airports.getAirport(aircraft.getLocation()));
+    }
  %>
 
 <!DOCTYPE html>
@@ -100,14 +102,20 @@
    	int equipment = aircraft.getEquipment();
 
     StringBuilder sb = new StringBuilder();
-   	if ((equipment & ModelBean.EQUIPMENT_IFR_MASK) != 0)
+    if ((equipment & ModelBean.EQUIPMENT_IFR_MASK) != 0)
+    {
         sb.append("<li>NAV1, NAV2, NDB</li>");
-   	
-   	if ((equipment & ModelBean.EQUIPMENT_AP_MASK) != 0)
-   		sb.append("<li>Autopilot</li>");
-   	
-   	if ((equipment & ModelBean.EQUIPMENT_GPS_MASK) != 0)
-   		sb.append("<li>GPS</li>");
+    }
+
+    if ((equipment & ModelBean.EQUIPMENT_AP_MASK) != 0)
+    {
+        sb.append("<li>Autopilot</li>");
+    }
+
+    if ((equipment & ModelBean.EQUIPMENT_GPS_MASK) != 0)
+    {
+        sb.append("<li>GPS</li>");
+    }
 %>
                                 <%= sb.toString() %>
 					  		</ul>
@@ -262,21 +270,21 @@
 	    int[] conditionPrice = aircraft.getConditionPrice(aircraft,AircraftMaintenanceBean.MAINT_100HOUR);
 	    int addedPrice=0;
 	    boolean repair = false;
-	    if (aircraft.isBroken())
-	      repair = true;
-	    for (int i = 0; i < conditionPrice.length; i++) 
-	    {
-	          addedPrice += conditionPrice[i];
-	    }
+        if (aircraft.isBroken())
+        {
+            repair = true;
+        }
+        for (int aConditionPrice : conditionPrice)
+        {
+            addedPrice += aConditionPrice;
+        }
 	
 		for (FboBean fbo : fbos) 
 	    {
 	            int price100hr = aircraft.getMaintenancePrice(AircraftMaintenanceBean.MAINT_100HOUR,  fbo);
 	            int totalAddedPrice = (addedPrice + Math.round((addedPrice * (1+ fbo.getRepairShopMargin())/100)));
 	            int estPrice = price100hr + totalAddedPrice;
-	            String sPrice100hr = Formatters.currency.format(price100hr);                
-	            String sAddedPrice = Formatters.currency.format(totalAddedPrice);
-				String sEstPrice = Formatters.currency.format(estPrice);   
+				String sEstPrice = Formatters.currency.format(estPrice);
 	
 	  		if (!repair)
 			{
@@ -311,8 +319,7 @@
 
 		for (FboBean fbo : fbos)
 		{
-		  	String priceER = Formatters.currency.format(aircraft.getMaintenancePrice(AircraftMaintenanceBean.MAINT_FIXAIRCRAFT,fbo));
-		    if (repair) 
+		    if (repair)
 		    {
 %>
 
@@ -362,10 +369,6 @@
 		  </thead>
 		  <tbody>
 <%
-		int totalDistance = 0;
-		int totalFlightTime = 0;
-		double totalMoney = 0;
-		
 		for (LogBean log : logs)
 		{
 			minutes = log.getTotalEngineTime() / 60;

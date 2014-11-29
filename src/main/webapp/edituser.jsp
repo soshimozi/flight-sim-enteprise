@@ -54,21 +54,21 @@
 
             <h3>Edit preferences</h3>
             <div>
-                <label for="email">email: </label>
+                <label>email: </label>
                 <input id="email" name="email" type="text" class="textarea" value="<%= user.getEmail()== null ? "" : user.getEmail() %>" size="30" maxlength="45" />
             </div><br>
             <div>
                 <div>
                     Show payments to self in logs:<br>
-                    <input type="radio" name="showPaymentsToSelf" id="r1" value="1" <%= user.getShowPaymentsToSelf() ? "checked" : "" %> /><label for="r1">Show</label>
-                    <input type="radio" name="showPaymentsToSelf" id="r2" value="0" <%= !user.getShowPaymentsToSelf() ? "checked" : "" %>/><label for="r1">Hide</label>
+                    <input type="radio" name="showPaymentsToSelf" id="r1" value="1" <%= user.getShowPaymentsToSelf() ? "checked" : "" %> /><label>Show</label>
+                    <input type="radio" name="showPaymentsToSelf" id="r2" value="0" <%= !user.getShowPaymentsToSelf() ? "checked" : "" %>/><label>Hide</label>
                 </div>
             </div><br>
             <div>
                 <div>
                     Show log times in:<br>
-                    <input type="radio" name="selectedTimeZone" id="r10" value="0" <%= user.getUserTimezone() == 0 ? "checked" : "" %> /><label for="r1">GMT</label>
-                    <input type="radio" name="selectedTimeZone" id="r20" value="1" <%= user.getUserTimezone() != 0 ? "checked" : "" %>/><label for="r1">Local (<%= gmtOffset %>)</label>
+                    <input type="radio" name="selectedTimeZone" id="r10" value="0" <%= user.getUserTimezone() == 0 ? "checked" : "" %> /><label>GMT</label>
+                    <input type="radio" name="selectedTimeZone" id="r20" value="1" <%= user.getUserTimezone() != 0 ? "checked" : "" %>/><label>Local (<%= gmtOffset %>)</label>
                 </div>
             </div><br>
             <div>

@@ -35,7 +35,7 @@
 }
 </style>
 <div class="container">
-	<a id="aliases"/>
+	<a id="aliases"></a>
 
 	<div class="myaliassection">
 		<div style="font-size: 12pt; font-weight: bold;">Aliases</div>

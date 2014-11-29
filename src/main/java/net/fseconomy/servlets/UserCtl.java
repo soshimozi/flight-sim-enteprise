@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSession;
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
-import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -505,8 +504,9 @@ public class UserCtl extends HttpServlet
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
-		String registration = req.getParameter("registration");
-		AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
+		String reg = req.getParameter("registration");
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+		AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -534,8 +534,9 @@ public class UserCtl extends HttpServlet
 		
 		int ibuyer = Integer.parseInt(req.getParameter("buyer"));
 		String reg = req.getParameter("reg");
-		
-		AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -543,15 +544,17 @@ public class UserCtl extends HttpServlet
         if (!aircraft.changeAllowed(user)) 
 			throw new DataError("Permission Denied.");
 
-		Aircraft.transferac(reg, ibuyer, aircraft.getOwner(), aircraft.getLocation());
+		Aircraft.transferac(aircraft.getId(), ibuyer, aircraft.getOwner(), aircraft.getLocation());
 	}
 	
 	void doEditAircraft(HttpServletRequest req) throws DataError
 	{		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
-		String registration = req.getParameter("registration");
-        AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
+		String reg = req.getParameter("registration");
+
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
  
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -628,8 +631,9 @@ public class UserCtl extends HttpServlet
 		int lessee = Integer.parseInt(req.getParameter("lessee"));
 		int owner = Integer.parseInt(req.getParameter("owner"));
 		String reg = req.getParameter("reg");
-		
-		AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -637,7 +641,7 @@ public class UserCtl extends HttpServlet
 		if (!aircraft.changeAllowed(user)) 
 			throw new DataError("Permission Denied.");
 
-		Aircraft.leaseac(reg, lessee, owner, aircraft.getLocation());
+		Aircraft.leaseac(aircraft.getId(), lessee, owner, aircraft.getLocation());
 	}	
 	
 	void doBankBalance(HttpServletRequest req) throws DataError
@@ -1077,23 +1081,25 @@ public class UserCtl extends HttpServlet
 	
 	void addAircraft(HttpServletRequest req) throws DataError
 	{
-		String sReg = req.getParameter("reg");
-		if (sReg == null)
+		String reg = req.getParameter("reg");
+		if (reg == null)
 			return;
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		if (user == null || !user.isLoggedIn())
 			return;
-		
+
+		int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+
 		String type = req.getParameter("type");
 		String rentalType = req.getParameter("rentalType");
 		if (type == null)
 			return;
 		
 		if (type.equals("add"))
-			Aircraft.rentAircraft(sReg, user.getId(), "dry".equals(rentalType));
+			Aircraft.rentAircraft(aircraftId, user.getId(), "dry".equals(rentalType));
 		else if (type.equals("remove"))
-            Aircraft.releaseAircraft(sReg, user.getId());
+            Aircraft.releaseAircraft(aircraftId, user.getId());
 	}
 
 	void returnLeaseAircraft(HttpServletRequest req) throws DataError
@@ -1101,45 +1107,51 @@ public class UserCtl extends HttpServlet
 		String reg = req.getParameter("reg");
 		if (reg == null)
 			return;
+
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		if (user == null || !user.isLoggedIn())
 			return;
 
-		AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
 
-        Aircraft.leasereturnac(reg, aircraft.getOwner(), aircraft.getLessor(), aircraft.getLocation());
+        Aircraft.leasereturnac(aircraft.getId(), aircraft.getOwner(), aircraft.getLessor(), aircraft.getLocation());
 	}
 	
 	void doRefuel(HttpServletRequest req) throws DataError
 	{
-		String sId = req.getParameter("id");
+		String reg = req.getParameter("id");
 		String sProvider = req.getParameter("provider");
 		String sType = req.getParameter("type");
 		int type = Integer.parseInt(sType);
-		if (sId == null)
+		if (reg == null)
 			return;
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		if (user == null || !user.isLoggedIn())
 			return;
-		
-		String sFuel = req.getParameter("fuel");
+
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+
+        String sFuel = req.getParameter("fuel");
 		int fuel = Integer.parseInt(sFuel);
-        Aircraft.refuelAircraft(sId, user.getId(), fuel, Integer.parseInt(sProvider), type);
+        Aircraft.refuelAircraft(aircraftId, user.getId(), fuel, Integer.parseInt(sProvider), type);
 	}
 	
 	void market(HttpServletRequest req) throws DataError
 	{
-		String sId = req.getParameter("id");
+		String reg = req.getParameter("id");
 		String sAccount = req.getParameter("account");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (sId == null)
+		if (reg == null)
 			return;
 
-        Aircraft.buyAircraft(sId, Integer.parseInt(sAccount), user);
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+
+        Aircraft.buyAircraft(aircraftId, Integer.parseInt(sAccount), user);
 	}
 	
 	void marketfbo(HttpServletRequest req) throws DataError
@@ -1155,12 +1167,14 @@ public class UserCtl extends HttpServlet
 	
 	void doSell(HttpServletRequest req) throws DataError
 	{
-		String sId = req.getParameter("registration");
+		String reg = req.getParameter("registration");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (sId == null)
+		if (reg == null)
 			return;
 
-        Aircraft.sellAircraft(sId, user);
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+
+        Aircraft.sellAircraft(aircraftId, user);
 	}	
 	
 	void newUser(HttpServletRequest req) throws DataError
@@ -1645,7 +1659,10 @@ public class UserCtl extends HttpServlet
 
 		int type = Integer.parseInt(maintenanceType);
 		int fbo = Integer.parseInt(sFbo);
-		AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+
 		if (aircraft == null)
 			throw new DataError("Aircraft not found");
 		
@@ -1663,7 +1680,7 @@ public class UserCtl extends HttpServlet
 				throw new DataError("Fbo not found");
 		}
 		
-		Aircraft.doMaintenance(aircraft, type, user, selectedFbo);
+		Aircraft.doMaintenance(aircraft, type, selectedFbo);
 	}
 	
 	void doEquipment(HttpServletRequest req) throws DataError
@@ -1678,7 +1695,9 @@ public class UserCtl extends HttpServlet
 		
 		int type = Integer.parseInt(equipmentType);
 		int fbo = Integer.parseInt(sFbo);
-		AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 		
         if (aircraft == null)
 			throw new DataError("Aircraft not found");
@@ -1809,7 +1828,7 @@ public class UserCtl extends HttpServlet
 	
 	void doUpdateAircraft(HttpServletRequest req) throws DataError
 	{
-		String registration = req.getParameter("registration");
+		String reg = req.getParameter("registration");
 		String newreg = req.getParameter("newreg");
 		String home = req.getParameter("home");
 		String location = req.getParameter("location").toUpperCase();
@@ -1847,8 +1866,9 @@ public class UserCtl extends HttpServlet
 		
 		if (newreg != null)
 			newreg = newreg.toUpperCase();
-		
-		AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
+
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");

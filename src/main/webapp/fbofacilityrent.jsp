@@ -151,12 +151,13 @@
 				<select class="formselect" name="occupantId">
 				<option value="<%= user.getId() %>" selected="selected" ><%= user.getName() %></option>
 <%
-		for (int i = 0; i < staffGroups.length; i++)
-		{
+        for (Accounts.groupMemberData staffGroup : staffGroups)
+        {
 %>
-				<option value="<%= staffGroups[i].groupId %>" ><%= staffGroups[i].groupName %></option>
+                    <option value="<%= staffGroup.groupId %>"><%= staffGroup.groupName %>
+                    </option>
 <%
-		}
+        }
 %>
 				</select>
 			</td>

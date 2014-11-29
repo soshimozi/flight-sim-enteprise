@@ -9,7 +9,7 @@
 	String returnPage = request.getHeader("referer");
 
 	String reg = request.getParameter("registration");
-	AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+	AircraftBean aircraft = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(reg));
 
 	UserBean owneraccount;
 	owneraccount = Accounts.getAccountById(aircraft.getOwner());

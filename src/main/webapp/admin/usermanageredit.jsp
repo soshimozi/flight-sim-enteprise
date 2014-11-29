@@ -1,7 +1,7 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, net.fseconomy.util.Formatters, java.util.List, net.fseconomy.dto.*, net.fseconomy.beans.UserBean"
-        %>
+%>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -149,8 +149,10 @@
                             <b>IP Addresses</b>
                             <table>
                                 <thead>
-                                <th>IP</th>
-                                <th style="padding-left: 20px">Hits</th>
+                                <tr>
+                                    <th>IP</th>
+                                    <th style="padding-left: 20px">Hits</th>
+                                </tr>
                                 </thead>
                                 <tbody>
                                 <%

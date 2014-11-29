@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.text.*, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
+	    import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -31,7 +31,7 @@
                 localMessage="Account not found";
 			else
 			{
-				if (account.isGroup() == false || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
+				if (!account.isGroup() || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
                     localMessage="Permission denied";
 			}
 		}

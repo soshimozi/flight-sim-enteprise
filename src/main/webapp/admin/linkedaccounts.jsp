@@ -1,7 +1,7 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, java.util.List, net.fseconomy.dto.LinkedAccount, net.fseconomy.beans.UserBean"
-        %>
+%>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 

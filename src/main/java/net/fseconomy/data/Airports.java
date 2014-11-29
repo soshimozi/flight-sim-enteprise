@@ -438,7 +438,7 @@ public class Airports implements Serializable
         double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(lat)));
 
         //get the airports that met the criteria passed
-        Hashtable<String, LatLonSize> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, minsize, maxsize, false, waterOk, false);
+        Hashtable<String, LatLonSize> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, minsize, maxsize, true, waterOk, true);
 
         //Don't bother if none found
         if (results != null && results.size() != 0)

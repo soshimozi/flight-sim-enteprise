@@ -6,7 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-	List<AssignmentBean> assignments = null;
+	List<AssignmentBean> assignments;
 	
 	boolean groupMode = false;
 		
@@ -234,8 +234,8 @@
 		
 		});
 		
-		var loc = new Object();
-		var assignment = new Object();
+		var loc = {};
+		var assignment = {};
 		var i = 0;
 		
 	</script>
@@ -287,10 +287,9 @@
         int counter = 0;
 		for (AssignmentBean assignment : assignments)
 		{
-			String aircraftReg = assignment.getAircraft();
+			String aircraftReg = Aircraft.getAircraftRegistrationById(assignment.getAircraftId());
 			String image = "img/set2_" + assignment.getActualBearingImage() + ".gif";
-			String cargo;
-			AssignmentBean as = assignment;
+            AssignmentBean as = assignment;
 					  
 			AirportBean destination = as.getDestinationAirport();
 			AirportBean location = as.getLocationAirport();

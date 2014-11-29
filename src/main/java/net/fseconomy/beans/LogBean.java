@@ -29,8 +29,8 @@ public class LogBean implements Serializable
 	private static final long serialVersionUID = 1L;
 	int id;
 	Timestamp time;
-	String user;
-	String aircraft;
+	int userId;
+	int aircraftId;
 	String from;
 	String to;
 	String type;
@@ -73,8 +73,8 @@ public class LogBean implements Serializable
 	{
 		setId(rs.getInt("id"));
 		setTime(rs.getTimestamp("time"));
-		setUser(rs.getString("user"));
-		setAircraft(rs.getString("aircraft"));		
+		setUser(rs.getInt("userid"));
+		setAircraftId(rs.getInt("aircraftid"));
 		setFrom(rs.getString("from"));
 		setTo(rs.getString("to"));
 		setType(rs.getString("type"));
@@ -111,9 +111,9 @@ public class LogBean implements Serializable
 	 * Returns the aircraft.
 	 * @return String
 	 */
-	public String getAircraft()
+	public int getAircraftId()
 	{
-		return aircraft;
+		return aircraftId;
 	}
 
 	/**
@@ -267,18 +267,18 @@ public class LogBean implements Serializable
 	 * Returns the user.
 	 * @return String
 	 */
-	public String getUser()
+	public int getUserId()
 	{
-		return user;
+		return userId;
 	}
 
 	/**
 	 * Sets the aircraft.
-	 * @param aircraft The aircraft to set
+	 * @param id The aircraft to set
 	 */
-	public void setAircraft(String aircraft)
+	public void setAircraftId(int id)
 	{
-		this.aircraft = aircraft;
+		this.aircraftId = id;
 	}
 
 	/**
@@ -418,11 +418,11 @@ public class LogBean implements Serializable
 
 	/**
 	 * Sets the user.
-	 * @param user The user to set
+	 * @param userid The user to set
 	 */
-	public void setUser(String user)
+	public void setUser(int userid)
 	{
-		this.user = user;
+		userId = userid;
 	}
 
 	/**

@@ -79,7 +79,7 @@
 </script>
 
     <div class="form">
-        <label for="AddService">Please select the service to add:</label>
+        <label>Please select the service to add:</label>
         <form id="AddService" name="AddService" method="post" action="userctl">
             <div>
                 <input type="hidden" name="event" value="addServiceProviderAccess">

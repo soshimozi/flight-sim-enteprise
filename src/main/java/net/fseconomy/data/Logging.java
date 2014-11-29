@@ -75,8 +75,8 @@ public class Logging implements Serializable
         int result = -1;
         try
         {
-            String qry = "SELECT count(*) FROM log WHERE user = ?";
-            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), Converters.escapeSQL(user.getName()));
+            String qry = "SELECT count(*) FROM log WHERE userid = ?";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), user.getId());
         }
         catch (SQLException e)
         {
@@ -86,13 +86,13 @@ public class Logging implements Serializable
         return result;
     }
 
-    public static int getAmountLogForAircraft(String registration)
+    public static int getAmountLogForAircraft(int aircraftId)
     {
         int result = -1;
         try
         {
-            String qry = "SELECT count(*) FROM log WHERE aircraft = ?";
-            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), Converters.escapeSQL(registration));
+            String qry = "SELECT count(*) FROM log WHERE aircraftid = ?";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), aircraftId);
         }
         catch (SQLException e)
         {
@@ -125,9 +125,9 @@ public class Logging implements Serializable
         return getLogSQL(sql);
     }
 
-    public static List<LogBean> getLogForAircraftFromId(String reg, int fromid)
+    public static List<LogBean> getLogForAircraftFromId(int aircraftId, int fromid)
     {
-        String sql = "SELECT * FROM log where id > " + fromid + " AND aircraft = '" + Converters.escapeSQL(reg) + "'" + " order by id LIMIT 500";
+        String sql = "SELECT * FROM log where id > " + fromid + " AND aircraftid = " + aircraftId + " order by id LIMIT 500";
 
         return getLogSQL(sql);
     }
@@ -153,9 +153,9 @@ public class Logging implements Serializable
         return getLogSQL(sql);
     }
 
-    public static List<LogBean> getLogForGroupFromRegistrations(String registrations, int fromid)
+    public static List<LogBean> getLogForGroupFromIds(String aircraftIds, int fromid)
     {
-        String sql = "SELECT * FROM log where id > " + fromid + " AND aircraft in (" + registrations + ")" + " order by id LIMIT 500";
+        String sql = "SELECT * FROM log where id > " + fromid + " AND aircraftid in (" + aircraftIds + ")" + " order by id LIMIT 500";
 
         return getLogSQL(sql);
     }
@@ -174,7 +174,24 @@ public class Logging implements Serializable
 
     public static List<LogBean> getLogForUser(UserBean user, int from, int amount)
     {
-        return getLogSQL("SELECT * FROM log WHERE type <> 'refuel' and type <> 'maintenance' and user='" + Converters.escapeSQL(user.getName()) + "' ORDER BY time DESC LIMIT " + from + "," + amount);
+        ArrayList<LogBean> result = new ArrayList<LogBean>();
+
+        try
+        {
+            String qry = "SELECT * FROM log WHERE  userid = ? AND type <> 'refuel' AND type <> 'maintenance' ORDER BY time DESC LIMIT " + from + "," + amount;
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user.getId());
+            while (rs.next())
+            {
+                LogBean log = new LogBean(rs);
+                result.add(log);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     public static List<LogBean> getLogForUser(UserBean user, int afterLogId)
@@ -193,19 +210,36 @@ public class Logging implements Serializable
         return getLogSQL("SELECT * FROM log WHERE fbo=" + fbo + " ORDER BY time DESC LIMIT " + from + "," + amount);
     }
 
-    public static List<LogBean> getLogForAircraft(String registration, int from, int amount)
+    public static List<LogBean> getLogForAircraft(int aircraftId, int from, int amount)
     {
-        return getLogSQL("SELECT * FROM log WHERE aircraft='" + Converters.escapeSQL(registration) + "' ORDER BY time DESC LIMIT " + from + "," + amount);
+        return getLogSQL("SELECT * FROM log WHERE aircraftid=" + aircraftId + " ORDER BY time DESC LIMIT " + from + "," + amount);
     }
 
-    public static List<LogBean> getLogForAircraft(String registration, int entryid)
+    public static List<LogBean> getLogForAircraft(int aircraftId, int entryid)
     {
-        return getLogSQL("SELECT * FROM log WHERE aircraft='" + Converters.escapeSQL(registration) + "' AND ID > " + entryid + " ORDER BY time DESC");
+        return getLogSQL("SELECT * FROM log WHERE aircraft=" + aircraftId + " AND ID > " + entryid + " ORDER BY time DESC");
     }
 
-    public static List<LogBean> getLogForMaintenanceAircraft(String registration)
+    public static List<LogBean> getLogForMaintenanceAircraft(int aircraftId)
     {
-        return getLogSQL("SELECT * FROM log WHERE type = 'maintenance' AND aircraft='" + Converters.escapeSQL(registration) + "' ORDER BY time DESC");
+        ArrayList<LogBean> result = new ArrayList<LogBean>();
+
+        try
+        {
+             String qry = "SELECT * FROM log WHERE type = 'maintenance' AND aircraftid = ? ORDER BY time DESC";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraftId);
+            while (rs.next())
+            {
+                LogBean log = new LogBean(rs);
+                result.add(log);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     static List<LogBean> getLogSQL(String qry)

@@ -145,7 +145,7 @@ public class MaintenanceCycle implements Runnable
 		long starttime = System.currentTimeMillis();			
 		int cycletype = CycleType30Min;
 
-        Stats.FlightSummaryList = Stats.getFlightSummary();
+        Stats.FlightSummaryList = Stats.getInstance().getFlightSummary();
 
 
         if(Boolean.getBoolean("Debug"))
@@ -287,9 +287,9 @@ public class MaintenanceCycle implements Runnable
 			rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			if(rs.next())
 			{
-                Stats.setMinutesFlown(rs.getLong(1) / 60);
-                Stats.setMilesFlown(rs.getLong(2));
-                Stats.setTotalIncome((long) rs.getDouble(3));
+                Stats.getInstance().setMinutesFlown(rs.getLong(1) / 60);
+                Stats.getInstance().setMilesFlown(rs.getLong(2));
+                Stats.getInstance().setTotalIncome((long) rs.getDouble(3));
 			}
 			
 			Map<Integer, Set<AircraftBean>> aircraft = new HashMap<>();
@@ -332,11 +332,11 @@ public class MaintenanceCycle implements Runnable
 			while (rs.next())
 				ownersByGroup.put(rs.getInt(2), rs.getString(1));
 			
-			qry = "SELECT user, count(log.user), sum(distance), sum(flightEngineTime), min(time) from log WHERE log.type = 'flight' group by user";
+			qry = "SELECT userid, count(log.userid), sum(distance), sum(flightEngineTime), min(time) from log WHERE log.type = 'flight' group by userid";
 			rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{
-				UserBean thisUser = usersByName.get(rs.getString(1).toLowerCase());
+				UserBean thisUser = usersById.get(rs.getInt(1));
 				if (thisUser == null)
 					continue;
 				
@@ -353,7 +353,7 @@ public class MaintenanceCycle implements Runnable
 				}
 			}
 
-			qry = "SELECT groupId, count(log.user), sum(distance), sum(flightEngineTime), min(time) from log WHERE log.groupid is not null AND log.type = 'flight' group by groupId";
+			qry = "SELECT groupId, count(log.userid), sum(distance), sum(flightEngineTime), min(time) from log WHERE log.groupid is not null AND log.type = 'flight' group by groupId";
 			rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{
@@ -377,11 +377,14 @@ public class MaintenanceCycle implements Runnable
 					stats.add(new Statistics(thisUser.getId(), thisUser.getName(), owner, (int)Math.round(thisUser.getMoney() + thisUser.getBank()), 0, 0, 0, null, aircraft.get(thisUser.getId()), true));
 			}
 
+            Collections.sort(stats, (i1, i2) -> (i1.accountName.compareTo(i2.accountName)));
+
             Stats.statistics = stats;
 
 			HashMap<String, Statistics> hm = new HashMap<>();
 			for( net.fseconomy.dto.Statistics s : stats)
 				hm.put(s.accountName.toLowerCase(), s);
+
 
             Stats.prevstatsmap = Stats.statsmap;
             Stats.statsmap = hm;
@@ -452,7 +455,7 @@ public class MaintenanceCycle implements Runnable
 	    		while (rs.next())
 	    		{
 	    			Money interest = new Money(rs.getBigDecimal("interest").doubleValue());
-                    Banking.addPaymentRecord(rs.getInt("id"), 0, interest, PaymentBean.INTEREST_PAYMENT, 0, 0, "", "", "");
+                    Banking.addPaymentRecord(rs.getInt("id"), 0, interest, PaymentBean.INTEREST_PAYMENT, 0, 0, "", 0, "");
 
 	    			totalPaid = totalPaid.add(rs.getBigDecimal("interest"));
 	    			counter++;
@@ -844,12 +847,12 @@ public class MaintenanceCycle implements Runnable
 						if (to == null)
 							continue;
 	
-						String aircraft = null;
+						int aircraftId = 0;
 						if (isAllIn) 
 						{
 							//TODO This should probably randomize the returned aircraft that meet the criteria if more then one
 							//All-In change - find available aircraft at airport that have not already been assigned to an All-In job - thanks Airboss for query help
-							String queryToFindFreeAircraft = "select registration from aircraft, models " +
+							String queryToFindFreeAircraft = "select aircraft.id from aircraft, models " +
 									"where location = '" + icao + "' " +
 									"and owner = 0 " + 
 									"and userlock is null " +
@@ -901,7 +904,7 @@ public class MaintenanceCycle implements Runnable
                             ResultSet aircraftRs = DALHelper.getInstance().ExecuteReadOnlyQuery(queryToFindFreeAircraft + aircraftFilterWhereClause.toString() + " LIMIT 1");
 
 							if (aircraftRs.next())
-								aircraft = aircraftRs.getString(1);
+								aircraftId = aircraftRs.getInt(1);
 							else // no aircraft found, skip it
 								continue;
 						}
@@ -951,8 +954,8 @@ public class MaintenanceCycle implements Runnable
 
 						if (isAllIn)
 						{
-							fields.append(", aircraft");
-							values.append(", '").append(aircraft).append("'");
+							fields.append(", aircraftid");
+							values.append(", '").append(aircraftId).append("'");
 						}
 						
 						qry = "INSERT INTO assignments (" + fields.toString() + ") VALUES(" + values.toString() + ")";
@@ -1003,7 +1006,7 @@ public class MaintenanceCycle implements Runnable
 				{
 					if (Banking.checkAnyFunds(occupant, (double) rent))
 					{
-                        Banking.doPayment(occupant, rs.getInt("owner"), (double) rent, PaymentBean.FBO_FACILITY_RENT, 0, rs.getInt("fboId"), rs.getString("location"), "", "", false);
+                        Banking.doPayment(occupant, rs.getInt("owner"), (double) rent, PaymentBean.FBO_FACILITY_RENT, 0, rs.getInt("fboId"), rs.getString("location"), 0, "", false);
 						
 						qry = "update fbofacilities set lastRentPayment = current_timestamp where id = ?";
 						DALHelper.getInstance().ExecuteUpdate(qry, rs.getInt("id"));
@@ -1340,7 +1343,7 @@ public class MaintenanceCycle implements Runnable
 				
 				double probability = toSell/(double)notForSale;					
 				
-				qry = "SELECT * FROM aircraft WHERE sellPrice is null AND owner=0 AND location <> 'DEAD' AND model = ?";
+				qry = "SELECT id FROM aircraft WHERE sellPrice is null AND owner=0 AND location <> 'DEAD' AND model = ?";
 				ResultSet toSellRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, model);
 				while (toSellRS.next())
 				{
@@ -1356,19 +1359,18 @@ public class MaintenanceCycle implements Runnable
 					expires.add(GregorianCalendar.DAY_OF_MONTH, 2);  // was 7
 					expires.add(GregorianCalendar.HOUR, (int)(Math.random() * 72));  // was 24
 
-					String reg = toSellRS.getString("registration");
-					AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+					AircraftBean aircraft = Aircraft.getAircraftById(toSellRS.getInt("id"));
 
 					int sellPrice = aircraft.getSystemSellPrice(); //includes raw equipment costs
 					sellPrice = (int) Math.round(sellPrice * (1 + Math.random() * 0.4 - 0.2));
 					
-					qry = "UPDATE aircraft SET sellPrice = ?, markettimeOut = ? where registration = ?";
-					DALHelper.getInstance().ExecuteUpdate(qry, sellPrice,  new Timestamp(expires.getTime().getTime()), reg);
-					Data.logger.info("Selling aircraft: " + aircraft.getMakeModel() + ", " + reg + ", Price = " + sellPrice + ", expires = " + expires.getTime().toString());
+					qry = "UPDATE aircraft SET sellPrice = ?, markettimeOut = ? where id = ?";
+					DALHelper.getInstance().ExecuteUpdate(qry, sellPrice,  new Timestamp(expires.getTime().getTime()), aircraft.getId());
+					Data.logger.info("Selling aircraft: " + aircraft.getMakeModel() + ", " + aircraft.getRegistration() + ", Price = " + sellPrice + ", expires = " + expires.getTime().toString());
 					
 					//remove any AllIn assignments that might be attached to this aircraft
-					qry = "DELETE FROM assignments WHERE aircraft = ?";
-					DALHelper.getInstance().ExecuteUpdate(qry, reg);						
+					qry = "DELETE FROM assignments WHERE aircraftid = ?";
+					DALHelper.getInstance().ExecuteUpdate(qry, aircraft.getId());
 				}
 			}
 		} 
@@ -1502,7 +1504,7 @@ public class MaintenanceCycle implements Runnable
 		
 		try
 		{
-			String qry = "SELECT * FROM aircraft WHERE (shippingState = 1 OR shippingState = 3)";
+			String qry = "SELECT id, shippingState, shippingStateNext FROM aircraft WHERE (shippingState = 1 OR shippingState = 3)";
 			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			
 			while (rs.next())
@@ -1522,7 +1524,7 @@ public class MaintenanceCycle implements Runnable
 						DALHelper.getInstance().ExecuteUpdate(qry, rs.getString("registration"));
 						
 						//Needed to get the aircraft empty weight
-						AircraftBean aircraft = Aircraft.getAircraftByRegistration(rs.getString("registration"));
+						AircraftBean aircraft = Aircraft.getAircraftById(rs.getInt("id"));
 						
 						AssignmentBean assignment;
 						assignment = new AssignmentBean();
@@ -1557,8 +1559,8 @@ public class MaintenanceCycle implements Runnable
 					
 					if(shippingState == 3)
 					{
-						qry = "UPDATE aircraft SET shippingState = 0 WHERE registration = ?";
-						DALHelper.getInstance().ExecuteUpdate(qry, rs.getString("registration"));
+						qry = "UPDATE aircraft SET shippingState = 0 WHERE id = ?";
+						DALHelper.getInstance().ExecuteUpdate(qry, rs.getInt("id"));
 					}																	
 				}
 			}
@@ -1581,9 +1583,10 @@ public class MaintenanceCycle implements Runnable
 	    	while (rs.next())
 	    	{
 	    		AircraftBean aircraft = new AircraftBean(rs);
+
 	    		try
 	    		{
-	    			Aircraft.doMaintenance(aircraft, 1, null, null);
+	    			Aircraft.doMaintenance(aircraft, 1, null);
 	    		}
 	    		catch (DataError e1)
 	    		{
@@ -1599,7 +1602,7 @@ public class MaintenanceCycle implements Runnable
 	      		AircraftBean aircraft = new AircraftBean(rs);
 	        	try
 	        	{
-	        		Aircraft.doMaintenance(aircraft, 2, null, null);
+	        		Aircraft.doMaintenance(aircraft, 2, null);
 	        	}
 	        	catch (DataError e1)
 	        	{
@@ -1615,7 +1618,7 @@ public class MaintenanceCycle implements Runnable
 	      		AircraftBean aircraft = new AircraftBean(rs);
 	        	try
 	        	{
-	        		Aircraft.doMaintenance(aircraft, 2, null, null);
+	        		Aircraft.doMaintenance(aircraft, 2, null);
 	        	}
 	        	catch (DataError e1)
 	        	{
@@ -1647,7 +1650,7 @@ public class MaintenanceCycle implements Runnable
 				ResultSet rs2 = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, model.getId());
 				while (rs2.next())
 				{
-					String reg = rs2.getString("registration");
+					int aircraftId = rs2.getInt("id");
 					int equipment = rs2.getInt("equipment");
 					int price = model.getTotalRentalTarget(equipment);
 					
@@ -1659,14 +1662,14 @@ public class MaintenanceCycle implements Runnable
 					
 					if (rs2.getString("rentalDry") != null)
 					{
-						qry = "UPDATE aircraft SET rentalDry = ? where registration = ?";
-						DALHelper.getInstance().ExecuteUpdate(qry, price, reg);
+						qry = "UPDATE aircraft SET rentalDry = ? where id = ?";
+						DALHelper.getInstance().ExecuteUpdate(qry, price, aircraftId);
 					}
 					
 					if (rs2.getString("rentalWet") != null)
 					{
-						qry = "UPDATE aircraft SET rentalWet = ? where registration = ?";
-						DALHelper.getInstance().ExecuteUpdate(qry, price + fuelCost, reg);
+						qry = "UPDATE aircraft SET rentalWet = ? where id = ?";
+						DALHelper.getInstance().ExecuteUpdate(qry, price + fuelCost, aircraftId);
 					}
 				}
 			}	
@@ -1682,7 +1685,7 @@ public class MaintenanceCycle implements Runnable
 		updateStatus("Moving aircraft to new home");
 		try
 		{
-			String qry = "SELECT aircraft.registration, models.minairportsize, lat, lon FROM aircraft, airports, models where home = icao AND models.id = aircraft.model and models.minairportsize > size AND aircraft.owner = 0 AND aircraft.userlock is NULL ";
+			String qry = "SELECT aircraft.id, models.minairportsize, lat, lon FROM aircraft, airports, models where home = icao AND models.id = aircraft.model and models.minairportsize > size AND aircraft.owner = 0 AND aircraft.userlock is NULL;";
 			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{
@@ -1690,8 +1693,8 @@ public class MaintenanceCycle implements Runnable
 				if (newHome == null)
 					continue;
 					
-				qry = "UPDATE aircraft SET home = ?, location = ? WHERE registration = ?";
-				DALHelper.getInstance().ExecuteUpdate(qry, newHome.icao, newHome.icao, rs.getString(1));
+				qry = "UPDATE aircraft SET home = ?, location = ? WHERE id = ?";
+				DALHelper.getInstance().ExecuteUpdate(qry, newHome.icao, newHome.icao, rs.getInt(1));
 			}	
 		} 
 		catch (SQLException e)
@@ -1729,6 +1732,7 @@ public class MaintenanceCycle implements Runnable
 				{
 					updateSet = updater.executeQuery("SELECT * FROM aircraft where 1=2");
 					airportSet = airports.executeQuery("SELECT airports.icao, size, prefix, registration FROM airports, registrations WHERE type='civil' AND airports.country = registrations.country AND airports.size > " + model.getMinAirportSize() + " ORDER BY rand() LIMIT " + amountToCreate);
+
 					while (airportSet.next())
 					{
 						String home = airportSet.getString(1);
@@ -1747,7 +1751,7 @@ public class MaintenanceCycle implements Runnable
 						updateSet.updateInt("RentalDry", rent);
 						int fuelCost = (int)Math.round(model.getGph() * Goods.getFuelPrice(home));
 
-						//update so that models with 0 rental price cannot be rented - airboss 7/1/12
+						//update so that models with 0 rental price cannot be rented
 						if(rent != 0)
 							updateSet.updateInt("RentalWet", fuelCost + rent);
 
@@ -1813,6 +1817,7 @@ public class MaintenanceCycle implements Runnable
 	
 		String qry = "SELECT registration from aircraft";
 		ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+
 		while (rs.next())
 			usedRegistrations.add(rs.getString(1));
 
@@ -1924,13 +1929,6 @@ public class MaintenanceCycle implements Runnable
 			{
 				regSet.add(rs.getString(1));
 			}
-			
-			// load orphan registrations from damage table in usedRegistrations	
-			rs = DALHelper.getInstance().ExecuteReadOnlyQuery("SELECT aircraft FROM damage left join aircraft on aircraft = registration where registration is null");
-			while (rs.next())
-			{
-				regSet.add(rs.getString(1));
-			}
 		}
 		catch(SQLException e)
 		{
@@ -1957,7 +1955,7 @@ public class MaintenanceCycle implements Runnable
 				}
 				else
 				{
-					list = new ArrayList<>();
+					list = new ArrayList<String[]>();
 					list.add(new String[]{rs.getString(2),rs.getString(3),rs.getString(4)});
 					map.put(rs.getString(1), list);
 				}
@@ -2076,15 +2074,8 @@ public class MaintenanceCycle implements Runnable
 	{
 		try
 		{
-			StringBuilder qry = new StringBuilder();
-
-			//can't use parameters for batch
-			qry.append("UPDATE log SET aircraft = '").append(newreg).append("' WHERE aircraft = '").append(reg).append("';");
-			qry.append("UPDATE payments SET aircraft = '").append(newreg).append("' WHERE aircraft = '").append(reg).append("';");
-			qry.append("UPDATE damage SET aircraft = '").append(newreg).append("' WHERE aircraft = '").append(reg).append("';");
-			qry.append("UPDATE aircraft SET registration = '").append(newreg).append("' WHERE registration = '").append(reg).append("';");
-
-			DALHelper.getInstance().ExecuteBatchUpdate(qry.toString());
+            String qry ="UPDATE aircraft SET registration = ? WHERE registration = ?;";
+            DALHelper.getInstance().ExecuteUpdate(qry, newreg, reg);
 		}
 		catch (SQLException e)
 		{

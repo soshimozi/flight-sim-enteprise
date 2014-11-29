@@ -148,8 +148,8 @@
 
 		<div class="invoiceInset">
 		<a title="Upload new invoice background" href="javascript:void(window.open('<%= response.encodeURL("updatebg.jsp?id=" + fbo.getId()) %>','InvoicePaper','status=no,toolbar=no,height=450,width=500'))">
-			<img width="200" src="<%= fbo.getInvoiceBackground() %>"><br>
-		</a>
+			<img width="200" src="<%= fbo.getInvoiceBackground() %>">
+		</a><br>
 		Current invoice background
 		</div>
 	

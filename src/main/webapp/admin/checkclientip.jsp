@@ -61,7 +61,6 @@
 %>
 <%
 	String searchby = request.getParameter("searchby");
-	String searchfor = "ip";
 %>
 	<h2>Client IP Checker</h2>
 	<h4>Enter User Account</h4>
@@ -80,7 +79,7 @@
 <%
 	if ( searchby != null && !searchby.equals(""))
 	{
-		List<ClientRequest> list = null;
+		List<ClientRequest> list;
 
         list = SimClientRequests.getClientRequestsByAccountId(Integer.parseInt(searchby));
 

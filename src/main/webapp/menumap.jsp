@@ -13,33 +13,41 @@
         StringBuffer returnValue = new StringBuffer();
         String indent = "&nbsp;&nbsp;&nbsp;&nbsp;";
 
-        if( includeBaseLink )
-            returnValue.append("<a href=\"" + link + "\" >" + name + "</a><br/><br/>\n");
+        if (includeBaseLink)
+        {
+            returnValue.append("<a href=\"").append(link).append("\" >").append(name).append("</a><br/><br/>\n");
+        }
 
         int stringLen = 0;
         boolean hasGroups = false;
         if (memberships != null)
         {
-            for (Iterator i = memberships.values().iterator(); i.hasNext(); )
+            for (Object o : memberships.values())
             {
-                Accounts.groupMemberData memberData = (Accounts.groupMemberData) i.next();
-                if (staffOnly == false || memberData.memberLevel >= UserBean.GROUP_STAFF)
+                Accounts.groupMemberData memberData = (Accounts.groupMemberData) o;
+                if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
                 {
                     int len = memberData.groupName.length();
                     if (len > stringLen)
+                    {
                         stringLen = len;
+                    }
                     hasGroups = true;
                 }
             }
         }
         if (!hasGroups)
-            return includeBaseLink ? returnValue.toString() : "";
-
-        for (Iterator i = memberships.values().iterator(); i.hasNext(); )
         {
-            Accounts.groupMemberData memberData = (Accounts.groupMemberData) i.next();
-            if (staffOnly == false || memberData.memberLevel >= UserBean.GROUP_STAFF)
-                returnValue.append(indent + "<a href=" + response.encodeURL(link + arg + memberData.groupId) + ">" + memberData.groupName.replaceAll("\'","\\\\'") + "</a><br/><br/>\n");
+            return includeBaseLink ? returnValue.toString() : "";
+        }
+
+        for (Object o : memberships.values())
+        {
+            Accounts.groupMemberData memberData = (Accounts.groupMemberData) o;
+            if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
+            {
+                returnValue.append(indent).append("<a href=").append(response.encodeURL(link + arg + memberData.groupId)).append(">").append(memberData.groupName.replaceAll("\'", "\\\\'")).append("</a><br/><br/>\n");
+            }
         }
         return returnValue.toString();
     }
@@ -110,12 +118,10 @@ if (user.isLoggedIn())
 	{
 %>
 	<a href="admin/admin.jsp">Admin</a><br/><br/>
+    <a href="admin/usermanager.jsp">User Manager</a><br/><br/>
 	<a href="admin/aircraftmappings.jsp">Modify aircraft mappings</a><br/><br/>
 	<a href="admin/models.jsp">Modify aircraft models</a><br/><br/>
 	<a href="admin/templates.jsp">Modify assignment templates</a><br/><br/>
-	<a href="admin/accountcreate.jsp">Add New User</a><br/><br/>
-	<a href="admin/accountstatusedit.jsp">Lock Account</a><br/><br/>
-	<a href="admin/accountunlock.jsp">Unlock Account</a><br/><br/>
 	<a href="admin/banlistreset.jsp">Reset Rental Ban List</a><br/><br/>
 <% 
 	}
@@ -123,8 +129,7 @@ if (user.isLoggedIn())
 	{
 %>
 	<br/><br/>
-	<a href="admin/accountcreate.jsp">Add User</a><br/><br/>
-	<a href="admin/accountedit.jsp">Edit User</a><br/><br/>
+    <a href="admin/usermanager.jsp">User Manager</a><br/><br/>
 <% 
 	}
 }

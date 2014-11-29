@@ -9,7 +9,7 @@
     List<PendingHours> pendingList = null;
     try
     {
-        pendingList = Stats.getPendingHours(user.getName(), 48);
+        pendingList = Stats.getInstance().getPendingHours(user.getName(), 48);
     }
     catch(DataError e)
     {
@@ -47,7 +47,7 @@
 	</caption>
 	<tbody>
 <%
-	if(pendingList.size() == 0)
+	if(pendingList != null && pendingList.size() == 0)
 	{
 %>
         <tr>
@@ -56,15 +56,17 @@
         </tr>
 <%		
 	}
-		
-	for (PendingHours hour : pendingList)
-	{
+	else
+    {
+	    for (PendingHours hour : pendingList)
+	    {
 %>
         <tr>
             <td><strong><%= Formatters.oneDecimal.format(hour.phours) %> </strong>hours back</td>
             <td>in <%= hour.phourtime %> hours and <%=hour.pminutetime%> minutes.</td>
         </tr>
 <%
+        }
 	}
 %>
 	</tbody>

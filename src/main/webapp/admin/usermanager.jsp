@@ -1,9 +1,7 @@
-<%@ page
-        language="java"
+<%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.Helpers"
-        %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
+        import="net.fseconomy.data.*, net.fseconomy.util.Helpers, net.fseconomy.beans.UserBean"
+%>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 

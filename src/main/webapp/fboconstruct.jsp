@@ -96,7 +96,7 @@
 		<form method="post" action="fboconstruct.jsp">
 	
 			<div class="formgroup high">
-				<img src="/stickyImg" /><br/>
+				<img src="stickyImg" /><br/>
 				To build new FBO, please enter the Captcha text below:<br/>
 				<input name="answer" /><br/><br/>			
 				<input type="hidden" name="location" value="<%= location.toUpperCase() %>"/>

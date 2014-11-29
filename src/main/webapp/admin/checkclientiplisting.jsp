@@ -19,8 +19,10 @@
     String searchby = request.getParameter("searchby");
     String searchfor = request.getParameter("searchfor");
 
-    if(searchby== null || searchfor == null)
+    if (searchby == null || searchfor == null)
+    {
         response.sendRedirect("/admin/checkclientip.jsp");
+    }
 
     List<ClientRequest> requests = null;
     UserBean inputuser = null;
@@ -84,9 +86,9 @@
 		<div class="message"><%= message %></div>
 <%	
 	}
-	else if (requests.size() > 0) 
+	else if ( requests != null && requests.size() > 0)
 	{
-%>		
+%>
 		<div class="dataTable">	
 		<h2>User - <%= "account".equals(searchby) ? inputuser.getName() : request.getParameter("ip") %> - Client request log last 100 entries</h2><br/>
 		<a href="admin.jsp">Return to Admin Page</a><br/><br/>
@@ -107,25 +109,33 @@
 		</thead>
 		<tbody>
 <%
-		if(requests != null)
-			for (int c=0; c < requests.size(); c++)
-			{
-				ClientRequest cr = requests.get(c);
-%>			<tr>
-			<td><%= cr.id %></td>
-			<td><%= cr.time %></td>
-			<td><%= cr.ip %></td>
-			<td><%= cr.userid %></td>
-			<td><%= cr.name %></td>
-			<td><%= cr.client %></td>
-			<td><%= cr.state %></td>
-			<td><%= cr.aircraft %></td>
-			<td><%= cr.params %></td>
-			</tr>
-<%		
-			}
+        for (ClientRequest cr : requests)
+        {
 %>
-	</tbody>
+            <tr>
+                <td><%= cr.id %>
+                </td>
+                <td><%= cr.time %>
+                </td>
+                <td><%= cr.ip %>
+                </td>
+                <td><%= cr.userid %>
+                </td>
+                <td><%= cr.name %>
+                </td>
+                <td><%= cr.client %>
+                </td>
+                <td><%= cr.state %>
+                </td>
+                <td><%= cr.aircraft %>
+                </td>
+                <td><%= cr.params %>
+                </td>
+            </tr>
+<%
+        }
+%>
+	    </tbody>
 	</table>
 </div>
 <%	

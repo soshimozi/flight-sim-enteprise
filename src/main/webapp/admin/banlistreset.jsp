@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.data.*, net.fseconomy.util.Helpers"
+        import="net.fseconomy.data.*"
 %>
 <%@ page import="net.fseconomy.beans.UserBean" %>
 
@@ -14,6 +14,8 @@
 <%
         return;
     }
+
+    String message = null;
 %>
 
 <!DOCTYPE html>
@@ -25,7 +27,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="..css/redmond/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css" />
     <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
     <script type="text/javascript" src="../scripts/jquery.min.js"></script>

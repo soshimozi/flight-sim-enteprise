@@ -9,7 +9,7 @@
 %>
 
 <!DOCTYPE html>
-<html xmlns="https://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
 
     <title>FSEconomy terminal</title>
@@ -53,7 +53,7 @@
             Select the aircraft model
         </div>
         <a href="aircraftconfigs.jsp">Open Table View</a>
-        <select id="modelSelect"  style="width:300px; margin-top:40;" size="20" class="select2">
+        <select id="modelSelect"  style="width:300px; margin-top:40px;" size="20" class="select2">
 <%
     List<MakeModel> makeModels = Models.getMakeModels();
     for(MakeModel makeModel : makeModels)

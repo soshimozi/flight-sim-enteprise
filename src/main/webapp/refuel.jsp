@@ -13,7 +13,7 @@
     
 	String aircraft = request.getParameter("registration");
     
-	AircraftBean aircraftData = Aircraft.getAircraftByRegistration(aircraft);
+	AircraftBean aircraftData = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(aircraft));
 	ModelBean modelData = Models.getModelById(aircraftData.getModelId());
 
     if (aircraftData.getLocation() == null)
@@ -22,7 +22,7 @@
     if (message != null)
     {
 %>
-<div class="message"><%= message %></div>
+    <div class="message"><%= message %></div>
 <%
         return;
     }
@@ -95,7 +95,7 @@
 <%
 			for (FboBean fbo : fbos)
 			{ 
-				int fuelQty = 0;
+				int fuelQty;
 				if (fueltype > 0)
 				{
 					fuelQty = Goods.getGoodsQty(fbo, GoodsBean.GOODS_FUELJETA);

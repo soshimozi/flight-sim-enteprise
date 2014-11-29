@@ -26,7 +26,8 @@ public class AssignmentBean implements Serializable
 	int userlock;
 	String commodity;
 	int amount;
-	String from, to, aircraft;
+	String from, to;
+    int aircraftId;
 	String location;
 	String comment;
 	double pay;
@@ -54,7 +55,7 @@ public class AssignmentBean implements Serializable
 		setId(rs.getInt("id"));
 		setExpires(rs.getTimestamp("expires"));
 		setCommodity(rs.getString("commodity"));
-		setAircraft(aircraft);
+		setAircraftId(rs.getInt("aircraftId"));
 		setFrom(rs.getString("fromicao"));
 		setTo(rs.getString("toicao"));
 		setLocation(rs.getString("location"));
@@ -134,9 +135,9 @@ public class AssignmentBean implements Serializable
 	 * Returns the aircraft.
 	 * @return String
 	 */
-	public String getAircraft()
+	public int getAircraftId()
 	{
-		return aircraft;
+		return aircraftId;
 	}
 
 	/**
@@ -195,11 +196,11 @@ public class AssignmentBean implements Serializable
 
 	/**
 	 * Sets the aircraft.
-	 * @param aircraft The aircraft to set
+	 * @param aircraftId The aircraft to set
 	 */
-	public void setAircraft(String aircraft)
+	public void setAircraftId(int aircraftId)
 	{
-		this.aircraft = aircraft;
+		this.aircraftId = aircraftId;
 	}
 
 	/**

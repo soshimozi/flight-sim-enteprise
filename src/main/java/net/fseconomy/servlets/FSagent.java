@@ -191,7 +191,7 @@ public class FSagent extends HttpServlet
 			throw new DataError(aircraft.getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
 		}		
 
-		if (Stats.getNumberOfHours(user.getName(), 48) > 30)
+		if (Stats.getInstance().getNumberOfHours(user.getId(), 48) > 30)
 			throw new DataError("Maximum pilot hours in a 48 hour period reached");
 
         DepartFlight info = Flights.departAircraft(aircraft, user.getId(), closest.icao);

@@ -401,8 +401,8 @@ public class Flights
                     totalPilotFee += pilotFee;
                     income += value;
 
-                    fboAssignmentFee += Fbos.payFboGroundCrewFees(assignment.getFrom(), assignment, payAssignmentToAccount, location.icao, aircraft.getRegistration(), true);
-                    fboAssignmentFee += Fbos.payFboGroundCrewFees(location.icao, assignment, payAssignmentToAccount, location.icao, aircraft.getRegistration(), true);
+                    fboAssignmentFee += Fbos.payFboGroundCrewFees(assignment.getFrom(), assignment, payAssignmentToAccount, location.icao, aircraft.getId(), true);
+                    fboAssignmentFee += Fbos.payFboGroundCrewFees(location.icao, assignment, payAssignmentToAccount, location.icao, aircraft.getId(), true);
                 }
                 rs.close();
                 stmt.close();
@@ -451,11 +451,11 @@ public class Flights
 
                 // Pay rental + fuel + bonus to owner of aircraft
                 if (toPayOwner != 0)
-                    Banking.doPayment(payAssignmentToAccount, aircraft.getOwner(), toPayOwner, PaymentBean.RENTAL, 0, -1, location.icao, aircraft.getRegistration(), "", false);
+                    Banking.doPayment(payAssignmentToAccount, aircraft.getOwner(), toPayOwner, PaymentBean.RENTAL, 0, -1, location.icao, aircraft.getId(), "", false);
 
                 // Pay crew cost
                 if (crewCost > 0)
-                    Banking.doPayment(payAssignmentToAccount, 0, crewCost, PaymentBean.CREW_FEE, 0, -1, location.icao, aircraft.getRegistration(), "", false);
+                    Banking.doPayment(payAssignmentToAccount, 0, crewCost, PaymentBean.CREW_FEE, 0, -1, location.icao, aircraft.getId(), "", false);
 
                 //---------------------------------------------
                 // Variable payouts based on each assignment
@@ -479,16 +479,16 @@ public class Flights
                         Logging.logTemplateAssignment(assignment, payAssignmentToAccount);
 
                     // Pay assignment to operator of flight
-                    Banking.doPayment(owner, payAssignmentToAccount, value, PaymentBean.ASSIGNMENT, 0, -1, location.icao, aircraft.getRegistration(), "", false);
+                    Banking.doPayment(owner, payAssignmentToAccount, value, PaymentBean.ASSIGNMENT, 0, -1, location.icao, aircraft.getId(), "", false);
 
                     // If group flight, pay the pilot fee
                     if (groupFlight && pilotFee > 0)
-                        Banking.doPayment(payAssignmentToAccount, user.getId(), pilotFee, PaymentBean.PILOT_FEE, 0, -1, location.icao, aircraft.getRegistration(), "", false);
+                        Banking.doPayment(payAssignmentToAccount, user.getId(), pilotFee, PaymentBean.PILOT_FEE, 0, -1, location.icao, aircraft.getId(), "", false);
 
                     // Charge mptTax - convert tax rate to a percent
                     if (mptTaxRate > 0)
                     {
-                        Banking.doPayment(payAssignmentToAccount, 0, (value * (mptTaxRate * .01)), PaymentBean.MULTIPLE_PT_TAX, 0, -1, location.icao, aircraft.getRegistration(), "", false);
+                        Banking.doPayment(payAssignmentToAccount, 0, (value * (mptTaxRate * .01)), PaymentBean.MULTIPLE_PT_TAX, 0, -1, location.icao, aircraft.getId(), "", false);
 
                         // Used for tracking log
                         mpttax += (value * (mptTaxRate * .01));
@@ -513,9 +513,10 @@ public class Flights
 
                             //Get Registration and trim off any excess space at start and end
                             String reg = sa.substring(start,end).trim();
+                            int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
 
                             //Finalize our shipment
-                            Aircraft.finalizeAircraftShipment(reg, false, false);
+                            Aircraft.finalizeAircraftShipment(aircraftId, false, false);
                         }
                     }
 
@@ -523,8 +524,8 @@ public class Flights
                     totalPilotFee += pilotFee;
                     income += value;
 
-                    fboAssignmentFee += Fbos.payFboGroundCrewFees(assignment.getFrom(), assignment, payAssignmentToAccount, location.icao, aircraft.getRegistration(), false);
-                    fboAssignmentFee += Fbos.payFboGroundCrewFees(location.icao, assignment, payAssignmentToAccount, location.icao, aircraft.getRegistration(), false);
+                    fboAssignmentFee += Fbos.payFboGroundCrewFees(assignment.getFrom(), assignment, payAssignmentToAccount, location.icao, aircraft.getId(), false);
+                    fboAssignmentFee += Fbos.payFboGroundCrewFees(location.icao, assignment, payAssignmentToAccount, location.icao, aircraft.getId(), false);
                 }
                 rs.close();
                 stmt.close();
@@ -601,10 +602,10 @@ public class Flights
                 //////////////////////////////////////////////////////
                 // Currently only Heat, and Mixture > 95% above 1000ft is checked in client
                 for (int[] aDamage : damage)
-                    Aircraft.addAircraftDamage(aircraft.getRegistration(), aDamage[0], aDamage[1], aDamage[2]);
+                    Aircraft.addAircraftDamage(aircraft.getId(), aDamage[0], aDamage[1], aDamage[2]);
 
                 for (int c=1; c<= aircraft.getEngines(); c++)
-                    Aircraft.addAircraftDamage(aircraft.getRegistration(), c, AircraftMaintenanceBean.DAMAGE_RUNTIME, engineTime);
+                    Aircraft.addAircraftDamage(aircraft.getId(), c, AircraftMaintenanceBean.DAMAGE_RUNTIME, engineTime);
 
                 // Add log entry
                 ///////////////////////////////////////////////////

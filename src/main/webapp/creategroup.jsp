@@ -32,7 +32,7 @@
             group.setBanList(request.getParameter("banList"));
             Accounts.CreateGroup(group, user);
 %>
-    <jsp:forward page="groups.jsp"></jsp:forward>
+    <jsp:forward page="groups.jsp" />
 <%
             return;
         }

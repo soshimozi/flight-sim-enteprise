@@ -28,9 +28,9 @@
     <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css">
     <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script type='text/javascript' src='/scripts/common.js'></script>
-    <script type='text/javascript' src='/scripts/css.js'></script>
-    <script type='text/javascript' src='/scripts/standardista-table-sorting.js'></script>
+    <script type='text/javascript' src='../scripts/common.js'></script>
+    <script type='text/javascript' src='../scripts/css.js'></script>
+    <script type='text/javascript' src='../scripts/standardista-table-sorting.js'></script>
     <script type='text/javascript' src="../scripts/jquery.min.js"></script>
     <script type='text/javascript' src="../scripts/jquery-ui.min.js"></script>
     <script type='text/javascript' src="../scripts/AutoComplete.js"></script>
@@ -68,18 +68,13 @@
 %>	<h2>Enter User Account</h2>
 	<div class="form" style="width: 400px">
 	<form method="post">
-	<tr>
-	<td>
-	Account Name : 
-	    <input type="text" id="username" name="username"/>
-	    <input type="hidden" id="user" name="user"/>
-	</td>
-	</td>
-	</tr>
-	<br/>
-	<input type="submit" class="button" value="GO" />
-	<input type="hidden" name="submit" value="true"/>
-	<input type="hidden" name="return" value="/admin/adminuser48hourtrend.jsp"/>
+    	Account Name:
+	        <input type="text" id="username" name="username"/>
+	        <input type="hidden" id="user" name="user"/>
+	    <br/>
+	    <input type="submit" class="button" value="GO" />
+	    <input type="hidden" name="submit" value="true"/>
+	    <input type="hidden" name="return" value="/admin/adminuser48hourtrend.jsp"/>
 	</form>
 	</div>
 <%
@@ -92,7 +87,7 @@
             message = "User Not Found";
         }
 
-        List<TrendHours> trend = null;
+        List<TrendHours> trend;
         trend = Data.getTrendHoursQuery(inputuser.getName(), 500);
 
         if (message != null)

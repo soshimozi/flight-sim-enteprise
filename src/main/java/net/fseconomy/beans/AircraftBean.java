@@ -13,7 +13,7 @@ public class AircraftBean implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 	public static final int ACC_TACHO=1;
-	public static final int ACC_HOUR=2;	
+	public static final int ACC_HOUR=2;
 	
 	public static final int ADV_FERRY = 1;
 	
@@ -29,6 +29,7 @@ public class AircraftBean implements Serializable
 	public static final int FUELTYPE_100LL = 0;
 	public static final int FUELTYPE_JETA = 1;
 
+    int id;
 	String make;
 	String model;
 	String registration;
@@ -90,6 +91,7 @@ public class AircraftBean implements Serializable
 	
 	public AircraftBean(ResultSet rs) throws SQLException
 	{
+        setId(rs.getInt("id"));
 		setRegistration(rs.getString("registration"));
 		setHome(rs.getString("home"));
 		setLocation(rs.getString("location"));
@@ -1668,5 +1670,15 @@ public class AircraftBean implements Serializable
     public boolean isForSale()
     {
         return sellPrice > 0;
+    }
+
+    public void setId(int id)
+    {
+        this.id = id;
+    }
+
+    public int getId()
+    {
+        return id;
     }
 }

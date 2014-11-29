@@ -26,7 +26,7 @@
     <link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css">
     <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/jquery/1.10.2/jquery.min.js"></script>
+    <script src="scripts/jquery.min.js"></script>
     <script src="scripts/jquery-ui.min.js"></script>
     <script src="scripts/AutoComplete.js"></script>
 

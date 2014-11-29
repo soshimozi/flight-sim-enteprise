@@ -40,7 +40,7 @@
 		{
 			Templates.updateTemplate(template, user);
 %>
-			<jsp:forward page="/admin/templates.jsp"></jsp:forward>
+			<jsp:forward page="/admin/templates.jsp" />
 <%		
 		} 
 		catch (DataError e)

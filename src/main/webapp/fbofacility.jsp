@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-    	import="java.util.List, java.text.*, net.fseconomy.beans.*, net.fseconomy.data.*"
+    	import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -20,7 +20,7 @@
 		account = Accounts.getAccountById(id);
 		if (account != null)
 		{
-			if (account.isGroup() == false || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
+			if (!account.isGroup() || user.groupMemberLevel(id) < UserBean.GROUP_STAFF)
 				account = null;	
 		}				
 	}
@@ -121,13 +121,12 @@
 			</thead>
 			<tbody>
 <%
-	NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
 	for (FboFacilityBean facility : facilities)
 	{
 		FboBean fbo = Fbos.getFbo(facility.getFboId());
 		AirportBean ap = Airports.getAirport(facility.getLocation());
 		
-		String sizedesc = null;
+		String sizedesc;
 		if (facility.getIsDefault())
 		{
 			int totalSpace = fbo.getFboSize() * ap.getFboSlots();

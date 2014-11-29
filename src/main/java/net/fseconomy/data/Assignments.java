@@ -336,11 +336,11 @@ public class Assignments implements Serializable
 
             //Get aircraft registration for assignment
             qry = "SELECT aircraft FROM assignments WHERE id = ?";
-            String aircraft = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), id);
+            String reg = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), id);
 
             //This is an All-In job if it has an assigned airplane to the job already
             //Do our checks and rent the aircraft
-            if (aircraft != null)
+            if (reg != null)
             {
                 //No jobs in the loading area
                 qry = "SELECT (count(*) > 0) AS found FROM assignments WHERE userlock = ? AND active <> 2";
@@ -358,7 +358,8 @@ public class Assignments implements Serializable
                     throw new DataError("FSE Validation Error: cannot have more than 1 All-In job in My Flight queue.");
                 }
 
-                Aircraft.rentAircraft(aircraft, user, false);
+                int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+                Aircraft.rentAircraft(aircraftId, user, false);
             }
             else
             {
@@ -392,12 +393,13 @@ public class Assignments implements Serializable
 
             //Get aircraft registration for assignment
             qry = "SELECT aircraft FROM assignments WHERE id = ?";
-            String aircraft = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), id);
+            String reg = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), id);
 
             //if All-In job, remove lock on aircraft now that job is canceled
-            if (aircraft != null)
+            if (reg != null)
             {
-                Aircraft.releaseAircraft(aircraft, user);
+                int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+                Aircraft.releaseAircraft(aircraftId, user);
             }
 
             qry = "UPDATE assignments SET userlock = null, active = 0 where id = ?";

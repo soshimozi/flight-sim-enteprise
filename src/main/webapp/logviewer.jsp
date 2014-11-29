@@ -13,16 +13,23 @@
     String sAircraft = request.getParameter("aircraft");
 
     if (sAircraft != null)
+    {
         output = Logging.outputLog("aircraft='" + Converters.escapeSQL(sAircraft) + "'");
+    }
     else if (sUser != null)
     {
         if (sUser.equals(user.getName()))
+        {
             output = Logging.outputLog("user='" + Converters.escapeSQL(sUser) + "'");
-    } else if (sGroupId != null)
+        }
+    }
+    else if (sGroupId != null)
     {
         int groupId = Integer.parseInt(sGroupId);
         if (user.groupMemberLevel(groupId) > UserBean.GROUP_INVITED)
+        {
             output = Logging.outputLog("groupId=" + groupId);
+        }
     }
     if (output == null)
     {
@@ -102,7 +109,7 @@
                     this.minLon = lon;
                 if (lon > this.maxLon)
                     this.maxLon = lon;
-            }
+            };
             this.fix = function()
             {
                 var dlat = this.maxLat - this.minLat;
@@ -114,21 +121,21 @@
                 this.minLon -= (delta - dlon)/2;
                 this.pixelsPerDegreeX = this.pixelsX / (this.maxLon - this.minLon);
                 this.pixelsPerDegreeY = this.pixelsY / (this.maxLat - this.minLat);
-            }
+            };
             this.toX = function(Lon)
             {
                 return Math.round((Lon - this.minLon) * this.pixelsPerDegreeX);
-            }
+            };
             this.toY = function(Lat)
             {
                 return Math.round((this.maxLat - Lat) * this.pixelsPerDegreeY);
-            }
+            };
 
         }
 
         function show()
         {
-            var flights = new Array();
+            var flights = [];
             var select = document.getElementById('flights');
             var bounds = new box(640, 480);
 
@@ -173,11 +180,13 @@
 %>
 		<select id="aircraft" size="10" onchange="fillFlights()">
 			<option value="">[ All ]</option>
-<%      for (Iterator i = aircraft.iterator(); i.hasNext(); )
+<%
+        for (Object anAircraft : aircraft)
         {
-		    String ac = (String) i.next();
+    String ac = (String) anAircraft;
 %>
-		    <option value="<%= ac %>"><%= ac %></option>
+            <option value="<%= ac %>"><%= ac %>
+            </option>
 <%
         }
 %>
@@ -190,13 +199,14 @@
     {
 %>
 		<select id="pilots" size="10" onchange="fillFlights()">
-			<option value="" selected="true">[ All ]</option>
+			<option value="" selected>[ All ]</option>
 <%
-        for (Iterator i = pilots.iterator(); i.hasNext(); )
+        for (Object pilot : pilots)
         {
-		    String ac = (String) i.next();
+        String ac = (String) pilot;
 %>
-		    <option value="<%= ac %>"><%= ac %></option>
+            <option value="<%= ac %>"><%= ac %>
+            </option>
 <%
         }
 %>
@@ -209,8 +219,8 @@
 		<input type="button" class="button" onclick="show()" value="Show" />
 	</form>
 	</div>
-	<div id="outDiv" style="position:relative;height:480px;width:640;">
-		<img id="output" width="640" height="480" src="img/empty.gif"/>
+	<div id="outDiv" style="position:relative;height:480px;width:640px;">
+		<img id="output" width="640px" height="480px" src="img/empty.gif"/>
 	</div>
 	</div>
 </body>

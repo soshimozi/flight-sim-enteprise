@@ -53,18 +53,11 @@
 	{
 		Banking.reloadMoney(user);
 		int hours = 48;
-		double totalhours = 0;
-		String stotalhours = null;
+		double totalhours;
+		String stotalhours;
 
-		try
-		{
-			totalhours = Stats.getNumberOfHours(user.getName(), hours);
-			stotalhours = Formatters.twoDecimals.format(Stats.getNumberOfHours(user.getName(), hours));
-		}
-		catch(DataError e)
-		{
-			//eat it
-		}
+        totalhours = Stats.getInstance().getNumberOfHours(user.getId(), hours);
+        stotalhours = Formatters.twoDecimals.format(totalhours);
 %>
 	<form class="top" method="post" action="/userctl">
 		<strong>Logged in as</strong>

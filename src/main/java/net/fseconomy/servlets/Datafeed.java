@@ -549,7 +549,7 @@ public class Datafeed extends HttpServlet
 				csvoutput.appendHeaderItem("ExpireDateTime");		
 			}	
 			
-            List<AssignmentBean> assignments = Assignments.getAssignmentsSQL("SELECT * FROM assignments WHERE aircraft is not null");
+            List<AssignmentBean> assignments = Assignments.getAssignmentsSQL("SELECT * FROM assignments WHERE aircraftid is not null");
 
             for (AssignmentBean assignment : assignments)
             {
@@ -557,10 +557,11 @@ public class Datafeed extends HttpServlet
 
                 if (csvformat)
                 {
+                    AircraftBean ac = Aircraft.getAircraftById(assignment.getAircraftId());
+
                     csvoutput.append(assignment.getFromTemplate());
                     csvoutput.append(assignment.getId());
-                    csvoutput.append(assignment.getAircraft());
-                    AircraftBean ac = Aircraft.getAircraftByRegistration(assignment.getAircraft());
+                    csvoutput.append(ac.getRegistration());
                     csvoutput.append(ac.getMakeModel());
                     csvoutput.append(assignment.getFrom());
                     csvoutput.append(assignment.getTo());
@@ -573,11 +574,11 @@ public class Datafeed extends HttpServlet
                 }
                 else
                 {
+                    AircraftBean ac = Aircraft.getAircraftById(assignment.getAircraftId());
                     xmloutput.append("<Assignment>\n");
                     xmloutput.append("templateId", assignment.getFromTemplate());
                     xmloutput.append("id", assignment.getId());
-                    xmloutput.append("aircraft", assignment.getAircraft());
-                    AircraftBean ac = Aircraft.getAircraftByRegistration(assignment.getAircraft());
+                    xmloutput.append("aircraft", ac.getRegistration());
                     xmloutput.append("makemodel", ac.getMakeModel());
                     xmloutput.append("from", assignment.getFrom());
                     xmloutput.append("to", assignment.getTo());
@@ -762,7 +763,7 @@ public class Datafeed extends HttpServlet
 		int flights = 0;
 		int totalMiles = 0;
 		String time = "";
-		List<Statistics> stats = Stats.getStatistics();
+		List<Statistics> stats = Stats.getInstance().getStatistics();
 		if(stats == null)
 		{
 			throw new DataError("Statistics not calculated yet. Try again in a few minutes.");
@@ -871,32 +872,33 @@ public class Datafeed extends HttpServlet
                 List<LogBean> log;
                 if (reg != null && !reg.isEmpty())
                 {
-                    log = Logging.getLogForAircraftFromId(reg, fromid);
+                    int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+                    log = Logging.getLogForAircraftFromId(aircraftId, fromid);
                 }
                 else if (req.getParameter("type") != null && req.getParameter("type").toLowerCase().contains("groupaircraft"))
                 {
                     List<AircraftBean> aircraftList = Aircraft.getAircraftOwnedByUser(account.getId());
                     if (aircraftList.size() > 0)
                     {
-                        String regs = "";
+                        String aircraftIds = "";
                         int counter = 0;
                         for (AircraftBean aircraft : aircraftList)
                         {
                             if (counter == 0)
                             {
-                                regs = "'" + aircraft.getRegistration() + "'";
+                                aircraftIds = aircraft.getId() + "";
                             }
                             else
                             {
-                                regs = regs + "'" + aircraft.getRegistration() + "'";
+                                aircraftIds = aircraftIds + aircraft.getRegistration();
                             }
 
                             if ((counter + 1) < aircraftList.size())
-                                regs = regs + ", ";
+                                aircraftIds = aircraftIds + ", ";
 
                             counter++;
                         }
-                        log = Logging.getLogForGroupFromRegistrations(regs, fromid);
+                        log = Logging.getLogForGroupFromIds(aircraftIds, fromid);
                     }
                     else
                     {
@@ -1420,7 +1422,8 @@ public class Datafeed extends HttpServlet
 			registration = registration.replaceAll("'", "\\\\'").replaceAll(";","");
 			
 			//get selected aircraft
-			aircraft = Aircraft.getAircraftByRegistration(registration);
+            int aircraftId = Aircraft.getAircraftIdByRegistration(registration);
+			aircraft = Aircraft.getAircraftById(aircraftId);
             aircraftList = new ArrayList<>();
 
             if(aircraft != null)
@@ -1435,13 +1438,14 @@ public class Datafeed extends HttpServlet
 			Converters.xmlBuffer output = new Converters.xmlBuffer();
 			
 			//Get our name parameter for the make/model we want to retrieve
-			String aircraftreg = req.getParameter("aircraftreg");
+			String registration = req.getParameter("aircraftreg");
 
 			//escape single quotes contained in the string
-			aircraftreg = aircraftreg.replaceAll("'", "\\\\'").replaceAll(";","");
+            registration = registration.replaceAll("'", "\\\\'").replaceAll(";","");
 			
 			//get selected aircraft
-			aircraft = Aircraft.getAircraftByRegistration(aircraftreg);
+            int aircraftId = Aircraft.getAircraftIdByRegistration(registration);
+            aircraft = Aircraft.getAircraftById(aircraftId);
 			if(aircraft == null)
 				throw new DataError("No Aircraft Found.");
 			
@@ -1499,14 +1503,15 @@ public class Datafeed extends HttpServlet
             for (AircraftAlias anAircraft : aliasList)
             {
                 csvoutput.append(anAircraft.model);
-                csvoutput.append(anAircraft.fsName);
+                csvoutput.append(Converters.XMLHelper.protectSpecialCharacters(anAircraft.fsName));
                 csvoutput.newrow();
             }
 		}
 		else
 		{
             //TODO needs to be rewritten for List
-            AircraftAlias[] aliasArray = (AircraftAlias[])aliasList.toArray();
+            AircraftAlias[] aliasArray = aliasList.toArray(new AircraftAlias[aliasList.size()]);
+
 			//create an aircraft tag section for each alias
 			for (int c=0; c < aliasArray.length; c++)
 			{
@@ -2399,7 +2404,8 @@ public class Datafeed extends HttpServlet
 
         for (LogBean log : logs)
         {
-            String type = Aircraft.getAircraftMakeModel(log.getAircraft());
+            AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
+            String username = Accounts.getAccountNameById(log.getUserId());
 
             String groupName = "";
             if (log.getGroupId() > 0)
@@ -2435,9 +2441,9 @@ public class Datafeed extends HttpServlet
             buffer.append(log.getType());
             buffer.append(Formatters.dateDataFeed.format(log.getTime()));
             buffer.append(log.getDistance());
-            buffer.append(log.getUser() == null ? "" : log.getUser());
-            buffer.append(log.getAircraft());
-            buffer.append(type);
+            buffer.append(username == null ? "" : username);
+            buffer.append(aircraft.getRegistration());
+            buffer.append(aircraft.getMakeModel());
             buffer.append(log.getFrom() == null ? "" : log.getFrom());
             buffer.append(log.getTo() == null ? "" : log.getTo());
             buffer.append(totalenginetime);
@@ -2462,15 +2468,8 @@ public class Datafeed extends HttpServlet
 	{
         for (LogBean log : logs)
         {
-            String type;
-            try
-            {
-                type = Aircraft.getAircraftMakeModel(log.getAircraft());
-            }
-            catch (ArrayIndexOutOfBoundsException e)
-            {
-                type = "None";
-            }
+            AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
+            String username = Accounts.getAccountNameById(log.getUserId());
 
             String groupName = "";
             if (log.getGroupId() > 0)
@@ -2501,15 +2500,15 @@ public class Datafeed extends HttpServlet
 
             String totalenginetime = TimeToHrsMins(log.getTotalEngineTime());
             String totalflighttime = TimeToHrsMins(log.getFlightEngineTime());
-
+            String makemodel = aircraft.getMakeModel();
             buffer.append("<FlightLog>\n");
             buffer.append("Id", log.getId());
             buffer.append("Type", log.getType());
             buffer.append("Time", Formatters.dateDataFeed.format(log.getTime()));
             buffer.append("Distance", log.getDistance());
-            buffer.append("Pilot", log.getUser());
-            buffer.append("Aircraft", log.getAircraft());
-            buffer.append("MakeModel", type);
+            buffer.append("Pilot", username);
+            buffer.append("Aircraft", aircraft.getRegistration());
+            buffer.append("MakeModel", makemodel == null ? "None" : makemodel);
             buffer.append("From", log.getFrom() == null ? "" : log.getFrom());
             buffer.append("To", log.getFrom() == null ? "" : log.getTo());
             buffer.append("TotalEngineTime", totalenginetime);

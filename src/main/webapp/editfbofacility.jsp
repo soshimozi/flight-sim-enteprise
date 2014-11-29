@@ -140,7 +140,7 @@
 				<td colspan="3"><i><span class="small">This is global. If unchecked, no renters will be able to renew.</span></i></td>
 			</tr>
 <%		
-		if (renters.size() > 0)
+		if (renters != null && renters.size() > 0)
 		{
 %>			
 			<tr>

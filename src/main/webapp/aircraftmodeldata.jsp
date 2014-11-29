@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="net.fseconomy.dto.*,java.text.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="net.fseconomy.dto.*, net.fseconomy.data.*, net.fseconomy.util.Formatters"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -26,8 +26,6 @@
 	
 	double costPerHr = (double)Math.round(((double)acconfig.gph * fuelprice)*100.0)/100.0;
 	double costPerNm = (double)Math.round((costPerHr / (double)acconfig.cruisespeed)*100.0)/100.0;
-	
-	NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
 %>
 
 <style type="text/css">
@@ -78,9 +76,9 @@
 }
 
 .myButton {
-	-moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
-	-webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
-	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	-moz-box-shadow:inset 0 1px 0 0 #ffffff;
+	-webkit-box-shadow:inset 0 1px 0 0 #ffffff;
+	box-shadow:inset 0 1px 0 0 #ffffff;
 	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf));
 	background:-moz-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
 	background:-webkit-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
@@ -96,12 +94,12 @@
 	display:inline-block;
 	cursor:pointer;
 	color:#777777;
-	font-family:arial;
+	font-family:arial,sans-serif;
 	font-size:15px;
 	font-weight:bold;
 	padding:6px 12px;
 	text-decoration:none;
-	text-shadow:0px 1px 0px #ffffff;
+	text-shadow:0 1px 0 #ffffff;
 }
 .myButton:hover {
 	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed));

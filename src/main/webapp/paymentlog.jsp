@@ -65,13 +65,13 @@
         if (id == 0)
             return "FS Economy";
 
-        String value = userMap.get(new Integer(id));
+        String value = userMap.get(id);
         if (value == null)
         {
             UserBean thisUser = Accounts.getAccountById(id);
             if (thisUser != null)
                 value = thisUser.getName();
-            userMap.put(new Integer(id), value);
+            userMap.put(id, value);
         }
         return value == null ? " - " : value;
     }
@@ -345,7 +345,6 @@
 </div>
 <%
     long tsEnd = System.nanoTime();
-    long elapsed = System.nanoTime()-tsStart;
     String eTime = Formatters.twoDecimals.format(((double)tsEnd-tsStart) / 1000000000.0);
 %>
     <div style="font-size: 9pt;">Elapsed Time: <%=eTime%></div>

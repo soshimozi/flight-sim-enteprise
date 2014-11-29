@@ -148,7 +148,8 @@ public class ServiceData
     {
         try
         {
-            AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+            int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+            AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 
             //if not, return error
             if(aircraft == null)
@@ -163,7 +164,7 @@ public class ServiceData
             int serviceid = getServiceId(serviceKey);
 
             String qry = "{call PurchaseAircraft(?,?,?,?)}";
-            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, account, "Service(" + serviceid + "): " + note);
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, account, "Service(" + serviceid + "): " + note);
 
             if(success)
                 return createSuccessResponse(200, null, null, "Aircraft purchase successful.");
@@ -185,7 +186,8 @@ public class ServiceData
     {
         try
         {
-            AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+            int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+            AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 
             //if not, return error
             if(aircraft == null)
@@ -197,7 +199,7 @@ public class ServiceData
             int serviceid = getServiceId(serviceKey);
 
             String qry = "{call AircraftTransfer(?,?,?,?)}";
-            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, transferto, "Service(" + serviceid + "): " + note);
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, transferto, "Service(" + serviceid + "): " + note);
 
             if (success)
                 return createSuccessResponse(200, null, null, "Aircraft transfer successful.");
@@ -222,7 +224,8 @@ public class ServiceData
 
         try
         {
-            AircraftBean aircraft = Aircraft.getAircraftByRegistration(reg);
+            int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+            AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 
             //if not, return error
             if(aircraft == null)
@@ -234,13 +237,13 @@ public class ServiceData
             {
                 mode = "lease";
                 String qry = "{call AircraftLease(?,?,?,?)}";
-                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, leaseto, "Service(" + serviceid + "): " + note);
+                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, leaseto, "Service(" + serviceid + "): " + note);
             }
             else if(aircraft.getLessor() == account) //return lease
             {
                 mode = "unlease";
                 String qry = "{call AircraftUnlease(?,?,?)}";
-                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, reg, "Service(" + serviceid + "): " + note);
+                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, "Service(" + serviceid + "): " + note);
             }
             else
                 return createErrorResponse(400, "Bad Request", "Account not lessor.");

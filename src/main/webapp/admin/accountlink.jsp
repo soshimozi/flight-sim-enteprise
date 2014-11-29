@@ -14,9 +14,10 @@
         return;
     }
 
-    String returnPage = request.getParameter("returnpage");
+    String sid = request.getParameter("id");
+    String returnPage = "/admin/usermanageredit.jsp?userid=" + sid;
 
-    int userId = Integer.parseInt(request.getParameter("id"));
+    int userId = Integer.parseInt(sid);
 
     UserBean linkuser = Accounts.getAccountById(userId);
 %>

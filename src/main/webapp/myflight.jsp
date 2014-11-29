@@ -32,7 +32,8 @@
 		String reg = request.getParameter("reg");
 		int id = Integer.parseInt(request.getParameter("id"));
 		boolean hold = Boolean.parseBoolean(request.getParameter("hold"));
-		Aircraft.setHoldRental(reg, id, !hold);
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+		Aircraft.setHoldRental(aircraftId, id, !hold);
 	}
 	
 	List<AssignmentBean> assignments = Assignments.getAssignmentsForUser(user.getId());
@@ -46,14 +47,7 @@
             isAllInPresent = true;
 	}
 	
-	try
-	{
-		pilothours = Stats.getNumberOfHours(user.getName(), 48);
-	}
-	catch(DataError e)
-	{
-		//Eat it
-	}
+	pilothours = Stats.getInstance().getNumberOfHours(user.getId(), 48);
 %>
 
 <!DOCTYPE html>
@@ -428,7 +422,7 @@
      		if (bean.getActive() == 2)
      		{
                 String image = "img/set2_" + bean.getActualBearingImage() + ".gif";
-           		String aircraftReg = bean.getAircraft();
+           		String aircraftReg = Aircraft.getAircraftRegistrationById(bean.getAircraftId());
            		String status;
            		
            		if (bean.getActive() > 0)
@@ -608,7 +602,7 @@
      		{
            		//AssignmentBean assignment = assignments[c];
            		String image = "img/set2_" +assignment.getActualBearingImage() + ".gif";
-           		String aircraftReg = assignment.getAircraft();
+           		String aircraftReg = Aircraft.getAircraftRegistrationById(assignment.getAircraftId());
            		String status;
            		
            		//All-In logic
@@ -955,7 +949,7 @@
 	     </tr>
 	     <tr><td>&nbsp;</td></tr>
 	     <tr>
-	     	<td><font color="#FF0033"><strong>CAUTION:</strong>  On larger aircraft, Max Fuel can be off by as much as 5 gallons due to floatingpoint issues.</font></td>
+	     	<td><span style="color: #FF0033; "><strong>CAUTION:</strong>  On larger aircraft, Max Fuel can be off by as much as 5 gallons due to floatingpoint issues.</span></td>
 	     </tr>
      </table>
      <form>

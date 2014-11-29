@@ -14,14 +14,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-	<meta name="GENERATOR" content="IBM WebSphere Studio" />
-	<meta http-equiv="Content-Style-Type" content="text/css" />
-	
-	<link href="css/Master.css" rel="stylesheet" type="text/css" />
-	
-	<title>FS Economy Terminal</title>
 
+    <title>FS Economy Terminal</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
 	<script src="scripts/AnchorPosition.js"></script>
 	<script src="scripts/PopupWindow.js"></script>

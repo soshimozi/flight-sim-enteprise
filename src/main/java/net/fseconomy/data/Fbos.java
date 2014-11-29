@@ -98,7 +98,7 @@ public class Fbos implements Serializable
                 stmt.executeUpdate("update payments set fbo = " + mergeWithId + " where fbo = " + fbo.getId());
             }
 
-            Banking.doPayment(buyer, owner, 0, PaymentBean.FBO_SALE, 0, fbo.getId(), icao, "", "FBO Transfer", false);
+            Banking.doPayment(buyer, owner, 0, PaymentBean.FBO_SALE, 0, fbo.getId(), icao, 0, "FBO Transfer", false);
         }
         catch (SQLException e)
         {
@@ -146,7 +146,7 @@ public class Fbos implements Serializable
                 doTransferFbo(fbo, account, oldOwner, icao, includesGoods);
                 Goods.resetAllGoodsSellBuyFlag(oldOwner, icao);
 
-                Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.FBO_SALE, 0, fboId, icao, "", "", false);
+                Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.FBO_SALE, 0, fboId, icao, 0, "", false);
             }
             else
             {
@@ -321,7 +321,7 @@ public class Fbos implements Serializable
                 DALHelper.getInstance().ExecuteUpdate(qry, fbo.getLocation(), fbo.getId(), occupantId, blocks, "Rented Facility", landlord.getUnits(), FboFacilityBean.DEFAULT_COMMODITYNAME_PASSENGERS, 300, 99999, 1, new Timestamp(paymentDate.getTime().getTime()));
             }
 
-            Banking.doPayment(occupantId, landlord.getOccupant(), (double) rent, PaymentBean.FBO_FACILITY_RENT, 0, fbo.getId(), fbo.getLocation(), "", "", false);
+            Banking.doPayment(occupantId, landlord.getOccupant(), (double) rent, PaymentBean.FBO_FACILITY_RENT, 0, fbo.getId(), fbo.getLocation(), 0, "", false);
         }
         catch (SQLException e)
         {
@@ -338,7 +338,7 @@ public class Fbos implements Serializable
         int fboId = -1;
         short cnvCommodityToTransfer[] = {0, PaymentBean.TRANSFER_GOODS_BUILDING_MATERIALS, PaymentBean.TRANSFER_GOODS_SUPPLIES, PaymentBean.TRANSFER_GOODS_FUEL, PaymentBean.TRANSFER_GOODS_JETA};
 
-        Banking.doPayment(buyer, seller, 0, cnvCommodityToTransfer[type], 0, fboId, location, "", amount + " Units", false);
+        Banking.doPayment(buyer, seller, 0, cnvCommodityToTransfer[type], 0, fboId, location, 0, amount + " Units", false);
     }
 
     public static List<FboBean> getFbo()
@@ -1184,7 +1184,7 @@ public class Fbos implements Serializable
 
 
     //Added ability to just add up total value, and not do any DB updates - Airboss 3/5/11
-    public static double payFboGroundCrewFees(String fboIcao, AssignmentBean assignment, int payAssignmentToAccount, String location, String registration, boolean checkonly)
+    public static double payFboGroundCrewFees(String fboIcao, AssignmentBean assignment, int payAssignmentToAccount, String location, int aircraftId, boolean checkonly)
     {
         if (assignment.isFerry())
             return 0.0;
@@ -1248,7 +1248,7 @@ public class Fbos implements Serializable
                 for (FboBean fbo : fbos)
                 {
                     thisFboFee = fbofee * ((double) fbo.getFboSize() / lotsTotal);
-                    Banking.doPayment(payAssignmentToAccount, fbo.getOwner(), thisFboFee, PaymentBean.FBO_ASSIGNMENT_FEE, 0, fbo.getId(), location, registration, "", false);
+                    Banking.doPayment(payAssignmentToAccount, fbo.getOwner(), thisFboFee, PaymentBean.FBO_ASSIGNMENT_FEE, 0, fbo.getId(), location, aircraftId, "", false);
                 }
             }
         }

@@ -13,14 +13,14 @@ import java.util.Date;
 
 public class Aircraft implements Serializable
 {
-    public static void transferac(String reg, int buyer, int owner, String location) throws DataError
+    public static void transferac(int aircraftId, int buyer, int owner, String location) throws DataError
     {
         try
         {
-            String qry = "UPDATE aircraft SET owner = ? WHERE owner = ? AND registration = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, buyer, owner, reg);
+            String qry = "UPDATE aircraft SET owner = ? WHERE owner = ? AND aircraftid = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, buyer, owner, aircraftId);
 
-            Banking.doPayment(buyer, owner, 0, PaymentBean.AIRCRAFT_SALE, 0, -1, location, reg, "AC Transfer", false);
+            Banking.doPayment(buyer, owner, 0, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraftId, "Aircraft Transfer", false);
         }
         catch (SQLException e)
         {
@@ -28,14 +28,48 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void leaseac(String reg, int lessee, int owner, String location) throws DataError
+    public static String getAircraftRegistrationById(int aircraftId)
+    {
+        String result = "";
+
+        try
+        {
+            String qry = "SELECT registration FROM aircraft WHERE id = ?";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), aircraftId);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static int getAircraftIdByRegistration(String reg)
+    {
+        int result = 0;
+
+        try
+        {
+            String qry = "SELECT id FROM aircraft WHERE registration = ?";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), reg);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static void leaseac(int aircraftId, int lessee, int owner, String location) throws DataError
     {
         try
         {
-            String qry = "UPDATE aircraft SET sellprice=null, owner = ?, lessor = ? WHERE owner = ? AND registration = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, lessee, owner, owner, reg);
+            String qry = "UPDATE aircraft SET sellprice=null, owner = ?, lessor = ? WHERE owner = ? AND aircraftid = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, lessee, owner, owner, aircraftId);
 
-            Banking.doPayment(lessee, owner, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, reg, "Aircraft Lease", false);
+            Banking.doPayment(lessee, owner, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease", false);
         }
         catch (SQLException e)
         {
@@ -43,14 +77,14 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void leasereturnac(String reg, int lessee, int owner, String location) throws DataError
+    public static void leasereturnac(int aircraftId, int lessee, int owner, String location) throws DataError
     {
         try
         {
-            String qry = "UPDATE aircraft SET owner = ?, lessor = null WHERE lessor = ? AND registration = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, owner, owner, reg);
+            String qry = "UPDATE aircraft SET owner = ?, lessor = null WHERE lessor = ? AND aircraftId = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, owner, owner, aircraftId);
 
-            Banking.doPayment(owner, lessee, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, reg, "Aircraft Lease Return", false);
+            Banking.doPayment(owner, lessee, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease Return", false);
         }
         catch (SQLException e)
         {
@@ -63,15 +97,34 @@ public class Aircraft implements Serializable
         return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND sellPrice is not null ORDER BY models.make, models.model, sellPrice");
     }
 
-    public static AircraftBean getAircraftByRegistration(String reg)
+    public static AircraftBean getAircraftByRegistrationX(String reg)
     {
         List<AircraftBean> result = getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND registration='" + Converters.escapeSQL(reg) + "'");
         return result.size() == 0 ? null : result.get(0);
     }
 
+    public static AircraftBean getAircraftById(int aircraftId)
+    {
+        AircraftBean result = null;
+        try
+        {
+            String qry = "SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND aircraft.id = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraftId);
+
+            if(rs.next())
+                result = new AircraftBean(rs);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public static Boolean isAircraftRegistrationUnique(String reg)
     {
-        Boolean exists = true; //default is not to allow the registration on error
+        Boolean exists = true; //default is not to allow the change on error
 
         try
         {
@@ -88,13 +141,10 @@ public class Aircraft implements Serializable
 
     /**
      * Gets the aircraft by registration and then fills in the shipping config values for passed in aircraft
-     *
-     * @param reg Airboss 12/21/10
      */
-    public static AircraftBean getAircraftShippingInfoByRegistration(String reg)
+    public static AircraftBean getAircraftShippingInfoById(int aircraftId)
     {
-        List<AircraftBean> aircraftList = getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND registration='" + Converters.escapeSQL(reg) + "'");
-        AircraftBean aircraft = aircraftList.get(0);
+        AircraftBean aircraft = getAircraftById(aircraftId);
 
         //Currently not used
         //if no shipping size available then return without trying to set.
@@ -105,6 +155,7 @@ public class Aircraft implements Serializable
         {
             String qry = "SELECT * FROM shippingConfigsAircraft WHERE minSize <= ? AND maxSize >= ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraft.getEmptyWeight(), aircraft.getEmptyWeight());
+
             rs.next();
             aircraft.setShippingConfigAircraft(rs.getInt("shippingStateDelay"), rs.getDouble("costPerKg"), rs.getInt("costPerCrate"), rs.getInt("costDisposal"));
         }
@@ -182,7 +233,7 @@ public class Aircraft implements Serializable
         departMargin = departSvc == 0 ? departMargin = 25 : fromfbo.getRepairShopMargin();
         destMargin = destSvc == 0 ? destMargin = 25 : tofbo.getRepairShopMargin();
 
-        AircraftBean acShippingInfo = getAircraftShippingInfoByRegistration(aircraft.getRegistration());
+        AircraftBean acShippingInfo = getAircraftShippingInfoById(aircraft.getId());
 
         //Compute total shipping costs
         double[] shippingcost = acShippingInfo.getShippingCosts(1);
@@ -251,13 +302,44 @@ public class Aircraft implements Serializable
 
     public static AircraftBean getAircraftForUser(int userId)
     {
-        List<AircraftBean> result = getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND userlock=" + userId);
-        return result.size() == 0 ? null : result.get(0);
-    }//Modified to add Lessor by Airboss 5/8/11
+        AircraftBean result = null;
+        try
+        {
+            String qry = "SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND userlock = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, userId);
+
+            if(rs.next())
+                result = new AircraftBean(rs);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 
     public static List<AircraftBean> getAircraftOwnedByUser(int userId)
     {
-        return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND (owner=" + userId + " OR lessor=" + userId + ") ORDER BY make,models.model");
+        List<AircraftBean> result = new ArrayList<>();
+
+        try
+        {
+            String qry = "SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND (owner = ? OR lessor = ?) ORDER BY make,models.model";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, userId, userId);
+
+            while(rs.next())
+            {
+                AircraftBean bean = new AircraftBean(rs);
+                result.add(bean);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     public static List<AircraftBean> getAircraftInArea(String location, List<CloseAirport> locations)
@@ -559,13 +641,13 @@ public class Aircraft implements Serializable
         return result;
     }
 
-    public static void rentAircraft(String reg, int user, boolean rentedDry) throws DataError
+    public static void rentAircraft(int aircraftId, int userId, boolean rentedDry) throws DataError
     {
         try
         {
             //get aircraft info
-            String qry = "SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND registration = ?";
-            ResultSet aircraftRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, reg);
+            String qry = "SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND aircraft.id = ?";
+            ResultSet aircraftRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraftId);
 
             if (!aircraftRS.next())
             {
@@ -576,7 +658,7 @@ public class Aircraft implements Serializable
 
             //get renter info
             qry = "SELECT * FROM accounts WHERE id = ?";
-            ResultSet renterRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user);
+            ResultSet renterRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, userId);
 
             if (!renterRS.next())
             {
@@ -618,28 +700,28 @@ public class Aircraft implements Serializable
 
             //normal flow for renting a plane begins
             qry = "SELECT (count(*) > 0) AS Found FROM aircraft WHERE userlock = ?";
-            boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user);
+            boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), userId);
             if (found)
             {
                 throw new DataError("There is already an aircraft selected.");
             }
 
-            qry = "SELECT (count(*) = 0) AS rented FROM aircraft WHERE userlock is null AND registration = ?";
-            boolean rented = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), reg);
+            qry = "SELECT (count(*) = 0) AS rented FROM aircraft WHERE userlock is null AND id = ?";
+            boolean rented = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraftId);
             if (rented)
             {
                 throw new DataError("Aircraft is already locked.");
             }
 
-            qry = "SELECT * FROM aircraft, models WHERE userlock is null AND location is not null AND aircraft.model = models.id AND registration = ?";
-            ResultSet fuelRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, reg);
+            qry = "SELECT * FROM aircraft, models WHERE userlock is null AND location is not null AND aircraft.model = models.id AND id = ?";
+            ResultSet fuelRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraftId);
             fuelRS.next();
             AircraftBean thisCraft = new AircraftBean(fuelRS);
 
             Float initialFuel = rentedDry ? (float) thisCraft.getTotalFuel() : null;
 
-            qry = "UPDATE aircraft SET userlock = ?, lockedSince = ?, initialFuel = ? where registration = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, user, new Timestamp(GregorianCalendar.getInstance().getTime().getTime()), initialFuel, reg);
+            qry = "UPDATE aircraft SET userlock = ?, lockedSince = ?, initialFuel = ? where id = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, userId, new Timestamp(GregorianCalendar.getInstance().getTime().getTime()), initialFuel, aircraftId);
         }
         catch (SQLException e)
         {
@@ -647,27 +729,27 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void releaseAircraft(String reg, int user) throws DataError
+    public static void releaseAircraft(int aircraftId, int user) throws DataError
     {
         try
         {
-            String qry = "SELECT (count(registration) > 0) AS found FROM aircraft WHERE location is not null AND registration = ? AND userlock = ?";
-            boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), reg, user);
+            String qry = "SELECT (count(registration) > 0) AS found FROM aircraft WHERE location is not null AND id = ? AND userlock = ?";
+            boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraftId, user);
             if (!found)
             {
                 return;
             }
 
-            qry = "SELECT location FROM aircraft WHERE location is not null AND registration = ? AND userlock = ?";
-            String location = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), reg, user);
+            qry = "SELECT location FROM aircraft WHERE location is not null AND id = ? AND userlock = ?";
+            String location = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), aircraftId, user);
 
             if (location == null)
             {
                 throw new DataError("No aircraft to cancel.");
             }
 
-            qry = "UPDATE aircraft SET holdRental=0, userlock = ?, lockedSince = ?, initialFuel = ? WHERE registration = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, null, null, null, reg);
+            qry = "UPDATE aircraft SET holdRental=0, userlock = null, lockedSince = null, initialFuel = null WHERE id = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, aircraftId);
         }
         catch (SQLException e)
         {
@@ -675,13 +757,13 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static boolean setHoldRental(String reg, int userId, boolean hold)
+    public static boolean setHoldRental(int aircraftId, int userId, boolean hold)
     {
         boolean result = false;
         try
         {
-            String qry = "UPDATE aircraft SET holdRental = ? WHERE registration = ? and userlock = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, hold, reg, userId);
+            String qry = "UPDATE aircraft SET holdRental = ? WHERE id = ? and userlock = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, hold, aircraftId, userId);
             result = true;
         }
         catch (SQLException e)
@@ -714,9 +796,9 @@ public class Aircraft implements Serializable
         return result;
     }
 
-    public static void defuelAircraft(AircraftBean aircraft, int userid, int amount) throws DataError
+    public static void defuelAircraft(AircraftBean aircraft, int userId, int amount) throws DataError
     {
-        UserBean user = Accounts.getAccountById(userid);
+        UserBean user = Accounts.getAccountById(userId);
         Accounts.reloadMemberships(user);
         ModelBean mb = Models.getModelById(aircraft.getModelId());
         if (!aircraft.changeAllowed(user) && mb.getFuelSystemOnly() != 1)
@@ -741,9 +823,10 @@ public class Aircraft implements Serializable
         {
             aircraft.emptyAllFuel();
             aircraft.addFuel(amount);
+
             conn = DALHelper.getInstance().getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE registration='" + aircraft.getRegistration() + "' AND userlock=" + user.getId());
+            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE id='" + aircraft.getId() + "' AND userlock=" + user.getId());
             if (rs.next())
             {
                 aircraft.writeFuel(rs);
@@ -764,13 +847,14 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void refuelAircraft(String reg, int user, int amount, int provider, int type) throws DataError
+    public static void refuelAircraft(int aircraftId, int userId, int amount, int provider, int type) throws DataError
     {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
-        AircraftBean aircraft = getAircraftByRegistration(reg);
-        UserBean pilot = Accounts.getAccountById(user);
+
+        AircraftBean aircraft = getAircraftById(aircraftId);
+        UserBean pilot = Accounts.getAccountById(userId);
         String location;
 
         if (aircraft == null)
@@ -784,14 +868,14 @@ public class Aircraft implements Serializable
             throw new DataError("Cannot refuel while aircraft is in the air.");
         }
 
-        if (aircraft.getUserLock() != user)
+        if (aircraft.getUserLock() != userId)
         {
             throw new DataError("Permission denied.");
         }
 
         if (provider == -2)
         {
-            defuelAircraft(aircraft, user, amount);
+            defuelAircraft(aircraft, userId, amount);
             return;
         }
 
@@ -835,10 +919,10 @@ public class Aircraft implements Serializable
         }
         else if (provider == -1)                    // Refuel from private drums
         {
-            GoodsBean fuel = Goods.getGoods(location, user, GoodsBean.GOODS_FUEL100LL);
+            GoodsBean fuel = Goods.getGoods(location, userId, GoodsBean.GOODS_FUEL100LL);
             if (type > 0)
             {
-                fuel = Goods.getGoods(location, user, GoodsBean.GOODS_FUELJETA);
+                fuel = Goods.getGoods(location, userId, GoodsBean.GOODS_FUELJETA);
             }
 
             if (fuel == null || fuel.getAmount() < kg)
@@ -890,7 +974,7 @@ public class Aircraft implements Serializable
             }
 
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE registration='" + reg + "' AND userlock=" + user);
+            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE id = " + aircraftId + " AND userlock = " + userId);
             if (rs.next())
             {
                 aircraft.writeFuel(rs);
@@ -914,11 +998,11 @@ public class Aircraft implements Serializable
             {
                 if (type < 1)
                 {
-                    Goods.changeGoodsRecord(location, GoodsBean.GOODS_FUEL100LL, user, -kg, false);
+                    Goods.changeGoodsRecord(location, GoodsBean.GOODS_FUEL100LL, userId, -kg, false);
                 }
                 else
                 {
-                    Goods.changeGoodsRecord(location, GoodsBean.GOODS_FUELJETA, user, -kg, false);
+                    Goods.changeGoodsRecord(location, GoodsBean.GOODS_FUELJETA, userId, -kg, false);
                 }
             }
 
@@ -927,7 +1011,7 @@ public class Aircraft implements Serializable
                 rs = stmt.executeQuery("SELECT * from log where 1=2");
                 rs.moveToInsertRow();
                 rs.updateTimestamp("time", new Timestamp(System.currentTimeMillis()));
-                rs.updateString("aircraft", reg);
+                rs.updateInt("aircraftid", aircraftId);
                 rs.updateString("user", pilot.getName());
                 rs.updateString("type", "refuel");
                 rs.updateFloat("fuelCost", cost);
@@ -938,14 +1022,14 @@ public class Aircraft implements Serializable
                 rs.close();
                 rs = null;
 
-                String comment = "User ID: " + user + " Amount (gals): " + Formatters.oneDecimal.format(added) + ", $ per Gal: " + Formatters.currency.format(fuelPrice);
+                String comment = "User ID: " + userId + " Amount (gals): " + Formatters.oneDecimal.format(added) + ", $ per Gal: " + Formatters.currency.format(fuelPrice);
                 if (type < 1)
                 {
-                    Banking.doPayment(aircraft.getOwner(), fbo == null ? 0 : fbo.getOwner(), cost, PaymentBean.REASON_REFUEL, logId, fboId, location, reg, comment, false);
+                    Banking.doPayment(aircraft.getOwner(), fbo == null ? 0 : fbo.getOwner(), cost, PaymentBean.REASON_REFUEL, logId, fboId, location, aircraft.getId(), comment, false);
                 }
                 else
                 {
-                    Banking.doPayment(aircraft.getOwner(), fbo == null ? 0 : fbo.getOwner(), cost, PaymentBean.REASON_REFUEL_JETA, logId, fboId, location, reg, comment, false);
+                    Banking.doPayment(aircraft.getOwner(), fbo == null ? 0 : fbo.getOwner(), cost, PaymentBean.REASON_REFUEL_JETA, logId, fboId, location, aircraft.getId(), comment, false);
                 }
             }
         }
@@ -961,7 +1045,7 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void buyAircraft(String aircraft, int account, UserBean user) throws DataError
+    public static void buyAircraft(int aircraftId, int account, UserBean user) throws DataError
     {
         if (user.getId() != account && user.groupMemberLevel(account) < UserBean.GROUP_STAFF)
         {
@@ -970,8 +1054,8 @@ public class Aircraft implements Serializable
 
         try
         {
-            String qry = "SELECT * from aircraft WHERE sellPrice > 0 AND registration = ?";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraft);
+            String qry = "SELECT * from aircraft WHERE sellPrice > 0 AND id = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraftId);
             if (rs.next())
             {
                 int sellPrice = rs.getInt("sellPrice");
@@ -983,10 +1067,10 @@ public class Aircraft implements Serializable
                     throw new DataError("Not enough money to buy aircraft");
                 }
 
-                qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null where registration = ?";
-                DALHelper.getInstance().ExecuteUpdate(qry, account, aircraft);
+                qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null where id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, account, aircraftId);
 
-                Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraft, "", false);
+                Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraftId, "", false);
             }
             else
             {
@@ -999,7 +1083,7 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void sellAircraft(String reg, UserBean user) throws DataError
+    public static void sellAircraft(int aircraftId, UserBean user) throws DataError
     {
         Connection conn = null;
         Statement stmt = null;
@@ -1009,10 +1093,10 @@ public class Aircraft implements Serializable
             conn = DALHelper.getInstance().getConnection();
 
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            rs = stmt.executeQuery("SELECT * from aircraft WHERE registration = '" + reg + "'");
+            rs = stmt.executeQuery("SELECT * from aircraft WHERE id = " + aircraftId);
             if (rs.next())
             {
-                AircraftBean aircraft = getAircraftByRegistration(reg);
+                AircraftBean aircraft = getAircraftById(aircraftId);
 
                 if (aircraft == null)
                 {
@@ -1053,7 +1137,7 @@ public class Aircraft implements Serializable
                 rs.close();
                 rs = null;
 
-                Banking.doPayment(0, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, reg, "", false);
+                Banking.doPayment(0, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraft.getId(), "", false);
             }
             else
             {
@@ -1072,7 +1156,7 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void addAircraftDamage(String aircraft, int engine, int parameter, int value)
+    public static void addAircraftDamage(int aircraftId, int engine, int parameter, int value)
     {
         if (value == 0)
         {
@@ -1081,17 +1165,17 @@ public class Aircraft implements Serializable
 
         try
         {
-            String qry = "SELECT (count(aircraft) > 0) AS found from damage WHERE aircraft = ? AND engine = ? AND parameter = ?";
-            boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft, engine, parameter);
+            String qry = "SELECT (count(aircraft) > 0) AS found from damage WHERE aircraftid = ? AND engine = ? AND parameter = ?";
+            boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraftId, engine, parameter);
             if (exists)
             {
-                qry = "UPDATE damage SET value = value + ? WHERE aircraft = ? AND engine = ? and parameter = ?";
-                DALHelper.getInstance().ExecuteUpdate(qry, value, aircraft, engine, parameter);
+                qry = "UPDATE damage SET value = value + ? WHERE aircraftid = ? AND engine = ? and parameter = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, value, aircraftId, engine, parameter);
             }
             else
             {
-                qry = "INSERT INTO damage (aircraft, engine, parameter, value) VALUES(?,?,?,?)";
-                DALHelper.getInstance().ExecuteUpdate(qry, aircraft, engine, parameter, value);
+                qry = "INSERT INTO damage (aircraftid, engine, parameter, value) VALUES(?,?,?,?)";
+                DALHelper.getInstance().ExecuteUpdate(qry, aircraftId, engine, parameter, value);
             }
         }
         catch (SQLException e)
@@ -1110,7 +1194,7 @@ public class Aircraft implements Serializable
             conn = DALHelper.getInstance().getConnection();
 
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            rs = stmt.executeQuery("SELECT * from aircraft WHERE registration = '" + aircraft.getRegistration() + "'");
+            rs = stmt.executeQuery("SELECT * from aircraft WHERE id = " + aircraft.getId());
             if (!rs.next())
             {
                 throw new DataError("No aircraft found.");
@@ -1131,7 +1215,7 @@ public class Aircraft implements Serializable
                 throw new DataError("Permission denied");
             }
 
-            if (newRegistration != null && getAircraftByRegistration(newRegistration) == null)
+            if (newRegistration != null && getAircraftIdByRegistration(newRegistration) != 0)
             {
                 throw new DataError("Registration already in use.");
             }
@@ -1140,31 +1224,16 @@ public class Aircraft implements Serializable
             aircraft.setDistance((int) Math.round(distanceFromHome.distance));
             aircraft.setBearing((int) Math.round(distanceFromHome.bearing));
             aircraft.writeBean(rs);
+
             if (newRegistration != null)
             {
                 newRegistration = newRegistration.trim();
-                PreparedStatement logUpdate = conn.prepareStatement("UPDATE log SET aircraft = ? WHERE aircraft = ?");
-                logUpdate.setString(1, newRegistration);
-                logUpdate.setString(2, aircraft.getRegistration());
-                logUpdate.execute();
-                logUpdate.close();
-                PreparedStatement paymentsUpdate = conn.prepareStatement("UPDATE payments SET aircraft = ? WHERE aircraft = ?");
-                paymentsUpdate.setString(1, newRegistration);
-                paymentsUpdate.setString(2, aircraft.getRegistration());
-                paymentsUpdate.execute();
-                paymentsUpdate.close();
-                PreparedStatement damageUpdate = conn.prepareStatement("UPDATE damage SET aircraft = ? WHERE aircraft = ?");
-                damageUpdate.setString(1, newRegistration);
-                damageUpdate.setString(2, aircraft.getRegistration());
-                damageUpdate.execute();
-                damageUpdate.close();
-
                 rs.updateString("registration", newRegistration);
             }
+
             rs.updateRow();
             rs.close();
             rs = null;
-
         }
         catch (SQLException e)
         {
@@ -1181,12 +1250,11 @@ public class Aircraft implements Serializable
     /**
      * Aircraft shipping
      *
-     * @param reg              - Aircraft registration to finalize shipment
+     * @param aircraftId              - Aircraft Id to finalize shipment
      * @param resetdepart      - indicates if the aircraft should returned to its departure location
      * @param deleteassignment - Indicates if we should also make sure the assignment is removed
-     *                         Airboss 12/26/10
      */
-    public static void finalizeAircraftShipment(String reg, boolean resetdepart, boolean deleteassignment)
+    public static void finalizeAircraftShipment(int aircraftId, boolean resetdepart, boolean deleteassignment)
     {
         Statement stmt = null;
         ResultSet rs = null;
@@ -1196,12 +1264,9 @@ public class Aircraft implements Serializable
             conn = DALHelper.getInstance().getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
-            //***********
-            //Remember, aircraft is BEFORE any changes that follow, as we are in a transaction!!
-            //***********
-            AircraftBean aircraft = getAircraftShippingInfoByRegistration(reg);
+            AircraftBean aircraft = getAircraftShippingInfoById(aircraftId);
 
-            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE registration='" + reg + "'");
+            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE id=" + aircraftId);
 
             if (rs.next())
             {
@@ -1220,7 +1285,7 @@ public class Aircraft implements Serializable
                 rs.updateRow();
                 rs.close();
             }
-            rs = stmt.executeQuery("SELECT * FROM log WHERE type='maintenance' and subtype=" + AircraftMaintenanceBean.MAINT_SHIPMENTREASSEMBLY + " and aircraft='" + reg + "' order by id desc");
+            rs = stmt.executeQuery("SELECT * FROM log WHERE type='maintenance' and subtype=" + AircraftMaintenanceBean.MAINT_SHIPMENTREASSEMBLY + " and aircraftId=" + aircraftId + " order by id desc");
 
             if (rs.next())
             {
@@ -1289,16 +1354,16 @@ public class Aircraft implements Serializable
                 throw new DataError("Not enough money.");
             }
 
-            String qry = "update aircraft set equipment = equipment|? where registration = ?";
-            if (DALHelper.getInstance().ExecuteUpdate(qry, equipmentType, aircraft.getRegistration()) != 1)
+            String qry = "update aircraft set equipment = equipment|? where id = ?";
+            if (DALHelper.getInstance().ExecuteUpdate(qry, equipmentType, aircraft.getId()) != 1)
             {
                 throw new DataError("Aircraft not found.");
             }
 
             double factor = 1 + fbo.getEquipmentInstallMargin() / 100.0;
 
-            Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), price, PaymentBean.EQUIPMENT, 0, fbo.getId(), aircraft.getLocation(), aircraft.getRegistration(), "", false);
-            Banking.doPayment(fbo.getOwner(), 0, (float) (price / factor), PaymentBean.EQUIPMENT_FBO_COST, 0, fbo.getId(), aircraft.getLocation(), aircraft.getRegistration(), "", false);
+            Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), price, PaymentBean.EQUIPMENT, 0, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
+            Banking.doPayment(fbo.getOwner(), 0, (float) (price / factor), PaymentBean.EQUIPMENT_FBO_COST, 0, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
         }
         catch (SQLException e)
         {
@@ -1360,7 +1425,7 @@ public class Aircraft implements Serializable
 
     public static List<AircraftConfigs> getAircraftConfigs()
     {
-        ArrayList<AircraftConfigs> result = new ArrayList<AircraftConfigs>();
+        ArrayList<AircraftConfigs> result = new ArrayList<>();
         ResultSet rs;
 
         try
@@ -1417,7 +1482,7 @@ public class Aircraft implements Serializable
             currentAirport.add(thisAirport);
             if (modelId != -1)
             {
-                HashMap<String, CloseAirport> airportMap = new HashMap<String, CloseAirport>();
+                HashMap<String, CloseAirport> airportMap = new HashMap<>();
                 List<CloseAirport> closeAirports = Airports.fillCloseAirports(airport.icao, 0, 100);
                 for (CloseAirport closeAirport : closeAirports)
                 {
@@ -1425,7 +1490,7 @@ public class Aircraft implements Serializable
                 }
 
                 List<AircraftBean> areaAircraft = getAircraftOfTypeInArea(airport.icao, closeAirports, modelId);
-                Set<CloseAirport> airportSet = new HashSet<CloseAirport>();
+                Set<CloseAirport> airportSet = new HashSet<>();
                 for (AircraftBean anAreaAircraft : areaAircraft)
                 {
                     if (anAreaAircraft.getLocation().toLowerCase().equals(thisAirport.getIcao().toLowerCase()))
@@ -1473,21 +1538,23 @@ public class Aircraft implements Serializable
         {
             conn = DALHelper.getInstance().getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            rs = stmt.executeQuery("SELECT * from aircraft WHERE registration = '" + aircraft.getRegistration() + "'");
+            rs = stmt.executeQuery("SELECT * from aircraft WHERE id = " + aircraft.getId());
             if (!rs.next())
             {
                 throw new DataError("No aircraft found.");
             }
 
-            aircraft.setEquipment(rs.getInt("equipment"));
-            if (newRegistration != null && getAircraftByRegistration(newRegistration) != null)
+            if (newRegistration != null && getAircraftIdByRegistration(newRegistration) != 0)
             {
                 throw new DataError("Registration already in use.");
             }
 
+            aircraft.setEquipment(rs.getInt("equipment"));
+
             DistanceBearing distanceFromHome = Airports.getDistanceBearing(aircraft.getLocation(), aircraft.getHome());
             aircraft.setDistance((int) Math.round(distanceFromHome.distance));
             aircraft.setBearing((int) Math.round(distanceFromHome.bearing));
+
             rs.updateString("home", aircraft.getHome());
             rs.updateString("location", aircraft.getLocation());
             rs.updateInt("owner", aircraft.getOwner());
@@ -1501,6 +1568,7 @@ public class Aircraft implements Serializable
             {
                 rs.updateInt("userlock", aircraft.getUserLock());
             }
+
             rs.updateInt("bonus", aircraft.getBonus());
             rs.updateInt("accounting", aircraft.getAccounting());
             rs.updateInt("rentalDry", aircraft.getRentalPriceDry());
@@ -1509,6 +1577,7 @@ public class Aircraft implements Serializable
             rs.updateInt("equipment", aircraft.getEquipment());
             rs.updateInt("advertise", aircraft.getAdvertise());
             rs.updateInt("allowFix", aircraft.getAllowFix());
+
             if (aircraft.getHome().equals(aircraft.getLocation()))
             {
                 rs.updateNull("bearingToHome");
@@ -1532,22 +1601,6 @@ public class Aircraft implements Serializable
             if (newRegistration != null)
             {
                 newRegistration = newRegistration.trim();
-                PreparedStatement logUpdate = conn.prepareStatement("UPDATE log SET aircraft = ? WHERE aircraft = ?");
-                logUpdate.setString(1, newRegistration);
-                logUpdate.setString(2, aircraft.getRegistration());
-                logUpdate.execute();
-                logUpdate.close();
-                PreparedStatement paymentsUpdate = conn.prepareStatement("UPDATE payments SET aircraft = ? WHERE aircraft = ?");
-                paymentsUpdate.setString(1, newRegistration);
-                paymentsUpdate.setString(2, aircraft.getRegistration());
-                paymentsUpdate.execute();
-                paymentsUpdate.close();
-                PreparedStatement damageUpdate = conn.prepareStatement("UPDATE damage SET aircraft = ? WHERE aircraft = ?");
-                damageUpdate.setString(1, newRegistration);
-                damageUpdate.setString(2, aircraft.getRegistration());
-                damageUpdate.execute();
-                damageUpdate.close();
-
                 rs.updateString("registration", newRegistration);
             }
 
@@ -1575,14 +1628,14 @@ public class Aircraft implements Serializable
         return Assignments.checkAllInFlightWithAssignment(aircraft);
     }
 
-    public static String getAircraftMakeModel(String reg)
+    public static String getAircraftMakeModel(int aircraftId)
     {
         String result = null;
 
         try
         {
-            String qry = "SELECT CONCAT(m.make, ' ', m.model) FROM aircraft a, models m  WHERE a.model=m.id AND registration = ?;";
-            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), reg);
+            String qry = "SELECT CONCAT(m.make, ' ', m.model) FROM aircraft a, models m  WHERE a.model=m.id AND id = ?;";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), aircraftId);
         }
         catch (SQLException e)
         {
@@ -1592,7 +1645,7 @@ public class Aircraft implements Serializable
         return result;
     }
 
-    public static void doMaintenance(AircraftBean aircraft, int maintenanceType, UserBean user, FboBean fbo) throws DataError
+    public static void doMaintenance(AircraftBean aircraft, int maintenanceType, FboBean fbo) throws DataError
     {
         Connection conn = null;
         Statement stmt = null;
@@ -1645,7 +1698,7 @@ public class Aircraft implements Serializable
                 throw new DataError("The Aircraft Location and the FBO Location are not the same.");
 
             damageStmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            damage = damageStmt.executeQuery("SELECT * FROM damage WHERE aircraft = '" + aircraft.getRegistration() + "'");
+            damage = damageStmt.executeQuery("SELECT * FROM damage WHERE aircraftid = " + aircraft.getId());
 
             maintenanceStmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             maintenance = maintenanceStmt.executeQuery("SELECT * FROM maintenance");
@@ -1665,7 +1718,7 @@ public class Aircraft implements Serializable
             logId = rs.getInt("id");
             rs.close();
 
-            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE registration = '" + aircraft.getRegistration() + "'");
+            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE id = " + aircraft.getId());
 
             if (!rs.next())
                 throw new DataError("Aircraft not found.");
@@ -1699,17 +1752,17 @@ public class Aircraft implements Serializable
             rs.updateRow();
 
             stmt.executeUpdate("UPDATE log SET maintenanceCost = " + price + ", ageECost = " + conditionPrice[0] + ", ageAvCost = " + conditionPrice[1] + ", ageAfCost = " + conditionPrice[2] + ", ageAdwCost = " + conditionPrice[3] + " WHERE id = " + logId);
-            Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), price, PaymentBean.MAINTENANCE, logId, fbo.getId(), aircraft.getLocation(), aircraft.getRegistration(), "", false);
+            Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), price, PaymentBean.MAINTENANCE, logId, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
 
             if (maintenanceType != AircraftMaintenanceBean.MAINT_FIXAIRCRAFT)
-                Banking.doPayment(fbo.getOwner(), 0, (float) (price / factor), PaymentBean.MAINTENANCE_FBO_COST, logId, fbo.getId(), aircraft.getLocation(), aircraft.getRegistration(), "", false);
+                Banking.doPayment(fbo.getOwner(), 0, (float) (price / factor), PaymentBean.MAINTENANCE_FBO_COST, logId, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
 
             rs.close();
 
             // clear engine damage and hours if new engine
             if(maintenanceType == AircraftMaintenanceBean.MAINT_REPLACEENGINE)
             {
-                String sQuery = "UPDATE damage SET value = 0 WHERE aircraft = '" + aircraft.getRegistration() + "' and 'engine' < 3";
+                String sQuery = "UPDATE damage SET value = 0 WHERE aircraftid = " + aircraft.getId() + " and 'engine' < 3";
                 stmt.executeUpdate(sQuery);
             }
         }
@@ -1751,7 +1804,7 @@ public class Aircraft implements Serializable
             rs.updateTimestamp("time", new Timestamp(System.currentTimeMillis()));
             rs.updateString("user", user.getName());
             rs.updateString("type", "maintenance");
-            rs.updateString("aircraft", aircraft.getRegistration());
+            rs.updateInt("aircraftid", aircraft.getId());
             rs.updateInt("subType", maintenanceType);
             rs.updateInt("totalEngineTime", aircraft.getTotalEngineTime());
             rs.updateInt("fbo", fbo.getId());
@@ -1776,10 +1829,10 @@ public class Aircraft implements Serializable
             else
                 PayLocation = aircraft.getLocation();
 
-            Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), shippingcost, PaymentBean.MAINTENANCE, logId, fbo.getId(), PayLocation, aircraft.getRegistration(), comment, false);
+            Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), shippingcost, PaymentBean.MAINTENANCE, logId, fbo.getId(), PayLocation, aircraft.getId(), comment, false);
 
             if (maintenanceType != AircraftMaintenanceBean.MAINT_FIXAIRCRAFT)
-                Banking.doPayment(fbo.getOwner(), 0, (float) (shippingcost / factor), PaymentBean.MAINTENANCE_FBO_COST, logId, fbo.getId(), PayLocation, aircraft.getRegistration(), comment, false);
+                Banking.doPayment(fbo.getOwner(), 0, (float) (shippingcost / factor), PaymentBean.MAINTENANCE_FBO_COST, logId, fbo.getId(), PayLocation, aircraft.getId(), comment, false);
 
             rs.close();
         }
@@ -1805,7 +1858,7 @@ public class Aircraft implements Serializable
             if (log == null)
                 throw new DataError("Maintenance record not found.");
 
-            AircraftBean aircraft = getAircraftByRegistration(log.getAircraft());
+            AircraftBean aircraft = getAircraftById(log.getAircraftId());
             if (aircraft == null)
                 throw new DataError("Aircraft not found.");
 

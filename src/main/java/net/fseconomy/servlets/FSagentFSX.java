@@ -372,7 +372,7 @@ public class FSagentFSX extends HttpServlet
 			throw new DataError(aircraft.getMakeModel() + " is an All-In only aircraft and no All-In assignment found.  Please select another aircraft");
 
 		// Check the number of hours the user has flown, if over 30 hours, exit
-		if (Stats.getNumberOfHours(user.getName(), 48) > 30)
+		if (Stats.getInstance().getNumberOfHours(user.getId(), 48) > 30)
 			throw new DataError("Maximum pilot hours in a 48 hour period reached");
 
 		// Lets put together our aircraft data

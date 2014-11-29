@@ -23,12 +23,16 @@
 	int highLoad = (request.getParameter("highLoad") == null || request.getParameter("highLoad").equals("")) ? -1 : Integer.parseInt(request.getParameter("highLoad"));
 
 	String equipment = request.getParameter("equipment");
-	if (equipment == null)
-		equipment = "all";
+    if (equipment == null)
+    {
+        equipment = "all";
+    }
 	
 	String fromParam = request.getParameter("from");
-	if (fromParam != null && fromParam.equals(""))
-		fromParam = null;
+    if (fromParam != null && fromParam.equals(""))
+    {
+        fromParam = null;
+    }
 	
 	boolean hasVfr = request.getParameter("hasVfr") != null;
 	boolean hasIfr = request.getParameter("hasIfr") != null;
@@ -39,7 +43,7 @@
 	boolean isPlayerOwned = request.getParameter("isPlayerOwned") != null;
 	
 	boolean isSubmit = request.getParameter("submit") != null;
-	boolean isSearch = (modelId != -1) || (lowPrice != -1) || (highPrice != -1) || (lowTime != -1) || (highTime != -1) || (distance != -1) || (lowPax != -1) || (highPax != -1) || (lowLoad != -1) || (highLoad != -1) || hasVfr || hasIfr || hasGps || hasAp || isSystemOwned || isPlayerOwned || equipment != "all";
+	boolean isSearch = (modelId != -1) || (lowPrice != -1) || (highPrice != -1) || (lowTime != -1) || (highTime != -1) || (distance != -1) || (lowPax != -1) || (highPax != -1) || (lowLoad != -1) || (highLoad != -1) || hasVfr || hasIfr || hasGps || hasAp || isSystemOwned || isPlayerOwned || !equipment.equals("all");
 %>
 
 <!DOCTYPE html>
@@ -325,7 +329,7 @@
 		for (AircraftBean aircraft : aircraftList)
 		{
 			String reg = aircraft.getRegistration();
-			String reg2 = "";
+			String reg2;
 			String acLocation = "In Flight";
 			String acICAO = acLocation;
 			String price = Formatters.currency.format(aircraft.getSellPrice());
@@ -337,10 +341,14 @@
 			}
 			
 			int owner=aircraft.getOwner();
-			if (owner != 0)
-				reg2 = reg + "*";
-			else
-				reg2 = reg;	
+            if (owner != 0)
+            {
+                reg2 = reg + "*";
+            }
+            else
+            {
+                reg2 = reg;
+            }
 			
 			// Calculate the airframe time		
 			int afminutes = aircraft.getAirframe()/60;
@@ -362,13 +370,15 @@
 		<td><%= price %></td>
 		<td><%= afTime %></td>
 		<td><a class="link" href="javascript:doSubmit('<%= reg %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
-<%		
-			for (int loop=0; loop < staffGroups.length; loop++) 
-			{
-%>
-			| <a class="link" href="javascript:doSubmit('<%= reg %>', '<%= price %>', <%= staffGroups[loop].groupId %>)">Buy for <%= staffGroups[loop].groupName %></a>
 <%
-			}
+            for (Accounts.groupMemberData staffGroup : staffGroups)
+            {
+%>
+            | <a class="link" href="javascript:doSubmit('<%= reg %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
+                for <%= staffGroup.groupName %>
+            </a>
+<%
+            }
 %>
 		</td>
 		</tr>

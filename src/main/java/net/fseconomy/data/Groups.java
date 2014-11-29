@@ -136,7 +136,7 @@ public class Groups implements Serializable
             // The group should have no property now
 
             // Transfer funds
-            Banking.doPayment(group, user.getId(), groupMoney, PaymentBean.GROUP_DELETION, 0, -1, "", "", groupName, false);
+            Banking.doPayment(group, user.getId(), groupMoney, PaymentBean.GROUP_DELETION, 0, -1, "", 0, groupName, false);
 
             // Delete group membership
             stmt.executeUpdate("DELETE FROM groupmembership WHERE groupId = " + group);
@@ -206,7 +206,7 @@ public class Groups implements Serializable
 
         for (String member : members)
         {
-            Banking.doPayment(groupid, Integer.parseInt(member), topay, PaymentBean.GROUP_PAYMENT, 0, -1, "", "", comment, false);
+            Banking.doPayment(groupid, Integer.parseInt(member), topay, PaymentBean.GROUP_PAYMENT, 0, -1, "", 0, comment, false);
         }
     }
 

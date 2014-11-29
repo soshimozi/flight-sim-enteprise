@@ -188,15 +188,15 @@
 		
 		var formatInt = function(value) {
 			return (value < 10 ? "0" : "") + value;
-		}
+		};
 		var sDate = function(number) {
 			var value = new Date(parseInt(number));
 			return value.getFullYear() + "." + formatInt(1 + value.getMonth()) + "." + formatInt(value.getDate()) +
 				" " + formatInt(value.getHours()) + ":" + formatInt(value.getMinutes()) + ":" + formatInt(value.getSeconds());
-		}
+		};
 		var sMoney = function(number) {
 			return "$ " + parseFloat(number).toFixed(2);
-		}
+		};
 		var sDuration = function(number) {
 			var left = parseInt(number);
 			var hours = Math.floor(left/3600);
@@ -204,18 +204,18 @@
 			var minutes = Math.floor(left/60);
 			left -= 60 * minutes;
 			return formatInt(hours) + ":" + formatInt(minutes) + ": " + formatInt(left)
-		}
+		};
 		
 		var formatDuration = function(elCell, oRecord, oColumn, oData) {
 			elCell.innerHTML = sDuration(oData); 
-		}
+		};
 		var formatMoney = function(elCell, oRecord, oColumn, oData) {
 			elCell.innerHTML = sMoney(oData); 
-		}
+		};
 
 		var formatDate = function(elCell, oRecord, oColumn, oData) {
 			elCell.innerHTML = sDate(oData); 
-		}
+		};
 		
 		var columnDefs = [
 			{ key: "time", label: "Date", formatter: formatDate },
@@ -243,7 +243,7 @@
 		var buildQueryString = function (state,dt) {
 			return "from=" + state.pagination.recordOffset +
 				"&amount=" + state.pagination.rowsPerPage;			 
-		}
+		};
 
 		var paginator = new YAHOO.widget.Paginator(
 				{
@@ -274,7 +274,7 @@
 					var paidToPilot = parseFloat(log.pilotFee);
 					var paidToGroup = total - paidToPilot;
 					
-					var el=function(e) { return document.getElementById(e); }
+					var el=function(e) { return document.getElementById(e); };
 					
 					el("logDate").innerHTML = sDate(log.time);
 					el("logFromTo").innerHTML =  log.from + " &rarr; " + log.to + " (" + sDuration(log.duration) + ")";
@@ -308,7 +308,7 @@
 				failure: function(oRequest,oResponse,oPayload) {},
 				scope: this,
 				argument: "test"
-			}
+			};
 			dataSource.sendRequest("amount=1&from=" + (oArgs.target.rowIndex + paginator.getStartIndex() - 1), oCallback);
 		}); 
 	</script>

@@ -15,16 +15,16 @@
     }
 
     String error = "";
-    int ownerid = -1;
-    String ownername = "";
-    int altid = -1;
-    String altname = "";
-    String name = "";
-    String ip = "";
-    String url = "";
-    String desc = "";
-    String notes = "";
-    String newnote = "";
+    int ownerid;
+    String ownername;
+    int altid;
+    String altname;
+    String name;
+    String ip;
+    String url;
+    String desc;
+    String notes;
+    String newnote;
 
     int id = Integer.parseInt(request.getParameter("id"));
     ServiceProviderBean service = ServiceProviders.getServiceProviderById(id);
@@ -131,8 +131,8 @@
 
         $(function()
         {
-            initAutoComplete("#ownername", "#owner", <%= Accounts.ACCT_TYPE_PERSON %>)
-            initAutoComplete("#altname", "#alt", <%= Accounts.ACCT_TYPE_PERSON %>)
+            initAutoComplete("#ownername", "#owner", <%= Accounts.ACCT_TYPE_PERSON %>);
+            initAutoComplete("#altname", "#alt", <%= Accounts.ACCT_TYPE_PERSON %>);
         });
 
     </script>

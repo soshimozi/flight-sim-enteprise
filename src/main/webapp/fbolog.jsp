@@ -25,14 +25,14 @@
 <html lang="en">
 <head>
 
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-<meta name="GENERATOR" content="IBM WebSphere Studio" />
-<meta http-equiv="Content-Style-Type" content="text/css" />
-<link href="css/Master.css" rel="stylesheet" type="text/css" />
-<title>FSEconomy terminal</title>
+    <title>FSEconomy terminal</title>
 
-<script src="scripts/PopupWindow.js"></script>
-<script type="text/javascript"> var gmap = new PopupWindow(); </script>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
+
+    <script src="scripts/PopupWindow.js"></script>
+    <script type="text/javascript"> var gmap = new PopupWindow(); </script>
 
 </head>
 <body>
@@ -62,8 +62,8 @@
 	for (LogBean log : logs)
 	{
 		String action = log.getType();
-		String reg = log.getAircraft();
-		aircraft = Aircraft.getAircraftByRegistration(reg);
+		int aircraftId = log.getAircraftId();
+		aircraft = Aircraft.getAircraftById(aircraftId);
 		fueltype = aircraft.getFuelType();
 		float money = 0;
 		
@@ -78,7 +78,7 @@
 %>
 		<tr>
 			<td><%= Formatters.getUserTimeFormat(user).format(log.getTime()) %></td>
-			<td><a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + reg ) %>"><%= log.getAircraft() %></a></td>
+			<td><a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration() ) %>"><%= aircraft.getRegistration() %></a></td>
 			<td><%=log.getType().equals("refuel") ? (fueltype < 1 ? log.getSType() + " 100LL" : log.getSType() + " JetA") : log.getSType()%></td>
 			<td class="numeric"><%= Formatters.currency.format(money) %></td>
 			<td>

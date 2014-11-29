@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import = "java.text.*, net.fseconomy.data.*"
+        import = "net.fseconomy.data.*"
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -10,15 +10,13 @@
     int flying = 0;
     try
     {
-        flying = Stats.getNumberOfUsers("flying");
-        parked = Stats.getNumberOfUsers("parked");
+        flying = Stats.getInstance().getNumberOfUsers("flying");
+        parked = Stats.getInstance().getNumberOfUsers("parked");
     }
     catch(DataError e)
     {
 
     }
-
-    NumberFormat moneyFormat = NumberFormat.getCurrencyInstance();
 %>
 
 <!DOCTYPE html>
@@ -39,72 +37,72 @@
         //Original javascript code by Daniel Insley at bravenet.com - modified by Paul Dahlen.
         function createtime()
         {
-            var time = new Date()
-            var gmtMS = time.getTime() + (time.getTimezoneOffset() * 60000)
-            var gmtTime =  new Date(gmtMS)
-            var zhours = gmtTime.getHours()
-            var tfzhours = zhours
-            var lhours = time.getHours()
-            var tflhours = lhours
-            var minutes = gmtTime.getMinutes()
-            var seconds = gmtTime.getSeconds()
-            var abbrev = "AM"
-            var labbrev = "AM"
+            var time = new Date();
+            var gmtMS = time.getTime() + (time.getTimezoneOffset() * 60000);
+            var gmtTime =  new Date(gmtMS);
+            var zhours = gmtTime.getHours();
+            var tfzhours = zhours;
+            var lhours = time.getHours();
+            var tflhours = lhours;
+            var minutes = gmtTime.getMinutes();
+            var seconds = gmtTime.getSeconds();
+            var abbrev = "AM";
+            var labbrev = "AM";
 
             if (tfzhours < 10)
-                tfzhours = "0"+tfzhours
+                tfzhours = "0"+tfzhours;
 
             if (tflhours < 10)
-                tflhours = "0"+tflhours
+                tflhours = "0"+tflhours;
 
             if (zhours>=12)
-                abbrev="PM"
+                abbrev="PM";
 
             if (zhours>12)
-                zhours=zhours-12
+                zhours=zhours-12;
 
             if (zhours==0)
-                zhours=12
+                zhours=12;
 
             if (lhours>=12)
-                labbrev="PM"
+                labbrev="PM";
 
             if (lhours>12)
-                lhours=lhours-12
+                lhours=lhours-12;
 
             if (lhours==0)
-                lhours=12
+                lhours=12;
 
             if (minutes<=9)
-                minutes="0"+minutes
+                minutes="0"+minutes;
 
             if (seconds<=9)
-                seconds="0"+seconds
+                seconds="0"+seconds;
 
-            var ctime=" &nbsp; "+"UTC: "+zhours+":"+minutes+":"+seconds+" "+abbrev+"  ("+tfzhours+":"+minutes+":"+seconds+") &nbsp;"
+            var ctime=" &nbsp; "+"UTC: "+zhours+":"+minutes+":"+seconds+" "+abbrev+"  ("+tfzhours+":"+minutes+":"+seconds+") &nbsp;";
 
             if(document.all)
             {
-                document.all.clock.innerHTML=ctime
+                document.all.clock.innerHTML=ctime;
             }
             else if (document.getElementById)
             {
-                document.getElementById("clock").innerHTML=ctime
+                document.getElementById("clock").innerHTML=ctime;
             }
             else
             {
-                document.write(tftime)
-                document.write(ctime)
+                document.write(tftime);
+                document.write(ctime);
             }
         }
 
         if (!document.all && !document.getElementById)
-            createtime()
+            createtime();
 
         function loadtime()
         {
             if (document.all || document.getElementById)
-                setInterval("createtime()",1000)
+                setInterval("createtime()",1000);
         }
 
         // Popup Windows
@@ -162,7 +160,7 @@
 			<li>Read the <a onclick="this.target='_blank'" href="https://sites.google.com/site/fseoperationsguide/">Manual</a></li>
 			<li>Go to the <a onclick="this.target='_blank'" href="http://www.fseconomy.net">FSE Community</a>.</li>
 			<li><a href="<%= "FSeconomy.zip"%>">Download</a> the FS2004 Client </li>
-			<li> <a href="fsxclient/publish.htm" onclick="this.target='_blank'">Download</a> the FSX Client </li>
+			<li> <a href="/static/fsxclient/publish.htm" onclick="this.target='_blank'">Download</a> the FSX Client </li>
 			<li>Join us on <a href="http://www.fseconomy.net/forum/teamspeak/41-teamspeak-instructions-read-this-first" onclick="this.target='_blank'">FSE TeamSpeak</a></li>
 			<li style="margin-top: 10px;">Follow us on your favorite<br/> social media:<br/>
 				<div style=" display: table; margin: 0 auto;">
@@ -186,7 +184,7 @@
 			<li>currently flying: <a href="#" onclick="onClickFlying()" id="flying"><%= flying %></a></li>
 			<li>currently parked at an airport: <a href="#" onclick="onClickParked()" id="parked"><%= parked %></a></li>
 		</ul>
-		<div style="display: table; margin: 5px auto; border-style:inset; font-size: 10pt; font-family: Arial;" id="clock" ></div>
+		<div style="display: table; margin: 5px auto; border-style:inset; font-size: 10pt; font-family: Arial,sans-serif;" id="clock" ></div>
 		<div style="display: table; margin: 0 auto;">
 			<a style="display: table; margin: 0 auto;" href="http://vatsim.net" onclick="this.target='_blank'"><img style="border-style: none;" src="img/VATSIM_logo_small.gif" width="90" /></a><br/>
 			<div style="font-size:x-small"><b>FSEconomy is a proud <a href="http://vatsim.net" onclick="this.target='_blank'">VATSIM</a> partner.</b></div>
@@ -229,7 +227,7 @@
 	<div>
 	<h3>FSE Reporter - Issue Released!</h3>
 	<p>
-	<img src="https://sites.google.com/site/fsereporter/home/cover.png" style="width: 100; float:left;margin:0px 10px" /><br/>
+	<img src="https://sites.google.com/site/fsereporter/home/cover.png" style="width: 100px; float:left;margin:0 10px" /><br/>
 	The FSE Reporter is FSE's official monthly publication. A wealth of content published by fellow FSE members, and about FSE members, is waiting for your perusal. Get paid to contribute! Advertise your flying group or business! 
 	See the FSE Reporter website for details: <a href="https://sites.google.com/site/fsereporter/">https://sites.google.com/site/fsereporter/</a>
 	</p>

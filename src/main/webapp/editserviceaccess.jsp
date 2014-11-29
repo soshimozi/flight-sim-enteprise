@@ -24,7 +24,6 @@
     else
         account = user;
 
-    boolean display = false;
     if (account.isGroup() && user.groupMemberLevel(accountId) != UserBean.GROUP_OWNER)
     {
         // We are not the owner of the group kick out to main menu.
@@ -35,7 +34,6 @@
     }
 
     //get current service permissions
-    StringBuilder trCurrentServiceProviders = new StringBuilder();
     ServiceAccessBean bean = ServiceProviders.getServiceProviderAccess(serviceId, accountId);
 %>
 

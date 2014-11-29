@@ -46,7 +46,7 @@
         {
             Models.updateModel(model, user);
 %>
-<jsp:forward page="/admin/models.jsp"></jsp:forward>
+<jsp:forward page="/admin/models.jsp" />
 <%
         }
         catch (DataError e)

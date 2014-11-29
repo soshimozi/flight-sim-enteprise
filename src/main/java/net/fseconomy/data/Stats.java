@@ -32,42 +32,56 @@ public class Stats
 
     public static List<LatLonCount> FlightSummaryList = new ArrayList<>();
 
-    public static long getMilesFlown()
+    private static Stats stats = null;
+
+    private Stats()
+    {
+    }
+
+    public static Stats getInstance()
+    {
+        if ( stats == null )
+            stats = new Stats();
+
+        return stats;
+    }
+
+    public long getMilesFlown()
     {
         return milesFlown;
     }
 
-    public static long getMinutesFlown()
+    public long getMinutesFlown()
     {
         return minutesFlown;
     }
 
-    public static void setMilesFlown(long i)
+    public void setMilesFlown(long i)
     {
         milesFlown = i;
     }
 
-    public static void setMinutesFlown(long i)
+    public void setMinutesFlown(long i)
     {
         minutesFlown = i;
     }
 
-    public static long getTotalIncome()
+    public long getTotalIncome()
     {
         return totalIncome;
     }
 
-    public static void setTotalIncome(long i)
+    public void setTotalIncome(long i)
     {
         totalIncome = i;
     }
 
-    public static List<Statistics> getStatistics()
+    public List<Statistics> getStatistics()
     {
         return statistics;
     }
 
-    public static int getNumberOfUsers(String usertype) throws DataError
+    public int getNumberOfUsers(String usertype) throws DataError
     {
         int result=0;
         try
@@ -100,14 +114,40 @@ public class Stats
         return result;
     }
 
-    public static double getNumberOfHours(String user, int hours) throws DataError
+    public double getNumberOfHours(int userId, int hours)
     {
         double result=0;
         try
         {
-            String qry = "SELECT SUM((FlightEngineTime)/3600) AS TimeLogged FROM `log` where user= ? and DATE_SUB(CURRENT_TIMESTAMP ,INTERVAL ? hour) <= `time`";
-            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.DoubleResultTransformer(), user, hours);
+            String qry;
+            int linkId = getLinkSet(userId);
+            if(linkId > 0)
+            {
+                qry = "SELECT SUM((FlightEngineTime)/3600) AS TimeLogged FROM (Select FlightEngineTime from `log` where DATE_SUB(CURRENT_TIMESTAMP ,INTERVAL ? hour) <= `time`  AND userid in (Select id from accounts join (Select accountid from linkedaccounts where linkid = ?)  as la where accounts.id=la.accountid) ) as b;";
+                result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.DoubleResultTransformer(), hours, linkId);
+            }
+            else
+            {
+                qry = "SELECT SUM((FlightEngineTime)/3600) AS TimeLogged FROM `log` where userid= ? and DATE_SUB(CURRENT_TIMESTAMP ,INTERVAL ? hour) <= `time`";
+                result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.DoubleResultTransformer(), userId, hours);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
 
+        return result;
+    }
+
+    private int getLinkSet(int userId)
+    {
+        int result = 0;
+
+        try
+        {
+            String qry = "SELECT linkid FROM linkedaccounts where accountid = ? and status = 1";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), userId);
         }
         catch (SQLException e)
         {
@@ -118,7 +158,7 @@ public class Stats
     }
 
     //get pending hours will list when hours are coming available - need to format 48: to hours
-    public static List<PendingHours> getPendingHours(String user, int hours) throws DataError
+    public List<PendingHours> getPendingHours(String user, int hours) throws DataError
     {
         ArrayList<PendingHours> result = new ArrayList<>();
         try
@@ -139,7 +179,7 @@ public class Stats
         return result;
     }
 
-    public static List<LatLonCount> getFlightSummary()
+    public List<LatLonCount> getFlightSummary()
     {
         List<LatLonCount> toList = new ArrayList<>();
 

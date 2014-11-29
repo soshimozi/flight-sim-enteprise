@@ -26,7 +26,7 @@
 	
 	AircraftBean aircraft;
 
-	aircraft = Aircraft.getAircraftShippingInfoByRegistration(reg);
+	aircraft = Aircraft.getAircraftShippingInfoById(Aircraft.getAircraftIdByRegistration(reg));
 	
 	AirportBean departairport = Airports.getAirport(aircraft.getLocation());
 	departfbos = Fbos.getFboForRepair( departairport, Fbos.FBO_REPAIR_MARGIN );
@@ -111,10 +111,10 @@
                 error = error + "<br/>Unable to ship aircraft as there is no active repair services available at " + shipto;
 		}
 		
-		if( depart.contains("-1"))
+		if( depart == null || depart.contains("-1"))
 			error = "You did not select a repair shop at departure!";
 
-		if( dest.contains("-1"))
+		if( dest == null || dest.contains("-1"))
 		{
             if (error == null)
                 error = " You did not select a repair shop at the destination!";

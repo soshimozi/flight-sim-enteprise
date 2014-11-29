@@ -1,9 +1,7 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters"
+        import="java.util.List, net.fseconomy.data.*, net.fseconomy.util.Formatters, net.fseconomy.beans.*"
 %>
-<%@ page import="net.fseconomy.beans.AircraftBean" %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -20,15 +18,15 @@
     // registration is only passed when we are processing an admin command to reset a shipped aircraft
     if (request.getParameter("registration") != null)
     {
-        int reassemToFrom = -1;
+        int reassemToFrom;
         String reg = request.getParameter("registration");
-
+        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
         reassemToFrom = Integer.parseInt(request.getParameter("reassemtofrom"));
 
         if( reassemToFrom == 0 )
-            Aircraft.finalizeAircraftShipment(reg, true, true);   // process aircraft back to its original location
+            Aircraft.finalizeAircraftShipment(aircraftId, true, true);   // process aircraft back to its original location
         else
-            Aircraft.finalizeAircraftShipment(reg, false, true); // process aircraft back to the shipped to location
+            Aircraft.finalizeAircraftShipment(aircraftId, false, true); // process aircraft back to the shipped to location
     }
 %>
 

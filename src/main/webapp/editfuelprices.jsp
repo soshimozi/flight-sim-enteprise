@@ -44,7 +44,7 @@
 	
 	<h3><%= ownerName %></h3>
 	
-	<div style="padding: 5">
+	<div style="padding: 5px">
 	This is a global change for the at the pump fuel prices for all FBOs<br>
 	that the named owner controls.<br><br>
 	To leave the price the same, leave the price field blank ("").

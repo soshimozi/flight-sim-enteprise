@@ -89,7 +89,7 @@
     else if (request.getParameter("submit") != null)
     {
         String registration = request.getParameter("registration");
-        AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
+        AircraftBean aircraft = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(registration));
         if (aircraft == null)
         {
             message = "Aircraft Not Found";

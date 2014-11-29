@@ -71,13 +71,15 @@
 	    </thead>
 	    <tbody>
 <%	
-	List<Statistics> stats = Stats.getStatistics();
+	List<Statistics> stats = Stats.getInstance().getStatistics();
 	if(stats != null)
 	{
 		for (Statistics entry : stats)
 		{
-			if (entry.group != group)
-				continue;
+            if (entry.group != group)
+            {
+                continue;
+            }
 			
 			int minutes = entry.totalFlightTime/60;
 			String time = (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
@@ -98,10 +100,9 @@
 <%
 			if (entry.aircraft != null) 
 			{
-				for (Iterator<AircraftBean> i = entry.aircraft.iterator(); i.hasNext();)
-				{
-					AircraftBean ac = i.next();
-%>					<%= ac.getRegistration() %> (<%= ac.getMakeModel() %>)<br/>
+                for (AircraftBean ac : entry.aircraft)
+                {
+%>                    <%= ac.getRegistration() %> (<%= ac.getMakeModel() %>)<br/>
 <%
                 }
 			}

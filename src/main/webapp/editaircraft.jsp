@@ -14,7 +14,7 @@
 	String mPrice;
 	String iPrice;
 	
-	AircraftBean aircraft = Aircraft.getAircraftByRegistration(registration);
+	AircraftBean aircraft = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(registration));
 
 	mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
 	iPrice = Integer.toString(aircraft.getMinimumPrice());
@@ -40,7 +40,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
     
-	<link href="theme/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
     <script src="scripts/jquery.min.js"></script>
 

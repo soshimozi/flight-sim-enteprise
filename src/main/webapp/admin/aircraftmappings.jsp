@@ -1,10 +1,7 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-        import="java.util.HashMap, java.util.List, net.fseconomy.data.*"
+        import="java.util.HashMap, java.util.List, net.fseconomy.data.*, net.fseconomy.beans.* "
 %>
-<%@ page import="net.fseconomy.beans.FSMappingBean" %>
-<%@ page import="net.fseconomy.beans.ModelBean" %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 

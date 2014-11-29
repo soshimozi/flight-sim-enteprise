@@ -201,10 +201,10 @@
 	<thead>
 		<tr>
 			<td class="sorter-false" colspan="7">&nbsp;</td>		
-			<th class="sorter-false" colspan="2" style="border: 1px solid white;"><span style="margin-left: 10px; align: center">Supply</span></th>		
-			<th class="sorter-false" colspan="2" style="border: 1px solid white;"><span style="margin-left: 10px; align: center">Build</span></th>		
-			<th class="sorter-false" colspan="4" style="border: 1px solid white;"><span style="margin-left: 10px; align: center">100LL [<a class="link" href="<%= response.encodeURL("editfuelprices.jsp") + groupParam %>">edit</a>]</span></th>		
-			<th class="sorter-false" colspan="4" style="border: 1px solid white;"><span style="margin-left: 10px; align: center">Jet-A</span></th>				
+			<th class="sorter-false" colspan="2" style="border: 1px solid white;"><span style="margin-left: 10px; text-align: center">Supply</span></th>
+			<th class="sorter-false" colspan="2" style="border: 1px solid white;"><span style="margin-left: 10px; text-align: center">Build</span></th>
+			<th class="sorter-false" colspan="4" style="border: 1px solid white;"><span style="margin-left: 10px; text-align: center">100LL [<a class="link" href="<%= response.encodeURL("editfuelprices.jsp") + groupParam %>">edit</a>]</span></th>
+			<th class="sorter-false" colspan="4" style="border: 1px solid white;"><span style="margin-left: 10px; text-align: center">Jet-A</span></th>
 			<td class="sorter-false" >&nbsp;</td>	
 		</tr>
 			

@@ -1,6 +1,6 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    errorPage="errorpage.jsp"
+	    errorPage="error.jsp"
 	    import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
 
@@ -46,8 +46,10 @@
 	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 	
 	<script>
-		function checkDecline(form) {
-			var ret = confirm('Are you sure you want to cancel the order? You will be required to wait 24 hours before placing another order.');			var sel100ll = document.getElementById("fuel100ll");
+		function checkDecline(form)
+        {
+			var ret = confirm('Are you sure you want to cancel the order? You will be required to wait 24 hours before placing another order.');
+            var sel100ll = document.getElementById("fuel100ll");
 			if(ret)
 			{
 				form.event.value = "";

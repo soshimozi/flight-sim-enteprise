@@ -181,22 +181,22 @@ public class Banking implements Serializable
 
     public static void doPayGroup(int user, int group, float value)
     {
-        doPayment(user, group, value, PaymentBean.GROUP_PAYMENT, 0, -1, "", "", "", false);
+        doPayment(user, group, value, PaymentBean.GROUP_PAYMENT, 0, -1, "", 0, "", false);
     }
 
     public static void doPayGroup(int user, int group, float value, String comment)
     {
-        doPayment(user, group, value, PaymentBean.GROUP_PAYMENT, 0, -1, "", "", comment, false);
+        doPayment(user, group, value, PaymentBean.GROUP_PAYMENT, 0, -1, "", 0, comment, false);
     }
 
     public static void doPayBulkFuel(int user, int group, float value, int fbo, String comment, String icao, int type)
     {
-        doPayment(user, group, value, (type == 3) ? PaymentBean.SALE_GOODS_FUEL : PaymentBean.SALE_GOODS_JETA, 0, fbo, icao, "", comment, false);
+        doPayment(user, group, value, (type == 3) ? PaymentBean.SALE_GOODS_FUEL : PaymentBean.SALE_GOODS_JETA, 0, fbo, icao, 0, comment, false);
     }
 
     public static void doPayBulkFuelDelivered(int user, int group, float value, int fbo, String comment, String icao)
     {
-        doPayment(user, group, value, PaymentBean.BULK_FUEL, 0, fbo, icao, "", comment, false);
+        doPayment(user, group, value, PaymentBean.BULK_FUEL, 0, fbo, icao, 0, comment, false);
     }
 
     /**
@@ -208,7 +208,7 @@ public class Banking implements Serializable
      * @param reason     The reason for payment
      * @param logEntry   The optional log entry this payment is associated with
      */
-    public static void addPaymentRecord(int user, int otherParty, Money amount, short reason, long logEntry, int fbo, String location, String aircraft, String comment)
+    public static void addPaymentRecord(int user, int otherParty, Money amount, short reason, long logEntry, int fbo, String location, int aircraftId, String comment)
     {
         StringBuilder fields = new StringBuilder();
         StringBuilder values = new StringBuilder();
@@ -234,10 +234,10 @@ public class Banking implements Serializable
                 values.append(", '").append(location).append("'");
             }
 
-            if (!"".equals(aircraft))
+            if (aircraftId > 0)
             {
-                fields.append(", aircraft");
-                values.append(", '").append(Converters.escapeSQL(aircraft)).append("'");
+                fields.append(", aircraftid");
+                values.append(", ").append(aircraftId);
             }
 
             if (!"".equals(comment))
@@ -264,12 +264,12 @@ public class Banking implements Serializable
      * @param reason     The reason for payment
      * @param logEntry   The optional log entry this payment is associated with
      */
-    public static boolean doPayment(int user, int otherParty, double amount, short reason, long logEntry, int fbo, String location, String aircraft, String comment, boolean blockOnDept)
+    public static boolean doPayment(int user, int otherParty, double amount, short reason, long logEntry, int fbo, String location, int aircraftId, String comment, boolean blockOnDept)
     {
-        return doPayment(user, otherParty, new Money(amount), reason, logEntry, fbo, location, aircraft, comment, blockOnDept);
+        return doPayment(user, otherParty, new Money(amount), reason, logEntry, fbo, location, aircraftId, comment, blockOnDept);
     }
 
-    public static boolean doPayment(int user, int otherParty, Money amount, short reason, long logEntry, int fbo, String location, String aircraft, String comment, boolean blockOnDept)
+    public static boolean doPayment(int user, int otherParty, Money amount, short reason, long logEntry, int fbo, String location, int aircraftId, String comment, boolean blockOnDept)
     {
         // if any of the following are true, then let the zero payment through, otherwise exit
         if (amount.getAsDouble() == 0 &&
@@ -288,7 +288,7 @@ public class Banking implements Serializable
         // Check if amount is negative, reverse payee/payer
         if (amount.getAsDouble() < 0)
         {
-            return doPayment(otherParty, user, amount.times(-1), reason, logEntry, fbo, location, aircraft, comment, blockOnDept);
+            return doPayment(otherParty, user, amount.times(-1), reason, logEntry, fbo, location, aircraftId, comment, blockOnDept);
         }
 
         try
@@ -338,7 +338,7 @@ public class Banking implements Serializable
             }
 
             // Log payment attempt
-            addPaymentRecord(otherParty, user, amount, reason, logEntry, fbo, location, aircraft, comment);
+            addPaymentRecord(otherParty, user, amount, reason, logEntry, fbo, location, aircraftId, comment);
 
             return !blocked;
         }

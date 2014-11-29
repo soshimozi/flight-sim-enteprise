@@ -52,13 +52,13 @@
 //<jsp:include flush="true" page="gmapapikey.jsp"></jsp:include>
 
     String server = request.getServerName();
-    if (server.indexOf("localhost") != -1)
+    if (server.contains("localhost"))
     {
 %>
     <script src="https://maps.google.com/maps?file=api&amp;v=2.58&amp;key=ABQIAAAAG82z-GJItM3IuG9EOBZAfRSVAaBWqUyeYUcKh2IdrcS-zyqYshS9pF6VeGdPA5RGfpaOt6r7Qr_ewg" type="text/javascript"></script>
 <%
     }
-    else if (server.indexOf("fseconomy.net") != -1)
+    else if (server.contains("fseconomy.net"))
     {
 %>
     <script src="https://maps.google.com/maps?file=api&amp;v=2.58&amp;key=AIzaSyDpmF0JgC7Oq-KJ-dxPM1eOFnNxhTzwQ2o"></script>
@@ -223,7 +223,7 @@ function load()
 			isFBO = true;
 			for (FboBean fbo : fboList) 
 			{				
-		        String temp = "";
+		        String temp  ;
 				fuelleft = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
 				int fuelgallons = 0;
 				if (fuelleft != null)
@@ -251,25 +251,33 @@ function load()
 			
 		if( assignments.size() > 0 && isFBO)
 		{
-%>			var markerdest = createTabbedMarker(pointdest, [ap, "<font face='Verdana' size='1'>"+fbostring+"</font><br>", "<font face='Verdana' size='1'>"+jobstring+"</font><br>"],["Airport","FBOs","Jobs"]);
-<%		} 
+%>
+            var markerdest = createTabbedMarker(pointdest, [ap, "<span  style="font-family: Verdana; font-size: xx-small; ">"+fbostring+"</font><br>", "<span  style="font-family: Verdana; font-size: xx-small; ">"+jobstring+"</font><br>"],["Airport","FBOs","Jobs"]);
+<%
+        }
 		else if( assignments.size() == 0 && isFBO)
-		   {
-%>			var markerdest = createTabbedMarker(pointdest, [ap, "<font face='Verdana' size='1'>"+fbostring+"</font><br>"],["Airport","FBOs"]);
-<%		} 
+		{
+%>
+            var markerdest = createTabbedMarker(pointdest, [ap, "<span  style="font-family: Verdana; font-size: xx-small; ">"+fbostring+"</font><br>"],["Airport","FBOs"]);
+<%
+        }
 		else if( assignments.size() > 0 && !isFBO)
 		{
-%>			var markerdest = createTabbedMarker(pointdest, [ap, "<font face='Verdana' size='1'>"+jobstring+"</font><br>"],["Airport","Jobs"]);
-<%		} 
+%>
+            var markerdest = createTabbedMarker(pointdest, [ap, "<span  style="font-family: Verdana; font-size: xx-small; ">"+jobstring+"</font><br>"],["Airport","Jobs"]);
+<%
+        }
 		else 
 		{ 
-%>			var markerdest = createTabbedMarker(pointdest, [ap],["Airport"]);	
-<%		}
+%>
+            var markerdest = createTabbedMarker(pointdest, [ap],["Airport"]);
+<%
+        }
 %>	
 
 		//SET DISTANCE & BEARING
 		var degrees = Math.round(bearing(pointloc,pointdest));
-		var msg = "Trip: " + '<font color="#0080C0"><%=icao%></font>' + " to " + '<font color="#0080C0"><%=icaod%></font>' + "&nbsp;&nbsp;&nbsp;&nbsp;Distance: "+ "<font color='#0080C0'>" + Math.round(pointloc.distanceFrom(pointdest) * 0.000539956803) + " NM </font>&nbsp;&nbsp;&nbsp;&nbsp;Bearing: "+ "<font color='#0080C0'>" + degrees + "&#186;</font>";
+		var msg = "Trip: " + '<font color="#0080C0"><%=icao%></font>' + " to " + '<font color="#0080C0"><%=icaod%></font>' + "&nbsp;&nbsp;&nbsp;&nbsp;Distance: "+ "<span style="color: #0080C0; ">" + Math.round(pointloc.distanceFrom(pointdest) * 0.000539956803) + " NM </font>&nbsp;&nbsp;&nbsp;&nbsp;Bearing: "+ "<span style="color: #0080C0; ">" + degrees + "&#186;</font>";
 		document.getElementById("mypoint").innerHTML = msg;  
 						
 		bounds.extend(pointdest);	
