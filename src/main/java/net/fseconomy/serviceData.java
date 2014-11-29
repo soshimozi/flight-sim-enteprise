@@ -108,7 +108,7 @@ public class ServiceData
         }
     }
 
-    public static Response TransferCashToAccount(String serviceKey, int account, float amount, int transferto, String note)
+    public static Response TransferCashToAccount(String serviceKey, int account, float amount, int transferTo, String note)
     {
         try
         {
@@ -120,13 +120,13 @@ public class ServiceData
                 return createErrorResponse(400, "Bad Request", "Balance less than amount to transfer.");
 
             //check that transferto exists
-            if(!checkAccountExists(transferto))
+            if(!checkAccountExists(transferTo))
                 return createErrorResponse(400, "Bad Request", "Transfer account does not exist.");
 
             int serviceid = getServiceId(serviceKey);
 
             String qry = "{call TransferCash(?,?,?,?,?)}";
-            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, account, amount, transferto, "Service(" + serviceid + "): " + note);
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, account, amount, transferTo, "Service(" + serviceid + "): " + note);
 
             if(success)
                 return createSuccessResponse(200, null, null, "Transfer successful.");
