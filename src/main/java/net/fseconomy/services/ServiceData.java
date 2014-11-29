@@ -119,7 +119,7 @@ public class ServiceData
             if(balance < amount)
                 return createErrorResponse(400, "Bad Request", "Balance less than amount to transfer.");
 
-            //check that transferto exists
+            //check that transferTo exists
             if(!checkAccountExists(transferTo))
                 return createErrorResponse(400, "Bad Request", "Transfer account does not exist.");
 
