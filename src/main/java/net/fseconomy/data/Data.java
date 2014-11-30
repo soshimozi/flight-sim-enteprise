@@ -95,7 +95,7 @@ public class Data implements Serializable
 	* @ return Mysql Resulset as an ArrayList to checkuser48hourtrend.jsp
 	* @ author - chuck229
 	*/
-	public static List<TrendHours> getTrendHoursQuery(String user, int limit)
+	public static List<TrendHours> getTrendHoursQuery(int userId, int limit)
 	{
         if(limit <= 0)
             limit = 1; //minimum
@@ -103,8 +103,8 @@ public class Data implements Serializable
 		ArrayList<TrendHours> result = new ArrayList<>();
 		try
 		{
-			String qry = "SELECT `time` as LOGDATE, cast(flightenginetime as signed) as Duration, cast((SELECT SUM(flightenginetime) FROM `log` where user = ? and `time` <= LOGDATE and `time` > DATE_SUB(LOGDATE, INTERVAL 48 HOUR)) as signed) as last48hours FROM log WHERE `user` = ? and TYPE = 'flight' ORDER BY TIME DESC Limit " + limit;
-			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user, user);
+			String qry = "SELECT `time` as LOGDATE, cast(flightenginetime as signed) as Duration, cast((SELECT SUM(flightenginetime) FROM `log` where userid = ? and `time` <= LOGDATE and `time` > DATE_SUB(LOGDATE, INTERVAL 48 HOUR)) as signed) as last48hours FROM log WHERE `userid` = ? and TYPE = 'flight' ORDER BY TIME DESC Limit " + limit;
+			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, userId, userId);
 			while (rs.next())
 			{
 				TrendHours trend = new TrendHours(rs.getString("LOGDATE"),rs.getInt("Duration"), rs.getInt("last48hours"));

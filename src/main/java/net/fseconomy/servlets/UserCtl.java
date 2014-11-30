@@ -1241,6 +1241,7 @@ public class UserCtl extends HttpServlet
         String newuser = req.getParameter("newuser");
         String email = req.getParameter("email");
         String sExposure = req.getParameter("exposure");
+        String sLevel = req.getParameter("level");
         String password = req.getParameter("password");
         String linkedid = req.getParameter("linkedid");
 
@@ -1258,7 +1259,7 @@ public class UserCtl extends HttpServlet
         if(linkedid != null && !linkedid.equals(""))
             linkedId = Integer.parseInt(linkedid);
 
-        Accounts.updateAccount(suser, newuser, email, exposure, password, linkedId, user.getId());
+        Accounts.updateAccount(suser, newuser, email, exposure, sLevel, password, linkedId, user.getId());
         req.setAttribute("message", "Account (" + suser + ") updated successfully");
     }
 
@@ -1476,30 +1477,31 @@ public class UserCtl extends HttpServlet
 	void doMappings(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (user == null || user.getLevel() < UserBean.LEV_MODERATOR)
+
+        if (user == null || user.getLevel() < UserBean.LEV_MODERATOR)
 			throw new DataError("Permission denied");
-		
-		Enumeration<?> names = req.getParameterNames();
-		while (names.hasMoreElements())
-		{
-			String name = (String) names.nextElement();
-			if (!name.startsWith("map"))
-				continue;
-			
-			try
-			{
-				int mapId = Integer.parseInt(name.substring(3));
-				String value = req.getParameter(name);
-				if (value == null || value.equals(""))
-					continue;
-			
-				int newMapping = Integer.parseInt(value);
-                Aircraft.setMapping(mapId, newMapping);
-			} 
-			catch (NumberFormatException ignored)
-			{
-			}
-		}
+
+        String mapevent = req.getParameter("mapevent");
+        String smapId = req.getParameter("mapid");
+
+        int mapId = 0;
+        if(smapId != null)
+            mapId = Integer.parseInt(smapId);
+
+        if(mapevent.equals("delete"))
+        {
+            Aircraft.deleteMapping(mapId);
+        }
+        else if(mapevent.equals("unmap"))
+        {
+            Aircraft.setMapping(mapId, 0);
+        }
+        else if(mapevent.equals("map"))
+        {
+            String smodelId =req.getParameter("modelid");
+            int modelId = Integer.parseInt(smodelId);
+            Aircraft.setMapping(mapId, modelId);
+        }
 	}
 	
 	void doJoinGroup(HttpServletRequest req) throws DataError
@@ -1815,9 +1817,10 @@ public class UserCtl extends HttpServlet
 		int facilityId = Integer.parseInt(req.getParameter("facilityId"));
 		int blocks = Integer.parseInt(req.getParameter("blocks"));
 		int occupantId = Integer.parseInt(req.getParameter("occupantId"));
-		
+
 		Fbos.rentFboFacility(user, occupantId, facilityId, blocks);
 	}
+
 	void doDeleteFboFacility(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");

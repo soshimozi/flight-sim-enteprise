@@ -1990,9 +1990,6 @@ public class Aircraft implements Serializable
 
     public static void setMapping(int id, int modelId)
     {
-        if(modelId < 0)
-            deleteMapping(id);
-        else
             updateMapping(id, modelId);
     }
 
@@ -2009,7 +2006,7 @@ public class Aircraft implements Serializable
         }
     }
 
-    private static void deleteMapping(int id)
+    public static void deleteMapping(int id)
     {
         try
         {

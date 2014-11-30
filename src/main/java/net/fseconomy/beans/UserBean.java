@@ -208,12 +208,48 @@ public class UserBean implements Serializable
 	 * Returns the level.
 	 * @return int
 	 */
-	public int getLevel()
+	public String getLevelString(int level)
 	{
-		return level;
+        String result;
+
+        switch(level)
+        {
+            case LEV_NONE:
+                result = "none";
+                break;
+            case LEV_ACTIVE:
+                result = "active";
+                break;
+            case LEV_ACA:
+                result = "aca";
+                break;
+            case LEV_CSR:
+                result = "csr";
+                break;
+            case LEV_MODERATOR:
+                result = "moderator";
+                break;
+            case LEV_ADMIN:
+                result = "admin";
+                break;
+            default:
+                result = "not found";
+                break;
+        }
+
+		return result;
 	}
 
-	/**
+    /**
+     * Returns the level.
+     * @return int
+     */
+    public int getLevel()
+    {
+        return level;
+    }
+
+    /**
 	 * Returns the money.
 	 * @return int
 	 */

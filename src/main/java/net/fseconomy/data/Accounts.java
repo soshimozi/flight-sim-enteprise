@@ -353,7 +353,7 @@ public class Accounts implements Serializable
         }
     }
 
-    public static void updateAccount(String currUserName, String editedUserName, String email, int exposure, String newpassword, int linkToId, int userId) throws DataError
+    public static void updateAccount(String currUserName, String editedUserName, String email, int exposure, String level, String newpassword, int linkToId, int userId) throws DataError
     {
         String qry;
         int count;
@@ -365,8 +365,8 @@ public class Accounts implements Serializable
                 if (newpassword.length() != 0)
                 {
                     newpassword = Converters.escapeSQL(newpassword);
-                    qry = "UPDATE accounts SET email = ?, exposure = ?, password = password(?) where name = ?";
-                    count = DALHelper.getInstance().ExecuteUpdate(qry, email, exposure, newpassword, currUserName);
+                    qry = "UPDATE accounts SET email = ?, exposure = ?, level = ?, password = password(?) where name = ?";
+                    count = DALHelper.getInstance().ExecuteUpdate(qry, email, exposure, level, newpassword, currUserName);
 
                     addAccountNote(account.getId(), userId, "Password changed.");
 
@@ -378,14 +378,17 @@ public class Accounts implements Serializable
                 }
                 else
                 {
-                    qry = "UPDATE accounts SET email = ?, exposure = ? where name = ?";
-                    count = DALHelper.getInstance().ExecuteUpdate(qry, email, exposure, currUserName);
+                    qry = "UPDATE accounts SET email = ?, exposure = ?, level = ? where name = ?";
+                    count = DALHelper.getInstance().ExecuteUpdate(qry, email, exposure, level, currUserName);
 
                     if(account.getExposure() != exposure)
                         addAccountNote(account.getId(), userId, "Exposure changed: [" + account.getExposure() + "] to [" + exposure + "]");
 
                     if(!account.getEmail().equals(email))
                         addAccountNote(account.getId(), userId, "Email changed: [" + account.getEmail() + "] to [" + email + "]");
+
+                    if(account.getLevelString(account.getLevel()) != level)
+                        addAccountNote(account.getId(), userId, "Level changed: [" + account.getLevelString(account.getLevel()) + "] to [" + level + "]");
                 }
             }
             else //name has changed

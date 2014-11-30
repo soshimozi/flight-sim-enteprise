@@ -81,7 +81,7 @@
 	{
 		List<ClientRequest> list;
 
-        list = SimClientRequests.getClientRequestsByAccountId(Integer.parseInt(searchby));
+        list = SimClientRequests.getClientRequestsByIp(searchby);
 
 		if (message != null)
 		{ 
@@ -92,7 +92,7 @@
 		else if (list.size() > 0) 
 		{
 %>	<div class="dataTable">	
-		<h2>User/ip - <%= searchby %></h2><br/>
+		<h2>IP - <%= searchby %></h2><br/>
 <%
 			if (Accounts.needLevel(user, UserBean.LEV_MODERATOR))
 			{

@@ -88,7 +88,7 @@
         }
 
         List<TrendHours> trend;
-        trend = Data.getTrendHoursQuery(inputuser.getName(), 500);
+        trend = Data.getTrendHoursQuery(inputuser.getId(), 500);
 
         if (message != null)
         {

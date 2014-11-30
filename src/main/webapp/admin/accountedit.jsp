@@ -71,6 +71,25 @@
                         </select>
                     </td>
                 </tr>
+<%
+    if(Accounts.needLevel(user, UserBean.LEV_MODERATOR))
+    {
+%>
+                <tr>
+                    <td>Level: </td>
+                    <td>
+                        <select name="level" class="formselect">
+                            <option class="formselect" value="none" <%=edituser.getLevel() == UserBean.LEV_NONE ? "selected" : ""%>>None</option>
+                            <option class="formselect" value="active" <%=edituser.getLevel() == UserBean.LEV_ACTIVE ? "selected" : ""%>>Active</option>
+                            <option class="formselect" value="aca" <%=edituser.getLevel() == UserBean.LEV_ACA ? "selected" : ""%>>ACA</option>
+                            <option class="formselect" value="csr" <%=edituser.getLevel() == UserBean.LEV_CSR ? "selected" : ""%>>CSR</option>
+                            <option class="formselect" value="moderator" <%=edituser.getLevel() == UserBean.LEV_MODERATOR ? "selected" : ""%>>Moderator</option>
+                        </select>
+                    </td>
+                </tr>
+<%
+    }
+%>
                 <tr>
                     <td>New Password: </td>
                     <td><input name="password" type="text" class="textarea" size="40" value = "" /></td>

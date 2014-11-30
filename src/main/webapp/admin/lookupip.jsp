@@ -2,7 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.*"
 %>
-<%@ page import="static net.fseconomy.data.SimClientRequests.getClientRequestIps" %>
+<%@ page import="static net.fseconomy.data.SimClientRequests.*" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -15,7 +15,7 @@
 
     try
     {
-        List<String> ips = getClientRequestIps(query);
+        List<String> ips = lookupClientRequestIps(query);
         if(ips.size() > 0)
         {
             String output = "{\"ips\": [";

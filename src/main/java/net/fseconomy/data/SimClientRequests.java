@@ -131,7 +131,7 @@ public class SimClientRequests
         return list;
     }
 
-    public static List<String> getClientRequestIps(String query) throws DataError
+    public static List<String> lookupClientRequestIps(String query) throws DataError
     {
         List<String> list = new ArrayList<>();
         try
@@ -140,7 +140,7 @@ public class SimClientRequests
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, query);
 
             while(rs.next())
-                list.add(rs.getString("ip") + "|" + rs.getInt("pilotid") + "|" + rs.getString("pilot"));
+                list.add(rs.getString("ip") + "|" + rs.getString("ip") + "|" + rs.getString("pilot"));
         }
         catch (SQLException e)
         {

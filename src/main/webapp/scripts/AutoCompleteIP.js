@@ -6,7 +6,7 @@ function initAutoCompleteIP(myname, myvalue)
             {
                 $.ajax(
                     {
-                        url: "/lookupip.jsp",
+                        url: "/admin/lookupip.jsp",
                         data: {
                             startsWith: request.term,
                             accountType: 2 //2 = person

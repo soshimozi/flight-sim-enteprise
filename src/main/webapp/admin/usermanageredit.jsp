@@ -38,7 +38,7 @@
         accountLocked = account.isLocked();
         noteList = Accounts.getAccountNoteList(accountId);
         linkedList = Accounts.getLinkedAccountList(accountId);
-        trendList = Data.getTrendHoursQuery(account.getName(), 10);
+        trendList = Data.getTrendHoursQuery(account.getId(), 10);
         ipList = SimClientRequests.getClientRequestCountsByAccountId(accountId);
 
         if (Stats.statsmap != null && Stats.statsmap.containsKey(account.getName()))
@@ -107,6 +107,17 @@
                             <td>Exposure: </td>
                             <td><%=account.getExposure() == 0 ? "Hidden" : "Visible"%></td>
                         </tr>
+<%
+    if(Accounts.needLevel(user, UserBean.LEV_MODERATOR))
+    {
+%>
+                        <tr>
+                            <td>Level: </td>
+                            <td><%=account.getLevelString(account.getLevel())%></td>
+                        </tr>
+<%
+    }
+%>
                     </table>
                 </div>
             </div>

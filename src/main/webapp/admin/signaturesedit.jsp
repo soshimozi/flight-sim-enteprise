@@ -53,7 +53,7 @@
 %>
 			<li>
 				<a title="Upload new signature background" onclick="updateSig(<%=i%>)">			
-					<img src="/sig-templates/template<%=i%>.jpg" />
+					<img src="/static/sig-templates/template<%=i%>.jpg" />
 				</a>
 			</li>
 <%

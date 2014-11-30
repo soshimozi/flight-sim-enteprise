@@ -44,7 +44,7 @@
     else
     {
 %>
-        <h2>Daily Maintenace Cycle</h2>
+        <h2>30 minute Cycle</h2>
         <div class="dataTable">
 
             <table id="sortableTableStats" class="sortable">
@@ -78,7 +78,7 @@
                 </tbody>
             </table>
         </div>
-        <h2>30 Minute Maintenace Cycle</h2>
+        <h2>Daily Cycle</h2>
         <div class="dataTable">
 
             <table id="sortableTableStats" class="sortable">
