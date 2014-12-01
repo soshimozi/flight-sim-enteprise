@@ -226,6 +226,9 @@ public class UserCtl extends HttpServlet
                     case "deletegroup":
                         doDeleteGroup(req);
                         break;
+                    case "transfergroup":
+                        doTransferGroup(req);
+                        break;
                     case "memberlevel":
                         doMemberLevel(req);
                         break;
@@ -1554,8 +1557,9 @@ public class UserCtl extends HttpServlet
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
+
 		if (id == null || user == null)
-			return;
+            throw new DataError("Invalid parameters.");
 		
 		int groupId = Integer.parseInt(id);
 		if (user.groupMemberLevel(groupId) != UserBean.GROUP_OWNER)
@@ -1563,8 +1567,26 @@ public class UserCtl extends HttpServlet
 
         Groups.deleteGroup(user, groupId);
 	}
-	
-	void doInvitation(HttpServletRequest req) throws DataError
+
+    void doTransferGroup(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        String sUserId = req.getParameter("userid");
+        String sGroupId = req.getParameter("groupid");
+
+        if (sUserId == null || sGroupId == null || user == null)
+            throw new DataError("Invalid parameters.");
+
+        int userId = Integer.parseInt(sUserId);
+        int groupId = Integer.parseInt(sGroupId);
+        if (user.groupMemberLevel(groupId) != UserBean.GROUP_OWNER)
+            throw new DataError("Permission denied.");
+
+        Groups.transferGroup(user.getId(), userId, groupId);
+    }
+
+    void doInvitation(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");

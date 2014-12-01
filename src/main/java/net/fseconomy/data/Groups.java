@@ -158,6 +158,21 @@ public class Groups implements Serializable
         Accounts.reloadMemberships(user);
     }
 
+    public static void transferGroup(int userId, int transferTo, int groupId)
+    {
+        try
+        {
+            String qry = "{call groupTransfer(?,?,?,?)}";
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, groupId, userId, transferTo);
+            if(success)
+                Banking.addPaymentRecord(transferTo, userId, new Money(0), PaymentBean.TRANSFER_GROUP, -1, -1, "", -1, "Group Transfer");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public static void flyForGroup(UserBean user, int groupid) throws DataError
     {
         UserBean group = Accounts.getGroupById(groupid);

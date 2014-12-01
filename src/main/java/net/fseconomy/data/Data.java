@@ -40,7 +40,6 @@ public class Data implements Serializable
     //Current Admin rest api key
     public static String adminApiKey = "";
     
-    public final static Logger logger = LoggerFactory.getLogger(Data.class);
 	private static Data singletonInstance = null;
 	
 	public static Data getInstance()
@@ -50,8 +49,6 @@ public class Data implements Serializable
 	
 	public Data()
 	{
-		logger.info("Data constructor called");
-		
 		Locale.setDefault(Locale.US);
 		
 		singletonInstance = this;

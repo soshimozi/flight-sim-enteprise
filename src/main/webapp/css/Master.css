@@ -448,3 +448,4 @@ div.invoiceInset img {
 .top a:hover {background-color: #ffffff;	color:#ff0000;}
 .top a {text-decoration:none;}
 
+a { cursor: pointer; }

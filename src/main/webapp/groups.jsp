@@ -6,6 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+    String returnPage = "groups.jsp";
 %>
 
 <!DOCTYPE html>
@@ -17,7 +18,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
     <link href="css/Master.css" rel="stylesheet" type="text/css" />
+
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/jquery-ui.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/AutoComplete.js"></script>
 
     <script type="text/javaScript">
         function doSubmit(id, event, groupname)
@@ -47,6 +56,30 @@
             inviteForm.action.value = action;
             inviteForm.submit();
         }
+
+        function doTransferSelect(id)
+        {
+            var form = document.getElementById("formTransferModal");
+            form.groupid.value = id;
+
+            $("#myModal").modal('show');
+        }
+
+        function doTransfer()
+        {
+            var form = document.getElementById("formTransferModal");
+            form.submit();
+        }
+
+        $(function()
+        {
+            <%--$('#myModal').on('shown.bs.modal', function () {--%>
+                <%--initAutoComplete("input[name='username']", "input[name='userid']", <%= Accounts.ACCT_TYPE_PERSON %>);--%>
+            <%--})--%>
+            initAutoComplete("#username", "#userid", <%= Accounts.ACCT_TYPE_PERSON %>);
+        });
+
+
     </script>
 
 </head>
@@ -156,7 +189,9 @@
 		{ 
 			if (memberLevel == UserBean.GROUP_OWNER ) 
 			{
-%>				<a class="link" href="editgroup.jsp?id=<%= id %>">Edit</a>
+%>
+                <a class="link" href="editgroup.jsp?id=<%= id %>">Edit</a>
+                <a class="link" onclick="doTransferSelect(<%= id %>, '<%=name%>');">Transfer</a>
 				<a class="link" href="javascript:doSubmit(<%= id %>, 'deletegroup', <%= "'" + Converters.escapeJavaScript(name.replaceAll("\"" , "''")) + "'" %>)">Delete</a>
 <%  		} 
 			else 
@@ -180,5 +215,45 @@
 </div>
 </div>
 </div>
+
+<!-- Modal HTML -->
+<div id="myModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Transfer Group</h4>
+            </div>
+            <div class="modal-body">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Warning!</h3>
+                    </div>
+                    <div class="panel-body">
+                        This will transfer all group assets including money, aircraft, and FBOs to the new owner.
+                        Triple check that you have selected the correct pilot to transfer the group. If you make a mistake that will be between you and the person that you transferred the group to.
+                    </div>
+                </div>
+                <form id="formTransferModal" method="post" action="userctl" class="ui-front">
+                    <input type="hidden" name="event" value="transfergroup"/>
+                    <input type="hidden" name="groupid" value=""/>
+                    <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+                    <div>
+                        Enter Account:
+                        <input type="hidden" id="userid" name="userid" value="-1"/>
+                        <input type="text" id="username" name="username" placeholder="Type Pilot Name here"/>
+                        <br/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="doTransfer();">Transfer</button>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

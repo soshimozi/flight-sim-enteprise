@@ -5,6 +5,8 @@ import net.fseconomy.beans.UserBean;
 import net.fseconomy.dto.MakeModel;
 import net.fseconomy.dto.Model;
 import net.fseconomy.dto.ModelAliases;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -17,6 +19,8 @@ import java.util.List;
 public class Models implements Serializable
 {
     static final int MAX_MODEL_TITLE_LENGTH = 128;
+
+    public final static Logger logger = LoggerFactory.getLogger(Data.class);
 
     public static String addModel(String aircraft, int[] fuelCapacities)
     {
@@ -276,11 +280,13 @@ public class Models implements Serializable
         {
             qry = "SELECT models.make, models.model FROM models where id=? ORDER BY models.make";
             rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, modelId);
+
             if(!rs.next())
             {
-                Data.logger.error("getModelAliases() unable to find modelId: " + modelId);
+                logger.error("getModelAliases() unable to find modelId: " + modelId);
                 return new ModelAliases();
             }
+
             modelaliases.MakeModel = rs.getString(1) + " " + rs.getString(2);
 
             ArrayList<String> aliases = new ArrayList<>();

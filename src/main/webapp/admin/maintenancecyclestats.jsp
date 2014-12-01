@@ -98,14 +98,14 @@
         //dump out our HashMap data
         sb.setLength(0);
 
-        sb.append("<tr>");
-        sb.append("<td>").append(Formatters.dateyyyymmddhhmmss.format(ctd.logstarttime[1])).append("</td>")
+        sb.append("<tr>")
+        .append("<td>").append(Formatters.dateyyyymmddhhmmss.format(ctd.logstarttime[1])).append("</td>")
         .append("<td>").append(ctd.hitcount[1]).append("</td>")
         .append("<td>").append(ctd.totaltime[1]).append("</td>")
         .append("<td>").append(ctd.mintime[1]).append("</td>")
         .append("<td>").append(ctd.maxtime[1]).append("</td>")
-        .append("<td>").append(ctd.hitcount[1] == 0 ? 0 : ctd.totaltime[1] / ctd.hitcount[1]).append("</td>");
-        sb.append("</tr>");
+        .append("<td>").append(ctd.hitcount[1] == 0 ? 0 : ctd.totaltime[1] / ctd.hitcount[1]).append("</td>")
+        .append("</tr>");
 %>
                 <%= sb.toString() %>
                 </tbody>

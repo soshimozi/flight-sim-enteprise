@@ -19,6 +19,9 @@
 
 package net.fseconomy.data;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.util.List;
@@ -47,7 +50,9 @@ public class Emailer
 
     public static final String ADDRESS_TO = "TO";
 	public static final String ADDRESS_BCC = "BCC";
-	
+
+    public final static Logger logger = LoggerFactory.getLogger(Data.class);
+
 	//constructor protected so cannot be used - use getInstance() only
 	protected Emailer() {}
 	
@@ -120,7 +125,7 @@ public class Emailer
 			{
 				if(!isValidEmailAddress(emailAddress))
 				{
-					Data.logger.info("SendMail Error: invalid email address format for[" + emailAddress + "]");
+					logger.info("SendMail Error: invalid email address format for[" + emailAddress + "]");
 					throw new DataError("SendMail Error: invalid email address format for[" + emailAddress + "]");
 				}
 				
