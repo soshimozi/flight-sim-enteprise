@@ -276,11 +276,11 @@ public class Assignments implements Serializable
             }
 
             //See if already locked
-            qry = "SELECT userlock, groupId from assignments where id = ?";
-            int userlock = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
-            if (userlock != 0 && userlock != user.getId())
+            qry = "SELECT (userlock is not null) as found from assignments where id = ?";
+            boolean isUserlock = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
+            if (isUserlock)
             {
-                throw new DataError("Assignment is already selected by a pilot.");
+                throw new DataError("Assignment is locked by a pilot.");
             }
 
             //Move it to group assignments
@@ -314,7 +314,7 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void addAssignment(int id, int user, boolean add) throws DataError
+    public static void addAssignment(int id, int user, boolean add, boolean isAirport) throws DataError
     {
         try
         {
@@ -332,6 +332,17 @@ public class Assignments implements Serializable
             if (noRecord)
             {
                 throw new DataError("No assignment found for id: " + id);
+            }
+
+            if(isAirport)
+            {
+                qry = "SELECT (userlock is not null OR groupId is not null) as owned FROM assignments WHERE id = ?";
+                boolean isOwned = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
+
+                if (isOwned)
+                {
+                    throw new DataError("Assignment already selected by a pilot or group.");
+                }
             }
 
             //Get aircraft registration for assignment

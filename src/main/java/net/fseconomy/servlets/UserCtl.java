@@ -48,13 +48,12 @@ public class UserCtl extends HttpServlet
 	private static ScheduledFuture<?> future = null;
 	public static MaintenanceCycle maintenanceObject = null;	
 
-	public static Logger logger = null;
+	public static Logger logger = LoggerFactory.getLogger(UserCtl.class);
 
     public static EmbeddedCacheManager cacheManager;
 
     public void init()
 	{
-        logger = LoggerFactory.getLogger(UserCtl.class);
 		logger.info("UserCtl init() called");
 
 		FullFilter.updateFilter(DALHelper.getInstance());
@@ -1004,7 +1003,7 @@ public class UserCtl extends HttpServlet
 
 		user.setTimeZone(TimeZone.getTimeZone("GMT" + sOffset));
 		user.setLoggedIn(true);
-        Accounts.reloadMemberships(user);
+        Groups.reloadMemberships(user);
 		HttpSession s = req.getSession();
 		s.setAttribute("user", user);
 
@@ -1073,7 +1072,8 @@ public class UserCtl extends HttpServlet
 			} 
 			else if(type.equals("add"))
 			{
-                Assignments.addAssignment(id[i], user.getId(), type.equals("add"));
+                boolean isAirport = req.getParameter("returnpage").contains("airport.jsp");
+                Assignments.addAssignment(id[i], user.getId(), type.equals("add"), isAirport);
 			}
 			else if(!type.equals("add"))
 			{
@@ -1491,19 +1491,19 @@ public class UserCtl extends HttpServlet
         if(smapId != null)
             mapId = Integer.parseInt(smapId);
 
-        if(mapevent.equals("delete"))
+        switch (mapevent)
         {
-            Aircraft.deleteMapping(mapId);
-        }
-        else if(mapevent.equals("unmap"))
-        {
-            Aircraft.setMapping(mapId, 0);
-        }
-        else if(mapevent.equals("map"))
-        {
-            String smodelId =req.getParameter("modelid");
-            int modelId = Integer.parseInt(smodelId);
-            Aircraft.setMapping(mapId, modelId);
+            case "delete":
+                Aircraft.deleteMapping(mapId);
+                break;
+            case "unmap":
+                Aircraft.setMapping(mapId, 0);
+                break;
+            case "map":
+                String smodelId = req.getParameter("modelid");
+                int modelId = Integer.parseInt(smodelId);
+                Aircraft.setMapping(mapId, modelId);
+                break;
         }
 	}
 	
@@ -1516,7 +1516,7 @@ public class UserCtl extends HttpServlet
 		
 		int groupId = Integer.parseInt(id);
 
-        Accounts.joinGroup(user, groupId, "member");
+        Groups.joinGroup(user, groupId, "member");
 	}
 	
 	void doCancelGroup(HttpServletRequest req) throws DataError
@@ -1628,7 +1628,7 @@ public class UserCtl extends HttpServlet
 			if (account == null)
 				throw new DataError("Unknown user.");
 
-            Accounts.joinGroup(account, groupId, "invited");
+            Groups.joinGroup(account, groupId, "invited");
 
 			return;
 		}

@@ -158,7 +158,7 @@
 	</thead>
 	<tbody>
 <%
-    Accounts.reloadMemberships(user);
+    Groups.reloadMemberships(user);
 
 	for (UserBean group : groups)
 	{

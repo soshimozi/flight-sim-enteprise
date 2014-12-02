@@ -47,16 +47,16 @@ public class Flights
             Timestamp now = new Timestamp(GregorianCalendar.getInstance().getTime().getTime());
             bean.setLockedSince(now);
 
-            String qry = "SELECT * FROM aircraft WHERE registration = ? AND location = ?";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, bean.getRegistration(), location);
+            String qry = "SELECT * FROM aircraft WHERE id = ? AND location = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, bean.getId(), location);
             if (!rs.next())
                 throw new DataError("No active aircraft found");
 
             if(Assignments.hasAllInJobInQueue(user))
                 allInFlight = true;
 
-            qry = "SELECT (initialFuel is not null) AS rentedDry FROM aircraft WHERE registration = ?";
-            rentedDry = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), bean.getRegistration());
+            qry = "SELECT (initialFuel is not null) AS rentedDry FROM aircraft WHERE id = ?";
+            rentedDry = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), bean.getId());
 
             if (bean.getCanFlyAssignments(model))
             {
@@ -96,8 +96,8 @@ public class Flights
                 if(allInFlight && onBoard != 1)
                     throw new DataError("All-In assignment not loaded. Cannot start the flight.");
             }
-            qry = "UPDATE aircraft SET departedFrom = ?, lockedSince = ?, location = null where registration = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, location, now, bean.getRegistration());
+            qry = "UPDATE aircraft SET departedFrom = ?, lockedSince = ?, location = null where id = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, location, now, bean.getId());
         }
         catch (Exception e)
         {
@@ -241,7 +241,7 @@ public class Flights
                 stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
                 //Is the pilot using an AllIn aircraft?
-                String qry = "SELECT (count(id) > 0) AS found FROM aircraft, assignments WHERE aircraft.registration = assignments.aircraft AND aircraft.userlock = ?";
+                String qry = "SELECT (count(id) > 0) AS found FROM aircraft, assignments WHERE aircraft.id = assignments.aircraftid AND aircraft.userlock = ?";
                 allIn = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user.getId());
 
                 //AllIn flight with no assignment check - Airboss 11-9-12
@@ -249,8 +249,8 @@ public class Flights
                 if(allIn)
                 {
                     //Get AllIn assignments that are enroute using the reported aircraft
-                    qry = "SELECT (count(id) > 0) AS found FROM assignments WHERE active = 1 AND aircraft = ?";
-                    boolean allInAssignment = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getRegistration());
+                    qry = "SELECT (count(id) > 0) AS found FROM assignments WHERE active = 1 AND aircraftid = ?";
+                    boolean allInAssignment = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getId());
                     if( !allInAssignment )
                     {
                         System.err.println("  Flight kicked: AllIn flight with no assignment at current aircraft location");
@@ -259,8 +259,8 @@ public class Flights
                         cancelFlight(user);
                         throw new DataError(errmsg);
                     }
-                    qry = "SELECT toicao FROM assignments WHERE active = 1 AND aircraft = ?";
-                    allInAssignmentToIcao = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), aircraft.getRegistration());
+                    qry = "SELECT toicao FROM assignments WHERE active = 1 AND aircraftid = ?";
+                    allInAssignmentToIcao = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), aircraft.getId());
                 }
 
                 //All-In change - don't pay rental, fuel, or distance fees
@@ -407,7 +407,7 @@ public class Flights
                 rs.close();
                 stmt.close();
 
-                //added vaidation to make sure exploit not possible for group flights and rentals
+                //added validation to make sure exploit not possible for group flights and rentals
                 //validate the rental cost is not more then the bank account in the group account
                 double netIncome = income - (flightCost + crewCost + totalPilotFee + fboAssignmentFee + mpttax);
 
@@ -617,7 +617,7 @@ public class Flights
 
                 rs.updateTimestamp("time",new Timestamp(System.currentTimeMillis()));
                 rs.updateString("user", user.getName());
-                rs.updateString("aircraft", aircraft.getRegistration());
+                rs.updateInt("aircraftid", aircraft.getId());
                 rs.updateString("from", aircraft.getDepartedFrom());
                 rs.updateString("to", location.icao);
                 rs.updateString("type", "flight");
@@ -757,8 +757,8 @@ public class Flights
                     location = rs.getString("departedFrom");
                 }
 
-                qry = "UPDATE aircraft SET location = ?, departedFrom = NULL WHERE registration = ?";
-                DALHelper.getInstance().ExecuteUpdate(qry, location, rs.getString("registration"));
+                qry = "UPDATE aircraft SET location = ?, departedFrom = NULL WHERE id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, location, rs.getInt("id"));
             }
         }
         catch (SQLException e)

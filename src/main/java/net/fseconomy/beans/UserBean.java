@@ -31,8 +31,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import net.fseconomy.data.Accounts.groupMemberData;
-import net.fseconomy.data.Data;
+import net.fseconomy.data.Groups;
 import net.fseconomy.util.Converters;
 
 // Airboss 11/27/2011
@@ -70,7 +69,7 @@ public class UserBean implements Serializable
 	boolean loggedIn;
 	double bank;
 	String comment;
-	Map<Integer, groupMemberData> memberships;
+	Map<Integer, Groups.groupMemberData> memberships;
 	boolean group;
 	boolean exposedJoin, exposedScore, exposedGrouplist;
 	String url;
@@ -358,25 +357,25 @@ public class UserBean implements Serializable
 	{
 		if (memberships == null)
 			return -1;
-		
-		groupMemberData data = memberships.get(group);
+
+        Groups.groupMemberData data = memberships.get(group);
 		
 		return data == null ? -1 : data.memberLevel;
 	}
 	
-	public groupMemberData[] getStaffGroups()
+	public Groups.groupMemberData[] getStaffGroups()
 	{
-		ArrayList<groupMemberData> returnValue = new ArrayList<>();
+		ArrayList<Groups.groupMemberData> returnValue = new ArrayList<>();
 		if (memberships == null)
-			return new groupMemberData[0];
+			return new Groups.groupMemberData[0];
 
-        for (groupMemberData item : memberships.values())
+        for (Groups.groupMemberData item : memberships.values())
         {
             if (item.memberLevel >= UserBean.GROUP_STAFF)
                 returnValue.add(item);
         }
 		
-		return returnValue.toArray(new groupMemberData[returnValue.size()]);
+		return returnValue.toArray(new Groups.groupMemberData[returnValue.size()]);
 	}
 	
 	public String getComment()
@@ -389,12 +388,12 @@ public class UserBean implements Serializable
 		comment = TruncateComment(Converters.clearHtml(string));
 	}
 
-	public Map<Integer, groupMemberData> getMemberships()
+	public Map<Integer, Groups.groupMemberData> getMemberships()
 	{
 		return memberships;
 	}
 
-	public void setMemberships(Map<Integer, groupMemberData> map)
+	public void setMemberships(Map<Integer, Groups.groupMemberData> map)
 	{
 		memberships = map;
 	}

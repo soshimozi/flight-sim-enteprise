@@ -1060,12 +1060,12 @@ public class Datafeed extends HttpServlet
 			List<UserBean> members = Accounts.getUsersForGroup(id);
 			for (UserBean member : members)
 			{
-                Accounts.reloadMemberships(member);
+                Groups.reloadMemberships(member);
 
 				String level = "ERROR";
 				if(member.getMemberships().containsKey(id))
 				{
-                    Accounts.groupMemberData gmd = member.getMemberships().get(id);
+                    Groups.groupMemberData gmd = member.getMemberships().get(id);
 					level = UserBean.getGroupLevelName(gmd.memberLevel);
 				}
 

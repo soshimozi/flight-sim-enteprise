@@ -51,7 +51,7 @@ public class Autologon extends HttpServlet {
 			
 		userBean.setTimeZone(new SimpleTimeZone(1000 * 60 * -offset, "Local"));
 		userBean.setLoggedIn(true);
-        Accounts.reloadMemberships(userBean);
+        Groups.reloadMemberships(userBean);
 
 		HttpSession s = request.getSession();
 		s.setAttribute("user", userBean);

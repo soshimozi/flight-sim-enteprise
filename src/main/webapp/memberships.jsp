@@ -98,7 +98,7 @@
 	{
 		int id = member.getId();
 		String name = member.getName();
-        Accounts.reloadMemberships(member);
+        Groups.reloadMemberships(member);
 		int memberLevel = member.groupMemberLevel(groupId);
 %>
 	<tr>

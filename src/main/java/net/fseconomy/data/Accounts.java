@@ -5,6 +5,8 @@ import net.fseconomy.dto.AccountNote;
 import net.fseconomy.dto.LinkedAccount;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.mail.internet.AddressException;
 import java.io.Serializable;
@@ -21,22 +23,9 @@ public class Accounts implements Serializable
     public static final int LINK_INACTIVE = 0;
     public static final int LINK_ACTIVE = 1;
 
+    public static Logger logger = LoggerFactory.getLogger(Accounts.class);;
+
     private static final Object lock = new Object();
-
-    public static class groupMemberData implements Serializable
-    {
-        private static final long serialVersionUID = 1L;
-        public int groupId;
-        public int memberLevel;
-        public String groupName;
-
-        public groupMemberData(int groupId, int memberLevel, String name)
-        {
-            this.groupId = groupId;
-            this.memberLevel = memberLevel;
-            this.groupName = name;
-        }
-    }
 
     public Accounts()
     {
@@ -99,127 +88,6 @@ public class Accounts implements Serializable
     {
         if (user == null || user.getId() == -1)
             throw new DataError("Not logged in.");
-    }
-
-    public static synchronized void updateGroup(UserBean group, UserBean user) throws DataError
-    {
-        mustBeLoggedIn(user);
-
-        if (group.getName().trim().length() < 4)
-        {
-            throw new DataError("Group name must be at least 4 characters.");
-        }
-
-        if (!(group.getDefaultPilotFee() >= 0 && group.getDefaultPilotFee() <= 100))
-        {
-            throw new DataError("Pilot Fee must be in the range of 0 to 100%");
-        }
-
-        try
-        {
-            String qry = "SELECT (count(id) > 0) as found FROM accounts WHERE type = 'group' AND id = ?";
-            boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), group.getId());
-            if (!exists)
-            {
-                System.err.println("id=" + group.getId());
-                throw new DataError("Group not found!");
-            }
-
-            qry = "UPDATE accounts SET name=?, comment=?, url=?, defaultPilotFee=?, banList=?, exposure=?, readAccessKey=? WHERE id=?";
-            DALHelper.getInstance().ExecuteUpdate(qry, group.getName(), group.getComment(), group.getUrl(), group.getDefaultPilotFee(), group.getBanList(), group.getExposure(), group.getReadAccessKey(), group.getId());
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public static synchronized void CreateGroup(UserBean group, UserBean user) throws DataError
-    {
-        mustBeLoggedIn(user);
-
-        if (group.getName().trim().length() < 4)
-        {
-            throw new DataError("Group name must be at least 4 characters.");
-        }
-
-        if (group.getDefaultPilotFee() > 100)
-        {
-            throw new DataError("Pilot Fee cannot exceed 100%");
-        }
-
-        try
-        {
-            String qry = "select (count(*) > 0) from accounts where upper(name) = upper(?)";
-            boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), group.getName());
-            if (exists)
-            {
-                throw new DataError("Group name already exists.");
-            }
-
-            qry = "INSERT INTO accounts (created, type, name, comment, url, defaultPilotFee, banList, exposure, readAccessKey) VALUES(?,?,?,?,?,?,?,?,?)";
-            DALHelper.getInstance().ExecuteUpdate(qry, new Timestamp(System.currentTimeMillis()), "group", group.getName(), group.getComment(), group.getUrl(), group.getDefaultPilotFee(), group.getBanList(), group.getExposure(), group.getReadAccessKey());
-
-            qry = "select id from accounts where upper(name) = upper(?)";
-            int id = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), group.getName());
-            joinGroup(user, id, "owner");
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public static void joinGroup(UserBean user, int group, String level) throws DataError
-    {
-        mustBeLoggedIn(user);
-
-        try
-        {
-            String qry = "SELECT (count(userId) > 0) as found FROM groupmembership WHERE userId = ? AND groupId = ?";
-            boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user.getId(), group);
-            if (!found)
-            {
-                qry = "INSERT INTO groupmembership (userId, groupId, level) VALUES (?, ?, ?)";
-                DALHelper.getInstance().ExecuteUpdate(qry, user.getId(), group, level);
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        reloadMemberships(user);
-    }
-
-    public static void reloadMemberships(UserBean user)
-    {
-        LinkedHashMap<Integer, groupMemberData> memberships = new LinkedHashMap<>();
-        try
-        {
-            boolean hasItems = false;
-
-            String qry = "SELECT * FROM groupmembership, accounts WHERE groupId = accounts.id AND userId = ? order by accounts.name";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user.getId());
-            while (rs.next())
-            {
-                int groupId = rs.getInt("groupId");
-                int groupLevel =  UserBean.getGroupLevel(rs.getString("level"));
-
-                memberships.put(groupId, new groupMemberData(groupId, groupLevel, rs.getString("name")));
-
-                hasItems = true;
-            }
-
-            if (!hasItems)
-                memberships = null;
-
-            user.setMemberships(memberships);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     public static boolean updateUser(UserBean user) throws DataError

@@ -21,7 +21,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
     {
         for (Object o : memberships.values())
         {
-            Accounts.groupMemberData memberData = (Accounts.groupMemberData) o;
+            Groups.groupMemberData memberData = (Groups.groupMemberData) o;
             if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
             {
                 int len = memberData.groupName.length();
@@ -42,7 +42,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 
     for (Object o : memberships.values())
     {
-        Accounts.groupMemberData memberData = (Accounts.groupMemberData) o;
+        Groups.groupMemberData memberData = (Groups.groupMemberData) o;
         if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
         {
             returnValue.append("oM.makeMenu('").append(menu).append("_").append(count++).append("','").append(menu).append("','").append(memberData.groupName.replaceAll("\'", "\\\\'")).append("','").append(response.encodeURL(link + arg + memberData.groupId)).append("', '', ").append(length).append(");\n");

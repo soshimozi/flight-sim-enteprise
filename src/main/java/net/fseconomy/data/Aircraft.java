@@ -128,7 +128,7 @@ public class Aircraft implements Serializable
 
         try
         {
-            String qry = "SELECT (Count(registration) = 0) as notfound FROM aircraft where registration = ?";
+            String qry = "SELECT (Count(id) = 0) as notfound FROM aircraft where registration = ?";
             exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), reg);
         }
         catch (SQLException e)
@@ -262,7 +262,7 @@ public class Aircraft implements Serializable
             //remove aircraft from use and set shipping details
             conn = DALHelper.getInstance().getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE registration = '" + aircraft.getRegistration() + "'");
+            rs = stmt.executeQuery("SELECT * FROM aircraft WHERE id = " + aircraft.getId());
 
             rs.next();
 
@@ -666,7 +666,7 @@ public class Aircraft implements Serializable
             }
 
             UserBean renter = new UserBean(renterRS);
-            Accounts.reloadMemberships(renter);
+            Groups.reloadMemberships(renter);
 
             //get owner of aircraft info
             qry = "SELECT * FROM accounts WHERE id = ?";
@@ -733,7 +733,7 @@ public class Aircraft implements Serializable
     {
         try
         {
-            String qry = "SELECT (count(registration) > 0) AS found FROM aircraft WHERE location is not null AND id = ? AND userlock = ?";
+            String qry = "SELECT (count(id) > 0) AS found FROM aircraft WHERE location is not null AND id = ? AND userlock = ?";
             boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraftId, user);
             if (!found)
             {
@@ -799,7 +799,7 @@ public class Aircraft implements Serializable
     public static void defuelAircraft(AircraftBean aircraft, int userId, int amount) throws DataError
     {
         UserBean user = Accounts.getAccountById(userId);
-        Accounts.reloadMemberships(user);
+        Groups.reloadMemberships(user);
         ModelBean mb = Models.getModelById(aircraft.getModelId());
         if (!aircraft.changeAllowed(user) && mb.getFuelSystemOnly() != 1)
         {
