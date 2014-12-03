@@ -23,10 +23,14 @@
 
 	if (transfer != null || group == null)
 	{
-		if (transfer != null)
-			transferId = Integer.parseInt(transfer);
-		else
-			transferId = user.getId();
+        if (transfer != null)
+        {
+            transferId = Integer.parseInt(transfer);
+        }
+        else
+        {
+            transferId = user.getId();
+        }
 		
 		UserBean account = Accounts.getAccountById(transferId);
 
@@ -167,9 +171,7 @@
 		}
 		function doSubmitComment(checkedItems)
 		{
-			var select = checkedItems;
-		
-			if(!isOneOrMoreChecked(select))
+            if(!isOneOrMoreChecked(checkedItems))
 			{
 				alert("No assignments are selected");
 				return;	
@@ -289,19 +291,18 @@
 		{
 			String aircraftReg = Aircraft.getAircraftRegistrationById(assignment.getAircraftId());
 			String image = "img/set2_" + assignment.getActualBearingImage() + ".gif";
-            AssignmentBean as = assignment;
-					  
-			AirportBean destination = as.getDestinationAirport();
-			AirportBean location = as.getLocationAirport();
+
+            AirportBean destination = assignment.getDestinationAirport();
+			AirportBean location = assignment.getLocationAirport();
 		
 			UserBean lockedBy = null;
-			if (as.getUserlock() != 0) 
+			if (assignment.getUserlock() != 0)
 			{
-				lockedBy = Accounts.getAccountById(as.getUserlock());
+				lockedBy = Accounts.getAccountById(assignment.getUserlock());
 			} 
-			else if (!groupMode && as.isGroup()) 
+			else if (!groupMode && assignment.isGroup())
 			{
-				lockedBy = Accounts.getAccountById(as.getGroupId());
+				lockedBy = Accounts.getAccountById(assignment.getGroupId());
 			}
 			String locked = lockedBy == null ? "-" : lockedBy.getName();
 			
@@ -316,7 +317,7 @@
 			double destLatl = mapDestAirport.getLat();
 			double destLonl = mapDestAirport.getLon();
 			
-			assignmentsTotalPay += as.calcPay();
+			assignmentsTotalPay += assignment.calcPay();
 %>
 			<script type="text/javascript">
 				if (typeof loc['<%=icao%>'] !== 'undefined') 
@@ -332,10 +333,10 @@
 				loc['<%=icao%>'][len] = [];
 				loc['<%=icao%>'][len].latl = <%=latl%>;
 				loc['<%=icao%>'][len].lonl = <%=lonl%>;
-				loc['<%=icao%>'][len].pay = "<%=Formatters.currency.format(as.calcPay())%>";
-				loc['<%=icao%>'][len].cargo = "<%=as.getSCargo()%>";
+				loc['<%=icao%>'][len].pay = "<%=Formatters.currency.format(assignment.calcPay())%>";
+				loc['<%=icao%>'][len].cargo = "<%=assignment.getSCargo()%>";
 				loc['<%=icao%>'][len].status = "selected";
-				loc['<%=icao%>'][len].dist = <%=as.getActualDistance()%>;
+				loc['<%=icao%>'][len].dist = <%=assignment.getActualDistance()%>;
 				loc['<%=icao%>'][len].dest = [];
 				loc['<%=icao%>'][len].dest.icao = '<%=destIcao%>';
 				loc['<%=icao%>'][len].dest.latl = <%=destLatl%>;
@@ -348,46 +349,58 @@
 			<tr>
 			<td>
 				<div class="checkbox" >
-					<input class="css-checkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= as.getId() %>" <%=lockedBy!=null ? "disabled" : "" %>/>
+					<input class="css-checkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= assignment.getId() %>" <%=lockedBy!=null ? "disabled" : "" %>/>
 					<label class="css-label" for="mycheckbox<%=counter%>"></label>
 				</div>
 			</td>
-			<td class="numeric"><%= Formatters.currency.format(as.calcPay()) %></td>
-			<td class="numeric"><%= Formatters.currency.format(as.getPilotFee()) %></td>
+			<td class="numeric"><%= Formatters.currency.format(assignment.calcPay()) %></td>
+			<td class="numeric"><%= Formatters.currency.format(assignment.getPilotFee()) %></td>
 		
 <%	
-			if (as.getActive() == 1) 
+			if (assignment.getActive() == 1)
 			{ 
 %>		
 				<td>[enroute]</td>
 <%	
 			} 
-			else if (as.getActive() == 2) 
+			else if (assignment.getActive() == 2)
 			{ 
 %>
-				<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(as.getLocation())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= location.getTitle() %> "class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getLocation()) %>"><%= as.getLocation() %></a> [on hold]</td>
+				<td>
+                    <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap">
+                        <img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(assignment.getLocation())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= location.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getLocation()) %>"><%= assignment.getLocation() %>
+                    </a> [on hold]
+                </td>
 <%
 			} 
 			else 
 			{ 
 %>		
-				<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap"><img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(as.getLocation())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= location.getTitle() %> "class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getLocation()) %>"><%= as.getLocation() %></a></td>
+				<td>
+                    <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap">
+                        <img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(assignment.getLocation())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= location.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getLocation()) %>"><%= assignment.getLocation() %>
+                    </a>
+                </td>
 <%  
 			} 
 %>
-			<td><img src="img/blankap.gif" style="vertical-align:middle;" /><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getFrom()) %>"><%= as.getFrom() %></a></td>
-			<td><a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap1"><img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(as.getTo())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= destination.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + as.getTo()) %>"><%= as.getTo() %></a></td>
-			<td class="numeric"><%= as.getActualDistance() %></td>
-			<td class="numeric"><%= as.getActualBearing() %> <img src="<%= image %>" /></td>
-			<td><%= as.getSCargo() %></td>
-			<td><%= as.getComment() %></td>
-			<td><%= as.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>
+			<td><img src="img/blankap.gif" style="vertical-align:middle;" /><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getFrom()) %>"><%= assignment.getFrom() %></a></td>
+			<td>
+                <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap1">
+                `<img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= destination.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>"><%= assignment.getTo() %>
+                </a>
+            </td>
+			<td class="numeric"><%= assignment.getActualDistance() %></td>
+			<td class="numeric"><%= assignment.getActualBearing() %> <img src="<%= image %>" /></td>
+			<td><%= assignment.getSCargo() %></td>
+			<td><%= assignment.getComment() %></td>
+			<td><%= assignment.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>
 			<td><%= aircraftReg == null ? "[not provided]" : aircraftReg %></td>
-			<td><%= as.getSExpires() %></td>
+			<td><%= assignment.getSExpires() %></td>
 			<td><%= locked %></td>
 			<td>
 <%		
-			if ((as.deleteAllowed(user) && as.getActive() == 0) || (as.deleteAllowed(user) && as.getActive() == 2)) 
+			if ((assignment.deleteAllowed(user) && assignment.getActive() == 0) || (assignment.deleteAllowed(user) && assignment.getActive() == 2))
 			{	
 %>	
 <%
@@ -396,24 +409,24 @@
 					if (groupMode) 
 					{ 
 %>
-						<a class="link" href="javascript:doSubmit4(<%= as.getId() %>)">Unlock</a>
+						<a class="link" href="javascript:doSubmit4(<%= assignment.getId() %>)">Unlock</a>
 <%
 					} 
 					else 
 					{ 
 %>	
-						<a class="link" href="javascript:doSubmit5(<%= as.getId() %>)">Unlock</a>
+						<a class="link" href="javascript:doSubmit5(<%= assignment.getId() %>)">Unlock</a>
 <%				
 					}
  				} 
  				else 
  				{ 
 %>
-					<a class="link" href="javascript:doSubmit2(<%= as.getId() %>)">Edit</a>
-<%					if (groupMode && as.isFerry()) 
+					<a class="link" href="javascript:doSubmit2(<%= assignment.getId() %>)">Edit</a>
+<%					if (groupMode && assignment.isFerry())
 					{ 
 %>
-						<a class="link" href="javascript:doSubmit3(<%= as.getId() %>)">Delete</a>
+						<a class="link" href="javascript:doSubmit3(<%= assignment.getId() %>)">Delete</a>
 <% 					}
 				}
    			} 
@@ -435,8 +448,10 @@
 %>	
 	Warning: <br/>
 	This will overwrite any existing comment for the selected assignments!<br/>
-	You must click the "Add comment" button.<br/>
-	<input name="assignmentComment" type="text" size="65" maxlength="250">
+	<label>
+        You must click the "Add comment" button.<br/>
+	    <input name="assignmentComment" type="text" size="65" maxlength="250">
+    </label>
 	<input type="button" value="Add comment to selected assignments" onclick="doSubmitComment(this.form.select)" /><br/>
 <%
 		}
@@ -469,7 +484,7 @@
 			$("#addSelectedButton").click(
 				function(e)
 				{			 
-					if (window.confirm("Are you sure you want to tranfer selected assignments to " + $("#addToGroup option:selected").text() + "?"))
+					if (window.confirm("Are you sure you want to tranfer selected assignments to " + $("#addToGroup").find("option:selected").text() + "?"))
 					{
 						doSubmit6(document.assignmentForm.select,$("#addToGroup").val());
 					}		 
@@ -478,14 +493,15 @@
 		</script>		
 				<select id="addToGroup" class="formselect">
 <%
-                Accounts.groupMemberData[] memberGroups = (Accounts.groupMemberData [])user.getMemberships().values().toArray(new Accounts.groupMemberData[0]);
+                Groups.groupMemberData[] memberGroups = user.getMemberships().values().toArray(new Groups.groupMemberData[0]);
 
-				for (int c=0; c< memberGroups.length; c++)
-				{ 
+            for (Groups.groupMemberData memberGroup : memberGroups)
+            {
 %>
-		      	<option class="formselect" value="<%= memberGroups[c].groupId%>"><%= memberGroups[c].groupName%></option>
+                    <option class="formselect" value="<%= memberGroup.groupId%>"><%= memberGroup.groupName%>
+                    </option>
 <%
-				}
+            }
 %>
 				</select>
 <%
@@ -498,7 +514,7 @@
 			<input type="button" id="transferButton" name="transferButton" value="Add Selected Assignments To ->" />
 			<script type="text/javascript">
 			$("#transferButton").click(
-				function(e)
+				function()
 				{			 
 					if (window.confirm("Are you sure you want to tranfer selected assignments to " + $("#transfername").val() + "?"))
 					{

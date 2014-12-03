@@ -34,7 +34,7 @@
             group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
             group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
             group.setBanList(request.getParameter("banList"));
-            Accounts.updateGroup(group, user);
+            Groups.updateGroup(group, user);
 %>
             <jsp:forward page="groups.jsp" />
 <%
