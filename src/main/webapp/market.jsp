@@ -212,7 +212,7 @@
 <%
 	String error = null;
 	List<AircraftBean> aircraftList = null;
-    Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
+    Groups.groupMemberData[] staffGroups = user.getStaffGroups();
 	
 	if (isSubmit) 
 	{		
@@ -371,7 +371,7 @@
 		<td><%= afTime %></td>
 		<td><a class="link" href="javascript:doSubmit('<%= reg %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
-            for (Accounts.groupMemberData staffGroup : staffGroups)
+            for (Groups.groupMemberData staffGroup : staffGroups)
             {
 %>
             | <a class="link" href="javascript:doSubmit('<%= reg %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy

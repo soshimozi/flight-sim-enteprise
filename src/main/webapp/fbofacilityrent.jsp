@@ -113,7 +113,7 @@
 	} 
 	else if (!madeBlocksSelection) 
 	{
-        Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
+        Groups.groupMemberData[] staffGroups = user.getStaffGroups();
 		int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(facility, fbo, airport);
 %>
 	<form method="post" action="fbofacilityrent.jsp" name="rentForm">
@@ -151,7 +151,7 @@
 				<select class="formselect" name="occupantId">
 				<option value="<%= user.getId() %>" selected="selected" ><%= user.getName() %></option>
 <%
-        for (Accounts.groupMemberData staffGroup : staffGroups)
+        for (Groups.groupMemberData staffGroup : staffGroups)
         {
 %>
                     <option value="<%= staffGroup.groupId %>"><%= staffGroup.groupName %>

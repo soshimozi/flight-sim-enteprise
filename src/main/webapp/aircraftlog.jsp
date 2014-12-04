@@ -87,7 +87,7 @@
     String saleprice = Formatters.currency.format(aircraftData.getSellPrice());
     String price = Formatters.currency.format(aircraftData.getSellPrice());
     String reg = aircraftData.getRegistration();
-    Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
+    Groups.groupMemberData[] staffGroups = user.getStaffGroups();
 
     //find how many planes of this type for sale in the FSE world
     int acForSale = Aircraft.FindAircraftForSaleByModelCount(aircraftData.getModelId());
@@ -205,7 +205,7 @@
                 <td>
                     <a class="link" href="javascript:doSubmit2('<%= reg %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
-        for (Accounts.groupMemberData staffGroup : staffGroups)
+        for (Groups.groupMemberData staffGroup : staffGroups)
         {
 %>
                     <a class="link"

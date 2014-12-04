@@ -24,7 +24,7 @@
         {
             for (Object o : memberships.values())
             {
-                Accounts.groupMemberData memberData = (Accounts.groupMemberData) o;
+                Groups.groupMemberData memberData = (Groups.groupMemberData) o;
                 if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
                 {
                     int len = memberData.groupName.length();
@@ -43,7 +43,7 @@
 
         for (Object o : memberships.values())
         {
-            Accounts.groupMemberData memberData = (Accounts.groupMemberData) o;
+            Groups.groupMemberData memberData = (Groups.groupMemberData) o;
             if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
             {
                 returnValue.append(indent).append("<a href=").append(response.encodeURL(link + arg + memberData.groupId)).append(">").append(memberData.groupName.replaceAll("\'", "\\\\'")).append("</a><br/><br/>\n");

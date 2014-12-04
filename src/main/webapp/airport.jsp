@@ -374,7 +374,7 @@
         boolean airportArea = "1".equals(request.getParameter("airportArea"));
         double fuelPrice = airport.getFuelPrice();
         double jetaPrice = airport.getJetAPrice();
-        Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
+        Groups.groupMemberData[] staffGroups = user.getStaffGroups();
 
         //make the lat and long human readable.
         //ABS() negative values and append the correct quadrant information.
@@ -911,7 +911,7 @@
 			<select name="addToGroup" id="addToGroup" class="formselect">
 				<option class="formselect" value="0">My Flight</option>
 <%
-        for (Accounts.groupMemberData staffGroup : staffGroups)
+        for (Groups.groupMemberData staffGroup : staffGroups)
         {
 %>
                 <option class="formselect" value="<%= staffGroup.groupId%>"><%= staffGroup.groupName%>
@@ -1285,7 +1285,7 @@
                     <td>
                         <a class="link" href="<%= response.encodeURL(buyUrl) %>">Buy</a>
 <%
-            for (Accounts.groupMemberData staffGroup : staffGroups)
+            for (Groups.groupMemberData staffGroup : staffGroups)
             {
 %>
                         | <a class="link" href="<%= response.encodeURL(buyUrl + "&groupId=" + staffGroup.groupId) %>">Buy

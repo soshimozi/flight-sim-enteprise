@@ -52,7 +52,7 @@
 <div class="dataTable">	
 <%
 	List<FboBean> fbos = Fbos.getFboForSale();
-    Accounts.groupMemberData[] staffGroups = user.getStaffGroups();
+    Groups.groupMemberData[] staffGroups = user.getStaffGroups();
 %>
 	<form method="post" action="userctl" name="fboForm">
 	<input type="hidden" name="event" value="MarketFbo"/>
@@ -142,7 +142,7 @@
 	<td style="text-align: right;"><%= price %></td>
 	<td><a class="link" href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fboid %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
-        for (Accounts.groupMemberData staffGroup : staffGroups)
+        for (Groups.groupMemberData staffGroup : staffGroups)
         {
 %>
         | <a class="link"
