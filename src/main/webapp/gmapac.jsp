@@ -55,6 +55,8 @@
     var locations = 
         [
 <%
+    StringBuilder sb = new StringBuilder();
+
     for (AircraftBean aircraft : aircraftList)
     {
         if(aircraft.getLocation() == null)
@@ -64,7 +66,6 @@
         double lat = airport.getLat();
         double lon = airport.getLon();
         String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
-        StringBuilder sb = new StringBuilder();
         sb.append("<div class=\"infowindow-content\">");
         sb.append(airportLink);
         sb.append("<br>");
@@ -99,6 +100,7 @@
 %>
 			[<%=lat%>, <%=lon%>, 0, '<%=sb.toString()%>'], 
 <%
+        sb.setLength(0);
     }
 %>
         ];

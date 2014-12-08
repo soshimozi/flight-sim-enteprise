@@ -252,28 +252,28 @@
 <%
 		if (isSearch)
 		{
-			StringBuffer queryURL = new StringBuffer("gmapmarket.jsp?");
-			
-			queryURL.append("modelId=");
+			StringBuilder queryURL = new StringBuilder("gmapmarket.jsp?");
+
+            queryURL.append("modelId=");
 			queryURL.append(modelId);
 			queryURL.append("&lowPrice=");
 			queryURL.append(lowPrice);
 			queryURL.append("&highPrice=");
-			queryURL.append(highPrice);	
+			queryURL.append(highPrice);
 			queryURL.append("&lowTime=");
 			queryURL.append(lowTime);
 			queryURL.append("&highTime=");
 			queryURL.append(highTime);
 			queryURL.append("&lowPax=");
-			queryURL.append(lowPax);	
+			queryURL.append(lowPax);
 			queryURL.append("&highPax=");
-			queryURL.append(highPax);				
+			queryURL.append(highPax);
 			queryURL.append("&lowLoad=");
 			queryURL.append(lowLoad);
 			queryURL.append("&highLoad=");
 			queryURL.append(highLoad);
 			queryURL.append("&distance=");
-			queryURL.append(distance);	
+			queryURL.append(distance);
 			
 			if (fromParam != null )
 			{

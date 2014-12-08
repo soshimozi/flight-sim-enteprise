@@ -39,12 +39,10 @@ var css = {
 	 *					(e.g. '*', 'div', 'li')
 	 **/
 	getElementsByClass : function(node, searchClass, tag) {
-		var classElements = new Array();
+		var classElements = [];
 		var els = node.getElementsByTagName(tag);
 		var elsLen = els.length;
-		var pattern = new RegExp("(^|\\s)"+searchClass+"(\\s|$)");
-		
-		
+
 		for (var i = 0, j = 0; i < elsLen; i++) {
 			if (this.elementHasClass(els[i], searchClass) ) {
 				classElements[j] = els[i];
@@ -85,11 +83,8 @@ var css = {
 		}
 		
 		var regex = new RegExp('\\b'+classString+'\\b');
-		if (el.className.match(regex)) {
-			return true;
-		}
 
-		return false;
+        return !!el.className.match(regex);
 	},
 
 	/**
@@ -142,4 +137,4 @@ var css = {
 
 		el.className = this.privateCreateClassString(classArray);
 	}
-}
+};

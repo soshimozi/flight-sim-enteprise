@@ -101,7 +101,7 @@ public class Assignments implements Serializable
         StringBuilder where = new StringBuilder("'" + Converters.escapeSQL(location) + "'");
         for (CloseAirport location1 : locations)
         {
-            where.append(", '" + location1.icao + "'");
+            where.append(", '").append(location1.icao).append("'");
         }
 
         String cargoFilter = BuildAssignmentCargoFilter(minPax, maxPax, minKG, maxKG);
@@ -182,7 +182,7 @@ public class Assignments implements Serializable
 
     public static List<AssignmentBean> getAssignmentsSQL(String qry)
     {
-        ArrayList<AssignmentBean> result = new ArrayList<AssignmentBean>();
+        ArrayList<AssignmentBean> result = new ArrayList<>();
         try
         {
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
@@ -424,10 +424,9 @@ public class Assignments implements Serializable
 
     public static void updateAssignment(AssignmentBean assignment, UserBean user) throws DataError
     {
-        Boolean localconn = false;
         Connection conn = null;
-        Statement stmt = null, check = null;
-        ResultSet rs = null, checkrs = null;
+        Statement stmt = null;
+        ResultSet rs = null;
 
         if (assignment.getOwner() != user.getId() &&
                 user.groupMemberLevel(assignment.getOwner()) < UserBean.GROUP_STAFF &&
@@ -440,11 +439,7 @@ public class Assignments implements Serializable
         {
             boolean newEntry;
 
-            if (conn == null)
-            {
-                localconn = true;
-                conn = DALHelper.getInstance().getConnection();
-            }
+            conn = DALHelper.getInstance().getConnection();
 
             assignment.updateData();
 
@@ -480,7 +475,7 @@ public class Assignments implements Serializable
 
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             rs = stmt.executeQuery("SELECT * from assignments WHERE id = " + assignment.getId());
-            int oldAmount = 0;
+            int oldAmount;
             if (!rs.next())
             {
                 newEntry = true;
@@ -519,13 +514,7 @@ public class Assignments implements Serializable
         {
             DALHelper.getInstance().tryClose(rs);
             DALHelper.getInstance().tryClose(stmt);
-            DALHelper.getInstance().tryClose(checkrs);
-            DALHelper.getInstance().tryClose(check);
-
-            if (localconn)
-            {
-                DALHelper.getInstance().tryClose(conn);
-            }
+            DALHelper.getInstance().tryClose(conn);
         }
     }
 

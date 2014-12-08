@@ -1881,7 +1881,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 } else {
                     return this.opts.width;
                }
-            };
+            }
 
             var width = resolveContainerWidth.call(this);
             if (width !== null) {
@@ -1895,7 +1895,7 @@ the specific language governing permissions and limitations under the Apache Lic
         // single
 
         createContainer: function () {
-            var container = $(document.createElement("div")).attr({
+            return $(document.createElement("div")).attr({
                 "class": "select2-container"
             }).html([
                 "<a href='javascript:void(0)' class='select2-choice' tabindex='-1'>",
@@ -1913,7 +1913,6 @@ the specific language governing permissions and limitations under the Apache Lic
                 "   <ul class='select2-results' role='listbox'>",
                 "   </ul>",
                 "</div>"].join(""));
-            return container;
         },
 
         // single
@@ -2509,7 +2508,7 @@ the specific language governing permissions and limitations under the Apache Lic
 
         // multi
         createContainer: function () {
-            var container = $(document.createElement("div")).attr({
+            return $(document.createElement("div")).attr({
                 "class": "select2-container select2-container-multi"
             }).html([
                 "<ul class='select2-choices'>",
@@ -2522,7 +2521,6 @@ the specific language governing permissions and limitations under the Apache Lic
                 "   <ul class='select2-results'>",
                 "   </ul>",
                 "</div>"].join(""));
-            return container;
         },
 
         // multi

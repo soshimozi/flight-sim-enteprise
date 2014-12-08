@@ -320,7 +320,7 @@ public class MaintenanceCycle implements Runnable
 			StringBuilder idSet = new StringBuilder();
 
 			HashMap<Integer, UserBean> usersById = new HashMap<>();
-			HashMap<String, UserBean> usersByName = new HashMap<>();
+			//HashMap<String, UserBean> usersByName = new HashMap<>();
 
 			qry = "SELECT * from accounts WHERE accounts.id > 0";
 			rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
@@ -328,7 +328,7 @@ public class MaintenanceCycle implements Runnable
 			{
 				UserBean user = new UserBean(rs);
 				usersById.put(user.getId(), user);
-				usersByName.put(user.getName().toLowerCase(), user);
+				//usersByName.put(user.getName().toLowerCase(), user);
 			}
 			
 			HashMap<Integer, String> ownersByGroup = new HashMap<>();
@@ -1510,12 +1510,13 @@ public class MaintenanceCycle implements Runnable
 		
 		try
 		{
-			String qry = "SELECT id, shippingState, shippingStateNext FROM aircraft WHERE (shippingState = 1 OR shippingState = 3)";
+			String qry = "SELECT id, owner, registration, location, shippingState, shippingStateNext FROM aircraft WHERE (shippingState = 1 OR shippingState = 3)";
 			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			
 			while (rs.next())
 			{
 				int shippingState = rs.getInt("shippingState");
+                int aircraftId = rs.getInt("id");
 
 				Timestamp statenext = rs.getTimestamp("shippingStateNext");
 				Timestamp now = new Timestamp(new Date().getTime());					
@@ -1526,11 +1527,11 @@ public class MaintenanceCycle implements Runnable
 					//Crate up and create the assignment if disassembly has completed
 					if(shippingState == 1)
 					{
-						qry = "UPDATE aircraft SET shippingState = 2 WHERE registration = ?";
-						DALHelper.getInstance().ExecuteUpdate(qry, rs.getString("registration"));
+						qry = "UPDATE aircraft SET shippingState = 2 WHERE id = ?";
+						DALHelper.getInstance().ExecuteUpdate(qry, aircraftId);
 						
 						//Needed to get the aircraft empty weight
-						AircraftBean aircraft = Aircraft.getAircraftById(rs.getInt("id"));
+						AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
 						
 						AssignmentBean assignment;
 						assignment = new AssignmentBean();

@@ -94,7 +94,7 @@ public class Aircraft implements Serializable
 
     public static List<AircraftBean> getAircraftForSale()
     {
-        return getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND sellPrice is not null ORDER BY models.make, models.model, sellPrice");
+        return getAircraftSQL("SELECT * FROM (SELECT id FROM aircraft WHERE sellPrice is not null ) a left join aircraft on a.id=aircraft.id left join models on aircraft.model=models.id ORDER BY models.make, models.model, sellPrice");
     }
 
     public static AircraftBean getAircraftByRegistrationX(String reg)
@@ -713,7 +713,7 @@ public class Aircraft implements Serializable
                 throw new DataError("Aircraft is already locked.");
             }
 
-            qry = "SELECT * FROM aircraft, models WHERE userlock is null AND location is not null AND aircraft.model = models.id AND id = ?";
+            qry = "SELECT * FROM aircraft, models WHERE userlock is null AND location is not null AND aircraft.model = models.id AND aircraft.id = ?";
             ResultSet fuelRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraftId);
             fuelRS.next();
             AircraftBean thisCraft = new AircraftBean(fuelRS);
@@ -757,7 +757,7 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static boolean setHoldRental(int aircraftId, int userId, boolean hold)
+    public static void setHoldRental(int aircraftId, int userId, boolean hold)
     {
         boolean result = false;
         try
@@ -770,11 +770,9 @@ public class Aircraft implements Serializable
         {
             e.printStackTrace();
         }
-
-        return result;
     }
 
-    public static boolean aircraftOk(AircraftBean bean, String aircraft)
+    public static boolean aircraftMappingFound(int modelId, String aircraft)
     {
         boolean result = false;
         try
@@ -782,7 +780,7 @@ public class Aircraft implements Serializable
             Timestamp now = new Timestamp(GregorianCalendar.getInstance().getTime().getTime());
 
             String qry = "UPDATE fsmappings SET lastused = ? WHERE fsaircraft=? AND model = ?";
-            int numrecs = DALHelper.getInstance().ExecuteUpdate(qry, now, aircraft, bean.getModelId());
+            int numrecs = DALHelper.getInstance().ExecuteUpdate(qry, now, aircraft, modelId);
 
             if (numrecs == 1)
             {
@@ -1709,7 +1707,7 @@ public class Aircraft implements Serializable
             rs.moveToInsertRow();
             rs.updateTimestamp("time", new Timestamp(System.currentTimeMillis()));
             rs.updateString("type", "maintenance");
-            rs.updateString("aircraft", aircraft.getRegistration());
+            rs.updateInt("aircraftid", aircraft.getId());
             rs.updateInt("totalEngineTime", aircraft.getTotalEngineTime());
             rs.updateInt("subType", maintenanceType);
             rs.updateInt("fbo", fbo.getId());
@@ -1730,14 +1728,14 @@ public class Aircraft implements Serializable
             // First call for additional cost during 100-hour
             int[] conditionPrice = aircraft.getConditionPrice(aircraft, maintenanceType);
             int addedPrice=0;
-            int condition =0;
+            int condition;
             if (maintenanceType != AircraftMaintenanceBean.MAINT_FIXAIRCRAFT)
             {
-                for (int i = 0; i < conditionPrice.length; i++)
+                for (int aConditionPrice : conditionPrice)
                 {
-
-                    addedPrice += conditionPrice[i];
+                    addedPrice += aConditionPrice;
                 }
+
                 price += (addedPrice * factor);
             }
             else  //Emergency Aircraft Repair between $1000-5000, reset condition
@@ -1746,6 +1744,7 @@ public class Aircraft implements Serializable
                 {
                     condition = (int) (50000 + (59999 - 50000)* Math.random());
                 }while(condition > AircraftBean.REPAIR_RANGE_LOW-1 && condition < AircraftBean.REPAIR_RANGE_HIGH+1);
+
                 rs.updateInt("condition", condition);
                 rs.updateInt("lastFix", rs.getInt("airframe"));
             }

@@ -96,7 +96,7 @@ public class Goods implements Serializable
         {
             try
             {
-                int currentAmount = 0;
+                int currentAmount;
                 String qry = "SELECT * FROM goods WHERE location = ? AND owner = ? AND type = ?";
                 ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, icao, userId, commodityId);
                 if (rs.next())
@@ -153,7 +153,7 @@ public class Goods implements Serializable
         List<GoodsBean> returnValue = getGoodsSQL(SQL);
         if (commodities != null && size > 0)
         {
-            List<GoodsBean> result = new ArrayList<GoodsBean>();
+            List<GoodsBean> result = new ArrayList<>();
             int amount[] = new int[commodities.length + 1];
             for (GoodsBean item : returnValue)
             {
@@ -195,7 +195,7 @@ public class Goods implements Serializable
 
     static List<GoodsBean> getGoodsSQL(String qry)
     {
-        ArrayList<GoodsBean> result = new ArrayList<GoodsBean>();
+        ArrayList<GoodsBean> result = new ArrayList<>();
         try
         {
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);

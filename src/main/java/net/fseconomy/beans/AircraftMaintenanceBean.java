@@ -296,11 +296,9 @@ public class AircraftMaintenanceBean implements Serializable
 		return totalCost;		
 	}
 
-	int calculateRepair()
+	void calculateRepair()
 	{
 		repairPrice = (int) (1000 + (3000 - 1000) * Math.random());
-
-		return repairPrice;
 	}
 	
 	int doRepair(ResultSet maintenanceRs, int log) throws SQLException
@@ -310,6 +308,7 @@ public class AircraftMaintenanceBean implements Serializable
 
 		return repairPrice;
 	}
+
 	public String report()
 	{
 		StringBuilder report = new StringBuilder();

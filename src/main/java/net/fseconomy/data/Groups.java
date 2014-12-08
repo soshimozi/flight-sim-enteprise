@@ -90,7 +90,7 @@ public class Groups implements Serializable
             int id = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), group.getName());
             joinGroup(user, id, "owner");
 
-            Accounts.addAccountNote(user.getId(), user.getId(), "Created group: " + group.getName()  + "[" + group.getId() + "]");
+            Accounts.addAccountNote(user.getId(), user.getId(), "Created group: " + group.getName() + "[" + group.getId() + "]");
         }
         catch (SQLException e)
         {
@@ -155,7 +155,7 @@ public class Groups implements Serializable
         Accounts.mustBeLoggedIn(user);
         try
         {
-            String qry = "";
+            String qry;
 
             if (accept)
             {
@@ -381,7 +381,7 @@ public class Groups implements Serializable
 
         try
         {
-            StringBuffer list = new StringBuffer("(");
+            StringBuilder list = new StringBuilder("(");
             for (int c = 0; c < members.length; c++)
             {
                 if (c > 0)
@@ -392,7 +392,7 @@ public class Groups implements Serializable
             }
             list.append(")");
 
-            List<String> toList = new ArrayList<String>();
+            List<String> toList = new ArrayList<>();
             String qry = "SELECT email FROM accounts, groupmembership WHERE accounts.id = groupmembership.userId AND groupId = ? AND accounts.id IN " + list.toString();
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, group);
             while (rs.next()) //add recipients to receive this message

@@ -37,4 +37,4 @@ function initAutoCompleteIP(myname, myvalue)
                 $(myvalue).val(ui.item.id);
             }
         });
-};
+}

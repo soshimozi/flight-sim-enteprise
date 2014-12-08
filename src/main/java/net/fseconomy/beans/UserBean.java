@@ -80,6 +80,7 @@ public class UserBean implements Serializable
 	int dateformat;
 	boolean showPaymentsToSelf;
 	String banList;
+    double earnedInterest;
 	
 	String readAccessKey; //Added by Airboss 11/28/2011
 	String writeAccessKey; //Added by Airboss 11/28/2011
@@ -113,7 +114,8 @@ public class UserBean implements Serializable
 		setDateFormat(rs.getInt("dateformat"));
 		setShowPaymentsToSelf(rs.getBoolean("showPaymentsToSelf"));
 		setBanList(rs.getString("banList"));
-		
+        setEarnedInterest(rs.getDouble("interest"));
+
 		setReadAccessKey(rs.getString("readAccessKey")); //Added by Airboss 11/28/2011
 		setWriteAccessKey(rs.getString("writeAccessKey")); //Added by Airboss 11/28/2011
 }
@@ -128,6 +130,16 @@ public class UserBean implements Serializable
 		rs.updateString("readAccessKey", readAccessKey); //Added by Airboss 11/28/2011
 		rs.updateString("writeAccessKey", writeAccessKey); //Added by Airboss 11/28/2011
 	}
+
+    private void setEarnedInterest(double interest)
+    {
+        earnedInterest = interest;
+    }
+
+    public double getEarnedInterest()
+    {
+        return earnedInterest;
+    }
 
     private void setCreated(Timestamp ts)
     {

@@ -162,7 +162,8 @@ public class Logging implements Serializable
 
     public static List<LogBean> getLogForUserFromId(String username, int fromid)
     {
-        String sql = "SELECT * FROM log where id > " + fromid + " AND user = '" + Converters.escapeSQL(username) + "'" + " order by id LIMIT 500";
+        int userId = Accounts.getAccountIdByName(username);
+        String sql = "SELECT * FROM log where id > " + fromid + " AND userid = " + userId + " order by id LIMIT 500";
 
         return getLogSQL(sql);
     }
@@ -174,7 +175,7 @@ public class Logging implements Serializable
 
     public static List<LogBean> getLogForUser(UserBean user, int from, int amount)
     {
-        ArrayList<LogBean> result = new ArrayList<LogBean>();
+        ArrayList<LogBean> result = new ArrayList<>();
 
         try
         {
@@ -196,7 +197,7 @@ public class Logging implements Serializable
 
     public static List<LogBean> getLogForUser(UserBean user, int afterLogId)
     {
-        return getLogSQL("SELECT * FROM log WHERE id > " + afterLogId + " AND type <> 'refuel' and type <> 'maintenance' and user='" + Converters.escapeSQL(user.getName()) + "' ORDER BY time DESC ");
+        return getLogSQL("SELECT * FROM log WHERE id > " + afterLogId + " AND type <> 'refuel' and type <> 'maintenance' and userid = " + user.getId() + " ORDER BY time DESC ");
     }
 
     public static LogBean getLogById(int id)
@@ -222,7 +223,7 @@ public class Logging implements Serializable
 
     public static List<LogBean> getLogForMaintenanceAircraft(int aircraftId)
     {
-        ArrayList<LogBean> result = new ArrayList<LogBean>();
+        ArrayList<LogBean> result = new ArrayList<>();
 
         try
         {
@@ -244,7 +245,7 @@ public class Logging implements Serializable
 
     static List<LogBean> getLogSQL(String qry)
     {
-        ArrayList<LogBean> result = new ArrayList<LogBean>();
+        ArrayList<LogBean> result = new ArrayList<>();
 
         try
         {
@@ -266,8 +267,8 @@ public class Logging implements Serializable
     public static Object[] outputLog(String selection)
     {
         StringBuilder result1 = new StringBuilder();
-        Set<String> aircraft = new HashSet<String>();
-        Set<String> users = new HashSet<String>();
+        Set<String> aircraft = new HashSet<>();
+        Set<String> users = new HashSet<>();
 
         try
         {
@@ -292,8 +293,8 @@ public class Logging implements Serializable
             e.printStackTrace();
         }
 
-        List<String> aircraftList = new ArrayList<String>(aircraft);
-        List<String> usersList = new ArrayList<String>(users);
+        List<String> aircraftList = new ArrayList<>(aircraft);
+        List<String> usersList = new ArrayList<>(users);
         Collections.sort(aircraftList);
         Collections.sort(usersList);
 

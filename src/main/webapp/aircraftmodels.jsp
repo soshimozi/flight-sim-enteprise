@@ -27,13 +27,15 @@
     <script>
 
         $(document).ready(function() {
-            $("#modelSelect").select2({
+            var e = $("#modelSelect");
+
+            e.select2({
                 matcher: function(term, text, opt){
                      return text.toUpperCase().indexOf(term.toUpperCase())>=0 || opt.parent("optgroup").attr("label").toUpperCase().indexOf(term.toUpperCase())>=0
                 }
             });
 
-            $("#modelSelect").change(function(){
+            e.change(function(){
                   $("#modelData").load( "aircraftmodeldata.jsp?id=" + $(this).val() );
             });
 

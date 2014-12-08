@@ -7,7 +7,6 @@
 
 package net.fseconomy.beans;
 
-import net.fseconomy.data.Data;
 import net.fseconomy.util.Constants;
 
 import java.io.Serializable;

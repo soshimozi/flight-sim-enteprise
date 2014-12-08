@@ -106,6 +106,7 @@
         [
 <%
 
+    StringBuilder sb = new StringBuilder();
     for (AirportBean airport : airports)
     {
         double lat = airport.getLat();
@@ -117,13 +118,14 @@
         boolean hasGoodsForSale = airport.hasGoodsForSale();
 
         int iconToUse = hasGoodsForSale ? 2 : hasServices ? 1 : 0;
-        StringBuilder sb = new StringBuilder();
+
         sb.append("<div class=\"infowindow-content\">");
         sb.append(airportLink);
         sb.append("</div>");
 %>
-			[<%=lat%>, <%=lon%>, <%=iconToUse%>, '<%=sb.toString()%>'], 
+			[<%=lat%>, <%=lon%>, <%=iconToUse%>, '<%=sb.toString()%>'],
 <%
+        sb.setLength(0);
     }
 %>
         ];

@@ -8,7 +8,7 @@
 	$.tablesorter.addParser({
 		id: "timeExpire",
 		is: function(s) {
-			false;
+			return false;
 		},
 		format: function(s, table) {
 			var parts = s.split(" ");

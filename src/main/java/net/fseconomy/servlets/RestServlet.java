@@ -10,7 +10,6 @@ import net.fseconomy.util.Formatters;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import java.util.List;
 

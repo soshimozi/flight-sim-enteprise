@@ -1,6 +1,5 @@
 package net.fseconomy.beans;
 
-import net.fseconomy.data.Data;
 import net.fseconomy.data.Fbos;
 import net.fseconomy.data.Goods;
 import net.fseconomy.dto.CloseAirport;

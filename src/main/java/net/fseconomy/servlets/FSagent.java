@@ -182,7 +182,7 @@ public class FSagent extends HttpServlet
 		if (aircraft == null || !closest.icao.equals(aircraft.getLocation()))
 			throw new DataError("You have no active aircraft at " + closest.icao);
 		
-		if (!Aircraft.aircraftOk(aircraft, FSAircraft))
+		if (!Aircraft.aircraftMappingFound(aircraft.getModelId(), FSAircraft))
 			throw new DataError(FSAircraft+" is not compatible with your active "+aircraft.getMakeModel());
 		
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit

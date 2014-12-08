@@ -37,4 +37,4 @@ function initAutoComplete(myname, myvalue, mytype)
                     		$(myvalue).val(ui.item.id);
                 		}
             });
-};
+}

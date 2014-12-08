@@ -241,7 +241,7 @@ public class Flights
                 stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
                 //Is the pilot using an AllIn aircraft?
-                String qry = "SELECT (count(id) > 0) AS found FROM aircraft, assignments WHERE aircraft.id = assignments.aircraftid AND aircraft.userlock = ?";
+                String qry = "SELECT (count(aircraft.id) > 0) AS found FROM aircraft, assignments WHERE aircraft.id = assignments.aircraftid AND aircraft.userlock = ?";
                 allIn = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user.getId());
 
                 //AllIn flight with no assignment check - Airboss 11-9-12
@@ -616,7 +616,7 @@ public class Flights
                 rs.moveToInsertRow();
 
                 rs.updateTimestamp("time",new Timestamp(System.currentTimeMillis()));
-                rs.updateString("user", user.getName());
+                rs.updateInt("userid", user.getId());
                 rs.updateInt("aircraftid", aircraft.getId());
                 rs.updateString("from", aircraft.getDepartedFrom());
                 rs.updateString("to", location.icao);

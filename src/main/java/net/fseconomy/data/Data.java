@@ -20,15 +20,10 @@
 package net.fseconomy.data;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
-import java.util.Date;
 
 import net.fseconomy.dto.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Data implements Serializable
 {

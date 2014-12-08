@@ -88,39 +88,34 @@
 
             if( action == "edit")
             {
-                var url = "/admin/serviceprovidersedit.jsp?id=" + id;
-                location.href = url;
+                location.href = "/admin/serviceprovidersedit.jsp?id=" + id;
             }
             else if( action == "approve")
             {
                 if (window.confirm("Are you sure you want to APPROVE this request?"))
                 {
-                    var url = "/admin/serviceproviders.jsp?id=" + id + "&action=approve";
-                    location.href = url;
+                    location.href = "/admin/serviceproviders.jsp?id=" + id + "&action=approve";
                 }
             }
             else if( action == "disable")
             {
                 if (window.confirm("Are you sure you want to DISABLE this service?"))
                 {
-                    var url = "/admin/serviceproviders.jsp?id=" + id + "&action=disable";
-                    location.href = url;
+                    location.href = "/admin/serviceproviders.jsp?id=" + id + "&action=disable";
                 }
             }
             else if( action == "reject")
             {
                 if (window.confirm("Are you sure you want to REJECT this request?"))
                 {
-                    var url = "/admin/serviceproviders.jsp?id=" + id + "&action=reject";
-                    location.href = url;
+                    location.href = "/admin/serviceproviders.jsp?id=" + id + "&action=reject";
                 }
             }
             else if( action == "ban")
             {
                 if (window.confirm("Are you sure you want to BAN this service?"))
                 {
-                    var url = "/admin/serviceproviders.jsp?id=" + id + "&action=ban";
-                    location.href = url;
+                    location.href = "/admin/serviceproviders.jsp?id=" + id + "&action=ban";
                 }
             }
         }

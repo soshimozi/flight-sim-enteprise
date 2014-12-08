@@ -453,10 +453,7 @@
 %>
 		     	<tr>
 		     	<td>
-					<div class="checkbox" >
-						<input class="css-checkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%=bean.getId() %>"/>
-						<label class="css-label" for="mycheckbox<%=counter%>"></label>
-					</div>
+					<input type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%=bean.getId() %>"/>
 				</td>
 		        <td class="numeric"><%=Formatters.currency.format(bean.calcPay()) %></td>
 		        <td>
@@ -693,10 +690,7 @@
 
 	     		<tr>
 	     			<td>
-					<div class="checkbox" >
-						<input class="css-checkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%=assignment.getId() %>" <%=assignment.getActive() != 0 ? "disabled" : "" %> />
-						<label class="css-label" for="mycheckbox<%=counter%>"></label>
-					</div>
+				        <input type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%=assignment.getId() %>" <%=assignment.getActive() != 0 ? "disabled" : "" %> />
 					</td>
 		        	<td class="numeric"><%=Formatters.currency.format(assignment.calcPay()) %></td>
 		       	 	<td>
@@ -1012,15 +1006,17 @@ $("#calcFuel").click(function () {
 });
 $("#calcLoad").click(function ()
 {
-    var percent = Math.min($("#entgallons").val() / <%= fuelCap %> * 100, 100);
+    var gals = $("#entgallons");
+    var pload = $("#expayload");
+    var percent = Math.min(gals.val() / <%= fuelCap %> * 100, 100);
     var maxpayload = Math.floor((100 - percent) * ((<%= payload75 %> - <%= payload100 %>) / 25) + <%= payload100 %>);
     var maxpax = Math.min(<%=seats%>, Math.floor(maxpayload / 77));
     
-    if ($("#entgallons").val() > <%= fuelCap %>) {
-        $("#expayload").val('Exceeds Limits');
+    if (gals.val() > <%= fuelCap %>) {
+        pload.val('Exceeds Limits');
     } 
     else {
-        $("#expayload").val(maxpayload + ' Kg or ' + maxpax + ' pax');
+        pload.val(maxpayload + ' Kg or ' + maxpax + ' pax');
     }
 });
 </script>

@@ -1,14 +1,10 @@
 package net.fseconomy.services;
 
 import static net.fseconomy.services.common.*;
-import net.fseconomy.data.Airports;
-import net.fseconomy.beans.AircraftBean;
+
 import net.fseconomy.data.*;
-import net.fseconomy.dto.IcaoLatLon;
 import net.fseconomy.dto.LatLonCount;
 import net.fseconomy.dto.LatLonSize;
-import net.fseconomy.dto.TemplateHeatmapItem;
-import net.fseconomy.util.Formatters;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;

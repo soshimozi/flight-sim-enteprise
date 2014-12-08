@@ -16,7 +16,7 @@ public final class Validate
 	
 	//Validates that an IP address has 4 octets and valid ranges
 	//http://www.tek-tips.com/viewthread.cfm?qid=1379040
-	public static boolean IPAddress( String  ipAddress )
+	public static boolean isIPAddress(String ipAddress)
 	{
 	    String[] parts = ipAddress.split( "\\." );
 

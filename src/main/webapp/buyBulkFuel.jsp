@@ -65,8 +65,8 @@
 					url: "/rs/fuelquote/"+fueltype+'/'+amount+'/'+icao,
 					dataType: "json",
 					success: function(response){
-						$("#fuelamt").html($("#amount option:selected").text());
-						$("#fueltype").html($("#type option:selected").text());
+						$("#fuelamt").html($("#amount").find("option:selected").text());
+						$("#fueltype").html($("#type").find("option:selected").text());
 						$("#fuelprice").html(response);
 					},
 					 error: function(e){

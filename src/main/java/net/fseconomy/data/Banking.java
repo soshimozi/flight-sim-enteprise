@@ -137,7 +137,7 @@ public class Banking implements Serializable
 
     public static List<PaymentBean> getPaymentLogSQL(String qry)
     {
-        ArrayList<PaymentBean> result = new ArrayList<PaymentBean>();
+        ArrayList<PaymentBean> result = new ArrayList<>();
 
         try
         {
@@ -156,11 +156,11 @@ public class Banking implements Serializable
         return result;
     }
 
-    public static void doBanking(int user, double value)
+    public static void doBanking(int userId, double amount)
     {
         try
         {
-            String sValue = Formatters.twoDecimals.format(value);
+            String sValue = Formatters.twoDecimals.format(amount);
 
             //I want to use these but can't because of how the rounding is being done in a string
             //I don't want to introduce a difference in how the banking is done yet.
@@ -168,16 +168,51 @@ public class Banking implements Serializable
             //qry = "UPDATE accounts SET money = ROUND(money - ?, 2) WHERE id = ?";
 
             String qry = "UPDATE accounts SET bank = ROUND(bank + " + sValue + ", 2) WHERE id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, user);
+            DALHelper.getInstance().ExecuteUpdate(qry, userId);
 
             qry = "UPDATE accounts SET money = ROUND(money - " + sValue + ", 2) WHERE id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, user);
+            DALHelper.getInstance().ExecuteUpdate(qry, userId);
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
     }
+
+    public static void doDeposit(int userId, double amount)
+    {
+        try
+        {
+            String sValue = Formatters.twoDecimals.format(amount);
+
+            String qry = "UPDATE accounts SET bank = ROUND(bank + " + sValue + ", 2) WHERE id = " + userId + ";" +
+                         "UPDATE accounts SET money = ROUND(money - " + sValue + ", 2) WHERE id =  " + userId + ";";
+            DALHelper.getInstance().ExecuteBatchUpdate(qry);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void doWithdrawal(int userId, double amount)
+    {
+        try
+        {
+            String sValue = Formatters.twoDecimals.format(amount);
+
+            String qry = "UPDATE accounts SET bank = ROUND(bank - " + sValue + ", 2) WHERE id = " + userId + ";" +
+                         "UPDATE accounts SET money = ROUND(money + " + sValue + ", 2) WHERE id =  " + userId + ";";
+            DALHelper.getInstance().ExecuteBatchUpdate(qry);
+
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+
 
     public static void doPayGroup(int user, int group, float value)
     {

@@ -1,8 +1,5 @@
 package net.fseconomy.servlets;
 
-import net.fseconomy.data.Data;
-import net.fseconomy.dto.PilotStatus;
-import net.fseconomy.dto.TemplateHeatmapItem;
 import net.fseconomy.services.AdminServiceData;
 import net.fseconomy.services.Authenticator;
 
@@ -11,7 +8,6 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
 import static net.fseconomy.services.common.ResponseAccessDenied;
 import static net.fseconomy.services.common.createErrorResponse;

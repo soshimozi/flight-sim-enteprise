@@ -2,17 +2,13 @@ package net.fseconomy.servlets;
 
 import static net.fseconomy.services.common.*;
 
-import net.fseconomy.beans.UserBean;
 import net.fseconomy.data.DALHelper;
-import net.fseconomy.data.Data;
 import net.fseconomy.services.Authenticator;
-import org.infinispan.Cache;
 import org.jboss.resteasy.core.interception.PostMatchContainerRequestContext;
 
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
-import javax.security.auth.login.LoginException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
@@ -74,7 +70,7 @@ public class SecurityInterceptor implements ContainerRequestFilter
             if(method.isAnnotationPresent(RolesAllowed.class))
             {
                 RolesAllowed rolesAnnotation = method.getAnnotation(RolesAllowed.class);
-                Set<String> rolesSet = new HashSet<String>(Arrays.asList(rolesAnnotation.value()));
+                Set<String> rolesSet = new HashSet<>(Arrays.asList(rolesAnnotation.value()));
 
                 rolesSet.forEach(System.out::println);
 
@@ -91,8 +87,7 @@ public class SecurityInterceptor implements ContainerRequestFilter
 
     private boolean isUserAllowed(final String username, final Set<String> rolesSet)
     {
-        boolean flag =rolesSet.contains(getUserLevel(username));
-        return flag;
+        return rolesSet.contains(getUserLevel(username));
     }
 
     public String getUserLevel(String userName)
@@ -100,8 +95,7 @@ public class SecurityInterceptor implements ContainerRequestFilter
         try
         {
             String qry = "SELECT level FROM accounts a WHERE name = ?";
-            String level = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), userName);
-            return level;
+            return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), userName);
         }
         catch(SQLException e)
         {

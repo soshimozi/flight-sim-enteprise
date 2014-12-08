@@ -364,7 +364,7 @@ public class FSagentFSX extends HttpServlet
 			throw new DataError("You have no rented aircraft at " + closest.icao);
 
 		// Check the aircraft name mapping to make sure we have a match, if not, exit
-		if (!Aircraft.aircraftOk(aircraft, FSAircraft))
+		if (!Aircraft.aircraftMappingFound(aircraft.getModelId(), FSAircraft))
 			throw new DataError(FSAircraft + " is not compatible with your rented " + aircraft.getMakeModel());
 
 		// Check the aircraft not an All-in only aircraft with no All-in assignment, if not unrent and exit

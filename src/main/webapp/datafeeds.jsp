@@ -8,7 +8,9 @@
 <%
     if(user == null || !user.isLoggedIn())
     {
-        out.print("<script type=\"text/javascript\">document.location.href=\"admin.jsp\"</script>");
+%>
+        <script type="text/javascript">document.location.href="admin.jsp"</script>
+<%
         return;
     }
 
@@ -70,7 +72,7 @@
                     {
                         //update the group access key
                         group.setReadAccessKey( newAccessKey );
-                        Accounts.updateGroup(group, user);
+                        Groups.updateGroup(group, user);
                         error = "Read Access Key Updated.";
                     }
                     else
@@ -206,15 +208,27 @@
 <%
 	if(!servicecreated)
 	{
-		out.print("<font size=\"1\"><a href=\"serviceproviderrequest.jsp\">Request Service Provider Key</a></font><br/><br/>");
+%>
+            <p>
+		        <span class="font-size: 1"><a href="serviceproviderrequest.jsp">Request Service Provider Key</a></span>
+            </p>
+<%
 	}
 	else if(service.getStatus() == ServiceProviderBean.STATUS_ACTIVE)
 	{
-		out.print("<font size=\"2\">Your Service Key: " + service.getKey() + "</a></font><br/><br/>");
+%>
+            <p>
+	    	    <span class="font-size: 2">Your Service Key: <%=service.getKey()%> </a></span>
+            </p>
+<%
 	}
 	else
 	{
-		out.print("<font size=\"2\">Your Service Key: " + service.getStatusString() + "</a></font><br/><br/>");
+%>
+            <p>
+    		    <span class="font-size: 2">Your Service Key: <%=service.getStatusString()%> </a></span>
+            </p>
+<%
 	}
 
 	String checked; 

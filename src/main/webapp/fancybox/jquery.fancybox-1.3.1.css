@@ -110,9 +110,8 @@
 	right: -15px;
 	width: 30px;
 	height: 30px;
-	background-image: url('fancybox.png');
-	background-position: -40px 0px;
-	cursor: pointer;
+    background: url('fancybox.png') -40px 0px;
+    cursor: pointer;
 	z-index: 1103;
 	display: none;
 }
@@ -195,24 +194,19 @@
 
 #fancybox-title-left {
 	padding-left: 15px;
-	background-image: url('fancybox.png');
-	background-position: -40px -90px;
-	background-repeat: no-repeat;
+    background: url('fancybox.png') no-repeat -40px -90px;
 }
 
 #fancybox-title-main {
 	font-weight: bold;
 	line-height: 29px;
-	background-image: url('fancybox-x.png');
-	background-position: 0px -40px;
-	color: #FFF;
+    background: url('fancybox-x.png') 0px -40px;
+    color: #FFF;
 }
 
 #fancybox-title-right {
 	padding-left: 15px;
-	background-image: url('fancybox.png');
-	background-position: -55px -90px;
-	background-repeat: no-repeat;
+    background: url('fancybox.png') no-repeat -55px -90px;
 }
 
 #fancybox-left, #fancybox-right {
@@ -248,13 +242,11 @@
 }
 
 #fancybox-left-ico {
-	background-image: url('fancybox.png');
-	background-position: -40px -30px;
+    background: url('fancybox.png') -40px -30px;
 }
 
 #fancybox-right-ico {
-	background-image: url('fancybox.png');
-	background-position: -40px -60px;
+    background: url('fancybox.png') -40px -60px;
 }
 
 #fancybox-left:hover, #fancybox-right:hover {
@@ -290,38 +282,33 @@
 #fancy-bg-ne {
 	top: -20px;
 	right: -20px;
-	background-image: url('fancybox.png');
-	background-position: -40px -162px;
+    background: url('fancybox.png') -40px -162px;
 }
 
 #fancy-bg-e {
 	top: 0;
 	right: -20px;
 	height: 100%;
-	background-image: url('fancybox-y.png');
-	background-position: -20px 0px;
+    background: url('fancybox-y.png') -20px 0px;
 }
 
 #fancy-bg-se {
 	bottom: -20px;
 	right: -20px;
-	background-image: url('fancybox.png');
-	background-position: -40px -182px; 
+    background: url('fancybox.png') -40px -182px;
 }
 
 #fancy-bg-s {
 	bottom: -20px;
 	left: 0;
 	width: 100%;
-	background-image: url('fancybox-x.png');
-	background-position: 0px -20px;
+    background: url('fancybox-x.png') 0px -20px;
 }
 
 #fancy-bg-sw {
 	bottom: -20px;
 	left: -20px;
-	background-image: url('fancybox.png');
-	background-position: -40px -142px;
+    background: url('fancybox.png') -40px -142px;
 }
 
 #fancy-bg-w {
@@ -334,8 +321,7 @@
 #fancy-bg-nw {
 	top: -20px;
 	left: -20px;
-	background-image: url('fancybox.png');
-	background-position: -40px -122px;
+    background: url('fancybox.png') -40px -122px;
 }
 
 /* IE */

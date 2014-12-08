@@ -106,9 +106,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 		<%= groupMenu(user, "m6", 1, "Aircraft", false, true, "aircraft.jsp", "?id=", response) %>
 		oM.makeMenu('sub6_1','m6','Purchase aircraft','<%= response.encodeURL("market.jsp") %>');
 
-		oM.makeMenu('m7','','Bank','<%= response.encodeURL("bank.jsp") %>', "", 60);
-		<%= groupMenu(user, "m7", 1, "Bank account", true, true, "bank.jsp", "?id=", response) %>
-		oM.makeMenu('sub7_2','m7','Summary of accounts','<%= response.encodeURL("banksummary.jsp")%>');
+		oM.makeMenu('m7','','Banking','<%= response.encodeURL("banksummary.jsp") %>', "", 80);
 
 		oM.makeMenu('m8','','Groups','<%= response.encodeURL("groups.jsp") %>', "", 80);
 		oM.makeMenu('sub8_0','m8','My groups','<%= response.encodeURL("groups.jsp")%>');

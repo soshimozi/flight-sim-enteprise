@@ -37,17 +37,19 @@
 		List items = upload.parseRequest(request);
 		
 		Map itemsMap = new HashMap();
-		for (Iterator i = items.iterator(); i.hasNext();)
-		{
-			FileItem item = (FileItem) i.next();
-			itemsMap.put(item.getFieldName(), item);
-		}
+        for (Object item1 : items)
+        {
+            FileItem item = (FileItem) item1;
+            itemsMap.put(item.getFieldName(), item);
+        }
 		
 		sMon = request.getParameter("month");
 		
 		mon = Integer.parseInt(sMon);
-		if(mon < 1 || mon > 12)
-			message = "Month out of range";
+        if (mon < 1 || mon > 12)
+        {
+            message = "Month out of range";
+        }
 	
 		FileItem image = (FileItem) itemsMap.get("template");
 		

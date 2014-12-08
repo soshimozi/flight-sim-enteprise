@@ -178,7 +178,7 @@ var standardistaTableSorting = {
 		// otherwise, we have to do the full sort
 		} else {
 			that.sortColumnIndex = column;
-			var newRows = new Array();
+			var newRows = [];
 
 			for (var j = 0; j < table.tBodies[0].rows.length; j++) { 
 				newRows[j] = table.tBodies[0].rows[j]; 
@@ -272,7 +272,7 @@ var standardistaTableSorting = {
 		if (itm.match(/^\d\d[\/-]\d\d[\/-]\d\d$/)) {
 			sortfn = this.sortDate;
 		}
-		if (itm.match(/^[£$]/)) {
+		if (itm.match(/^[ï¿½$]/)) {
 			sortfn = this.sortCurrency;
 		}
 		if (itm.match(/^\d?\.?\d+$/)) {

@@ -15,7 +15,8 @@ public class ServiceAccessBean
     private String fboaccess;
     private String goodsaccess;
 
-    ServiceAccessBean() {};
+    private ServiceAccessBean() {}
+
     public ServiceAccessBean(CachedRowSet rs)
     {
         try

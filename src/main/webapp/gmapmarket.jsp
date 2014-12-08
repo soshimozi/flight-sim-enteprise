@@ -25,10 +25,10 @@
     if (fromParam != null && fromParam.equals(""))
         fromParam = null;
 
-    boolean hasVfr = (request.getParameter("hasVfr") == null ? false : Boolean.parseBoolean(request.getParameter("hasVfr")));
-    boolean hasIfr = (request.getParameter("hasIfr") == null ? false : Boolean.parseBoolean(request.getParameter("hasIfr")));
-    boolean hasAp = (request.getParameter("hasAp") == null ? false : Boolean.parseBoolean(request.getParameter("hasAp")));
-    boolean hasGps = (request.getParameter("hasGps") == null ? false : Boolean.parseBoolean(request.getParameter("hasGps")));
+    boolean hasVfr = (request.getParameter("hasVfr") != null && Boolean.parseBoolean(request.getParameter("hasVfr")));
+    boolean hasIfr = (request.getParameter("hasIfr") != null && Boolean.parseBoolean(request.getParameter("hasIfr")));
+    boolean hasAp = (request.getParameter("hasAp") != null && Boolean.parseBoolean(request.getParameter("hasAp")));
+    boolean hasGps = (request.getParameter("hasGps") != null && Boolean.parseBoolean(request.getParameter("hasGps")));
 
     boolean isSystemOwned = request.getParameter("isSystemOwned") != null;
     boolean isPlayerOwned = request.getParameter("isPlayerOwned") != null;
@@ -106,53 +106,54 @@ if (message != null)
     var locations = 
         [
 <%
-for (AircraftBean aircraft : aircraftList)
-{
-	if(aircraft.getLocation() == null)
-		continue;
-		
-	boolean bankOwned = aircraft.getOwner() == 0;
-	AirportBean airport = Airports.getAirport(aircraft.getLocation());
-	double lat = airport.getLat();
-	double lon = airport.getLon();
-	String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
-	
 	StringBuilder sb = new StringBuilder();
-	sb.append("<div class=\"infowindow-content\">");
-	sb.append(airportLink);
-	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(Accounts.getAccountNameById(aircraft.getOwner())));
-	sb.append("<br>");
-	sb.append(aircraft.getRegistration());
-	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(aircraft.getMakeModel()));
-	sb.append("<br>");
-	sb.append(Formatters.oneDecimal.format(aircraft.getAirframeHours()));
-	sb.append(" hrs Airframe");
-	sb.append("<br>");
-	sb.append(Formatters.oneDecimal.format(aircraft.getEngineHours()));
-	sb.append(" hrs Engine Time");
-	sb.append("<br>");
-	sb.append(Formatters.oneDecimal.format(aircraft.getHoursSinceLastCheck()));
-	sb.append(" hrs Since 100hr");
-	sb.append("<br>");
-	sb.append(Formatters.oneDecimal.format(aircraft.getTotalFuel()));
-	sb.append(" of ");
-	sb.append(Formatters.oneDecimal.format(aircraft.getTotalCapacity()));
-	sb.append(" Gallons");
-	sb.append("<br>");
-	sb.append(aircraft.getSEquipment());
-	sb.append("<br>");
-	sb.append(Formatters.currency.format(aircraft.getSellPrice()));
-	sb.append(" Sell Price");
-	sb.append("<br>");
-	sb.append(Formatters.currency.format(aircraft.getMinimumPrice()));
-	sb.append(" Buyback Price");
-	sb.append("</div>");
+    for (AircraftBean aircraft : aircraftList)
+    {
+        if(aircraft.getLocation() == null)
+            continue;
+
+        boolean bankOwned = aircraft.getOwner() == 0;
+        AirportBean airport = Airports.getAirport(aircraft.getLocation());
+        double lat = airport.getLat();
+        double lon = airport.getLon();
+        String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
+
+        sb.append("<div class=\"infowindow-content\">");
+        sb.append(airportLink);
+        sb.append("<br>");
+        sb.append(Converters.escapeJavaScript(Accounts.getAccountNameById(aircraft.getOwner())));
+        sb.append("<br>");
+        sb.append(aircraft.getRegistration());
+        sb.append("<br>");
+        sb.append(Converters.escapeJavaScript(aircraft.getMakeModel()));
+        sb.append("<br>");
+        sb.append(Formatters.oneDecimal.format(aircraft.getAirframeHours()));
+        sb.append(" hrs Airframe");
+        sb.append("<br>");
+        sb.append(Formatters.oneDecimal.format(aircraft.getEngineHours()));
+        sb.append(" hrs Engine Time");
+        sb.append("<br>");
+        sb.append(Formatters.oneDecimal.format(aircraft.getHoursSinceLastCheck()));
+        sb.append(" hrs Since 100hr");
+        sb.append("<br>");
+        sb.append(Formatters.oneDecimal.format(aircraft.getTotalFuel()));
+        sb.append(" of ");
+        sb.append(Formatters.oneDecimal.format(aircraft.getTotalCapacity()));
+        sb.append(" Gallons");
+        sb.append("<br>");
+        sb.append(aircraft.getSEquipment());
+        sb.append("<br>");
+        sb.append(Formatters.currency.format(aircraft.getSellPrice()));
+        sb.append(" Sell Price");
+        sb.append("<br>");
+        sb.append(Formatters.currency.format(aircraft.getMinimumPrice()));
+        sb.append(" Buyback Price");
+        sb.append("</div>");
 %>
 			[<%=lat%>, <%=lon%>, <%=bankOwned ? 0 : 1%>, '<%=sb.toString()%>'], 
 <%
-}
+        sb.setLength(0);
+    }
 %>
         ];
 

@@ -164,7 +164,7 @@ public class Models implements Serializable
 
     public static List<ModelBean> getModelsSQL(String qry)
     {
-        ArrayList<ModelBean> result = new ArrayList<ModelBean>();
+        ArrayList<ModelBean> result = new ArrayList<>();
 
         try
         {
@@ -273,7 +273,7 @@ public class Models implements Serializable
     public static ModelAliases getModelAliases(int modelId)
     {
         String qry;
-        ResultSet rs = null;
+        ResultSet rs;
         ModelAliases modelaliases = new ModelAliases();
 
         try

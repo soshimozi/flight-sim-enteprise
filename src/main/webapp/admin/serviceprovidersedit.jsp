@@ -51,7 +51,7 @@
         if(name == null || name.isEmpty())
             error = error + "Name missing<br/>";
 
-        if(!ip.equals("none") && !Validate.IPAddress(ip))
+        if(!ip.equals("none") && !Validate.isIPAddress(ip))
             error = error + "IP missing or bad format, use 'none' if not available<br/>";
 
         if(url == null || url.isEmpty())

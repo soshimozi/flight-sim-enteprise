@@ -67,8 +67,7 @@
             if (form.selectedIndex > 5)
                 doSubmit2(form.options[form.selectedIndex].value.substr(0,form.options[form.selectedIndex].value.indexOf(",")),form.options[form.selectedIndex].value.substr(form.options[form.selectedIndex].value.indexOf(",") + 1));
              else {
-                var url = form.options[form.selectedIndex].value;
-                location.href = url;
+                location.href = form.options[form.selectedIndex].value;
             }
         }
 

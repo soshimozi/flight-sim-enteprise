@@ -1137,7 +1137,7 @@
 				var holdr;
 				if (getIt) {
 					table.isProcessing = true;
-					$tb.before('<span class="tablesorter-savemyplace"/>');
+					$tb.before('<span class="tablesorter-savemyplace"></span>');
 					holdr = ($.fn.detach) ? $tb.detach() : $tb.remove();
 					return holdr;
 				}

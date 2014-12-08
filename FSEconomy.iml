@@ -67,9 +67,8 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: jboss-marshalling-osgi-1.4.4.Final" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: bcprov-jdk15on-1.50" level="project" />
     <orderEntry type="library" exported="" name="Gradle: slf4j-api-1.7.7" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: logback-classic-1.1.2" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: logback-core-1.1.2" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: slf4j-api-1.7.6" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: logback-classic-1.1.2" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: logback-core-1.1.2" level="project" />
   </component>
 </module>
 

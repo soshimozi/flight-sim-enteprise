@@ -155,7 +155,7 @@ public class Emailer
 	    boolean result = true;
 	    try 
 	    {
-	    	InternetAddress emailAddr = new InternetAddress(aEmailAddress);
+	    	new InternetAddress(aEmailAddress);
 	    }
 	    catch (AddressException ex)
 	    {

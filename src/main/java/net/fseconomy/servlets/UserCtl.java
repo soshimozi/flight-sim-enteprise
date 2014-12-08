@@ -210,6 +210,12 @@ public class UserCtl extends HttpServlet
                     case "bank":
                         doBank(req);
                         break;
+                    case "bankDeposit":
+                        doBankDeposit(req);
+                        break;
+                    case "bankWithdrawal":
+                        doBankWithdrawal(req);
+                        break;
                     case "mappings":
                         doMappings(req);
                         break;
@@ -1476,8 +1482,82 @@ public class UserCtl extends HttpServlet
 		
 		Banking.doBanking(id, total);
 	}
-	
-	void doMappings(HttpServletRequest req) throws DataError
+
+    void doBankDeposit(HttpServletRequest req) throws DataError
+    {
+        UserBean account;
+
+        String sAccountId = req.getParameter("accountid");
+        String sAmount = req.getParameter("amount");
+
+        if(sAccountId == null || sAmount == null || sAccountId.equals("") || sAmount.equals(""))
+            throw new DataError("Invalid parameters");
+
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        int accountId = Integer.parseInt(sAccountId);
+
+        if (accountId != user.getId())
+        {
+            account = Accounts.getAccountById(accountId);
+            if (account == null)
+                throw new DataError("Account not found");
+
+            if (account.isGroup() && user.groupMemberLevel(accountId) < UserBean.GROUP_STAFF)
+                throw new DataError("Permission denied");
+        }
+        else
+        {
+            account = user;
+        }
+
+        double deposit = Double.parseDouble(sAmount);
+
+        if ((account.getMoney() - deposit) < 0)
+            throw new DataError("You don't have enough money.");
+
+        Banking.doDeposit(account.getId(), deposit);
+    }
+
+    void doBankWithdrawal(HttpServletRequest req) throws DataError
+    {
+        UserBean account;
+
+        String sAccountId = req.getParameter("accountid");
+        String sAmount = req.getParameter("amount");
+
+        if(sAccountId == null || sAmount == null || sAccountId.equals("") || sAmount.equals(""))
+            throw new DataError("Invalid parameters");
+
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        int accountId = Integer.parseInt(sAccountId);
+
+        if (accountId != user.getId())
+        {
+            account = Accounts.getAccountById(accountId);
+            if (account == null)
+                throw new DataError("Account not found");
+
+            if (account.isGroup() && user.groupMemberLevel(accountId) < UserBean.GROUP_STAFF)
+                throw new DataError("Permission denied");
+        }
+        else
+        {
+            account = user;
+        }
+
+        double withdraw = Double.parseDouble(sAmount);
+
+        if (account.isGroup() && (account.getBank() - withdraw) < 0)
+            throw new DataError("The Group does not have enough money.");
+        else if (((account.getBank() - withdraw) < -account.getLoanLimit()))
+            throw new DataError("You can have a maximum loan of " + Formatters.currency.format(account.getLoanLimit()) + ".");
+
+        Banking.doWithdrawal(account.getId(), withdraw);
+    }
+
+    void doMappings(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 

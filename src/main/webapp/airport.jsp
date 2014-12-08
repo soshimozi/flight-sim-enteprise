@@ -4,9 +4,6 @@
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
-<jsp:useBean id="airport" class="net.fseconomy.beans.AirportBean">
-    <jsp:setProperty name="airport" property="icao"/>
-</jsp:useBean>
 
 <%
 	if(user == null || !user.isLoggedIn())
@@ -16,16 +13,34 @@
 <%
 		return;
 	}
-	
+
+    AirportBean airport = new AirportBean();
+
 	//setup return page if action used
-	String returnPage = request.getRequestURI();
+    String returnPage = null;
+    String selectedIcao = request.getParameter("icao");
+
+    //setup return page if action used
+    if(selectedIcao != null)
+    {
+        returnPage = request.getRequestURI() + "?icao=" + selectedIcao;
+        airport.setIcao(selectedIcao);
+        session.setAttribute("icao", selectedIcao);
+    }
+    else
+    {
+        selectedIcao = (String)session.getAttribute("icao");
+        if( selectedIcao != null)
+        {
+            returnPage = request.getRequestURI() + "?icao=" + selectedIcao;
+            airport.setIcao(selectedIcao);
+        }
+    }
 	response.addHeader("referer", request.getRequestURI());
+
 
 	//This has to be here to allow the op chart json data to load
 	boolean isSearch = request.getParameter("submit") != null;
-    if (airport.getIcao() == null && !isSearch)
-        airport.setIcao((String) session.getAttribute("requestedAirport"));
-
 	boolean hasAssignments = request.getParameter("assignments") != null;
 	boolean toAirport = "1".equals(request.getParameter("toAirport"));
 	boolean ferry = request.getParameter("ferry") != null;
@@ -450,16 +465,16 @@
                 <table>
                     <tr>
                         <td>
-                            <h1><jsp:getProperty name="airport" property="icao" /></h1>
+                            <h1><%=selectedIcao.toUpperCase()%></h1>
                         </td>
                         <td>
                             <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= airport.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap">
-                                <img style="border-style: none;" src="<%= airport.getDescriptiveImage(fbos) %>" />
+                                <img style="border-style: none;" src="<%= airport.getDescriptiveImage(fbos) %>">
                             </a>
                         </td>
                         <td>
                             <a href="http://www.fscharts.com/?action=search&type=icao&term=<%= airport.getIcao() %>" onclick="this.target='_blank'">
-                                <img style="border-style: none;" src="img/fscharts.gif"/>
+                                <img style="border-style: none;" src="img/fscharts.gif">
                             </a>
                         </td>
                     </tr>
@@ -759,7 +774,7 @@
 		else
             aircraftList = Aircraft.getAircraft(airport.getIcao());
 
-		String URL = returnPage + "?icao=" + airport.getIcao();	
+		String URL = returnPage;
 		String sToAirport = "&toAirport=" + (toAirport?1:0);
 		String sAirportArea = "&airportArea=" + (airportArea?1:0);
 		String sAircraftArea = "&aircraftArea=" + (aircraftArea?1:0);
@@ -825,10 +840,7 @@
 %>
                 <tr>
                     <td>
-                        <div class="checkbox" >
-                            <input class="css-checkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= id %>"/>
-                            <label class="css-label" for="mycheckbox<%=counter%>"></label>
-                        </div>
+                        <input type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= id %>"/>
                     </td>
                     <td class="numeric"><%= Formatters.currency.format(assignment.calcPay()) %></td>
 <% 				if (ap.equals(locap))
@@ -930,38 +942,43 @@
 	$("#addSelectedButton").click(function(e)
 	{			 
 		e.preventDefault();
-		$("#jsCountHolder").val(0);
-		$("#jsCountHolder2").val(0);
-		$("#whocares").val(0);
+
+        var h = $("#jsCountHolder");
+        var h2 = $("#jsCountHolder2");
+        var wc = $("#whocares");
+
+		h.val(0);
+		h2.val(0);
+		wc.val(0);
 			 
 		$.each($(".assigmentTable").find("input"), function()
 		{
 			if($(this).attr("checked") == true)
 			{
-				$("#jsCountHolder2").val(parseInt($("#jsCountHolder2").val()) + 1);
+				h2.val(parseInt(h2).val() + 1);
 				if($("#assignmentType-" + $(this).val()).html() == 'A')
 				{			   
-					$("#jsCountHolder").val(parseInt($("#jsCountHolder").val()) + 1);
+					h.val(parseInt(h.val()) + 1);
 				}
 			}
 		 });
 		 
-		if(parseInt($("#jsCountHolder").val()) > 0 && (parseInt($("#jsCountHolder2").val()) == parseInt($("#jsCountHolder").val())))
+		if(parseInt(h.val()) > 0 && (parseInt(h2.val()) == parseInt(h.val())))
 		{
 			   //the amount of all-in jobs matches the total number of selected jobs				
-				if(parseInt($("#jsCountHolder").val()) == 1)
+				if(parseInt(h.val()) == 1)
 				{					
-					$("#whocares").val(1);
-					doSubmit3(document.getElementById("airportForm").select,$("#addToGroup").val());
+					wc.val(1);
+					doSubmit3(document.getElementById("airportForm").select, $("#addToGroup").val());
 				}
 				else
 				{
 					alert('FSE Validation Error: cannot have more then 1 All-In job selected.');				    	
 				}
 		}
-		else if(parseInt($("#jsCountHolder").val()) == 0)
+		else if(h.val() == 0)
 		{
-			$("#whocares").val(1);
+			wc.val(1);
 			doSubmit3(document.getElementById("airportForm").select,$("#addToGroup").val());			  
 		}
 		else

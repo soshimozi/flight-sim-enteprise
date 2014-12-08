@@ -23,7 +23,7 @@ public class Accounts implements Serializable
     public static final int LINK_INACTIVE = 0;
     public static final int LINK_ACTIVE = 1;
 
-    public static Logger logger = LoggerFactory.getLogger(Accounts.class);;
+    public static Logger logger = LoggerFactory.getLogger(Accounts.class);
 
     private static final Object lock = new Object();
 
@@ -255,7 +255,7 @@ public class Accounts implements Serializable
                     if(!account.getEmail().equals(email))
                         addAccountNote(account.getId(), userId, "Email changed: [" + account.getEmail() + "] to [" + email + "]");
 
-                    if(account.getLevelString(account.getLevel()) != level)
+                    if(!account.getLevelString(account.getLevel()).equals(level))
                         addAccountNote(account.getId(), userId, "Level changed: [" + account.getLevelString(account.getLevel()) + "] to [" + level + "]");
                 }
             }
@@ -290,18 +290,18 @@ public class Accounts implements Serializable
 
     public static boolean accountNameIsUnique(String accountName)
     {
-        boolean exists = false;
+        boolean doesNotExist = false;
         try
         {
-            String qry = "SELECT (count(name) > 0) as found FROM accounts WHERE upper(name) = upper(?)";
-            exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), accountName);
+            String qry = "SELECT (count(name) = 0) as notfound FROM accounts WHERE upper(name) = upper(?)";
+            doesNotExist = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), accountName);
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
 
-        return !exists;
+        return doesNotExist;
     }
 
     public static boolean accountEmailIsUnique(String accountEmail)
@@ -804,13 +804,13 @@ public class Accounts implements Serializable
         return result;
     }
 
-    public static boolean isGroupOwner(int groupid, int userid)
+    public static boolean isGroupOwner(int groupId, int userId)
     {
         boolean result = false;
         try
         {
             String qry = "SELECT (count(groupid) > 0) AS found FROM groupmembership WHERE groupid = ? AND userid = ? AND level = 'owner'";
-            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), groupid, userid);
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), groupId, userId);
         }
         catch (SQLException e)
         {

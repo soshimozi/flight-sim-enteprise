@@ -63,7 +63,7 @@ function cm_active(on,h){
   if(bw.reuse||bw.usedom){
     if(!this.img2) this.o.evnt.className=on?this.cl2:this.cl
     else this.o.ref.images["img"+this.name].src=on?this.img2.src:this.img1.src; //Changed v4.05
-    if(on && bw.ns6){this.o.hideIt(); this.o.css.visibility='inherit' }; //netscape 6 bug fix  
+    if(on && bw.ns6){this.o.hideIt(); this.o.css.visibility='inherit' } //netscape 6 bug fix
   }else{  
     if(!this.img2){ if(on) this.o.over.showIt(); else this.o.over.hideIt();
     }else this.o.ref.images["img"+this.name].src=on?this.img2.src:this.img1.src;
@@ -91,7 +91,7 @@ function cm_makeLevel(){//changed 4.06
 }
 /***Making the main menu object**/
 function makeCM(name){ //Changed v4.06
-  var c=this; c.mc=0; c.name = name; c.m=new Array(); c.scrollY=-1; c.level=new Array(); c.l=new Array(); c.tim=100; c.isresized=0;
+  var c=this; c.mc=0; c.name = name; c.m=[]; c.scrollY=-1; c.level=[]; c.l=[]; c.tim=100; c.isresized=0;
   c.isover=0; c.zIndex=100; c.frameStartLevel=1; c.bar=0; c.z=0; c.totw=0; c.toth=0; c.maxw=0; c.maxh=0; cmpage = new cm_page(); c.constructed = 0;
 	return this
 }//events
@@ -148,16 +148,16 @@ makeCM.prototype.makeMenu=function(name,parent,txt,lnk,targ,w,h,img1,img2,cl,cl2
     if(tmp.indexOf('file:')>-1||tmp.charAt(1)==':') c.root=c.offlineRoot; else c.root=c.onlineRoot
     if(c.useBar){if(!c.barBorderClass) c.barBorderClass=c.barClass; c.bar1 = cm_divCreate(c.name+'bbar_0',c.barClass,'',0,1);
       c.bar = cm_divCreate(c.name+'bbar',c.barBorderClass,'',1,1,0,0,c.bar1); if(bw.usedom) c.bar.appendChild(c.bar1);    
-    }}var create=1,img,arrow; var m = c.m[name] = new Object(); m.name=name; m.subs=new Array(); m.parent=p; m.arnum=0; m.arr=0
+    }}var create=1,img,arrow; var m = c.m[name] = {}; m.name=name; m.subs=[]; m.parent=p; m.arnum=0; m.arr=0
   var l = m.lev = p?c.m[p].lev+1:0; c.mc++; m.hide=0;
   if(l>=c.l.length){
     var p1,p2=0; if(l>=c.level.length) p1=c.l[c.level.length-1];
-    else p1=c.level[l]; c.l[l]=new Array(); if(!p2) p2=c.l[l-1]
+    else p1=c.level[l]; c.l[l]=[]; if(!p2) p2=c.l[l-1]
     if(l!=0){ if(isNaN(p1.align)) p1["align"]=cm_checkalign(p1.align)
       for(var i in p1){if(i!="str"&&i!="m"){if(p1[i]==null) c.l[l][i]=p2[i]; else c.l[l][i]=p1[i] }}
     }else{c.l[l]=c.level[0]; c.l[l].align=cm_checkalign(c.l[l].align)}
-    c.l[l]["str"]=''; c.l[l].m=new Array(); if(!c.l[l].borderClass) c.l[l].borderClass=c.l[l].regClass
-    c.l[l].app=0; c.l[l].max=0; c.l[l].arnum=0; c.l[l].o=new Array(); c.l[l].arr=new Array()
+    c.l[l]["str"]=''; c.l[l].m=[]; if(!c.l[l].borderClass) c.l[l].borderClass=c.l[l].regClass
+    c.l[l].app=0; c.l[l].max=0; c.l[l].arnum=0; c.l[l].o=[]; c.l[l].arr=[]
     c.level[l]=p1=p2=null
     if(l!=0) c.l[l].str=c.l[l].app=cm_divCreate(c.name+ '_' +l+'_0',c.l[l].borderClass,'')
   }if(p){p = c.m[p]; p.subs[p.subs.length]=name; 

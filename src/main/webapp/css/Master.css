@@ -4,12 +4,12 @@ BODY
 	BACKGROUND-COLOR: #EEEEEE;
 	/* COLOR: #333366; */
 	COLOR:#333333;
-	FONT-FAMILY: 'Arial';
+	FONT-FAMILY: Arial, sans-serif;
 	margin: 0 5px 0 5px;
 	padding: 0 5px 0 5px;
 }
 
-PUT {
+INPUT {
     color: #000000;
     border: 1px solid #999999;
     margin-top: 2px;
@@ -46,11 +46,9 @@ SELECT, OPTION {
 .form {
 	/*background-color: #B7CBE7; */
 	background-color: #CCCCCC;
-	border-style:ridge;
-	border-width: 3px;
-	padding: 10px;
-	margin: 20px;
-	margin-left: 0px;
+    border: 3px ridge;
+    padding: 10px;
+    margin: 20px 20px 20px 0px;
 }
 .form form {
 	margin: 5px;
@@ -62,9 +60,8 @@ SELECT, OPTION {
 	background-color: #000000;
 	color:#ffffff;
 	font-size: 9pt;
-	border-width: 0;
-	border-style:inset;
-	float: right;
+    border: 0 inset;
+    float: right;
 	padding: 2px 5px 0px 5px;
 	margin: 0px;
 	height:85px;
@@ -104,9 +101,7 @@ SELECT, OPTION {
 
 div.header {
 	height: 120px;
-	background-color: #000000;
-	background-image: url(../img/banner.jpg);
-	background-repeat: no-repeat;
+    background: #000000 url(../img/banner.jpg) no-repeat;
 }
 
 .formgroup {
@@ -118,11 +113,8 @@ div.header {
 }
 
 .content {
-	margin-left: 0px;
-	margin-right: 0px;
-	margin-bottom: 0px;
-	margin-top: 10px;
-	background-color:#eeeeee;
+    margin: 10px 0px 0px;
+    background-color:#eeeeee;
 	
 }
 
@@ -134,7 +126,7 @@ div.airportInfo h1 {
 	text-transform: uppercase;
 	font-weight: bold;
 	font-size: 18pt;
-	font-family: Arial;
+	font-family: Arial, sans-serif;
 	margin: 0px
 }
 div.airportInfo table td {
@@ -144,7 +136,7 @@ div.airportInfo table td {
 h2 {
 	font-weight: bold;
 	font-size: 14pt;
-	font-family: Arial;
+	font-family: Arial, sans-serif;
 	margin: 0px;
 }
 
@@ -161,9 +153,8 @@ div.airportInfo {
 
 div.infoBlock {
 	background-color: #cccccc;
-	border-width: 1px;
-	border-style: solid;
-	float: right;
+    border: 1px solid;
+    float: right;
 }
 
 div.infoBlock a:link {color:#000066; font-weight:bold;}
@@ -176,9 +167,8 @@ div.dataTable {
 	margin-bottom: 20px;
 	display: table;
 	padding: 10px;
-	border-style: outset;
-	border-width: 2px;
-	font-size:14px
+    border: 2px outset;
+    font-size:14px
 
 }
 .dataTable table {
@@ -196,10 +186,7 @@ div.dataTable {
 	padding-right: 10px;
 	vertical-align: top;
 }
-.dataTable tr.odd {
-	background-color:#cccccc;
-}
-.dataTable table tr:nth-child(odd) {
+.dataTable tr:nth-child(odd) {
     background-color:#cccccc;
 }
 
@@ -211,16 +198,16 @@ div.dataTable {
 	vertical-align: top;
 }
 .dataTable table tbody {
-	font-family: "Arial";
+	font-family: Arial, sans-serif;
 }
 .dataTable table a:link {
-	font-family: "Arial";
+	font-family: Arial, sans-serif;
 	font-style: normal;
 	text-decoration: none;
 	color:#000099;
 }
 .dataTable table a:hover {
-	font-family: "Arial";
+	font-family: Arial, sans-serif;
 	font-style: normal;
 	text-decoration: none;
 	color:#FF0000;
@@ -228,25 +215,21 @@ div.dataTable {
 .dataTable caption
 {
 	font-weight: bold;
-	font-family: Arial;
+	font-family: Arial, sans-serif;
 	text-align: left;
-	margin-left: 0px;
-	margin-right: 0px;
-	margin-bottom: 10px;
-	margin-top: 0px;
+    margin: 0px 0px 10px;
 }
 ul.footer {
 	font-size: 9pt;
-	font-family: "Arial";
+	font-family: Arial, sans-serif;
 	list-style-type: square
 	           
 }
 ul.equipment {
 	font-size: 10pt;
-	font-family: "Arial";
-	list-style-type: square;
-	list-style-position: inside;
-	margin: 0px;
+	font-family: Arial, sans-serif;
+    list-style: square inside;
+    margin: 0px;
 	padding: 0px;
 }
 
@@ -296,7 +279,7 @@ span.time {
 table.flightLog td.logHead {
 	font-weight: bold;
 	font-size: 10pt;
-	font-family: Arial;
+	font-family: Arial, sans-serif;
 }
 table.flightLog {
 	background-color: #eeeeee;
@@ -315,34 +298,29 @@ table.flightLog td.indent {
 	padding-left: 20px
 }
 table.flightLog td.ul {
-	border-bottom-width: 1px;
-	border-bottom-style: dashed
+    border-bottom: 1px dashed;
 }
 table.flightLog td.space {
 	height: 20px
 }
 table.flightLog tr.total td.cost {
-	border-top-width: 1px;
-	border-top-style: dashed
+    border-top: 1px dashed;
 }
 table.flightLog tr.total td {
 	padding-top: 10px;
 	font-weight: bold             
 }
 table.flightLog td.small {
-	font-family: Arial;
+	font-family: Arial, sans-serif;
 	font-size: 10px;
 }
 
 div.form caption {
 	font-weight: bold;
 	font-size: 12pt;
-	font-family: Arial;
+	font-family: Arial, sans-serif;
 	text-align: left;
-	margin-left: 0px;
-	margin-right: 0px;
-	margin-bottom: 20px;
-	margin-top: 0px
+    margin: 0px 0px 20px;
 }
 
 div.news {
@@ -350,10 +328,9 @@ div.news {
 }
 div.news div {
 	display:table;
-	border-color:gray;
-	border-style:none none solid none;
-	border-width:1px;
-	margin-bottom:10px;
+    border: 1px none gray;
+    border-bottom-style: solid;
+    margin-bottom:10px;
 	margin-right:10px;
 }
 
@@ -367,9 +344,8 @@ div#logviewer form {
 div#logviewer div {
 	width: 640px;
 	background-color: #eeeeee;
-	border-width: thick;
-	border-style: double;
-	margin-bottom: 10px;
+    border: thick double;
+    margin-bottom: 10px;
 }
 div#logviewer #flights {
 	width: 350px
@@ -387,7 +363,7 @@ div#logviewer #pilots {
 }
 
 .maintenanceLog {
-	font-family: "Arial";
+	font-family: Arial, sans-serif;
 	font-size: 10pt;
 	color: black
 }
@@ -449,3 +425,26 @@ div.invoiceInset img {
 .top a {text-decoration:none;}
 
 a { cursor: pointer; }
+
+@media(max-width:767px){
+    .bs3-form-label {
+        text-align: left;
+    }
+}
+@media(min-width:767px){
+    .bs3-form-label {
+        text-align: right;
+    }
+}
+
+.vcenter i {
+    vertical-align: middle;
+    display: inline-block;
+    padding-bottom: 3px;
+    padding-left: 2px;
+}
+
+.btn-text-right {
+    text-align: right;
+    padding-right: 8px;
+}

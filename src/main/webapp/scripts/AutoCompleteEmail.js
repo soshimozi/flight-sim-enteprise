@@ -37,4 +37,4 @@ function initAutoCompleteEmail(myname, myvalue)
                 $(myvalue).val(ui.item.id);
             }
         });
-};
+}

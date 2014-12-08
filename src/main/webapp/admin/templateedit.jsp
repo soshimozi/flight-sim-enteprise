@@ -52,8 +52,8 @@
 <%!
 	String deviation(int current)
 	{
-		StringBuffer result = new StringBuffer();
-		for (int c=0; c<=100; c+=5)
+		StringBuilder result = new StringBuilder();
+        for (int c=0; c<=100; c+=5)
 		{
 			result.append("<option value=\"");
 			result.append(c);

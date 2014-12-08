@@ -248,23 +248,36 @@ function load()
 			isFBO = true;
 %>			fbostring+= " Repairs ";
 <%		}		 
-			
+
 		if( assignments.size() > 0 && isFBO)
 		{
 %>
-            var markerdest = createTabbedMarker(pointdest, [ap, "<span  style="font-family: Verdana; font-size: xx-small; ">"+fbostring+"</font><br>", "<span  style="font-family: Verdana; font-size: xx-small; ">"+jobstring+"</font><br>"],["Airport","FBOs","Jobs"]);
+            var markerdest = createTabbedMarker(pointdest,
+                                [ap,
+                                "<span  style=\"font-family: Verdana,sans-serif; font-size: xx-small; \">"+fbostring+"</span><br>",
+                                "<span  style=\"font-family: Verdana,sans-serif; font-size: xx-small; \">"+jobstring+"</span><br>"],
+                                ["Airport","FBOs","Jobs"]
+            );
 <%
         }
 		else if( assignments.size() == 0 && isFBO)
 		{
 %>
-            var markerdest = createTabbedMarker(pointdest, [ap, "<span  style="font-family: Verdana; font-size: xx-small; ">"+fbostring+"</font><br>"],["Airport","FBOs"]);
+            var markerdest = createTabbedMarker(pointdest,
+                                [ap,
+                                "<span  style=\"font-family: Verdana,sans-serif; font-size: xx-small; \">"+fbostring+"</span><br>"],
+                                ["Airport","FBOs"]
+            );
 <%
         }
 		else if( assignments.size() > 0 && !isFBO)
 		{
 %>
-            var markerdest = createTabbedMarker(pointdest, [ap, "<span  style="font-family: Verdana; font-size: xx-small; ">"+jobstring+"</font><br>"],["Airport","Jobs"]);
+            var markerdest = createTabbedMarker(pointdest,
+                                [ap,
+                                "<span  style=\"font-family: Verdana,sans-serif; font-size: xx-small; \">"+jobstring+"</span><br>"],
+                                ["Airport","Jobs"]
+            );
 <%
         }
 		else 
@@ -277,7 +290,7 @@ function load()
 
 		//SET DISTANCE & BEARING
 		var degrees = Math.round(bearing(pointloc,pointdest));
-		var msg = "Trip: " + '<font color="#0080C0"><%=icao%></font>' + " to " + '<font color="#0080C0"><%=icaod%></font>' + "&nbsp;&nbsp;&nbsp;&nbsp;Distance: "+ "<span style="color: #0080C0; ">" + Math.round(pointloc.distanceFrom(pointdest) * 0.000539956803) + " NM </font>&nbsp;&nbsp;&nbsp;&nbsp;Bearing: "+ "<span style="color: #0080C0; ">" + degrees + "&#186;</font>";
+		var msg = "Trip: " + '<font color="#0080C0"><%=icao%></font>' + " to " + '<font color="#0080C0"><%=icaod%></font>' + "&nbsp;&nbsp;&nbsp;&nbsp;Distance: "+ "<span style=\"color: #0080C0; \">" + Math.round(pointloc.distanceFrom(pointdest) * 0.000539956803) + " NM </font>&nbsp;&nbsp;&nbsp;&nbsp;Bearing: "+ "<span style=\"color: #0080C0; \">" + degrees + "&#186;</font>";
 		document.getElementById("mypoint").innerHTML = msg;  
 						
 		bounds.extend(pointdest);	

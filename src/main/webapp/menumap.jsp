@@ -10,7 +10,7 @@
     {
         Map memberships = user.getMemberships();
 
-        StringBuffer returnValue = new StringBuffer();
+        StringBuilder returnValue = new StringBuilder();
         String indent = "&nbsp;&nbsp;&nbsp;&nbsp;";
 
         if (includeBaseLink)

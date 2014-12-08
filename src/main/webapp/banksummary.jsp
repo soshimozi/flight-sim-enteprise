@@ -1,46 +1,151 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.beans.*, java.util.Calendar, net.fseconomy.data.*, net.fseconomy.util.*"
-%>
+        import="java.util.List, net.fseconomy.beans.*, java.util.Calendar, net.fseconomy.data.*, net.fseconomy.util.*"
+        %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-	//setup return page if action used
-	String returnPage = request.getRequestURI();
+    //setup return page if action used
+    String returnPage = request.getRequestURI();
     response.addHeader("referer", request.getRequestURI());
 
-	//String error = (String) request.getSession().getAttribute("message");
+    //String error = (String) request.getSession().getAttribute("message");
 
-	List<UserBean> groups = null;
-	
-	//if(error == null)
-		groups = Accounts.getGroupsForUser(user.getId());
+    List<UserBean> groups;
 
-	Calendar cal = Calendar.getInstance();
-	int month = cal.get(Calendar.MONTH)+1;
-	int year = cal.get(Calendar.YEAR);
+    //if(error == null)
+    groups = Accounts.getGroupsForUser(user.getId());
+
+    Calendar cal = Calendar.getInstance();
+    int month = cal.get(Calendar.MONTH)+1;
+    int year = cal.get(Calendar.YEAR);
 %>
 
 <!DOCTYPE html>
 <html>
 <head>
-	
-	<title>FSEconomy terminal</title>
 
-	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>FSEconomy terminal</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    
-	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-	<script type="text/javaScript">	
-		function doSubmit(sel)	
-		{
-			sel.form.selectedBalance.value = sel.options[sel.selectedIndex].value;
-			sel.form.submit();
-		}	
-	</script>
-	
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
+    <link href="css/Master.css" rel="stylesheet" type="text/css" />
+
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/jquery-ui.min.js"></script>
+    <script src="scripts/jquery.cookie.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/AutoComplete.js"></script>
+
+    <script type="text/javaScript">
+
+        var displayGroupsOnly = false;
+
+        function doSubmit(sel)
+        {
+            sel.form.selectedBalance.value = sel.options[sel.selectedIndex].value;
+            sel.form.submit();
+        }
+
+        $(function()
+        {
+            initAutoComplete("#accountname", "#account", <%= Accounts.ACCT_TYPE_ALL %>);
+
+            displayGroupsOnly = $.cookie('displayGroupsOnly') === 'true';
+            setGroupsOnly(displayGroupsOnly);
+
+            $("#groupSelect").change(function() {
+                var str = "";
+                $( "#groupSelect option:selected" ).each(function() {
+                    $("#accountname").val($(this).text());
+                    $("#account").val($(this).val());
+                });
+            });
+
+        });
+
+        function doDeposit(id, name)
+        {
+            var form = document.getElementById("formBankModal");
+            form.accountid.value = id;
+            //event
+            form.event.value = "bankDeposit";
+            //bankActionTitle
+            document.getElementById("bankActionTitle").innerText = name + " - Deposit into Bank";
+            //bankAction
+            document.getElementById("bankAction").innerText = "Deposit";
+            //buttonBankAction
+            document.getElementById("buttonBankAction").innerText = "Deposit";
+
+            $("#myModal").modal('show');
+        }
+
+        function doWithdrawal(id, name)
+        {
+            var form = document.getElementById("formBankModal");
+            form.accountid.value = id;
+            //event
+            form.event.value = "bankWithdrawal";
+            //bankActionTitle
+            document.getElementById("bankActionTitle").innerText = name + " - Withdraw from Bank";
+            //bankAction
+            document.getElementById("bankAction").innerText = "Withdraw";
+            //buttonBankAction
+            document.getElementById("buttonBankAction").innerText = "Withdraw";
+
+            $("#myModal").modal('show');
+        }
+
+        function doTransfer()
+        {
+            var form = document.getElementById("formBankModal");
+            form.submit();
+        }
+
+        function setGroupsOnly(flag)
+        {
+            var ac = document.getElementById('byAutoComplete');
+            var bg = document.getElementById('byGroup');
+            var bgcb = document.getElementById('groupsOnly');
+
+            if(flag){
+                bg.style.display = 'block';
+                ac.style.display = 'none';
+                bgcb.checked = true;
+            }
+            else
+            {
+                ac.style.display = 'block';
+                bg.style.display = 'none';
+                bgcb.checked = false;
+            }
+        }
+
+        function doGroupsOnly()
+        {
+            var ac = document.getElementById('byAutoComplete');
+            var bg = document.getElementById('byGroup');
+            if(ac.style.display == 'none'){
+                ac.style.display = 'block';
+                bg.style.display = 'none';
+                $.cookie('displayGroupsOnly', false);
+            }
+            else
+            {
+                bg.style.display = 'block';
+                ac.style.display = 'none';
+                $.cookie('displayGroupsOnly', true);
+            }
+        }
+
+    </script>
+
 </head>
 <body>
 
@@ -50,210 +155,302 @@
 <div id="wrapper">
 <%
     String message = Helpers.getSessionMessage(request);
-	if (message != null)
-	{
+    if (message != null)
+    {
 %>
-	<div class="error"><%= message %></div>
-<%	
-	}
+<div class="error"><%= message %></div>
+<%
+    }
 %>
 
-<div class="dataTable">	
-	<table>
-	
-		<caption>
-			<b>Summary of Personal and Group Bank Accounts</b><br/>
-			<span style="color: #666666; font-size: 9pt;">Group financial information is limited to group staff and group owners.</span>
-		</caption>
-		
-		<thead>
-			<tr>
-				<th>Account</th>
-				<th>Cash Balance</th>
-				<th>Bank Balance</th>
-				<th>Actions</th>
-			</tr>
-		</thead>
-		
-		<tbody>
-<%
-			//Add user account
-%>		
-			<tr>
-				<td><jsp:getProperty name="user" property="name"/></td>
-				<td><%= Formatters.currency.format(user.getMoney()) %></td>
-				<td><%= Formatters.currency.format(user.getBank()) %></td>
-				<td>
-					<a class="link" href="bank.jsp">Banking</a> | <a class="link" href="paymentlog.jsp">Payment Log</a> | 
-					<a class="link" href="paymentlog.jsp?month=<%= month %>&year=<%= year %>">Monthly Statement</a>					
-					<br/><br/>				
-					<form method="post" action="userctl">
-						<div>
-							<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
-						</div>
-						<div>
-							<input type="hidden" name="event" value="bankBalance"/>							
-							<input type="hidden" name="uid" value="<%=user.getId()%>"/>							
-							<input type="hidden" name="selectedBalance" value=""/>							
-							<select name="Actionbox" class="formselect" onchange="doSubmit(this)" >
-								<option value="-1">Quick Transfers - Select action...</option>
-								<option value="0">Set cash to $0.00</option>
-								<option value="1">Set cash to $1,000</option>
-								<option value="5">Set cash to $5,000</option>
-								<option value="10">Set cash to $10,000</option>
-								<option value="20">Set cash to $20,000</option>
-								<option value="30">Set cash to $30,000</option>
-								<option value="40">Set cash to $40,000</option>
-								<option value="50">Set cash to $50,000</option>
-								<option value="60">Set cash to $60,000</option>
-								<option value="70">Set cash to $70,000</option>
-								<option value="80">Set cash to $80,000</option>
-								<option value="100">Set cash to $100,000</option>
-								<option value="999">Transfer all in bank to cash.</option>
-							</select>
-						</div>
-					</form>	
-				</td>
-			</tr>
-			<tr>
-				<td colspan="4"><hr/></td>
-			</tr>	
-<%
-	//Add group accounts
-	
-	for (UserBean group : groups)
-	{
-		int id = group.getId();
-		String name = group.getName();
-		String url = group.getUrl();
-		double grpmoney = group.getMoney();
-		double grpbank = group.getBank();
-		
-		if (url != null)
-			url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
-		else
-			url = name;
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-sm-12 column">
+            <div class="page-header">
+                <h3>
+                    Summary of Personal and Group Bank Accounts<br>
+                    <small>Group financial information is limited to group staff and group owners.</small>
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="row clearfix" style="border-bottom: 1px solid darkgray; padding-bottom: 3px">
+        <div class="col-sm-4 col-md-4 column">
+            <span class="label label-primary">Account</span>
+        </div>
+        <div class="col-sm-2 col-md-2 column vcenter text-right">
+            <span class="label label-primary">Cash</span><span title="Click balance to deposit cash into Bank"> <img height="16" width="16" src="img/helpicon.png"></span>
+        </div>
+        <div class="col-sm-2 col-md-2 column vcenter text-right">
+            <span class="label label-primary">Bank</span><span title="Click balance to withdraw cash out of Bank"> <img height="16" width="16" src="img/helpicon.png"></span>
+        </div>
+        <div class="col-sm-4 col-md-4 column">
+            <span class="label label-primary">Action</span>
+        </div>
+    </div>
 
-		int memberLevel = user.groupMemberLevel(id);
-		if (memberLevel >= UserBean.GROUP_STAFF ) 
-		{
-	%>
-			<tr>
-				<td><%= url %></td>
-				<td><%= Formatters.currency.format(grpmoney) %></td>
-				<td><%= Formatters.currency.format(grpbank) %></td>
-				<td>
-					<a class="link" href="bank.jsp?id=<%= id %>">Banking</a> | 
-					<a class="link" href="paymentlog.jsp?groupId=<%= id %>">Payment Log</a> | 
-					<a class="link" href="paymentlog.jsp?groupId=<%= id %>&month=<%= month %>&year=<%= year %>">Monthly Statement</a>
-					<br/><br/>			
-					<form method="post" action="userctl">
-						<div>
-							<div>
-								<input type="hidden" name="event" value="bankBalance"/>							
-								<input type="hidden" name="uid" value="<%= id %>"/>							
-								<input type="hidden" name="selectedBalance" value=""/>							
-								<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
-							</div>
-							<select name="Actionbox" class="formselect" onchange="doSubmit(this)" >
-								<option value="-1">Quick Transfers - Select action...</option>
-								<option value="0">Set cash to $0.00</option>
-								<option value="1">Set cash to $1,000</option>
-								<option value="5">Set cash to $5,000</option>
-								<option value="10">Set cash to $10,000</option>
-								<option value="20">Set cash to $20,000</option>
-								<option value="30">Set cash to $30,000</option>
-								<option value="40">Set cash to $40,000</option>
-								<option value="50">Set cash to $50,000</option>
-								<option value="60">Set cash to $60,000</option>
-								<option value="70">Set cash to $70,000</option>
-								<option value="80">Set cash to $80,000</option>
-								<option value="100">Set cash to $100,000</option>
-								<option value="999">Transfer all in bank to cash.</option>
-							</select>
-						</div>
-					</form>				
-				</td>
-			</tr>
-			<tr>
-				<td colspan="4"><hr/></td>
-			</tr>		
-<% 		
-		} 
-	}
-%>
-		</tbody>
-	</table>
-    <br>
+    <div class="row clearfix"  style="border-bottom: 1px solid darkgray; padding-bottom: 3px">
+        <div class="col-sm-4 col-md-4 column">
+            <jsp:getProperty name="user" property="name"/><br>
+        </div>
+        <div class="col-sm-2 col-md-2 column text-right">
+            <button class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=user.getName()%>');">
+                <%= Formatters.currency.format(user.getMoney()) %>
+            </button>
+        </div>
+        <div class="col-sm-2 col-md-2 column text-right" >
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=user.getName()%>');">
+                <%= Formatters.currency.format(user.getBank()) %>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-4 column">
+            <div style="padding-bottom: 3px">
+                <a class="link" href="paymentlog.jsp">Payment Log</a> |
+                <a class="link" href="paymentlog.jsp?month=<%= month %>&year=<%= year %>">Monthly Statement</a>
+            </div>
+            <div style="padding-bottom: 3px">
+                <form method="post" action="userctl">
+                    <div>
+                        <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+                    </div>
+                    <div>
+                        <input type="hidden" name="event" value="bankBalance"/>
+                        <input type="hidden" name="uid" value="<%=user.getId()%>"/>
+                        <input type="hidden" name="selectedBalance" value=""/>
+                        <select name="Actionbox" class="formselect" onchange="doSubmit(this)" >
+                            <option value="-1">Quick Transfers - Select action...</option>
+                            <option value="0">Set cash to $0.00</option>
+                            <option value="1">Set cash to $1,000</option>
+                            <option value="5">Set cash to $5,000</option>
+                            <option value="10">Set cash to $10,000</option>
+                            <option value="20">Set cash to $20,000</option>
+                            <option value="30">Set cash to $30,000</option>
+                            <option value="40">Set cash to $40,000</option>
+                            <option value="50">Set cash to $50,000</option>
+                            <option value="60">Set cash to $60,000</option>
+                            <option value="70">Set cash to $70,000</option>
+                            <option value="80">Set cash to $80,000</option>
+                            <option value="100">Set cash to $100,000</option>
+                            <option value="999">Transfer all in bank to cash.</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%
+        //Add group accounts
+
+        for (UserBean group : groups)
+        {
+            int id = group.getId();
+            String name = group.getName();
+            String url = group.getUrl();
+            double grpmoney = group.getMoney();
+            double grpbank = group.getBank();
+
+            if (url != null)
+                url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
+            else
+                url = name;
+
+            int memberLevel = user.groupMemberLevel(id);
+            if (memberLevel >= UserBean.GROUP_STAFF )
+            {
+    %>
+    <div class="row clearfix"  style="border-bottom: 1px solid darkgray; padding-bottom: 3px">
+        <div class="col-sm-4 col-md-4 column">
+            <%=url%>
+        </div>
+        <div class="col-sm-2 col-md-2 column text-right">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=name%>');">
+                <%= Formatters.currency.format(grpmoney) %>
+            </div>
+        </div>
+        <div class="col-sm-2 col-md-2 column text-right">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=name%>');">
+                <%= Formatters.currency.format(grpbank) %>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-4 column">
+            <div style="padding-bottom: 3px">
+                <a class="link" href="paymentlog.jsp?groupId=<%= id %>">Payment Log</a> |
+                <a class="link" href="paymentlog.jsp?groupId=<%= id %>&month=<%= month %>&year=<%= year %>">Monthly Statement</a>
+            </div>
+            <div style="padding-bottom: 3px">
+                <form method="post" action="userctl">
+                    <div>
+                        <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+                    </div>
+                    <div>
+                        <input type="hidden" name="event" value="bankBalance"/>
+                        <input type="hidden" name="uid" value="<%=id%>"/>
+                        <input type="hidden" name="selectedBalance" value=""/>
+                        <select name="Actionbox" class="formselect" onchange="doSubmit(this)" >
+                            <option value="-1">Quick Transfers - Select action...</option>
+                            <option value="0">Set cash to $0.00</option>
+                            <option value="1">Set cash to $1,000</option>
+                            <option value="5">Set cash to $5,000</option>
+                            <option value="10">Set cash to $10,000</option>
+                            <option value="20">Set cash to $20,000</option>
+                            <option value="30">Set cash to $30,000</option>
+                            <option value="40">Set cash to $40,000</option>
+                            <option value="50">Set cash to $50,000</option>
+                            <option value="60">Set cash to $60,000</option>
+                            <option value="70">Set cash to $70,000</option>
+                            <option value="80">Set cash to $80,000</option>
+                            <option value="100">Set cash to $100,000</option>
+                            <option value="999">Transfer all in bank to cash.</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <%
+            }
+        }
+    %>
+    <div class="row clearfix"  style="padding: 5px">
+        <div class="col-sm-12 column">
+            <small>Personal account earned interest to date: <%= Formatters.currency.format(user.getEarnedInterest()) %></small>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row clearfix">
+        <div class="col-sm-12 column">
+            <div class="page-header">
+                <h3>
+                    Cash Transfers<br>
+                    <small>Transfers are only allowed <span style="text-decoration: underline">from</span> accounts you own or have staff rights to.</small>
+                </h3>
+            </div>
+        </div>
+    </div>
+
     <form method="post" action="userctl">
         <div>
-            <div>
-                <input type="hidden" name="event" value="bankTransfer" />
-                <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
-            </div>
-            <p>
-            <b>Summary Page Transfers</b><br/>
-            <span style="color: #666666; font-size: 9pt;">Transfers on this page are only allowed <span style="text-decoration: underline">from</span> accounts you own or have staff rights to, and <span style="text-decoration: underline">to</span> accounts you own or have membership in.</span>
-            </p>
-            <div class="tf_form">
-                <table>
-                    <tr>
-                        <td>From Account:</td>
-                        <td>
-                            <select name="id" class="formselect">
-                                <option class="formselect" value=""></option>
-                                <option class="formselect" value="<%=user.getId()%>"><%= user.getName()%></option>
-<% 		
-		for (UserBean group : groups)
-		{ 
-%>
-<% 			
-			if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
-			{ 
-%>
-                               	<option class="formselect" value="<%=group.getId()%>"><%= group.getName()%></option>
-<% 			
-			}
-%>
-<% 		
-		}
-%>        
-        	                </select>
-			    		</td>
-					</tr>
-	                <tr>
-                        <td>To Account:</td>
-                        <td>
-                            <select name="account" class="formselect">
-                                <option class="formselect" value=""></option>
-                                <option class="formselect" value="<%=user.getId()%>"><%= user.getName()%></option>
-<% 		
-		for (UserBean group : groups)
-		{ 
-%>
-                                <option class="formselect" value="<%=group.getId()%>"><%= group.getName()%></option>
-<% 		
-		} 
-%>  
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Amount:&nbsp;</td><td><input name="amount" type="text" class="textarea" size="10" /></td>
-                    </tr>
-                    <tr>
-                        <td>Comment:&nbsp;</td><td><input name="comment" type="text" class="textarea" size="50" /></td>
-                    </tr>
-                </table>
-            </div>
-	            
-            <div class="tf_form">
-                <input type="submit" class="button" value="Transfer" />
-            </div>
+            <input type="hidden" name="event" value="bankTransfer" />
+            <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+        </div>
 
+        <div class="row clearfix"  style="padding-bottom: 3px">
+            <div class="col-sm-3 column bs3-form-label">
+            </div>
+            <div class="col-sm-3 column">
+                <label><input type="checkbox" id="groupsOnly" onclick="doGroupsOnly();"> Limit to my groups only</label>
+            </div>
+        </div>
+        <div class="row clearfix"  style="padding-bottom: 3px">
+            <div class="col-sm-3 column bs3-form-label">
+                From Account:
+            </div>
+            <div class="col-sm-3 column">
+                <select name="id">
+                    <option value=""></option>
+                    <option value="<%=user.getId()%>"><%= user.getName()%></option>
+<%
+    for (UserBean group : groups)
+    {
+        if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
+        {
+%>
+                    <option value="<%=group.getId()%>"><%= group.getName()%></option>
+<%
+        }
+    }
+%>
+                </select>
+            </div>
+        </div>
+        <div class="row clearfix"  style="padding-bottom: 3px">
+            <div class="col-sm-3 column bs3-form-label">
+                To Account:
+            </div>
+            <div class="col-sm-3 column">
+                <div id="byAutoComplete">
+                    <input type="text" id="accountname" name="accountname"  size="50"/>
+                    <input type="hidden" id="account" name="account" value=""/>
+                </div>
+                <div id="byGroup" style="display: none">
+                    <select id="groupSelect">
+                        <option value=""></option>
+                        <option value="<%=user.getId()%>"><%= user.getName()%></option>
+<%
+    for (UserBean group : groups)
+    {
+        if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
+        {
+%>
+                        <option value="<%=group.getId()%>"><%= group.getName()%></option>
+<%
+        }
+    }
+%>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row clearfix"  style="padding-bottom: 3px">
+            <div class="col-sm-3 column bs3-form-label">
+                Amount:
+            </div>
+            <div class="col-sm-3 column">
+                <input name="amount" type="text" size="10" />
+            </div>
+        </div>
+        <div class="row clearfix"  style="padding-bottom: 3px">
+            <div class="col-sm-3 column bs3-form-label">
+                Comment:
+            </div>
+            <div class="col-sm-3 column">
+                <input name="comment" type="text" size="50" />
+            </div>
+        </div>
+        <div class="row clearfix"  style="padding-bottom: 3px">
+            <div class="col-sm-3 column bs3-form-label">
+                <input type="submit" class="btn btn-primary" value="Transfer" />
+            </div>
         </div>
     </form>
 </div>
+
 </div>
+<br>
+<br>
+<br>
+<br>
+<!-- Modal HTML -->
+<div id="myModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 id="bankActionTitle" class="modal-title">BANK ACTION TITLE HERE</h4>
+            </div>
+            <div class="modal-body">
+                <form id="formBankModal" method="post" action="userctl" class="ui-front">
+                    <input type="hidden" name="event" value="bankactionhere"/>
+                    <input type="hidden" name="accountid" value=""/>
+                    <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+                    <div>
+                        Enter Amount to <span id="bankAction">ACTION</span>:
+                        <input type="text" id="amount" name="amount" value="" placeholder="0.00"/>
+                        <br/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="doTransfer();"><span id="buttonBankAction">ACTION</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
 </body>
 </html>

@@ -508,9 +508,9 @@ function mkOv2D(left, top, width, height)
 		_st = (_aa>>1)*(1-(_b<<1)) + _bb,
 		_tt = (_bb>>1) - _aa*((_b<<1)-1),
 
-		pxl = new Array(),
-		pxt = new Array(),
-		_pxb = new Array();
+		pxl = [],
+		pxt = [],
+		_pxb = [];
 		pxl[0] = 0;
 		pxt[0] = b;
 		_pxb[0] = _b-1;
@@ -813,7 +813,7 @@ interior_extrema. */
 		}
 		for (y = miny; y <= maxy; y++)
 		{
-			var polyInts = new Array();
+			var polyInts = [];
 			ints = 0;
 			for (i = 0; i < n; i++)
 			{

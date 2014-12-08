@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.sql.*;
 import java.util.Date;
 
-import net.fseconomy.data.Data;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;

@@ -61,7 +61,7 @@ NOTES:
 function getAnchorPosition(anchorname) {
 	// This function will return an Object with x and y properties
 	var useWindow=false;
-	var coordinates=new Object();
+	var coordinates={};
 	var x=0,y=0;
 	// Browser capability sniffing
 	var use_gebi=false, use_css=false, use_layers=false;
@@ -420,7 +420,7 @@ function PopupWindow_attachListener() {
 // Pass it a DIV name to use a DHTML popup, otherwise will default to window popup
 function PopupWindow() {
 	if (!window.popupWindowIndex) { window.popupWindowIndex = 0; }
-	if (!window.popupWindowObjects) { window.popupWindowObjects = new Array(); }
+	if (!window.popupWindowObjects) { window.popupWindowObjects = []; }
 	if (!window.listenerAttached) {
 		window.listenerAttached = true;
 		PopupWindow_attachListener();

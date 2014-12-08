@@ -1,7 +1,6 @@
 package net.fseconomy.beans;
 
 import net.fseconomy.data.Airports;
-import net.fseconomy.data.Data;
 import net.fseconomy.dto.DistanceBearing;
 import net.fseconomy.util.Converters;
 

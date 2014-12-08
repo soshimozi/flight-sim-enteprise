@@ -348,10 +348,7 @@
 			
 			<tr>
 			<td>
-				<div class="checkbox" >
-					<input class="css-checkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= assignment.getId() %>" <%=lockedBy!=null ? "disabled" : "" %>/>
-					<label class="css-label" for="mycheckbox<%=counter%>"></label>
-				</div>
+				<input type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= assignment.getId() %>" <%=lockedBy!=null ? "disabled" : "" %>/>
 			</td>
 			<td class="numeric"><%= Formatters.currency.format(assignment.calcPay()) %></td>
 			<td class="numeric"><%= Formatters.currency.format(assignment.getPilotFee()) %></td>
@@ -387,7 +384,7 @@
 			<td><img src="img/blankap.gif" style="vertical-align:middle;" /><a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getFrom()) %>"><%= assignment.getFrom() %></a></td>
 			<td>
                 <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap1">
-                `<img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= destination.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>"><%= assignment.getTo() %>
+                <img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo())) %>" style="border-style: none; vertical-align:middle;" /></a><a title="<%= destination.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>"><%= assignment.getTo() %>
                 </a>
             </td>
 			<td class="numeric"><%= assignment.getActualDistance() %></td>
@@ -483,17 +480,19 @@
 		<script type="text/javascript">
 			$("#addSelectedButton").click(
 				function(e)
-				{			 
-					if (window.confirm("Are you sure you want to tranfer selected assignments to " + $("#addToGroup").find("option:selected").text() + "?"))
+				{
+                    var el = $("#addToGroup");
+					if (window.confirm("Are you sure you want to tranfer selected assignments to " + el.find("option:selected").text() + "?"))
 					{
-						doSubmit6(document.assignmentForm.select,$("#addToGroup").val());
+						doSubmit6(document.assignmentForm.select,el.val());
 					}		 
 				}
 			);
 		</script>		
 				<select id="addToGroup" class="formselect">
 <%
-                Groups.groupMemberData[] memberGroups = user.getMemberships().values().toArray(new Groups.groupMemberData[0]);
+    Collection<Groups.groupMemberData> values = user.getMemberships().values();
+    Groups.groupMemberData[] memberGroups = values.toArray(new Groups.groupMemberData[values.size()]);
 
             for (Groups.groupMemberData memberGroup : memberGroups)
             {
