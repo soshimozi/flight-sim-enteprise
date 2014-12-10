@@ -448,3 +448,9 @@ a { cursor: pointer; }
     text-align: right;
     padding-right: 8px;
 }
+
+.scrollable-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
+}

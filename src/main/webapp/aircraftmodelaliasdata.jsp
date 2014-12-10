@@ -19,37 +19,21 @@
 	ModelAliases aliases = Models.getModelAliases(id);
 %>
 
-<style type="text/css">
-.myaliassection {
-	margin: 10px;
- 	border:2px solid #a1a1a1;
-    padding:10px 40px; 
-    background:#dddddd;
-    border-radius:25px;
-    width:500px;
-}
-
-.myaliasblock li {
-    margin-left: auto;
-    margin-right: auto;
-}
-</style>
-<div class="container">
-	<a id="aliases"></a>
-
-	<div class="myaliassection">
-		<div style="font-size: 12pt; font-weight: bold;">Aliases</div>
-		<div class="myaliasblock">
-		<ol>
+<div class="row clearfix">
+	<div class="col-sm-12 column">
+        <a id="aliases"></a>
+		<h4>Aliases</h4>
+		<div class="panel panel-default">
+    		<ol>
 <%
 	for(int i=0; i<aliases.Aliases.length; i++)
 	{
 %>
-			<li><%=aliases.Aliases[i]%></li>
+    			<li><%=aliases.Aliases[i]%></li>
 <%
 	}
 %>			
-		</ol>
+	    	</ol>
 		</div>
 	</div>
 </div>

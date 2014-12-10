@@ -1,45 +1,76 @@
 <%@page language="java"
-        contentType="text/html; charset=ISO-8859-1"
-        import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
-%>
+		contentType="text/html; charset=ISO-8859-1"
+		import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
+		%>
+<%@ page import="java.util.HashMap" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+	//setup return page if action used
+	String returnPage = request.getRequestURI();
+	response.addHeader("referer", request.getRequestURI());
 %>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 
-    <title>FSEconomy terminal</title>
+	<title>FSEconomy terminal</title>
 
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="css/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
+	<link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
 
-    <script src="scripts/AnchorPosition.js"></script>
-    <script src="scripts/PopupWindow.js"></script>
-    <script type='text/javascript' src='scripts/common.js'></script>
-    <script type='text/javascript' src='scripts/css.js'></script>
-    <script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>
-    <script type="text/javascript">
+	<script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script src="scripts/bootstrap.min.js"></script>
+	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
+	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
+	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
+	<script src="scripts/PopupWindow.js"></script>
 
-        var gmapfs = new PopupWindow();
-        var gmap = new PopupWindow();
 
-        function doSubmit(fbodesc, id, price, id2)
-        {
-            if (window.confirm("Do you want to buy " + fbodesc + " for " + price + "?"))
-            {
-                document.fboForm.id.value = id;
-                document.fboForm.account.value = id2;
-                document.fboForm.submit();
-            }
-        }
+	<script type="text/javascript">
 
-    </script>
+		var gmapfs = new PopupWindow();
+		var gmap = new PopupWindow();
+
+		function purchaseFbo()
+		{
+			var form = document.getElementById("formFboModal");
+			var ebuyer = document.getElementById("groupSelect");
+
+			form.accountid.value = ebuyer.options[ebuyer.selectedIndex].value;
+			form.submit();
+		}
+
+		$(function() {
+
+			$.extend($.tablesorter.defaults, {
+				widthFixed: false,
+				widgets : ['zebra','columns']
+			});
+
+			$('.fboTable').tablesorter();
+		});
+
+		function selectFbo(fboId)
+		{
+			var form = document.getElementById("formFboModal");
+			form.fboid.value = fboId;
+
+			$("#fboData").load( "fbodata.jsp?fboid=" + fboId );
+
+			$("#myModal").modal('show');
+		}
+
+	</script>
 
 </head>
 <body>
@@ -48,120 +79,105 @@
 <jsp:include flush="true" page="menu.jsp" />
 
 <div id="wrapper">
-<div class="content">
-<div class="dataTable">	
-<%
-	List<FboBean> fbos = Fbos.getFboForSale();
-    Groups.groupMemberData[] staffGroups = user.getStaffGroups();
-%>
-	<form method="post" action="userctl" name="fboForm">
-	<input type="hidden" name="event" value="MarketFbo"/>
-	<input type="hidden" name="id">
-	<input type="hidden" name="account" value="<%= user.getId() %>"/>
-	<input type="hidden" name="returnpage" value="marketfbo.jsp" />
+	<div class="content">
+		<div class="dataTable">
+			<%
+				List<FboBean> fbos = Fbos.getFboForSale();
+			%>
+			<form method="post" action="userctl" name="fboForm">
+				<input type="hidden" name="event" value="MarketFbo"/>
+				<input type="hidden" name="id">
+				<input type="hidden" name="account" value="<%= user.getId() %>"/>
+				<input type="hidden" name="returnpage" value="marketfbo.jsp" />
 
-	<table id="sortableTable0" class="sortable">
-	<caption>FBOs for sale  
-	<a href="#" onclick="gmapfs.setSize(690,535);gmapfs.setUrl('<%= response.encodeURL("gmapmarketfbo.jsp") %>');gmapfs.showPopup('gmapfs');return false;" id="gmapfs"><img src="img/wmap.gif" width="50" height="32" border="0" align="absmiddle" /></a>
-	</caption>
-	<thead>
-	<tr>
-		<th>Name</th>
-		<th>ICAO</th>
-		<th>Location</th>
-		<th>Goods Included</th>
-		<th>Price</th>
-		<th>Action</th>
-	</tr>
-	</thead>
-	<tbody>
-<%
-	for (FboBean fbo : fbos)
-	{
-		int fboid = fbo.getId();
-		String price = Formatters.currency.format(fbo.getPrice());
-		int owner=fbo.getOwner();
-		UserBean fboowner = Accounts.getAccountById(owner);
-		String icao = fbo.getLocation();
-		AirportBean airport = Airports.getAirport(icao);
-		int groupOwnerid = Accounts.accountUltimateGroupOwner(owner);
-		UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
-		int totalSpace = fbo.getFboSize() * airport.getFboSlots();
-		int rented = Fbos.getFboFacilityBlocksInUse(fboid);
- 	    String fboservices = "<br>Lots=" + fbo.getFboSize() + ",Repair Shop=" + ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No") + "<br>" + ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? totalSpace + " gates (" + rented + " rented)" : "No Passenger Terminal");
-		String fboname = fbo.getName() + "<br><span class=\"small\"><i>" + fboowner.getName() + (fboowner.isGroup() ? "(" + ultimateOwner.getName() + ")" : "") + fboservices + "</i></span>";
-		String location = airport.getCity() + "<br />" + airport.getCountry();
-		String goodsincluded = "";
-
-		if (fbo.getPriceIncludesGoods())
-        {
-			GoodsBean fuel = Goods.getGoods(icao, owner, GoodsBean.GOODS_FUEL100LL);
-			GoodsBean jeta = Goods.getGoods(icao, owner, GoodsBean.GOODS_FUELJETA);
-			GoodsBean supplies = Goods.getGoods(icao, owner, GoodsBean.GOODS_SUPPLIES);
-			GoodsBean buildingmaterials = Goods.getGoods(icao, owner, GoodsBean.GOODS_BUILDING_MATERIALS);
-
-            if ((fuel != null ? fuel.getAmount() : 0) > 0)
-            {
-                goodsincluded = "100LL Fuel: " + Formatters.oneDigit.format(fuel.getAmount()) + " KG";
-            }
-
-			if ((jeta != null ? jeta.getAmount() : 0) > 0)
-            {
-                if (!"".equals(goodsincluded))
-                {
-                    goodsincluded = goodsincluded + "<br>";
-                }
-
-				goodsincluded = goodsincluded + "JetA Fuel: " + Formatters.oneDigit.format(jeta.getAmount()) + " KG";
-			}
-			if ((supplies != null ? supplies.getAmount() : 0) != 0)
-            {
-                if (!"".equals(goodsincluded))
-                {
-                    goodsincluded = goodsincluded + "<br>";
-                }
-
-				goodsincluded = goodsincluded + "Supplies: " + Formatters.oneDigit.format(supplies.getAmount()) + " KG";
-			}
-			if ((buildingmaterials != null ? buildingmaterials.getAmount() : 0) > 0)
-            {
-                if (!"".equals(goodsincluded))
-                {
-                    goodsincluded = goodsincluded + "<br>";
-                }
-
-				goodsincluded = goodsincluded + "Building Materials: " + Formatters.oneDigit.format(buildingmaterials.getAmount()) + " KG";
-			}
-		}
-%>
-	<tr>
-	<td><%= fboname %></td>
-	<td><%= Airports.airportLink(airport, airport, response) %></td>
-	<td><%= Data.sortHelper(airport.getCountry() + ", " + airport.getState() + ", " + airport.getCity()) %><%= location %></td>
-	<td><%= goodsincluded %></td>
-	<td style="text-align: right;"><%= price %></td>
-	<td><a class="link" href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fboid %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
-<%
-        for (Groups.groupMemberData staffGroup : staffGroups)
-        {
-%>
-        | <a class="link"
-             href="javascript:doSubmit('<%= "(" + icao + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fboid %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
-            for <%= staffGroup.groupName %>
-        </a>
-<%
-        }
-%>
-	</td>
-	</tr>
-<%
-	}
-%>
-	</tbody>
-	</table>
-	</form>
+				<table class="fboTable tablesorter-default tablesorter">
+					<caption>FBOs for sale
+						<a href="#" onclick="gmapfs.setSize(690,535);gmapfs.setUrl('<%= response.encodeURL("gmapmarketfbo.jsp") %>');gmapfs.showPopup('gmapfs');return false;" id="gmapfs"><img src="img/wmap.gif" width="50" height="32" border="0" align="absmiddle" /></a>
+					</caption>
+					<thead>
+					<tr>
+						<th colspan="4" class="sorter-false disabledtext">Click Name for full information and to purchase</th>
+					</tr>
+					<tr>
+						<th>Name</th>
+						<th>ICAO</th>
+						<th>Location</th>
+						<th>Price</th>
+					</tr>
+					</thead>
+					<tbody>
+					<%
+						//Get hashmap of airports in list
+						HashMap<String, AirportBean> aps = Airports.getAirportsFromFboList(fbos);
+						for (FboBean fbo : fbos)
+						{
+							String fboname = fbo.getName(); // + "<br><span class=\"small\"><i>" + fboowner.getName() + (fboowner.isGroup() ? "(" + ultimateOwner.getName() + ")" : "") + fboservices + "</i></span>";
+							String price = Formatters.currency.format(fbo.getPrice());
+							AirportBean airport = aps.get(fbo.getLocation());
+							String location = airport.getCity() + "<br />" + airport.getCountry();
+					%>
+					<tr>
+						<td onclick="selectFbo(<%=fbo.getId()%>)"><%= fboname %></td>
+						<td><%= Airports.airportLink(airport, airport, response) %></td>
+						<td><%= location %></td>
+						<td style="text-align: right;"><%= price %></td>
+					</tr>
+					<%
+						}
+					%>
+					</tbody>
+				</table>
+			</form>
+		</div>
+	</div>
 </div>
+
+<!-- Modal HTML -->
+<div id="myModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">FBO Information and Purchase</h4>
+			</div>
+			<div class="modal-body">
+				<form id="formFboModal" method="post" action="userctl" class="ui-front">
+					<input type="hidden" name="event" value="purchaseFbo"/>
+					<input type="hidden" name="accountid" value=""/>
+					<input type="hidden" name="fboid" value=""/>
+					<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+					<div id="fboData">
+					</div>
+					<div>
+						Purchase for:
+						<select id="groupSelect">
+							<option value=""></option>
+							<option value="<%=user.getId()%>"><%= user.getName()%></option>
+							<%
+								List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
+
+								for (UserBean group : groups)
+								{
+									if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
+									{
+							%>
+							<option value="<%=group.getId()%>"><%= group.getName()%></option>
+							<%
+									}
+								}
+							%>
+						</select>
+
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" onclick="purchaseFbo();">Purchase</button>
+			</div>
+		</div>
+	</div>
 </div>
-</div>
+
 </body>
 </html>

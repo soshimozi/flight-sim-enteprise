@@ -33,7 +33,6 @@
 
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
-    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
     <link href="css/Master.css" rel="stylesheet" type="text/css" />
 

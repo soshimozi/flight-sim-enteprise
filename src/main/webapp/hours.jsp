@@ -28,10 +28,6 @@
 
     <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script type='text/javascript' src='scripts/common.js'></script>
-    <script type='text/javascript' src='scripts/css.js'></script>
-    <script type='text/javascript' src='scripts/standardista-table-sorting.js'></script>
-
 </head>
 <body>
 
@@ -43,7 +39,7 @@
 <div class="dataTable">	
 	<table>
 	<caption>
-	<%= user.getName() %> will have:
+	    <%= user.getName() %> will have:
 	</caption>
 	<tbody>
 <%

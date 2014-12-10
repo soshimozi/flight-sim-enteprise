@@ -21,7 +21,7 @@
 
 	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-	<script src="scripts/AnchorPosition.js"></script>
+	<%--<script src="scripts/AnchorPosition.js"></script>--%>
 	<script src="scripts/PopupWindow.js"></script>
 
 	<script type="text/javascript">

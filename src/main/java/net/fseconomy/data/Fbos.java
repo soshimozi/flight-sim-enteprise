@@ -112,9 +112,9 @@ public class Fbos implements Serializable
         }
     }
 
-    public static void buyFbo(int fboId, int account, UserBean user) throws DataError
+    public static void buyFbo(int fboId, int accountId, UserBean user) throws DataError
     {
-        if (user.getId() != account && user.groupMemberLevel(account) < UserBean.GROUP_STAFF)
+        if (user.getId() != accountId && user.groupMemberLevel(accountId) < UserBean.GROUP_STAFF)
         {
             throw new DataError("Permission denied");
         }
@@ -130,23 +130,23 @@ public class Fbos implements Serializable
                 boolean includesGoods = fbo.getPriceIncludesGoods();
 
                 String qry = "SELECT (count(id) > 0) AS found FROM accounts WHERE id = ?";
-                boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), account);
+                boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), accountId);
                 if (!exists)
                 {
                     throw new DataError("Account not found");
                 }
 
                 qry = "SELECT (money >= ?) as enough FROM accounts WHERE id = ?";
-                boolean enough = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), sellPrice, account);
+                boolean enough = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), sellPrice, accountId);
                 if (!enough)
                 {
                     throw new DataError("Not enough money to buy FBO");
                 }
 
-                doTransferFbo(fbo, account, oldOwner, icao, includesGoods);
+                doTransferFbo(fbo, accountId, oldOwner, icao, includesGoods);
                 Goods.resetAllGoodsSellBuyFlag(oldOwner, icao);
 
-                Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.FBO_SALE, 0, fboId, icao, 0, "", false);
+                Banking.doPayment(accountId, oldOwner, sellPrice, PaymentBean.FBO_SALE, 0, fboId, icao, 0, "", false);
             }
             else
             {
@@ -157,7 +157,7 @@ public class Fbos implements Serializable
         {
             e.printStackTrace();
         }
-    }//Added PRD
+    }
 
     public static void transferFbo(FboBean fbo, UserBean user, int buyer, int owner, String icao, boolean goods) throws DataError
     {

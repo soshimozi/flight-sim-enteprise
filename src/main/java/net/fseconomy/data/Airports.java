@@ -642,8 +642,45 @@ public class Airports implements Serializable
 
     public static AirportBean getAirport(String icao)
     {
-        List<AirportBean> result = getAirportSQL("SELECT * FROM airports WHERE icao='" + Converters.escapeSQL(icao) + "'");
-        return result.size() == 0 ? null : result.get(0);
+        AirportBean result = null;
+        try
+        {
+            String qry = "SELECT * FROM airports WHERE icao = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, icao);
+            if(rs.next())
+                result = new AirportBean(rs);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static HashMap<String, AirportBean> getAirportsFromFboList(List<FboBean> fbos)
+    {
+        HashMap<String, AirportBean> result = new HashMap<>();
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            for(FboBean fbo: fbos)
+                sb.append("'").append(fbo.getLocation()).append("'").append(",");
+            String icaos = sb.toString().substring(0, sb.length()-1);
+
+            String qry = "SELECT * FROM airports WHERE icao in (" + icaos + ")";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+            while (rs.next())
+            {
+                result.put(rs.getString("icao"), new AirportBean(rs));
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     public static List<AirportBean> getAirportSQL(String sql)
@@ -1137,35 +1174,32 @@ public class Airports implements Serializable
 
     public static String airportLink(AirportBean airport, AirportBean gmapAirport, HttpServletResponse response)
     {
-        return airportLink(airport, null, gmapAirport, null, response);
+        return airportLink(airport, null, gmapAirport.getIcao(), null, response);
     }
 
     public static String airportLink(AirportBean airport, AirportBean gmapAirport, AirportBean gmapAirportTo, HttpServletResponse response)
     {
-        return airportLink(airport, null, gmapAirport, gmapAirportTo, response);
+        return airportLink(airport, null, gmapAirport.getIcao(), gmapAirportTo.getIcao(), response);
     }
 
-    public static String airportLink(AirportBean airport, String bulletCodeLocation, AirportBean gmapAirport, AirportBean gmapAirportTo, HttpServletResponse response)
+    public static String airportLink(AirportBean airport, String bulletCodeLocation, String gmapAirport, String gmapAirportTo, HttpServletResponse response)
     {
         if (airport == null)
         {
             return "";
         }
 
-        String sorthelp = "";
         String image = "";
         if (gmapAirport != null)
         {
-            sorthelp = Data.sortHelper(airport.getIcao());
-
             String icaodPart = "";
-            if ((gmapAirportTo != null) && !gmapAirportTo.getIcao().equals(gmapAirport.getIcao()))
+            if ((gmapAirportTo != null) && !gmapAirportTo.equals(gmapAirport))
             {
-                icaodPart = "&icaod=" + gmapAirportTo.getIcao();
+                icaodPart = "&icaod=" + gmapAirportTo;
             }
 
             image = "<A HREF=\"#\" onClick=\"gmap.setSize(620,530);gmap.setUrl('gmap.jsp?icao=" +
-                    gmapAirport.getIcao() +
+                    gmapAirport +
                     icaodPart +
                     "');gmap.showPopup('gmap');return false;\" NAME=\"gmap\" ID=\"gmap\">" +
                     "<img src=\"" +
@@ -1186,7 +1220,7 @@ public class Airports implements Serializable
                 airport.getIcao() +
                 "</a>";
 
-        return sorthelp + image + textLink;
+        return image + textLink;
     }
 
     public static String getBearingImageURL(double bearing)

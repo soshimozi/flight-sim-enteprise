@@ -29,198 +29,115 @@
 %>
 
 <style type="text/css">
-.mysection {
-	margin: 10px;
- 	border:2px solid #a1a1a1;
-    padding:10px 40px; 
-    background:#dddddd;
-    border-radius:25px;
-    width:360px;
-}
-.myblock {
-	display:table-cell;
-	vertical-align:middle;
-	text-align:center;
-	width:320px;
-	margin:auto;
-	border:1px solid darkgray;
-}
-.formright{
-	display:inline-block;
-	vertical-align:middle;
-	padding:0 10px;
-	font-size:12pt;
-	text-align:right;
-	    width: 140px;
-}
-.formleft {
-	display:inline-block;
-	vertical-align:middle;
-	padding:0 10px;
-	font-size:12pt;
-	text-align:left;
-    width: 120px;
-}
 
 .fuel {
- 	border:2px solid yellow;
+    width: 75px;
+ 	border:1px solid yellow;
     background:green;
     border-radius:2px;
     color: #fff;
+    text-align: center;
 }
 .nofuel {
- 	border:2px solid #bbbbbb;
+    width: 75px;
+ 	border: 1px solid #bbbbbb;
     background: #dddddd;
     border-radius:2px;
     color: #aaa;
+    text-align: center;
 }
-
-.myButton {
-	-moz-box-shadow:inset 0 1px 0 0 #ffffff;
-	-webkit-box-shadow:inset 0 1px 0 0 #ffffff;
-	box-shadow:inset 0 1px 0 0 #ffffff;
-	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf));
-	background:-moz-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-	background:-webkit-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-	background:-o-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-	background:-ms-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-	background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf',GradientType=0);
-	background-color:#ededed;
-	-moz-border-radius:12px;
-	-webkit-border-radius:12px;
-	border-radius:12px;
-	border:1px solid #dcdcdc;
-	display:inline-block;
-	cursor:pointer;
-	color:#777777;
-	font-family:arial,sans-serif;
-	font-size:15px;
-	font-weight:bold;
-	padding:6px 12px;
-	text-decoration:none;
-	text-shadow:0 1px 0 #ffffff;
-}
-.myButton:hover {
-	background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed));
-	background:-moz-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
-	background:-webkit-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
-	background:-o-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
-	background:-ms-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
-	background:linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed',GradientType=0);
-	background-color:#dfdfdf;
-}
-.myButton:active {
-	position:relative;
-	top:1px;
+.fuelLabel {
+    padding: 1px;
 }
 
 </style>
 
-<div class="container">
-	<div>
-		<div style="width: 400px; text-align: center; font-size: 14pt; font-weight: bold;"><%=acconfig.makemodel %></div>
-		<div style="width: 400px; text-align: center;"><input type="button" id="aliasRequest" class="mybutton" value="Request Aliases"/></div>
-	</div>
-	<div class="mysection">
-		<div style="font-size: 12pt; font-weight: bold;">Stats</div>
-		<div class="myblock">
-			<span class="formright">Additional Crew</span>
-			<span class="formleft"><%=acconfig.crew %></span>
-			
-			<span class="formright">Seats</span>
-			<span class="formleft"><%=acconfig.seats %></span>
-			
-			<span class="formright">Paxs</span>
-			<span class="formleft"><%=acconfig.seats - (acconfig.crew > 0 ? 2 : 1) %></span>
-			
-			<span class="formright">Cruise</span>
-			<span class="formleft"><%=acconfig.cruisespeed %></span>
-			
-			<span class="formright">Engines</span>
-			<span class="formleft"><%=acconfig.engines %></span>
-			
-			<span class="formright">Fuel Type</span>
-			<span class="formleft"><%=acconfig.fueltype > 0 ? "JetA" : "100LL" %></span>
-			
-			<span class="formright">GPH</span>
-			<span class="formleft"><%=acconfig.gph %></span>
-			
-			<span class="formright">Total Fuel</span>
-			<span class="formleft"><%=acconfig.fcaptotal %></span>
-			
-			<span class="formright">Payload - No Fuel</span>
-			<span class="formleft"><%=acconfig.maxWeight-acconfig.emptyWeight %></span>
-			
-			<span class="formright"></span>
-			<span class="formleft"></span>
-			
-			<span class="formright">Est Endurance NM</span>
-			<span class="formleft"><%=endurNm %></span>
-			
-			<span class="formright">Est Endurance Hrs</span>
-			<span class="formleft"><%=endurHr %></span>
-			
-			<span class="formright">Est Cost Per NM</span>
-			<span class="formleft"><%=costPerNm %></span>
-			
-			<span class="formright">Est Cost per Hr</span>
-			<span class="formleft"><%=costPerHr %></span>
-			
-			<span class="formright"></span>
-			<span class="formleft"></span>
-			
-			<span class="formright">MTOW</span>
-			<span class="formleft"><%=acconfig.maxWeight %></span>
-			
-			<span class="formright">Empty Weight</span>
-			<span class="formleft"><%=acconfig.emptyWeight %></span>
-			
-			<span class="formright">Base Price</span>
-			<span class="formleft"><%=Formatters.currency.format(acconfig.price) %></span>
-		</div>
-		<div style="font-size: 12pt; font-weight: bold;margin-top: 10px;">Fuel Tanks</div>
-		<div class="myblock">
-			<span class="formright">Ext 1</span>
-			<span class="formleft <%=acconfig.fcapExt1 > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapExt1 %></span>
-			
-			<span class="formright">L Tip</span>
-			<span class="formleft <%=acconfig.fcapLeftTip > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapLeftTip %></span>
-			
-			<span class="formright">L Aux	</span>
-			<span class="formleft <%=acconfig.fcapLeftAux > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapLeftAux %></span>
-			
-			<span class="formright">L Main</span>
-			<span class="formleft <%=acconfig.fcapLeftMain > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapLeftMain %></span>
-			
-			<span class="formright">Center</span>
-			<span class="formleft <%=acconfig.fcapCenter > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapCenter %></span>
-			
-			<span class="formright">Center 2</span>
-			<span class="formleft <%=acconfig.fcapCenter2 > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapCenter2 %></span>
-			
-			<span class="formright">Center 3</span>
-			<span class="formleft <%=acconfig.fcapCenter3 > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapCenter3 %></span>
-			
-			<span class="formright">R Main</span>
-			<span class="formleft <%=acconfig.fcapRightMain > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapRightMain %></span>
-			
-			<span class="formright">R Aux</span>
-			<span class="formleft <%=acconfig.fcapRightAux > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapRightAux %></span>
-			
-			<span class="formright">R Tip</span>
-			<span class="formleft <%=acconfig.fcapRightTip > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapRightTip %></span>
-			
-			<span class="formright">Ext 2</span>
-			<span class="formleft <%=acconfig.fcapExt2 > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapExt2 %></span>
-		</div>
-	</div>
-	<div class="container">
-		<div id="aliasData">
-		</div>
-	</div>	
+<div class="row clearfix">
+	<div class="col-sm-12 column">
+        <div class="panel panel-primary">
+            <h3 class="text-center">
+                <%=acconfig.makemodel %><br>
+                <button class="btn btn-primary btn-xs" id="aliasRequest">
+                    Request Aliases
+                </button>
+            </h3>
+            
+
+            <div class="panel panel-default" style="margin: 10px">
+                <h4>Stats</h4>
+                <div class="row clearfix">
+                    <div class="col-xs-6 col-sm-6 col-md-6 column">
+                        <div class="text-right">Additional Crew</div>
+                        <div class="text-right">Seats</div>
+                        <div class="text-right">Paxs</div>
+                        <div class="text-right">Cruise</div>
+                        <div class="text-right">Engines</div>
+                        <div class="text-right">Fuel Type</div>
+                        <div class="text-right">GPH</div>
+                        <div class="text-right">Total Fuel</div>
+                        <div class="text-right">Payload - No Fuel</div>
+                        <div class="text-right">Est Endurance NM</div>
+                        <div class="text-right">Est Endurance Hrs</div>
+                        <div class="text-right">Est Cost Per NM</div>
+                        <div class="text-right">Est Cost per Hr</div>
+                        <div class="text-right">MTOW</div>
+                        <div class="text-right">Empty Weight</div>
+                        <div class="text-right">Base Price</div>
+                    </div>
+                    <div  class="col-xs-6 col-sm-6 col-md-6 column">
+                        <div class="text-left"><%=acconfig.crew %></div>
+                        <div class="text-left"><%=acconfig.seats %></div>
+                        <div class="text-left"><%=acconfig.seats - (acconfig.crew > 0 ? 2 : 1) %></div>
+                        <div class="text-left"><%=acconfig.cruisespeed %></div>
+                        <div class="text-left"><%=acconfig.engines %></div>
+                        <div class="text-left"><%=acconfig.fueltype > 0 ? "JetA" : "100LL" %></div>
+                        <div class="text-left"><%=acconfig.gph %></div>
+                        <div class="text-left"><%=acconfig.fcaptotal %></div>
+                        <div class="text-left"><%=acconfig.maxWeight-acconfig.emptyWeight %></div>
+                        <div class="text-left"><%=endurNm %></div>
+                        <div class="text-left"><%=endurHr %></div>
+                        <div class="text-left"><%=costPerNm %></div>
+                        <div class="text-left"><%=costPerHr %></div>
+                        <div class="text-left"></div>
+                        <div class="text-left"><%=acconfig.maxWeight %></div>
+                        <div class="text-left"><%=acconfig.emptyWeight %></div>
+                        <div class="text-left"><%=Formatters.currency.format(acconfig.price) %></div>                        
+                    </div>
+                </div>
+                <h4>Fuel Tanks</h4>
+                <div class="row clearfix">
+                    <div class="col-xs-6 col-sm-6 col-md-6 column">
+                        <div class="fuelLabel text-right">Ext 1</div>
+                        <div class="fuelLabel text-right">L Tip</div>
+                        <div class="fuelLabel text-right">L Aux	</div>
+                        <div class="fuelLabel text-right">L Main</div>
+                        <div class="fuelLabel text-right">Center</div>
+                        <div class="fuelLabel text-right">Center 2</div>
+                        <div class="fuelLabel text-right">Center 3</div>
+                        <div class="fuelLabel text-right">R Main</div>
+                        <div class="fuelLabel text-right">R Aux</div>
+                        <div class="fuelLabel text-right">R Tip</div>
+                        <div class="fuelLabel text-right">Ext 2</div>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 column">
+                        <div class="text-left <%=acconfig.fcapExt1 > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapExt1 %></div>
+                        <div class="text-left <%=acconfig.fcapLeftTip > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapLeftTip %></div>
+                        <div class="text-left <%=acconfig.fcapLeftAux > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapLeftAux %></div>
+                        <div class="text-left <%=acconfig.fcapLeftMain > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapLeftMain %></div>
+                        <div class="text-left <%=acconfig.fcapCenter > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapCenter %></div>
+                        <div class="text-left <%=acconfig.fcapCenter2 > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapCenter2 %></div>
+                        <div class="text-left <%=acconfig.fcapCenter3 > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapCenter3 %></div>
+                        <div class="text-left <%=acconfig.fcapRightMain > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapRightMain %></div>
+                        <div class="text-left <%=acconfig.fcapRightAux > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapRightAux %></div>
+                        <div class="text-left <%=acconfig.fcapRightTip > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapRightTip %></div>
+                        <div class="text-left <%=acconfig.fcapExt2 > 0 ? "fuel" : "nofuel" %>"><%=acconfig.fcapExt2 %></div>
+                    </div>
+                </div>                
+            </div>
+        </div>
+    </div>
 </div>
+
 <script>
 		$("#aliasRequest").click(function(){
 			  $("#aliasData").load( "aircraftmodelaliasdata.jsp?id=<%= id %>");

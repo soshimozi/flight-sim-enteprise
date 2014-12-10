@@ -201,9 +201,6 @@ public class UserCtl extends HttpServlet
                     case "Market":
                         market(req);
                         break;
-                    case "MarketFbo":
-                        marketfbo(req);
-                        break;
                     case "sell":
                         doSell(req);
                         break;
@@ -260,6 +257,9 @@ public class UserCtl extends HttpServlet
                         break;
                     case "sellGoods":
                         doBuySellGoods(req, false);
+                        break;
+                    case "purchaseFbo":
+                        doPurchaseFbo(req);
                         break;
                     case "deleteFbo":
                         doDeleteFbo(req);
@@ -1163,17 +1163,6 @@ public class UserCtl extends HttpServlet
         Aircraft.buyAircraft(aircraftId, Integer.parseInt(sAccount), user);
 	}
 	
-	void marketfbo(HttpServletRequest req) throws DataError
-	{
-		String sId = req.getParameter("id");
-		String sAccount = req.getParameter("account");
-		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (sId == null)
-			return;
-		
-		Fbos.buyFbo(Integer.parseInt(sId), Integer.parseInt(sAccount), user);
-	}
-	
 	void doSell(HttpServletRequest req) throws DataError
 	{
 		String reg = req.getParameter("registration");
@@ -1883,7 +1872,19 @@ public class UserCtl extends HttpServlet
 		Goods.transferGoods(from, to, account, location, type, amount);
 	}
 
-	void doDeleteFbo(HttpServletRequest req) throws DataError
+    void doPurchaseFbo(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        String sAccountId = req.getParameter("accountid");
+        String sFboId = req.getParameter("fboid");
+
+        if (sFboId == null || sAccountId == null)
+            throw new DataError("Missing parameters");
+
+        Fbos.buyFbo(Integer.parseInt(sFboId), Integer.parseInt(sAccountId), user);
+    }
+
+    void doDeleteFbo(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String sId = req.getParameter("id");

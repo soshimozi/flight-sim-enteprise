@@ -66,7 +66,7 @@ public class Aircraft implements Serializable
     {
         try
         {
-            String qry = "UPDATE aircraft SET sellprice=null, owner = ?, lessor = ? WHERE owner = ? AND aircraftid = ?";
+            String qry = "UPDATE aircraft SET sellprice=null, owner = ?, lessor = ? WHERE owner = ? AND id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, lessee, owner, owner, aircraftId);
 
             Banking.doPayment(lessee, owner, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease", false);
@@ -81,7 +81,7 @@ public class Aircraft implements Serializable
     {
         try
         {
-            String qry = "UPDATE aircraft SET owner = ?, lessor = null WHERE lessor = ? AND aircraftId = ?";
+            String qry = "UPDATE aircraft SET owner = ?, lessor = null WHERE lessor = ? AND id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, owner, owner, aircraftId);
 
             Banking.doPayment(owner, lessee, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease Return", false);
