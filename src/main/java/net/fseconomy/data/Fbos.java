@@ -1,7 +1,7 @@
 package net.fseconomy.data;
 
 import net.fseconomy.beans.*;
-import net.fseconomy.dto.LatLonSize;
+import net.fseconomy.dto.AirportInfo;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Formatters;
 
@@ -834,7 +834,7 @@ public class Fbos implements Serializable
                 for (String item1 : items)
                 {
                     item = item1.trim();
-                    LatLonSize lls = Airports.cachedAPs.get(item);
+                    AirportInfo lls = Airports.cachedAPs.get(item);
                     if (lls == null)
                     {
                         throw new DataError("ICAO '" + item + "' not found.");

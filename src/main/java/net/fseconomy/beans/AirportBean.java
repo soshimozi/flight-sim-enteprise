@@ -238,8 +238,8 @@ public class AirportBean implements Serializable
 	{
 		return type;
 	}
-	
-	public String getTypeDescription()
+
+	public static String getTypeDescription(int type, int size)
 	{
 		if (type == TYPE_WATER)
 			return "Seaplane base";

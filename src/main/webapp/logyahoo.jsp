@@ -6,7 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    String sGroup = request.getParameter("groupId");
+    String sGroup = request.getParameter("groupid");
 
     String groupName;
     String mapViewer;

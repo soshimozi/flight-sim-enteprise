@@ -8,7 +8,7 @@
 
 <%
     List<LogBean> logs;
-    String sGroup = request.getParameter("groupId");
+    String sGroup = request.getParameter("groupid");
     String sFrom = request.getParameter("from");
 
     String linkOptions = "";

@@ -4,7 +4,7 @@ import static net.fseconomy.services.common.*;
 
 import net.fseconomy.data.*;
 import net.fseconomy.dto.LatLonCount;
-import net.fseconomy.dto.LatLonSize;
+import net.fseconomy.dto.AirportInfo;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
@@ -27,9 +27,9 @@ public class AdminServiceData
 
             while(rs.next())
             {
-                LatLonSize lls = Airports.cachedAPs.get(rs.getString("fromicao"));
+                AirportInfo lls = Airports.cachedAPs.get(rs.getString("fromicao"));
 
-                LatLonCount llc = new LatLonCount(lls.lat, lls.lon, rs.getInt("count"));
+                LatLonCount llc = new LatLonCount(lls.latlon.lat, lls.latlon.lon, rs.getInt("count"));
                 toList.add(llc);
             }
 

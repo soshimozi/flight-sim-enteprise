@@ -60,7 +60,6 @@
             setGroupsOnly(displayGroupsOnly);
 
             $("#groupSelect").change(function() {
-                var str = "";
                 $( "#groupSelect option:selected" ).each(function() {
                     $("#accountname").val($(this).text());
                     $("#account").val($(this).val());
@@ -238,44 +237,44 @@
         </div>
     </div>
 
-    <%
-        //Add group accounts
+<%
+    //Add group accounts
 
-        for (UserBean group : groups)
+    for (UserBean group : groups)
+    {
+        int id = group.getId();
+        String name = group.getName();
+        String url = group.getUrl();
+        String grpmoney = Formatters.currency.format(group.getMoney());
+        String grpbank = Formatters.currency.format(group.getBank());
+
+        if (url != null)
+            url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
+        else
+            url = name;
+
+        int memberLevel = user.groupMemberLevel(id);
+        if (memberLevel >= UserBean.GROUP_STAFF )
         {
-            int id = group.getId();
-            String name = group.getName();
-            String url = group.getUrl();
-            double grpmoney = group.getMoney();
-            double grpbank = group.getBank();
-
-            if (url != null)
-                url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
-            else
-                url = name;
-
-            int memberLevel = user.groupMemberLevel(id);
-            if (memberLevel >= UserBean.GROUP_STAFF )
-            {
-    %>
+%>
     <div class="row clearfix"  style="border-bottom: 1px solid darkgray; padding-bottom: 3px">
         <div class="col-sm-4 col-md-4 column">
             <%=url%>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
             <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=name%>');">
-                <%= Formatters.currency.format(grpmoney) %>
+                <%= grpmoney %>
             </div>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
             <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=name%>');">
-                <%= Formatters.currency.format(grpbank) %>
+                <%= grpbank %>
             </div>
         </div>
         <div class="col-sm-4 col-md-4 column">
             <div style="padding-bottom: 3px">
-                <a class="link" href="paymentlog.jsp?groupId=<%= id %>">Payment Log</a> |
-                <a class="link" href="paymentlog.jsp?groupId=<%= id %>&month=<%= month %>&year=<%= year %>">Monthly Statement</a>
+                <a class="link" href="paymentlog.jsp?groupid=<%= id %>">Payment Log</a> |
+                <a class="link" href="paymentlog.jsp?groupid=<%= id %>&month=<%= month %>&year=<%= year %>">Monthly Statement</a>
             </div>
             <div style="padding-bottom: 3px">
                 <form method="post" action="userctl">
@@ -307,10 +306,10 @@
             </div>
         </div>
     </div>
-    <%
-            }
+<%
         }
-    %>
+    }
+%>
     <div class="row clearfix"  style="padding: 5px">
         <div class="col-sm-12 column">
             <small>Personal account earned interest to date: <%= Formatters.currency.format(user.getEarnedInterest()) %></small>
@@ -448,7 +447,6 @@
             </div>
         </div>
     </div>
-</div>
 </div>
 
 </body>

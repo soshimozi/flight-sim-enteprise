@@ -9,7 +9,7 @@
 	//setup return page if action used
     response.addHeader("referer", request.getRequestURI());
 
-	String group = request.getParameter("groupId");
+	String group = request.getParameter("groupid");
 	UserBean account = user;
 	if (group != null)
 		account = Accounts.getAccountById(Integer.parseInt(group));

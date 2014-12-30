@@ -8,7 +8,7 @@
 
 <%
     long tsStart = System.nanoTime();
-    String sGroup = request.getParameter("groupId");
+    String sGroup = request.getParameter("groupid");
     String sFboId = request.getParameter("fboId");
     String aircraft = request.getParameter("aircraft");
     String sFrom = request.getParameter("from");
@@ -39,7 +39,7 @@
         groupId = Integer.parseInt(sGroup);
         account = groupId;
         selector = "group " + getUser(account, userMap);
-        linkOptions = "groupId=" + sGroup + "&";
+        linkOptions = "groupid=" + sGroup + "&";
     }
     String sFilter = "";
     FboBean filterFbo;

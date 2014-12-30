@@ -189,6 +189,24 @@ public class UserCtl extends HttpServlet
                     case "Assignment":
                         processAssignment(req);
                         break;
+                    case "newAssignment":
+                        newAssignment(req);
+                        break;
+                    case "updateAssignment":
+                        updateAssignment(req);
+                        break;
+                    case "removeAssignmentFromGroup":
+                        removeAssignmentFromGroup(req);
+                        break;
+                    case "deleteAssignment":
+                        deleteGroupAssignment(req);
+                        break;
+                    case "deleteGoodsAssignment":
+                        deleteGoodsAssignment(req);
+                        break;
+                    case "unlockGoodsAssignment":
+                        unlockGoodsAssignment(req);
+                        break;
                     case "Aircraft":
                         addAircraft(req);
                         break;
@@ -664,7 +682,7 @@ public class UserCtl extends HttpServlet
 		UserBean account = Accounts.getAccountById(uid);
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 
-		if(user.isGroup() && !Accounts.isGroupOwnerStaff(account.getId(), user.getId()))
+		if(account.isGroup() && !Accounts.isGroupOwnerStaff(account.getId(), user.getId()))
 			throw new DataError("Permission Denied.");
 		
 		if (req.getParameter("selectedBalance") != null)
@@ -1022,7 +1040,7 @@ public class UserCtl extends HttpServlet
 		// select = checkbox values - multiple records		
 		String sId = req.getParameter("id");
 		String saId[] = req.getParameterValues("select");
-		String comment = req.getParameter("assignmentComment");
+		String comment = req.getParameter("comment");
 		
 		if (sId == null && saId == null)
 			return;
@@ -1056,7 +1074,7 @@ public class UserCtl extends HttpServlet
 				
 			if (type.equals("move"))
 			{
-				String group = req.getParameter("groupId");
+				String group = req.getParameter("groupid");
 				int groupId = Integer.parseInt(group);
 				Assignments.moveAssignment(user, id[i], groupId);
 			} 
@@ -1068,9 +1086,9 @@ public class UserCtl extends HttpServlet
 			{
                 Assignments.deleteAssignment(id[i], user);
 			} 
-			else if (type.equals("unlock") || type.equals("unlockAll"))
+			else if (type.equals("unlock"))
 			{
-                Assignments.unlockAssignment(id[i], type.equals("unlockAll"));
+                Assignments.unlockAssignment(id[i]);
 			} 
 			else if (type.equals("hold") || type.equals("load"))
 			{
@@ -1087,8 +1105,142 @@ public class UserCtl extends HttpServlet
 			}
 		}
 	}
-	
-	void addAircraft(HttpServletRequest req) throws DataError
+
+    void newAssignment(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        //id = assignment id - single record
+        String sGroupId = req.getParameter("groupid");
+        String fromIcao = req.getParameter("fromicao");
+        String toIcao = req.getParameter("toicao");
+        String sPilotFee = req.getParameter("pilotfee");
+        String comment = req.getParameter("comment");
+
+        if (fromIcao == null || toIcao == null || sGroupId == null || sPilotFee == null)
+            throw new DataError("Invalid parameters.");
+
+        int groupId = Integer.parseInt(sGroupId);
+        double pilotFee = Double.parseDouble(sPilotFee);
+
+        if (Groups.getRole(groupId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        Assignments.newAssignment(groupId, fromIcao.toUpperCase(), toIcao.toUpperCase(), pilotFee, comment);
+    }
+
+    void removeAssignmentFromGroup(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        //id = assignment id - single record
+        String sGroupId = req.getParameter("groupid");
+        String sAssignments[] = req.getParameterValues("select");
+
+        if (sAssignments == null || sGroupId == null)
+            throw new DataError("Invalid parameters.");
+
+        int groupId = Integer.parseInt(sGroupId);
+        int[] array = Arrays.stream(sAssignments).mapToInt(Integer::parseInt).toArray();
+
+        if (Groups.getRole(groupId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        Assignments.removeAssignmentFromGroup(array);
+    }
+
+    void updateAssignment(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        //id = assignment id - single record
+        String sGroupId = req.getParameter("groupid");
+        String sOwnerId = req.getParameter("ownerid");
+        String sAssignmentId = req.getParameter("assignmentid");
+        String sPilotFee = req.getParameter("pilotfee");
+        String comment = req.getParameter("comment");
+
+        if (sAssignmentId == null || (sGroupId == null && sOwnerId == null) || sPilotFee == null)
+            throw new DataError("Invalid parameters.");
+
+        int ownerId = 0;
+        int groupId = Integer.parseInt(sGroupId);
+        int assignmentId = Integer.parseInt(sAssignmentId);
+        double pilotFee = Double.parseDouble(sPilotFee);
+
+        if ( groupId > 0 && Groups.getRole(groupId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        if(sOwnerId != null)
+            ownerId = Integer.parseInt(sOwnerId);
+
+        if ( ownerId > 0 && Groups.getRole(ownerId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        Assignments.updateAssignment(assignmentId, pilotFee, comment);
+    }
+
+    void deleteGoodsAssignment(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        String sAssignments[] = req.getParameterValues("select");
+        int[] array = Arrays.stream(sAssignments).mapToInt(Integer::parseInt).toArray();
+
+        if(array.length == 0)
+            return;
+
+        for(int assignmentId: array)
+            Assignments.deleteGoodsAssignment(assignmentId, user);
+    }
+
+    void unlockGoodsAssignment(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        String sAssignments[] = req.getParameterValues("select");
+        int[] array = Arrays.stream(sAssignments).mapToInt(Integer::parseInt).toArray();
+
+        if (array.length == 0)
+            return;
+
+        for(int assignmentId: array)
+            Assignments.unlockGoodsAssignment(assignmentId);
+    }
+
+    void deleteGroupAssignment(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        //id = assignment id - single record
+        String sGroupId = req.getParameter("groupid");
+        String sAssignmentId = req.getParameter("assignmentid");
+
+        if (sAssignmentId == null || sGroupId == null)
+            throw new DataError("Invalid parameters.");
+
+        int groupId = Integer.parseInt(sGroupId);
+        int assignmentId = Integer.parseInt(sAssignmentId);
+
+        if (Groups.getRole(groupId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        Assignments.deleteGroupAssignment(assignmentId);
+    }
+
+    void addAircraft(HttpServletRequest req) throws DataError
 	{
 		String reg = req.getParameter("reg");
 		if (reg == null)
@@ -1606,7 +1758,7 @@ public class UserCtl extends HttpServlet
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
-		String groupId = req.getParameter("groupId");
+		String groupId = req.getParameter("groupid");
 		
 		if (id == null || user == null || groupId == null)
 			return;
@@ -1675,7 +1827,7 @@ public class UserCtl extends HttpServlet
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
 		String level = req.getParameter("level");
-		String group = req.getParameter("groupId");
+		String group = req.getParameter("groupid");
 		String invitation = req.getParameter("membername");
 		String money = req.getParameter("money");
 		String message = req.getParameter("email");

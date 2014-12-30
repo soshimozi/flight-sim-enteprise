@@ -139,7 +139,7 @@ public class SimClientRequests
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, query);
 
             while(rs.next())
-                list.add(rs.getString("ip") + "|" + rs.getString("ip") + "|" + rs.getString("pilot"));
+                list.add(rs.getString("ip") + "|" + rs.getString("pilotid") + "|" + rs.getString("pilot"));
         }
         catch (SQLException e)
         {

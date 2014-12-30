@@ -18,7 +18,7 @@
     int amount = Logging.getAmountLogForFbo(fbo);
     FboBean fboinfo = Fbos.getFbo(fbo);
     AirportBean airport = Airports.getAirport(fboinfo.getLocation());
-    String paymentUrl = "paymentlog.jsp?groupId=" + fboinfo.getOwner() + "&fboId=" + fbo;
+    String paymentUrl = "paymentlog.jsp?groupid=" + fboinfo.getOwner() + "&fboId=" + fbo;
 %>
 
 <!DOCTYPE html>

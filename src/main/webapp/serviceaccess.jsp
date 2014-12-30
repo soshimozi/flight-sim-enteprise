@@ -9,7 +9,7 @@
     //setup return page if action used
     String returnPage = java.net.URLDecoder.decode(request.getParameter("returnpage"),"UTF-8").trim();
 
-    String group = request.getParameter("groupId");
+    String group = request.getParameter("groupid");
     UserBean account = user;
     if (group != null)
         account = Accounts.getAccountById(Integer.parseInt(group));

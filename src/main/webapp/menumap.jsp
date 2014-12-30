@@ -83,8 +83,8 @@ if (user.isLoggedIn())
 	<br/><br/>
 	<a href="airport.jsp">Airports</a><br/><br/>
 	<a href="myflight.jsp">My Flight</a><br/><br/>
-	<%= groupMenu(user, "Logs", false, true, "log.jsp", "?groupId=", response) %>
-	<%= groupMenu(user, "Payment logs", false, true, "paymentlog.jsp", "?groupId=", response) %>
+	<%= groupMenu(user, "Logs", false, true, "log.jsp", "?groupid=", response) %>
+	<%= groupMenu(user, "Payment logs", false, true, "paymentlog.jsp", "?groupid=", response) %>
 	<br/><br/>
 	<%= groupMenu(user, "Aircraft", false, true, "aircraft.jsp", "?id=", response) %>
 	<a href="market.jsp">Aircraft - Purchase</a><br/><br/>
@@ -95,18 +95,18 @@ if (user.isLoggedIn())
 	<a href="groups.jsp">Groups - My Groups</a><br/><br/>
 	<a href="groups.jsp?all=1">Groups - All</a><br/><br/>
 	Group Assignments<br/><br/>
-	<%= groupMenu(user, "Group Assignments", false, false, "groupassignments.jsp", "?groupId=", response) %>
+	<%= groupMenu(user, "Group Assignments", false, false, "groupassignments.jsp", "?groupid=", response) %>
 	<br/>
 	Pay Group<br/><br/>
-	<%= groupMenu(user, "Pay Group", true, false, "pay.jsp", "?groupId=", response) %>
+	<%= groupMenu(user, "Pay Group", true, false, "pay.jsp", "?groupid=", response) %>
 	<br/>
 	Group Membership<br/><br/>
-	<%= groupMenu(user, "Group Membership", true, false, "memberships.jsp", "?groupId=", response) %>
+	<%= groupMenu(user, "Group Membership", true, false, "memberships.jsp", "?groupid=", response) %>
 	<br/><br/>
-	<%= groupMenu(user, "Goods", true, true, "goods.jsp", "?groupId=", response) %>
+	<%= groupMenu(user, "Goods", true, true, "goods.jsp", "?groupid=", response) %>
 	<br/>
 	<a href="groupassignments.jsp">Goods Transfer Assignments</a><br/><br/>
-	<%= groupMenu(user, "Transfer Assignments", true, false, "groupassignments.jsp", "?transfer=", response) %>
+	<%= groupMenu(user, "Transfer Assignments", true, false, "goodsassignments.jsp", "?transferid=", response) %>
 	<br/><br/>
 	<%= groupMenu(user, "FBOs", true, true, "fbo.jsp", "?id=", response) %>
 	<%= groupMenu(user, "FBO Mgt", true, true, "fbomgt.jsp", "?id=", response) %>

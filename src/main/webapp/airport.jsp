@@ -286,7 +286,7 @@
 			form.id.value = id;
 			if (id2 != 0) 
 			{
-				form.groupId.value = id2;	
+				form.groupid.value = id2;
 				form.type.value = "move";
 			}	
 			form.submit();
@@ -481,7 +481,7 @@
                 </table>
 	            <%= airport.getTitle() %><br>
 	            Landing fee: <%= Formatters.currency.format(airport.getLandingFee()) %>&nbsp;&nbsp;
-	            <i><%= airport.getTypeDescription() %></i><br>
+	            <i><%= AirportBean.getTypeDescription(airport.getType(), airport.getSize()) %></i><br>
 <%
 		int[] aopm = Airports.getAirportOperationsPerMonth(airport.getIcao());
 		int currentops = aopm[0];
@@ -787,7 +787,7 @@
 		<input type="hidden" name="event" value="Assignment"/>
 		<input type="hidden" name="type" value="add"/>
 		<input type="hidden" name="id" />
-		<input type="hidden" name="groupId" />
+		<input type="hidden" name="groupid" />
 		<input type="hidden" name="returnpage" value="<%= URL + sToAirport + sAirportArea + sAircraftArea %>" />
 		</div>
 		
@@ -1305,7 +1305,7 @@
             for (Groups.groupMemberData staffGroup : staffGroups)
             {
 %>
-                        | <a class="link" href="<%= response.encodeURL(buyUrl + "&groupId=" + staffGroup.groupId) %>">Buy
+                        | <a class="link" href="<%= response.encodeURL(buyUrl + "&groupid=" + staffGroup.groupId) %>">Buy
                         for <%= staffGroup.groupName %>
                     </a>
 <%

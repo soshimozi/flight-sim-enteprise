@@ -551,14 +551,14 @@ public class Aircraft implements Serializable
                 //ResultSet rsAp = dalHelper.ExecuteReadOnlyQuery(qry, fromParam);
                 //if (!rsAp.next())
                 //	throw new DataError("Airport " + fromParam + " not found.");
-                LatLonSize lls = Airports.cachedAPs.get(fromParam.toUpperCase());
+                AirportInfo lls = Airports.cachedAPs.get(fromParam.toUpperCase());
                 if (lls == null)
                 {
                     throw new DataError("Airport " + fromParam.toUpperCase() + " not found.");
                 }
 
-                lat = lls.lat;
-                lon = lls.lon;
+                lat = lls.latlon.lat;
+                lon = lls.latlon.lon;
             }
 
             Map<String, Double> distanceMap = new HashMap<>();

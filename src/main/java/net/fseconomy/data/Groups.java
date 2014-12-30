@@ -410,4 +410,23 @@ public class Groups implements Serializable
             e.printStackTrace();
         }
     }
+
+    public static int getRole(int groupId, int userId)
+    {
+        int result = -1;
+
+        try
+        {
+            String qry = "SELECT level FROM groupmembership WHERE groupId = ? AND userId = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, groupId, userId);
+            if(rs.next())
+                return UserBean.getGroupLevel(rs.getString("level"));
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 }

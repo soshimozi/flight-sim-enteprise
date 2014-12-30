@@ -99,8 +99,8 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 		oM.makeMenu('m2','','Airports','<%= response.encodeURL("airport.jsp") %>', "", 80);
 		oM.makeMenu('m3','','My Flight','<%= response.encodeURL("myflight.jsp") %>', "", 90);
 		oM.makeMenu('m4','','Log','<%= response.encodeURL("log.jsp") %>', "", 50);
-		<%= groupMenu(user, "m4", 1, "Logs", false, true, "log.jsp", "?groupId=", response) %>
-		<%= groupMenu(user, "m4", 2, "Payment logs", false, true, "paymentlog.jsp", "?groupId=", response) %>
+		<%= groupMenu(user, "m4", 1, "Logs", false, true, "log.jsp", "?groupid=", response) %>
+		<%= groupMenu(user, "m4", 2, "Payment logs", false, true, "paymentlog.jsp", "?groupid=", response) %>
 
 		oM.makeMenu('m6','','Aircraft','<%= response.encodeURL("aircraft.jsp")%>', "", 80);
 		<%= groupMenu(user, "m6", 1, "Aircraft", false, true, "aircraft.jsp", "?id=", response) %>
@@ -111,13 +111,13 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 		oM.makeMenu('m8','','Groups','<%= response.encodeURL("groups.jsp") %>', "", 80);
 		oM.makeMenu('sub8_0','m8','My groups','<%= response.encodeURL("groups.jsp")%>');
 		oM.makeMenu('sub8_1','m8','All groups','<%= response.encodeURL("groups.jsp?all=1")%>');
-	<%= groupMenu(user, "m8", 1, "Assignments", false, false, "groupassignments.jsp", "?groupId=", response) %>
-	<%= groupMenu(user, "m8", 2, "Pay group", false, false, "pay.jsp", "?groupId=", response) %>
-	<%= groupMenu(user, "m8", 3, "Memberships", true, false, "memberships.jsp", "?groupId=", response) %>
+	<%= groupMenu(user, "m8", 1, "Assignments", false, false, "groupassignments.jsp", "?groupid=", response) %>
+	<%= groupMenu(user, "m8", 2, "Pay group", false, false, "pay.jsp", "?groupid=", response) %>
+	<%= groupMenu(user, "m8", 3, "Memberships", true, false, "memberships.jsp", "?groupid=", response) %>
 	
 		oM.makeMenu('m9','','Goods','<%= response.encodeURL("goods.jsp") %>', "", 75);
-		<%= groupMenu(user, "m9", 1, "Goods", true, true, "goods.jsp", "?groupId=", response) %>
-		<%= groupMenu(user, "m9", 2, "Transfer assignments", true, true, "groupassignments.jsp", "?transfer=", response) %>
+		<%= groupMenu(user, "m9", 1, "Goods", true, true, "goods.jsp", "?groupid=", response) %>
+		<%= groupMenu(user, "m9", 2, "Transfer assignments", true, true, "goodsassignments.jsp", "?transferid=", response) %>
 	
 		oM.makeMenu('m10','','FBO','<%= response.encodeURL("fbo.jsp") %>', "", 50);
 		<%= groupMenu(user, "m10", 1, "FBO", true, true, "fbo.jsp", "?id=", response) %>

@@ -59,27 +59,27 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link rel="stylesheet" type="text/css" href="css/Master.css" />
-	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css" />
+	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
+	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css'>
+	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="fancybox/jquery.fancybox-1.3.1.css"/>
+	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css"/>
+	<link rel="stylesheet" type="text/css" href="css/Master.css"/>
 
-	<% //regressed jquery so that lightbox would work %>
-	<script src="scripts/jquery.min.js"></script>
-	<script src="scripts/jquery-ui.min.js"></script>
-	<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="http://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>
 
+	<script type='text/javascript' src="scripts/jquery.cookie.js"></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
 	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
-
-	<script src="scripts/PopupWindow.js"></script>
-	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
-	<script src="scripts/location-mapper.js"></script>
+	<script src="scripts/AutoComplete.js"></script>
 
 	<script>
-		var gmap = new PopupWindow();
-		
+
 		function doSubmit(id)
 		{
 		     document.lflightForm.id.value = id;
@@ -168,7 +168,21 @@
 				widgets : ['zebra','columns']
 			});
 		
-			$('.assignmentTable').tablesorter();		
+			$('.assignmentTable').tablesorter();
+
+			$('.mapassignment').click(function () {
+				var depart = this.getAttribute("data-depart");
+				var dest = this.getAttribute("data-dest");
+
+				$("#mapData").load("gmapassignmentpv.jsp?dest=" + dest + "&depart=" + depart);
+
+				$("#mapModal").modal('show');
+			});
+
+			$('#mapModal').on('shown.bs.modal', function () {
+				initMap();
+			});
+
 		});
 		
 	</script>
@@ -420,7 +434,7 @@
      	for (AssignmentBean bean : assignments)
      	{
      		if (bean.getActive() == 2)
-     		{
+			{
                 String image = "img/set2_" + bean.getActualBearingImage() + ".gif";
            		String aircraftReg = Aircraft.getAircraftRegistrationById(bean.getAircraftId());
            		String status;
@@ -457,25 +471,22 @@
 				</td>
 		        <td class="numeric"><%=Formatters.currency.format(bean.calcPay()) %></td>
 		        <td>
-		        	<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%=location.getIcao() %>&icaod=<%= destination.getIcao()%>');gmap.showPopup('gmap');return false;" id="gmap">
-		        	<img src="<%=location.getDescriptiveImage(Fbos.getFboByLocation(bean.getLocation()))%>" style="border-style: none; vertical-align:middle;" />
-		        	</a>
-		        	<a class="normal" title="<%=location.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao="+ bean.getLocation()) %>">
+		        	<img class="mapassignment" data-depart="<%= bean.getLocation()%>" data-dest="<%= bean.getTo()%>"
+						 src="<%=location.getDescriptiveImage(Fbos.getFboByLocation(bean.getLocation()))%>"
+						 style="border-style: none; vertical-align:middle;" />
+					<a class="normal" title="<%=location.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao="+ bean.getLocation()) %>">
 		        	<%= bean.getLocation() %>
 		        	</a>
-		        </td>
-		        <td>
-		        	<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%=from.getIcao() %>&icaod=<%=(from.getIcao().equals(location.getIcao()))?destination.getIcao():location.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        		<img src="<%=from.getDescriptiveImage(Fbos.getFboByLocation(bean.getFrom()))%>" style="border-style: none; vertical-align:middle;" />
-		        	</a>
-		        	<a class="normal" title="<%=from.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + bean.getFrom()) %>">
+				</td>
+					<td>
+						<img src="<%=from.getDescriptiveImage(Fbos.getFboByLocation(bean.getFrom()))%>" style="border-style: none; vertical-align:middle;" />
+						<a class="normal" title="<%=from.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + bean.getFrom()) %>">
 		        		<%= bean.getFrom() %>
 		        	</a>
 		        </td>
 		        <td>
-		        	<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%=location.getIcao() %>&icaod=<%= destination.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        		<img src="<%=destination.getDescriptiveImage(Fbos.getFboByLocation(bean.getTo()))%>" style="border-style: none; vertical-align:middle;" />
-		        	</a>
+	        		<img class="mapassignment" data-depart="<%= bean.getLocation()%>" data-dest="<%= bean.getTo()%>"
+						 src="<%=destination.getDescriptiveImage(Fbos.getFboByLocation(bean.getTo()))%>" style="border-style: none; vertical-align:middle;" />
 		        	<a class="normal" title="<%=destination.getTitle() %>" href="<%=response.encodeURL("airport.jsp?icao=" + bean.getTo()) %>">
 		        		<%=bean.getTo() %>
 		        	</a>
@@ -694,25 +705,23 @@
 					</td>
 		        	<td class="numeric"><%=Formatters.currency.format(assignment.calcPay()) %></td>
 		       	 	<td>
-		        		<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%=location.getIcao() %>&icaod=<%= destination.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        			<img src="<%=location.getDescriptiveImage(Fbos.getFboByLocation(assignment.getLocation()))%>" style="border-style: none; vertical-align:middle;" />
-		        		</a>
-		        		<a title="<%=location.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao="+ assignment.getLocation()) %>">
+	        			<img  class="mapassignment" data-depart="<%= assignment.getLocation()%>" data-dest="<%= assignment.getTo()%>"
+							 src="<%=location.getDescriptiveImage(Fbos.getFboByLocation(assignment.getLocation()))%>"
+							 style="border-style: none; vertical-align:middle;"/>
+						<a title="<%=location.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao="+ assignment.getLocation()) %>">
 		        			<%= assignment.getLocation() %>
 		        		</a>
 		       		</td>
 		        	<td>
-		        		<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= from.getIcao() %>&icaod=<%=(from.getIcao().equals(location.getIcao()))?destination.getIcao():location.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        			<img src="<%=from.getDescriptiveImage(Fbos.getFboByLocation(assignment.getFrom()))%>" style="border-style: none; vertical-align:middle;" />
-		        		</a>
-		        		<a title="<%=from.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" +assignment.getFrom()) %>">
+		        		<img src="img/blankap.gif" style="border-style: none; vertical-align:middle;"/>
+						<a title="<%=from.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" +assignment.getFrom()) %>">
 		        			<%= assignment.getFrom() %>
 		        		</a>
-		        	</td>
+					</td>
 		        	<td>
-		        		<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao()%>');gmap.showPopup('gmap');return false;">
-		        			<img src="<%=destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo()))%>" style="border-style: none; vertical-align:middle;" />
-		        		</a>
+						<img  class="mapassignment" data-depart="<%= assignment.getLocation()%>" data-dest="<%= assignment.getTo()%>"
+							 src="<%=destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo()))%>"
+							 style="border-style: none; vertical-align:middle;" />
 		        		<a title="<%=destination.getTitle() %>" href="<%=response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>">
 		        			<%=assignment.getTo() %>
 		        		</a>
@@ -741,7 +750,7 @@
      <a class="link" href="javascript:checkNone(document.lflightForm.select)">De-Select</a>
      <input type="button" name="hold_Selected" value="Hold Selected Assignments" onClick="doSubmit5(document.lflightForm.select)" />
      <input type="button" name="add_Selected" value="Cancel Selected Assignments" onClick="doSubmit(this.form.select)" />
-     <a href="#lb" id="show-map">Map My Assignments</a>
+     <a href="gmapfull.jsp?type=myflight" target="_blank">Map My Assignments</a>
      <br><br>
      </form>
 <%
@@ -1028,48 +1037,21 @@ $("#calcLoad").click(function ()
 </div>
 </div>
 
-<!--
-	This is the lightbox markup, keep the JSP stuff all intact, and
-	make sure that the aircraft	information table is between the 
-	curly braces of the JSP conditional	clause 
--->
-<div style="display: none;">
-	<div style="width: 100%; height: 100%;" id="lb">
-		<table style="height: 100px; width: 880px; vertical-align: middle;" border="1">
-<%	
-	if (haveAircraft)
-	{ 
-%>
-		<tr>
-			<th colspan="4">Aircraft information</th>
-		</tr>
-		<tr>
-			<td style="width:210px;"><strong>Aircraft Type:</strong><br/><%=aircraft.getMakeModel() %></td>
-			<td style="width:210px;"><strong>Reg #:</strong><br/><%=aircraft.getRegistration()%></td>
-			<td style="width:210px;"><strong>Location:</strong><br/><%=aircraft.getSLocation()%></td>
-			<td style="width:210px;"><strong>Current Fuel:</strong><br/><%=Formatters.oneDigit.format(aircraft.getTotalFuel()) %> Gal (<%=(int)Math.round(100.0 * aircraft.getTotalFuel()/(double)aircraft.getTotalCapacity())%>%)</td>
-		</tr>
-<%
-	} 
-%>
-		<tr>
-			<th colspan="4">Legend</th>
-		</tr>
-		<tr>
-			<td><img src="https://maps.google.com/mapfiles/kml/pal2/icon48.png"/>Current Plane Location</td>
-			<td><img src="https://google-maps-icons.googlecode.com/files/airport.png"/>Assignment Location</td>
-			<td><img src="https://google-maps-icons.googlecode.com/files/airport-runway.png"/>Plane &amp; Assignment</td>
-			<td><img src="https://maps.google.com/mapfiles/kml/pal2/icon56.png"/>Destination Airport</td>
-		</tr>
-		<tr>
-			<td colspan="4">
-				<input type="checkbox" value="draw-lines" id="draw-lines" checked/><strong>Show Lines</strong>
-			</td>
-		</tr>
-		</table>
-		<div id="map_canvas" style="width:900px; height:550px">
-			<div style="width: 220px; height: 19px; margin: 250px auto 0 auto;">
-				<img src="img/ajax-loader.gif" />
+<div class="modal fade" id="mapModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button class="close" aria-hidden="true" type="button" data-dismiss="modal">×</button>
+				<h4 class="modal-title">Assignment Map</h4>
+			</div>
+			<div class="modal-body">
+				<div class="container">
+					<div class="row" id="mapData">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
 			</div>
 		</div>
 	</div>

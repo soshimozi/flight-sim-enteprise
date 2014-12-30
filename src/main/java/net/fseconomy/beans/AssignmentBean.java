@@ -550,18 +550,9 @@ public class AssignmentBean implements Serializable
 	{
 		if (amount == 0)
 		{
-			String S;
-			if ((comment != null) && (comment.length() > 0))
-			{
-				if (comment.length() > 40)
-					S = comment.substring(0, 40) + "...";
-				else
-					S = comment;
-			}
-			else
-				S = "[Group Assignment]";
-			return S;
+				return "[Group Assignment]";
 		}
+
 		if (units == AssignmentBean.UNIT_PASSENGERS)
 			return (ptAssignment ? "<font color=Green>" : "") + amount + " " + getCommodity() + (ptAssignment ? "</font>" : "");
 		else

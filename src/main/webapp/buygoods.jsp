@@ -21,7 +21,7 @@
 		return;
 	}
 
-	String sId = request.getParameter("groupId");
+	String sId = request.getParameter("groupid");
 	if (sId != null)
 	{
 		int id = Integer.parseInt(sId);

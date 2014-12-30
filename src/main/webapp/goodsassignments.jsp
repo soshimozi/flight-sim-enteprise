@@ -7,20 +7,32 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
 <%
-    int groupId;
+    int transferId;
     boolean isStaff;
 
-    groupId = Integer.parseInt(request.getParameter("groupid"));
+    String sTransferId = request.getParameter("transferid");
+
+    if(sTransferId == null)
+        transferId = user.getId();
+    else
+        transferId = Integer.parseInt(sTransferId);
 
     //check if proper access
-    int role = Groups.getRole(groupId, user.getId());
-    if(role < UserBean.GROUP_MEMBER)
-        return;
+    if(user.getId() != transferId)
+    {
+        int role = Groups.getRole(transferId, user.getId());
+        if (role < UserBean.GROUP_MEMBER)
+            return;
 
-    isStaff = role >= UserBean.GROUP_STAFF;
+        isStaff = role >= UserBean.GROUP_STAFF;
+    }
+    else
+    {
+        isStaff = true;
+    }
 
     //setup return page if action used
-    String params = "?groupid=" + groupId;
+    String params = "?transferid=" + transferId;
     String returnPage = request.getRequestURI() + params;
 %>
 
@@ -40,12 +52,13 @@
     <link rel="stylesheet" type="text/css" href="css/tablesorter-style.css"/>
     <link rel="stylesheet" type="text/css" href="css/Master.css"/>
 
+    <% //regressed jquery so that lightbox would work %>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-    <script src="http://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>
+    <script src="https://maps.google.com/maps/api/js?sensor=false"></script>
+    <script src="scripts/jquery.cookie.js"></script>
 
-    <script type='text/javascript' src="scripts/jquery.cookie.js"></script>
     <script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
     <script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
     <script type='text/javascript' src='scripts/parser-checkbox.js'></script>
@@ -86,20 +99,17 @@
             form.submit();
         }
 
-        function unlockAssignments() {
+        function unlockAssignments(id) {
             var form = document.getElementById("assignmentForm");
-            form.id.value = $("input[name='select']:checked");
             form.action = "<%= response.encodeURL("userctl") %>";
-            form.type.value = "unlock";
+            form.event.value = "unlockGoodsAssignment";
             form.submit();
         }
 
-        function removeAssignmentFromGroup() {
+        function deleteGoodsAssignments() {
             var form = document.getElementById("assignmentForm");
-            form.id.value = $("input[name='select']:checked");
             form.action = "<%= response.encodeURL("userctl") %>";
-            form.event.value = "removeAssignmentFromGroup";
-            form.groupid.value = <%=groupId%>;
+            form.event.value = "deleteGoodsAssignment";
             form.submit();
         }
 
@@ -144,7 +154,6 @@
                 }
             }
             return okay;
-
         }
 
         var displayGroupsOnly = false;
@@ -188,7 +197,6 @@
     </script>
 
     <script type="text/javascript">
-        var map;
 
         $(function () {
 
@@ -213,37 +221,20 @@
                 $("#myModal").modal('show');
             });
 
+
             $('.newassignment').click(function () {
+                var id = this.getAttribute("data-id");
+
                 $("#assignmentData").load("editnewassignmentdata.jsp", function () {
-                    newAssignmentInit(<%=groupId%>, '<%=returnPage%>');
+                    newAssignmentInit(<%=transferId%>, '<%=returnPage%>');
                 });
 
                 $("#myModal").modal('show');
             });
 
-            $('.mapassignment').click(function () {
-                var depart = this.getAttribute("data-depart");
-                var dest = this.getAttribute("data-dest");
-
-                $("#mapData").load("gmapassignmentpv.jsp?dest=" + dest + "&depart=" + depart);
-
-                $("#mapModal").modal('show');
-            });
-
-            $('#mapModal').on('shown.bs.modal', function () {
-                initMap();
-            });
-
             $("#transferButton").click(
                     function () {
-                        var name;
-
-                        if(displayGroupsOnly)
-                            name = $("#groupSelect").find("option:selected").text();
-                        else
-                            name = $("#selectedGroupName").val();
-
-                        if (window.confirm("Are you sure you want to transfer selected assignments to " + name + "?")) {
+                        if (window.confirm("Are you sure you want to transfer selected assignments to " + $("#transfername").val() + "?")) {
                             if(displayGroupsOnly)
                                 transferAssignment($("input[name='select']:checked"), $("#groupSelect").val());
                             else
@@ -261,7 +252,6 @@
                     $("#account").val($(this).val());
                 });
             });
-
         });
 
         var loc = {};
@@ -279,14 +269,13 @@
 
 <div id="wrapper">
     <div class="content">
-        <jsp:include flush="true" page="assignmentsgroupdata.jsp">
-            <jsp:param name="groupid" value="<%=groupId%>"/>
-            <jsp:param name="isStaff" value="<%=isStaff%>"/>
+        <jsp:include flush="true" page="assignmentsgoodsdata.jsp">
+            <jsp:param name="transferid" value="<%=transferId%>"/>
             <jsp:param name="returnPage" value="<%=returnPage%>"/>
         </jsp:include>
 
         <br>
-        <a href="gmapfull.jsp?type=group&id=<%=groupId%>" target="_blank">Map Group Assignments</a>
+        <a href="gmapfull.jsp?type=transfer&id=<%=transferId%>" target="_blank">Map Transfer Assignments</a>
         <br>
         <a class="btn btn-default" href="javascript:checkAll()">Select All</a>
         <a class="btn btn-default" href="javascript:uncheckAll()">De-Select</a>
@@ -294,21 +283,20 @@
             <input class="btn btn-success" type="button" name="add_Selected" value="Add Selected to My Flight"
                    onclick="addToMyFlight()"/>
             <br/><br/>
-            <%
-                if (isStaff)
-                {
-            %>
+<%
+    if (isStaff)
+    {
+%>
             <div class="panel panel-primary alert-info" style="background: lightsteelblue; padding: 15px">
                 <h3>Owner and Staff Only</h3>
                 <div class="well">
                     <h4>Assignment Actions</h4>
                     <input class="btn btn-warning" type="button" name="unlock_Selected" value="Unlock Selected" onclick="unlockAssignments()"/>
-                    <input class="btn btn-danger" type="button" name="cancel_Selected" value="Cancel Selected Assignments" onclick="removeAssignmentFromGroup()"/>
-                    <input class="btn btn-info newassignment" type="button" name="newassignment" value="New assignment"/>
+                    <input class="btn btn-danger" type="button" name="delete_Selected" value="Delete assignments" onclick="deleteGoodsAssignments()"/>
                 </div>
-                <div class="well">
-                    <h4>Add Comment to selected assignments</h4>
-                    <span class="alert-danger"><strong>Warning:</strong> This will overwrite any existing comment for the selected assignments!</span><br/>
+                <div class="well alert-danger">
+                    <h4>Add Comment to selected assignemnts</h4>
+                    <strong>Warning:</strong> This will overwrite any existing comment for the selected assignments!<br/>
                     <label>
                         You must click the "Add comment" button!<br/>
                         <input class="form-control" id="assignmentComment" type="text" size="65" maxlength="250">
@@ -330,19 +318,19 @@
                                 <span id="byGroup" style="display: none">
                                     <select class="form-control" id="groupSelect">
                                         <option value=""></option>
-                                        <%
-                                            List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
+<%
+    List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
 
-                                            for (UserBean group : groups)
-                                            {
-                                                if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
-                                                {
-                                        %>
+    for (UserBean group : groups)
+    {
+        if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
+        {
+%>
                                         <option value="<%=group.getId()%>"><%= group.getName()%></option>
-                                        <%
-                                                }
-                                            }
-                                        %>
+<%
+        }
+    }
+%>
                                     </select>
                                 </span>
                             </label>
@@ -352,9 +340,9 @@
                 </div>
             </div>
         </div>
-        <%
-            }
-        %>
+<%
+    }
+%>
     </div>
 </div>
 
@@ -362,28 +350,8 @@
 <div id="myModal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content ui-front">
-            <div id="assignmentData" style="height: 400px; width: 600px;">
+            <div id="assignmentData">
 
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="mapModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button class="close" aria-hidden="true" type="button" data-dismiss="modal">×</button>
-                <h4 class="modal-title">Assignment Map</h4>
-            </div>
-            <div class="modal-body">
-                <div class="container">
-                    <div class="row" id="mapData">
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

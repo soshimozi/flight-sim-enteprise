@@ -6,7 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    String group = request.getParameter("groupId");
+    String group = request.getParameter("groupid");
     int groupId = -1;
     if (group != null)
         groupId = Integer.parseInt(group);
@@ -79,8 +79,8 @@
 	<input type="hidden" name="event" value="memberlevel" />
 	<input type="hidden" name="level" />
 	<input type="hidden" name="id"/>
-	<input type="hidden" name="groupId" value="<%= groupId %>"/>
-	<input type="hidden" name="returnpage" value="memberships.jsp?groupId=<%= groupId %>" />
+	<input type="hidden" name="groupid" value="<%= groupId %>"/>
+	<input type="hidden" name="returnpage" value="memberships.jsp?groupid=<%= groupId %>" />
 <div class="dataTable">		
 	<table>
 	<caption>Group memberships</caption>

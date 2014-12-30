@@ -2,10 +2,7 @@ package net.fseconomy.data;
 
 import com.google.gson.Gson;
 import net.fseconomy.beans.*;
-import net.fseconomy.dto.CloseAirport;
-import net.fseconomy.dto.DistanceBearing;
-import net.fseconomy.dto.FlightOp;
-import net.fseconomy.dto.LatLonSize;
+import net.fseconomy.dto.*;
 import net.fseconomy.util.Converters;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,7 +18,7 @@ public class Airports implements Serializable
      * Used to hold an ICAO and lat/lon instance in Hashtable
      * This is initialized in the Data() constructor on startup 
      */
-    public static HashMap<String,LatLonSize> cachedAPs = new HashMap<>();
+    public static HashMap<String, AirportInfo> cachedAPs = new HashMap<>();
 
     static
     {
@@ -57,17 +54,14 @@ public class Airports implements Serializable
             //pull the airports
             try
             {
-                String qry = "SELECT icao, lat, lon, size, type FROM airports";
+                String qry = "SELECT icao, name, city, state, country, lat, lon, size, type FROM airports";
                 ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
                 while (rs.next())
                 {
                     int itype;
 
-                    String icao = rs.getString("icao");
-                    double lat = rs.getDouble("lat");
-                    double lon = rs.getDouble("lon");
-                    int size = rs.getInt("size");
-                    String type = rs.getString("type");
+                    String icao = rs.getString(1);
+                    String type = rs.getString(6);
 
                     if (type.contains("military"))
                     {
@@ -82,7 +76,8 @@ public class Airports implements Serializable
                         itype = AirportBean.TYPE_CIVIL;
                     }
 
-                    LatLonSize lls = new LatLonSize(lat, lon, size, itype);
+                    String title = rs.getString(2) + ", " + rs.getString(3) + ", " + rs.getString(4) + ", " + rs.getString(5);
+                    AirportInfo lls = new AirportInfo(icao, title, rs.getDouble(6), rs.getDouble(7), rs.getInt(8), itype);
                     cachedAPs.put(icao, lls);
                 }
             }
@@ -108,8 +103,8 @@ public class Airports implements Serializable
 
     public static double getDistance(double lat1, double lon1, double lat2, double lon2)
     {
-        LatLonSize lls1 = new LatLonSize(lat1, lon1, 0, 0);
-        LatLonSize lls2 = new LatLonSize(lat2, lon2, 0, 0);
+        LatLon lls1 = new LatLon(lat1, lon1);
+        LatLon lls2 = new LatLon(lat2, lon2);
 
         DistanceBearing result = getDistanceBearing(lls1, lls2, true, false);
 
@@ -123,8 +118,8 @@ public class Airports implements Serializable
 
     public static double getDistance(String from, String to)
     {
-        LatLonSize lls1 = cachedAPs.get(from.toUpperCase()); //Added .toUpperCase to make sure comparison will work
-        LatLonSize lls2 = cachedAPs.get(to.toUpperCase());
+        AirportInfo lls1 = cachedAPs.get(from.toUpperCase()); //Added .toUpperCase to make sure comparison will work
+        AirportInfo lls2 = cachedAPs.get(to.toUpperCase());
 
         if (lls1 == null || lls2 == null)
         {
@@ -136,15 +131,15 @@ public class Airports implements Serializable
             return 0;
         }
 
-        DistanceBearing result = getDistanceBearing(lls1, lls2, true, false);
+        DistanceBearing result = getDistanceBearing(lls1.latlon, lls2.latlon, true, false);
 
         return result.distance; //distance only
     }
 
     public static DistanceBearing getDistanceBearing(String from, String to)
     {
-        LatLonSize lls1 = cachedAPs.get(from.toUpperCase()); //Added .toUpperCase to make sure comparison will work
-        LatLonSize lls2 = cachedAPs.get(to.toUpperCase());
+        AirportInfo lls1 = cachedAPs.get(from.toUpperCase()); //Added .toUpperCase to make sure comparison will work
+        AirportInfo lls2 = cachedAPs.get(to.toUpperCase());
 
         if (lls1 == null || lls2 == null)
         {
@@ -155,11 +150,10 @@ public class Airports implements Serializable
 
             return null;
         }
-
-        return getDistanceBearing(lls1, lls2);
+        return getDistanceBearing(lls1.latlon, lls2.latlon);
     }
 
-    public static DistanceBearing getDistanceBearing(LatLonSize from, LatLonSize to)
+    public static DistanceBearing getDistanceBearing(LatLon from, LatLon to)
     {
         return getDistanceBearing(from, to, true, true);
     }
@@ -173,7 +167,7 @@ public class Airports implements Serializable
      * @param returnBearing  - return beaing if true, or 0 if false
      * @return double[] - 0 = distance, 1 = bearing
      */
-    public static DistanceBearing getDistanceBearing(LatLonSize from, LatLonSize to, boolean returnDistance, boolean returnBearing)
+    public static DistanceBearing getDistanceBearing(LatLon from, LatLon to, boolean returnDistance, boolean returnBearing)
     {
         if ((!returnDistance && !returnBearing) || (from.lat == to.lat && from.lon == to.lon))
         {
@@ -225,10 +219,10 @@ public class Airports implements Serializable
      * @param waterOk - airport types to include in the search
      * @param militaryOk - airport types to include in the search
      */
-    public static Hashtable<String, LatLonSize> getAirportsInRange(String icao, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk)
+    public static Hashtable<String, AirportInfo> getAirportsInRange(String icao, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk)
     {
         //Get the lat/lon to pass in
-        LatLonSize lls = cachedAPs.get(icao.toUpperCase());
+        AirportInfo lls = cachedAPs.get(icao.toUpperCase());
 
         if (lls == null)
         {
@@ -236,7 +230,7 @@ public class Airports implements Serializable
             return null;
         }
 
-        Hashtable<String, LatLonSize> results = getAirportsInRange(lls.lat, lls.lon, clipLat, clipLon, minSize, maxSize, civilOk, waterOk, militaryOk);
+        Hashtable<String, AirportInfo> results = getAirportsInRange(lls.latlon.lat, lls.latlon.lon, clipLat, clipLon, minSize, maxSize, civilOk, waterOk, militaryOk);
 
         //removed center airport
         if (results.size() > 0)
@@ -260,23 +254,23 @@ public class Airports implements Serializable
      * @param waterOk - airport types to include in the search
      * @param militaryOk - airport types to include in the search
      */
-    public static Hashtable<String, LatLonSize> getAirportsInRange(double lat, double lon, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk)
+    public static Hashtable<String, AirportInfo> getAirportsInRange(double lat, double lon, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk)
     {
-        Hashtable<String, LatLonSize> results = new Hashtable<>();
-        LatLonSize lls;
+        Hashtable<String, AirportInfo> results = new Hashtable<>();
+        AirportInfo lls;
         int minSz;
         int maxSz;
 
         minSz = minSize;
         maxSz = maxSize == 0 ? Integer.MAX_VALUE : maxSize;
 
-        for (Map.Entry<String, LatLonSize> entry : cachedAPs.entrySet())
+        for (Map.Entry<String, AirportInfo> entry : cachedAPs.entrySet())
         {
             //get our current loop key and value
             lls = entry.getValue();
 
-            double clat = Math.abs(lls.lat - lat);
-            double clon = Math.abs(lls.lon - lon);
+            double clat = Math.abs(lls.latlon.lat - lat);
+            double clon = Math.abs(lls.latlon.lon - lon);
 
             if(clat > clipLat && clon > clipLon)
                 continue;
@@ -333,7 +327,7 @@ public class Airports implements Serializable
         double bestDistance = 0;
 
         String key;
-        LatLonSize value;
+        AirportInfo value;
 
         boolean found = false;
         double degrees = 0.2;
@@ -347,7 +341,7 @@ public class Airports implements Serializable
             double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(lat)));
 
             //get the airports in range
-            Hashtable<String, LatLonSize> results = getAirportsInRange(lat, lon, degreeClipLat, degreeClipLon, minSize, 0, true, waterOk, true);
+            Hashtable<String, AirportInfo> results = getAirportsInRange(lat, lon, degreeClipLat, degreeClipLon, minSize, 0, true, waterOk, true);
 
             //loop through the results to see if any are closest
             Enumeration<String> keys = results.keys();
@@ -358,7 +352,7 @@ public class Airports implements Serializable
                 value = results.get(key);
 
                 //get the distance
-                double distance = getDistance(lat, lon, value.lat, value.lon);
+                double distance = getDistance(lat, lon, value.latlon.lat, value.latlon.lon);
 
                 //check if we found a new match that is better then the previous
                 if (bestIcao == null || distance < bestDistance)
@@ -438,14 +432,14 @@ public class Airports implements Serializable
         double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(lat)));
 
         //get the airports that met the criteria passed
-        Hashtable<String, LatLonSize> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, minsize, maxsize, true, waterOk, true);
+        Hashtable<String, AirportInfo> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, minsize, maxsize, true, waterOk, true);
 
         //Don't bother if none found
         if (results != null && results.size() != 0)
         {
-            LatLonSize icao = cachedAPs.get(id);
+            AirportInfo icao = cachedAPs.get(id);
             String key;
-            LatLonSize value;
+            AirportInfo value;
             DistanceBearing distbearing;
 
             //Iterate through the returned set
@@ -456,7 +450,7 @@ public class Airports implements Serializable
                 key = keys.nextElement();
                 value = results.get(key);
 
-                distbearing = getDistanceBearing(icao, value);
+                distbearing = getDistanceBearing(icao.latlon, value.latlon);
 
                 //filter out the ones that don't meet the minimum distance, or is the center airport
                 if (id.contains(key) || distbearing.distance < minDistance || distbearing.distance > maxDistance)
@@ -477,7 +471,7 @@ public class Airports implements Serializable
                     key = keys.nextElement();
                     value = results.get(key);
 
-                    distbearing = getDistanceBearing(icao, value);
+                    distbearing = getDistanceBearing(icao.latlon, value.latlon);
                     returnValue = new CloseAirport(key, distbearing.distance, distbearing.bearing);
                 }
                 else
@@ -490,7 +484,7 @@ public class Airports implements Serializable
                     }
 
                     value = results.get(key);
-                    distbearing = getDistanceBearing(icao, value);
+                    distbearing = getDistanceBearing(icao.latlon, value.latlon);
                     returnValue = new CloseAirport(key, distbearing.distance, distbearing.bearing);
                 }
             }
@@ -523,9 +517,12 @@ public class Airports implements Serializable
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, id);
             while (rs.next())
             {
-                LatLonSize lls1 = cachedAPs.get(rs.getString(1));
-                LatLonSize lls2 = cachedAPs.get(rs.getString(2));
-                DistanceBearing distanceBearing = getDistanceBearing(lls1, lls2);
+                AirportInfo lls1 = cachedAPs.get(rs.getString(1));
+                AirportInfo lls2 = cachedAPs.get(rs.getString(2));
+
+                LatLon ll1 = new LatLon(lls1.latlon.lat, lls1.latlon.lon);
+                LatLon ll2 = new LatLon(lls2.latlon.lat, lls2.latlon.lon);
+                DistanceBearing distanceBearing = getDistanceBearing(ll1, ll2);
 
                 if (distanceBearing.distance >= minDistance && distanceBearing.distance < maxDistance)
                 {
@@ -565,8 +562,8 @@ public class Airports implements Serializable
         List<CloseAirport> result = new ArrayList<>();
 
         String key;
-        LatLonSize value;
-        LatLonSize icao;
+        AirportInfo value;
+        AirportInfo icao;
 
         icao = cachedAPs.get(id);
 
@@ -579,9 +576,9 @@ public class Airports implements Serializable
         double degreeClipLat = Math.abs(maxDistance / 60.0);
 
         //adjust for compression toward poles
-        double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(icao.lat)));
+        double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(icao.latlon.lat)));
 
-        Hashtable<String, LatLonSize> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, 0, 0, true, true, true);
+        Hashtable<String, AirportInfo> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, 0, 0, true, true, true);
 
         //loop through the results to see if any are closest
         Enumeration<String> keys = results.keys();
@@ -592,7 +589,7 @@ public class Airports implements Serializable
             value = results.get(key);
 
             //get the distance / bearing
-           DistanceBearing distanceBearing = getDistanceBearing(icao, value);
+           DistanceBearing distanceBearing = getDistanceBearing(icao.latlon, value.latlon);
 
             boolean skipself = id.contains(key);
 

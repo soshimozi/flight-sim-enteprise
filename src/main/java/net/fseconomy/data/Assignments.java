@@ -4,6 +4,7 @@ import net.fseconomy.beans.AircraftBean;
 import net.fseconomy.beans.AssignmentBean;
 import net.fseconomy.beans.UserBean;
 import net.fseconomy.dto.CloseAirport;
+import net.fseconomy.dto.DistanceBearing;
 import net.fseconomy.util.Converters;
 
 import java.io.Serializable;
@@ -118,22 +119,22 @@ public class Assignments implements Serializable
     {
         if (includelocked)
         {
-            return getAssignmentsSQL("SELECT * FROM assignments WHERE groupId=" + groupId + " ORDER BY location");
+            return getAssignmentsSQL("SELECT * FROM assignments WHERE groupId=" + groupId + " ORDER BY location, toicao");
         }
         else
         {
-            return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock is null AND groupId=" + groupId + " ORDER BY location");
+            return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock is null AND groupId=" + groupId + " ORDER BY location, toicao");
         }
     }
 
     public static List<AssignmentBean> getAssignmentsForUser(int userId)
     {
-        return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock=" + userId);
+        return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock=" + userId + " order by location, toicao");
     }
 
-    public static List<AssignmentBean> getAssignmentsForTransfer(int userId)
+    public static List<AssignmentBean> getAssignmentsForTransfer(int ownerId)
     {
-        return getAssignmentsSQL("SELECT * FROM assignments WHERE owner=" + userId);
+        return getAssignmentsSQL("SELECT * FROM assignments WHERE owner=" + ownerId);
     }
 
     public static List<AssignmentBean> getAssignments(String location, int minPax, int maxPax, int minKG, int maxKG)
@@ -200,7 +201,7 @@ public class Assignments implements Serializable
         return result;
     }
 
-    public static void unlockAssignment(int id, boolean unlockAll)
+    public static void unlockAssignment(int id)
     {
         try
         {
@@ -208,17 +209,29 @@ public class Assignments implements Serializable
             boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
             if (exists)
             {
-                if (unlockAll)
-                {
-                    qry = "UPDATE assignments SET userlock = NULL, active = 0, groupId = null, pilotFee = 0, comment = null WHERE id = ?";
-                }
-                else
-                {
-                    qry = "UPDATE assignments SET userlock = NULL, active = 0 WHERE id = ?";
-                }
-
+                qry = "UPDATE assignments SET userlock = NULL, active = 0 WHERE id = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, id);
             }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void unlockGoodsAssignment(int id) throws DataError
+    {
+        try
+        {
+            String qry = "SELECT (count(*) > 0) AS found FROM assignments WHERE (active = 0 or active = 2) AND id = ?";
+            boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
+            if (exists)
+            {
+                qry = "UPDATE assignments SET userlock = NULL, groupId = NULL, active = 0 WHERE id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, id);
+            }
+            else
+                throw new DataError("Goods assignment not found, or enroute.");
         }
         catch (SQLException e)
         {
@@ -307,6 +320,20 @@ public class Assignments implements Serializable
             //Move it to group assignments
             qry = "UPDATE assignments SET comment=? WHERE id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, comment, id);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void newAssignment(int groupId, String fromIcao, String toIcao, double pilotFee, String comment) throws DataError
+    {
+        try
+        {
+            DistanceBearing db = Airports.getDistanceBearing(fromIcao,toIcao);
+            String qry = "INSERT INTO assignments (creation, commodityid, owner, active, units, groupId, fromicao, location, toicao, distance, bearing, pilotfee, comment) VALUES(NOW(),0,0,0,'kg',?,?,?,?,?,?,?,?)";
+            DALHelper.getInstance().ExecuteUpdate(qry, groupId, fromIcao, fromIcao, toIcao, db.distance, db.bearing, pilotFee, comment);
         }
         catch (SQLException e)
         {
@@ -415,6 +442,59 @@ public class Assignments implements Serializable
 
             qry = "UPDATE assignments SET userlock = null, active = 0 where id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, id);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void removeAssignmentFromGroup(int[] assignments) throws DataError
+    {
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for( int i: assignments)
+            {
+                if(!first)
+                    sb.append(", ");
+
+                sb.append(i);
+
+                first = false;
+            }
+            String qry = "UPDATE assignments SET groupId = null, active = 0, pilotfee = 0, comment = null WHERE userlock IS NULL AND id IN (";
+            qry += sb.toString();
+            qry += ")";
+            DALHelper.getInstance().ExecuteUpdate(qry);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateAssignment(int assignmentId, double pilotFee, String comment) throws DataError
+    {
+        try
+        {
+            //No assignment found
+            String qry = "SELECT (userlock is not null) AS locked  FROM assignments WHERE id = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, assignmentId);
+            if (!rs.next())
+            {
+                throw new DataError("No assignment found for id: " + assignmentId);
+            }
+
+            //Assignment is locked!
+            if (rs.getBoolean("locked"))
+            {
+                throw new DataError("Assignment is locked!");
+            }
+
+            qry = "UPDATE assignments SET pilotFee = ?, comment = ? WHERE id = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, pilotFee,comment, assignmentId);
         }
         catch (SQLException e)
         {
@@ -631,5 +711,62 @@ public class Assignments implements Serializable
         }
     }
 
+    public static void deleteGoodsAssignment(int assignmentId, UserBean user) throws DataError
+    {
+        try
+        {
+            String qry = "SELECT * FROM assignments WHERE id = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, assignmentId);
+            if (!rs.next())
+                throw new DataError("Assignment not found.");
+
+            AssignmentBean assignment = new AssignmentBean(rs);
+
+            if (assignment.getUserlock() > 0 && assignment.getUserlock() != user.getId())
+                throw new DataError("Assignment is currently locked by a pilot.");
+
+            if (!assignment.deleteAllowed(user))
+                throw new DataError("Permission denied.");
+
+            if (!assignment.isGoods() || !(assignment.getCommodityId() < 99))
+                throw new DataError("Assignment is not a goods assignment.");
+
+            Goods.changeGoodsRecord(assignment.getLocation(), assignment.getCommodityId(), assignment.getOwner(), assignment.getAmount(), false);
+
+            qry = "DELETE FROM assignments WHERE id = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, assignmentId);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteGroupAssignment(int assignmentId) throws DataError
+    {
+        try
+        {
+            //No assignment found
+            String qry = "SELECT (userlock is not null) AS locked  FROM assignments WHERE id = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, assignmentId);
+            if (!rs.next())
+            {
+                throw new DataError("No assignment found for id: " + assignmentId);
+            }
+
+            //Assignment is locked!
+            if (rs.getBoolean("locked"))
+            {
+                throw new DataError("Assignment is locked!");
+            }
+
+            qry = "DELETE FROM assignments WHERE id = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, assignmentId);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
 }

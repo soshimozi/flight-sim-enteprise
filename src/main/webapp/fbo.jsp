@@ -337,7 +337,7 @@
 		String paymentUrl;
         if (account.isGroup())
         {
-            paymentUrl = "paymentlog.jsp?groupId=" + account.getId() + "&fboId=" + fbo.getId();
+            paymentUrl = "paymentlog.jsp?groupid=" + account.getId() + "&fboId=" + fbo.getId();
         }
         else
         {

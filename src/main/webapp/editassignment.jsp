@@ -11,7 +11,7 @@
     String from = request.getParameter("from");
     String to = request.getParameter("to");
     String sCommodityId = request.getParameter("commodityId");
-    String sGroup = request.getParameter("groupId");
+    String sGroup = request.getParameter("groupid");
     String comment = request.getParameter("comment");
     String sPilotFee = request.getParameter("pilotFee");
     String sAmount = request.getParameter("amount");
@@ -128,22 +128,17 @@
             for (i=0;i<cnt;i++)
                 Assignments.updateAssignment(assignment, user);
 
-            //if (assignment.getOwner() > 0)
-            if(assignment.getGroupId() > 0)
+            if (assignment.getOwner() > 0 && assignment.getGroupId() == 0)
             {
-%>
-<jsp:forward page="groupassignments.jsp">
-    <jsp:param name="groupId" value="<%= assignment.getGroupId() %>"/>
-</jsp:forward>
-<%
-}
-else
-{
-%>
-<jsp:forward page="groupassignments.jsp">
-    <jsp:param name="transfer" value="<%= assignment.getOwner() %>"/>
-</jsp:forward>
-<%
+                response.sendRedirect("goodsassignments.jsp?transferid=" + assignment.getOwner());
+            }
+            else if(assignment.getGroupId() > 0)
+            {
+                response.sendRedirect("goodsassignments.jsp?groupid=" + assignment.getGroupId());
+            }
+            else
+            {
+                response.sendRedirect("goodsassignments.jsp");
             }
         }
         catch (DataError e)
@@ -198,7 +193,7 @@ else
 	if (assignment.isGroup()) 
 	{ 
 %> 
-		<input type="hidden" name="groupId" value="<%= assignment.getGroupId() %>"/>
+		<input type="hidden" name="groupid" value="<%= assignment.getGroupId() %>"/>
 <% 
 	} 
 %>

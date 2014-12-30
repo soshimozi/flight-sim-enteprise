@@ -11,6 +11,8 @@
             <module name="org.apache.commons.fileupload"/>
             <module name="org.apache.commons.lang3"/>
             <module name="nl.captcha.simplecaptcha"/>
+            <!--<module name="org.slf4j" slot="1.7.7"/>-->
+            <!--<module name="ch.qos.logback"/>-->
 
             <module name="org.infinispan.commons" export="TRUE"/>
             <module name="org.infinispan" export="TRUE"/>

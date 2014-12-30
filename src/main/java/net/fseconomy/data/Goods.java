@@ -1,7 +1,7 @@
 package net.fseconomy.data;
 
 import net.fseconomy.beans.*;
-import net.fseconomy.dto.LatLonSize;
+import net.fseconomy.dto.AirportInfo;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -426,7 +426,7 @@ public class Goods implements Serializable
                     rs.close();
                 }
 
-                LatLonSize lls = Airports.cachedAPs.get(location);
+                AirportInfo lls = Airports.cachedAPs.get(location);
                 if (lls == null)
                 {
                     throw new DataError("Unknown airport.");

@@ -28,7 +28,7 @@
         int groupId = Integer.parseInt(sGroupId);
         if (user.groupMemberLevel(groupId) > UserBean.GROUP_INVITED)
         {
-            output = Logging.outputLog("groupId=" + groupId);
+            output = Logging.outputLog("groupid=" + groupId);
         }
     }
     if (output == null)

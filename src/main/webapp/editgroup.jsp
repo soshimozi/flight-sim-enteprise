@@ -113,7 +113,7 @@
 	</div>
 
     <jsp:include flush="true" page="serviceaccess.jsp">
-        <jsp:param name="groupId" value="<%=group.getId()%>" />
+        <jsp:param name="groupid" value="<%=group.getId()%>" />
         <jsp:param name="returnpage" value="<%=returnPage%>" />
     </jsp:include>
 
