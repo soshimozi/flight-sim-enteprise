@@ -59,7 +59,7 @@
 			{
 				if (image.getSize() > 0 && image.getContentType().equals("image/jpeg"))
 				{
-					String filename = request.getRealPath(File.separator) + "/sig-templates/template" + mon + ".jpg";
+					String filename = "/opt/wildfly/fse-static/sig-templates/template" + mon + ".jpg";
 					File file = new File(filename);
 					image.write(file);
 				}
@@ -96,7 +96,7 @@
 <div class="content">
 	<div class="form">
 	    <h2>Upload new signature template</h2>
-	    <img src='<%= "sig-templates/template" + mon + ".jpg" %>'/>
+	    <img src='<%= "/static/sig-templates/template" + mon + ".jpg" %>'/>
 	    <p>Select the desired new template file from your local drive. The filename you select will be changed when uploaded to the required filename.
 	    <form method="post" enctype="multipart/form-data">
             <div>

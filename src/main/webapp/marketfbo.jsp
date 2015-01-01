@@ -96,12 +96,13 @@
 					</caption>
 					<thead>
 					<tr>
-						<th colspan="4" class="sorter-false disabledtext">Click Name for full information and to purchase</th>
+						<th colspan="1" class="sorter-false disabledtext" style="background-color: lightsalmon">Click Name for full information and to purchase</th>
 					</tr>
 					<tr>
 						<th>Name</th>
 						<th>ICAO</th>
 						<th>Location</th>
+						<th>Country</th>
 						<th>Price</th>
 					</tr>
 					</thead>
@@ -119,7 +120,8 @@
 					<tr>
 						<td onclick="selectFbo(<%=fbo.getId()%>)"><%= fboname %></td>
 						<td><%= Airports.airportLink(airport, airport, response) %></td>
-						<td><%= location %></td>
+						<td><%= airport.getCity() %></td>
+						<td><%= airport.getCountry() %></td>
 						<td style="text-align: right;"><%= price %></td>
 					</tr>
 					<%

@@ -362,7 +362,7 @@
 <div id="myModal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content ui-front">
-            <div id="assignmentData" style="height: 400px; width: 600px;">
+            <div id="assignmentData" style="width: 600px;">
 
             </div>
         </div>

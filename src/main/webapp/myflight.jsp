@@ -413,9 +413,9 @@
 	    <tr>
 	    	<th class="sorter-checkbox" style="width: 35px">Select</th>
 			<th class="numeric" style="width: 75px">Pay</th>
-			<th style="width: 75px">Location</th>
-			<th style="width: 70px">From</th>
-			<th style="width: 75px">Dest</th>
+			<th style="width: 80px">Location</th>
+			<th style="width: 80px">From</th>
+			<th style="width: 80px">Dest</th>
 			<th class="numeric" style="width: 35px">NM</th>
 			<th class="numeric" style="width: 45px">Bearing</th>
 			<th style="max-width: 400px">Cargo</th>
@@ -575,9 +575,9 @@
     	<tr>
 	    	<th class="sorter-checkbox" style="width: 35px;">Select</th>
 			<th class="numeric" style="width: 75px;">Pay</th>
-			<th style="width: 75px;">Location</th>
-			<th style="width: 70px;">From</th>
-			<th style="width: 75px;">Dest</th>
+			<th style="width: 80px;">Location</th>
+			<th style="width: 80px;">From</th>
+			<th style="width: 80px;">Dest</th>
 			<th class="numeric" style="width: 35px;">NM</th>
 			<th class="numeric" style="width: 45px;">Bearing</th>
 			<th style="max-width: 400px;">Cargo</th>

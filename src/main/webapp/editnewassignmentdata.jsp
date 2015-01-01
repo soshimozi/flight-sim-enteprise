@@ -1,5 +1,3 @@
-<%@ page import="net.fseconomy.beans.AssignmentBean" %>
-<%@ page import="net.fseconomy.data.Assignments" %>
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
@@ -39,7 +37,7 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="editPilotFee">Pilot Fee</label>
                 <div class="col-sm-3">
-                    <input class="form-control" id="editPilotFee" name="pilotfee" type="text" value="" size="10" maxlength="10"/>
+                    <input class="form-control" id="editPilotFee" name="pilotfee" type="text" value="0.00" size="10" maxlength="10"/>
                 </div>
             </div>
             <div class="form-group">

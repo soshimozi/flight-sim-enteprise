@@ -272,7 +272,7 @@ public class Airports implements Serializable
             double clat = Math.abs(lls.latlon.lat - lat);
             double clon = Math.abs(lls.latlon.lon - lon);
 
-            if(clat > clipLat && clon > clipLon)
+            if(clat > clipLat || clon > clipLon)
                 continue;
 
             if(lls.size < minSz && lls.size > maxSz)

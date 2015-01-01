@@ -244,7 +244,6 @@
 				<td valign="top">&nbsp;</td>
 				<td valign="top">
 					<!-- <input name="x" type="text" class="textarea" value="<%= facility.getCommodity() %>" maxlength="255" size="50" /> -->
-					<textarea name="pd_commodity" rows="5" cols="80"  style="width: 350px">
 <%
 		String commodities = facility.getCommodity();
 		if (commodities == null)
@@ -257,8 +256,7 @@
 			output += items[i].trim() + (i < items.length - 1 ? ", " : "");
 		}
 %>
-                        <%= output %>
-					</textarea>
+<textarea name="pd_commodity" rows="5" cols="80"  style="width: 350px"><%= output %></textarea>
 					<br />
 					<i>
 						<span class="small">For varying names separate with a comma<br />
