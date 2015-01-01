@@ -72,7 +72,7 @@ public class PaymentBean implements Serializable
 	int logEntry;
 	int fboId;
 	String location;
-	String aircraft;
+	int aircraftId;
 	String comment;
 	
 	/**
@@ -92,7 +92,7 @@ public class PaymentBean implements Serializable
 		else
 			fboId = rs.getInt("fbo");
 		location = rs.getString("location");
-		aircraft = rs.getString("aircraft");
+		aircraftId = rs.getInt("aircraftid");
 		comment = rs.getString("comment");
 	}
 	
@@ -188,8 +188,8 @@ public class PaymentBean implements Serializable
 		return location;
 	}
 	
-	public String getAircraft() {
-		return aircraft;
+	public int getAircraftId() {
+		return aircraftId;
 	}
 	
 	public String getComment() {

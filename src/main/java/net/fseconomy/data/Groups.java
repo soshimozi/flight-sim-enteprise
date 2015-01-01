@@ -189,7 +189,7 @@ public class Groups implements Serializable
         }
     }
 
-    public static void cancelGroup(UserBean user, int group) throws DataError
+    public static void leaveGroup(UserBean user, int group) throws DataError
     {
         try
         {

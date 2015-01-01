@@ -78,7 +78,7 @@
 %>
 		<tr>
 			<td><%= Formatters.getUserTimeFormat(user).format(log.getTime()) %></td>
-			<td><a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration() ) %>"><%= aircraft.getRegistration() %></a></td>
+			<td><a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId() ) %>"><%= aircraft.getRegistration() %></a></td>
 			<td><%=log.getType().equals("refuel") ? (fueltype < 1 ? log.getSType() + " 100LL" : log.getSType() + " JetA") : log.getSType()%></td>
 			<td class="numeric"><%= Formatters.currency.format(money) %></td>
 			<td>

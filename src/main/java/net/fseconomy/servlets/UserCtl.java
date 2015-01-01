@@ -237,8 +237,8 @@ public class UserCtl extends HttpServlet
                     case "joingroup":
                         doJoinGroup(req);
                         break;
-                    case "cancelgroup":
-                        doCancelGroup(req);
+                    case "leavegroup":
+                        doLeaveGroup(req);
                         break;
                     case "kickgroup":
                         doKickGroup(req);
@@ -529,10 +529,9 @@ public class UserCtl extends HttpServlet
 	void doShipAircraft(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		
-		String reg = req.getParameter("registration");
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-		AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+
+        int id = Integer.parseInt(req.getParameter("id"));
+		AircraftBean aircraft = Aircraft.getAircraftById(id);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -559,10 +558,8 @@ public class UserCtl extends HttpServlet
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
 		int ibuyer = Integer.parseInt(req.getParameter("buyer"));
-		String reg = req.getParameter("reg");
-
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+        int id = Integer.parseInt(req.getParameter("id"));
+        AircraftBean aircraft = Aircraft.getAircraftById(id);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -577,10 +574,9 @@ public class UserCtl extends HttpServlet
 	{		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		
-		String reg = req.getParameter("registration");
+		int id = Integer.parseInt(req.getParameter("id"));
 
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+        AircraftBean aircraft = Aircraft.getAircraftById(id);
  
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -656,10 +652,9 @@ public class UserCtl extends HttpServlet
 		
 		int lessee = Integer.parseInt(req.getParameter("lessee"));
 		int owner = Integer.parseInt(req.getParameter("owner"));
-		String reg = req.getParameter("reg");
+        int id = Integer.parseInt(req.getParameter("id"));
 
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+        AircraftBean aircraft = Aircraft.getAircraftById(id);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -1242,15 +1237,11 @@ public class UserCtl extends HttpServlet
 
     void addAircraft(HttpServletRequest req) throws DataError
 	{
-		String reg = req.getParameter("reg");
-		if (reg == null)
-			return;
+        int id = Integer.parseInt(req.getParameter("id"));
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		if (user == null || !user.isLoggedIn())
 			return;
-
-		int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
 
 		String type = req.getParameter("type");
 		String rentalType = req.getParameter("rentalType");
@@ -1258,23 +1249,20 @@ public class UserCtl extends HttpServlet
 			return;
 		
 		if (type.equals("add"))
-			Aircraft.rentAircraft(aircraftId, user.getId(), "dry".equals(rentalType));
+			Aircraft.rentAircraft(id, user.getId(), "dry".equals(rentalType));
 		else if (type.equals("remove"))
-            Aircraft.releaseAircraft(aircraftId, user.getId());
+            Aircraft.releaseAircraft(id, user.getId());
 	}
 
 	void returnLeaseAircraft(HttpServletRequest req) throws DataError
 	{
-		String reg = req.getParameter("reg");
-		if (reg == null)
-			return;
+		int id = Integer.parseInt(req.getParameter("id"));
 
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		if (user == null || !user.isLoggedIn())
 			return;
 
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+        AircraftBean aircraft = Aircraft.getAircraftById(id);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
@@ -1284,22 +1272,19 @@ public class UserCtl extends HttpServlet
 	
 	void doRefuel(HttpServletRequest req) throws DataError
 	{
-		String reg = req.getParameter("id");
 		String sProvider = req.getParameter("provider");
 		String sType = req.getParameter("type");
 		int type = Integer.parseInt(sType);
-		if (reg == null)
-			return;
-		
+
+        int id = Integer.parseInt(req.getParameter("id"));
+
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		if (user == null || !user.isLoggedIn())
 			return;
 
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-
         String sFuel = req.getParameter("fuel");
 		int fuel = Integer.parseInt(sFuel);
-        Aircraft.refuelAircraft(aircraftId, user.getId(), fuel, Integer.parseInt(sProvider), type);
+        Aircraft.refuelAircraft(id, user.getId(), fuel, Integer.parseInt(sProvider), type);
 	}
 	
 	void market(HttpServletRequest req) throws DataError
@@ -1740,7 +1725,7 @@ public class UserCtl extends HttpServlet
         Groups.joinGroup(user, groupId, "member");
 	}
 	
-	void doCancelGroup(HttpServletRequest req) throws DataError
+	void doLeaveGroup(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
@@ -1751,7 +1736,7 @@ public class UserCtl extends HttpServlet
 		if (user.groupMemberLevel(groupId) == UserBean.GROUP_OWNER)
 			throw new DataError("You cannot leave your own group.");
 		
-		Groups.cancelGroup(user, groupId);
+		Groups.leaveGroup(user, groupId);
 	}
 	
 	void doKickGroup(HttpServletRequest req) throws DataError
@@ -1771,7 +1756,7 @@ public class UserCtl extends HttpServlet
 		
 		UserBean member = Accounts.getAccountById(intId);
 
-        Groups.cancelGroup(member, intgroupId);
+        Groups.leaveGroup(member, intgroupId);
 	}
 	
 	void doDeleteGroup(HttpServletRequest req) throws DataError
@@ -2086,7 +2071,7 @@ public class UserCtl extends HttpServlet
 	
 	void doUpdateAircraft(HttpServletRequest req) throws DataError
 	{
-		String reg = req.getParameter("registration");
+        int id = Integer.parseInt(req.getParameter("id"));
 		String newreg = req.getParameter("newreg");
 		String home = req.getParameter("home");
 		String location = req.getParameter("location").toUpperCase();
@@ -2125,8 +2110,7 @@ public class UserCtl extends HttpServlet
 		if (newreg != null)
 			newreg = newreg.toUpperCase();
 
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+        AircraftBean aircraft = Aircraft.getAircraftById(id);
 
         if (aircraft == null)
             throw new DataError("Aircraft not found.");

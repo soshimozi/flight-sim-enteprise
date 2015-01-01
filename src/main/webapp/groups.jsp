@@ -101,7 +101,7 @@
 	<input type="hidden" name="event" value="invitation" />
 	<input type="hidden" name="action" />
 	<input type="hidden" name="id"/>
-	<input type="hidden" name="return" value="groups.jsp" />
+	<input type="hidden" name="returnpage" value="groups.jsp" />
 	
 	<table>
 	<caption>Invitations</caption>
@@ -145,7 +145,7 @@
 	<form method="post" name="groupForm">
 	<input type="hidden" name="event" />
 	<input type="hidden" name="id"/>
-	<input type="hidden" name="return" value="groups.jsp" />
+	<input type="hidden" name="returnpage" value="groups.jsp" />
 	
 	<table>
 	<caption>Groups</caption>
@@ -196,7 +196,7 @@
 <%  		} 
 			else 
 			{ 
-%>				<a class="link" href="javascript:doSubmit(<%= id %>, 'cancelgroup', <%= "'" + Converters.escapeJavaScript(name.replaceAll("\"" , "''")) + "'" %>)">Leave</a>
+%>				<a class="link" href="javascript:doSubmit(<%= id %>, 'leavegroup', <%= "'" + Converters.escapeJavaScript(name.replaceAll("\"" , "''")) + "'" %>)">Leave</a>
 <%  		} 
 		}
 %>

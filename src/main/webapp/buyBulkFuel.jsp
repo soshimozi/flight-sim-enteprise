@@ -62,12 +62,12 @@
 				var amount = $("#amount").val();
 				$.ajax({
 					type: "GET",
-					url: "/rs/fuelquote/"+fueltype+'/'+amount+'/'+icao,
+					url: "/rest/api/fuelquote/"+fueltype+'/'+amount+'/'+icao,
 					dataType: "json",
 					success: function(response){
 						$("#fuelamt").html($("#amount").find("option:selected").text());
 						$("#fueltype").html($("#type").find("option:selected").text());
-						$("#fuelprice").html(response);
+						$("#fuelprice").html(response.data);
 					},
 					 error: function(e){
 					   alert('Error: ' + e);

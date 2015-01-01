@@ -273,10 +273,10 @@
 			form.id.value = id;
 			form.submit();
 		}
-		function doSubmit2(reg, type)
+		function doSubmit2(id, type)
 		{
 			var form = document.getElementById("aircraftForm");
-			form.reg.value = reg;
+			form.id.value = id;
 			form.rentalType.value = type;
 			form.submit();
 		}
@@ -1146,7 +1146,7 @@
 %>
 		    <tr>
 		        <td>
-			        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + reg) %>"><%= reg2 %></a>
+			        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><%= reg2 %></a>
 <%			if (sellprice !=0)
 			{
 %>
@@ -1163,6 +1163,12 @@
                     </span>
 <%
                 }
+				else
+				{
+%>
+					<img src="img/repair.gif" style="border-style: none; vertical-align:middle;" />
+<%
+				}
             }
 %>
 		        </td>
@@ -1205,18 +1211,18 @@
                     if (priceDry > 0)
                     {
 %>
-                    <a class="link" href="javascript:doSubmit2('<%= aircraft.getRegistration() %>', 'dry')">Rent dry</a>
+                    <a class="link" href="javascript:doSubmit2('<%= aircraft.getId() %>', 'dry')">Rent dry</a>
 <%					}
 					if (priceWet > 0)
 					{
 %>
-                    <%= priceDry > 0 ? " | " : "" %><a class="link" href="javascript:doSubmit2('<%= aircraft.getRegistration() %>', 'wet')">Rent wet</a>
+                    <%= priceDry > 0 ? " | " : "" %><a class="link" href="javascript:doSubmit2('<%= aircraft.getId() %>', 'wet')">Rent wet</a>
 <%
                     }
 					if (priceDry + priceWet == 0 && aircraft.canAlwaysRent(user)) 
 					{
 %>
-                    <a class="link" href="javascript:doSubmit2('<%= aircraft.getRegistration() %>', 'wet')">Rent</a>
+                    <a class="link" href="javascript:doSubmit2('<%= aircraft.getId() %>', 'wet')">Rent</a>
 <%
                     }
 %>

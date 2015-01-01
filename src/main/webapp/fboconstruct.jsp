@@ -1,6 +1,7 @@
 <%@page language="java"
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.data.*, nl.captcha.Captcha"%>
+<%@ page import="net.fseconomy.servlets.UserCtl" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -20,7 +21,7 @@
         String answer = request.getParameter("answer");
         if (!captcha.isCorrect(answer))
         {
-            Data.logger.info("Captcha failed: loc = [" + location + "], owner=[" + sOwner + "], origCapt=["+ captcha.getAnswer() + "], entryCapt=[" + answer + "]");
+            UserCtl.logger.info("Captcha failed: loc = [" + location + "], owner=[" + sOwner + "], origCapt=["+ captcha.getAnswer() + "], entryCapt=[" + answer + "]");
             error = "Incorrect Captcha, please try again.";
         }
         else if (name == null || name.isEmpty())
@@ -40,7 +41,7 @@
                 try
                 {
                     Fbos.createFbo(fbo, user);
-                    Data.logger.info("FBO Constructed: loc = [" + location + "], owner=[" + sOwner + "], Name=["+ name + "]");
+                    UserCtl.logger.info("FBO Constructed: loc = [" + location + "], owner=[" + sOwner + "], Name=["+ name + "]");
 %>
                     <script type="text/javascript">document.location.href="fbo.jsp?id=<%=owner%>"</script>
 <%
@@ -49,7 +50,7 @@
                 catch (DataError e)
                 {
                     error = e.getMessage();
-                    Data.logger.info("FBO Construct request failed: loc = [" + location + "], owner=[" + sOwner + "], Name=["+ name + "], error=[" + error + "]");
+                    UserCtl.logger.info("FBO Construct request failed: loc = [" + location + "], owner=[" + sOwner + "], Name=["+ name + "], error=[" + error + "]");
                 }
             }
         }

@@ -165,7 +165,7 @@ public class RestServlet
                                   @PathParam("amount") final int amount,
                                   @PathParam("icao") final String icao)
     {
-        String price = Formatters.twoDecimals.format(Goods.quoteFuel(icao, fueltype, amount));
+        String price = Formatters.currency.format(Goods.quoteFuel(icao, fueltype, amount));
 
         return createSuccessResponse(200, null, null, price);
     }
@@ -180,7 +180,7 @@ public class RestServlet
     {
         boolean BUY = true;
 
-        String price = Formatters.twoDecimals.format(Goods.quoteGoods(icao, goodstype, amount, src, BUY));
+        String price = Formatters.currency.format(Goods.quoteGoods(icao, goodstype, amount, src, BUY));
 
         return createSuccessResponse(200, null, null, price);
     }

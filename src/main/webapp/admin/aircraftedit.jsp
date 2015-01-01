@@ -192,7 +192,7 @@
                         <td>
                             <input type="submit" class="button" value="Update"/>
                             <input type="hidden" name="event" value="updateAircraft"/>
-                            <input type="hidden" name="registration" value="<%= aircraft.getRegistration()%>"/>
+                            <input type="hidden" name="id" value="<%= aircraft.getId()%>"/>
                             <input type="hidden" name="returnpage" value="/admin/aircraftedit.jsp"/>
                         </td>
                     </tr>

@@ -40,7 +40,7 @@
         UserBean group = Accounts.getGroupById(groupId);
 
         selector = "group " + group.getName();
-        linkOptions = "groupId=" + sGroup + "&";
+        linkOptions = "groupid=" + sGroup + "&";
         mapViewer = "group=" + group.getId();
     }
 %>
@@ -265,7 +265,7 @@
                         <a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + log.getTo()) %>"><%= log.getTo() %></a>
                     </td>
                     <td>
-                        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>"><%= aircraft.getRegistration() %></a>
+                        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><%= aircraft.getRegistration() %></a>
                     </td>
                     <td><%= aircraft.getMakeModel() %></td>
                     <td><%= flightTime %></td>

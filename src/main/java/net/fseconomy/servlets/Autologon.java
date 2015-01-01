@@ -56,7 +56,7 @@ public class Autologon extends HttpServlet {
 		HttpSession s = request.getSession();
 		s.setAttribute("user", userBean);
 
-		response.sendRedirect("/admin.jsp");
+		response.sendRedirect("/index.jsp");
 	}
 	
 

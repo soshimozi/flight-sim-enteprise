@@ -37,8 +37,11 @@
             case "myflight":
                 assignments = Assignments.getAssignmentsForUser(user.getId());
                 AircraftBean acbean = Aircraft.getAircraftForUser(user.getId());
-                AirportInfo airport = Airports.cachedAPs.get(acbean.getLocation());
-                aircraftInfo = new MapAircraftInfo(acbean.getLocation(), airport.latlon, acbean.getRegistration(), acbean.getMakeModel(), acbean.getSEquipment(), (int)(acbean.getTotalFuel()+.5) + " of " + acbean.getTotalCapacity() + " Gals", "", "");
+                if (acbean != null && acbean.getLocation() != null)
+                {
+                    AirportInfo airport = Airports.cachedAPs.get(acbean.getLocation());
+                    aircraftInfo = new MapAircraftInfo(acbean.getLocation(), airport.latlon, acbean.getRegistration(), acbean.getMakeModel(), acbean.getSEquipment(), (int) (acbean.getTotalFuel() + .5) + " of " + acbean.getTotalCapacity() + " Gals", "", "");
+                }
                 break;
             case "transfer":
                 if (sId == null)
@@ -98,7 +101,7 @@
             }
 
             String distance = Integer.toString(Airports.findDistance(lastLocation, lastDestination)) + " NM";
-            MapAssignment mapAssignment = new MapAssignment(lastDestination, assignment.getSCargo(), Formatters.currency.format(assignment.getPay()), distance);
+            MapAssignment mapAssignment = new MapAssignment(lastDestination, assignment.getSCargo(), Formatters.currency.format(assignment.getRealPay()), distance);
 
             if(locChanged)
             {

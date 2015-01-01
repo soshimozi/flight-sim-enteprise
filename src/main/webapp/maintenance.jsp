@@ -6,12 +6,12 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-	String registration = request.getParameter("registration");
+	int id = Integer.parseInt(request.getParameter("id"));
 
 	//setup return page if action used
-	String returnPage = "maintenance.jsp?registration=" + registration;
+	String returnPage = "maintenance.jsp?id=" + id;
 
- 	AircraftBean aircraft = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(registration));
+ 	AircraftBean aircraft = Aircraft.getAircraftById(id);
  	List<LogBean> logs = Logging.getLogForMaintenanceAircraft(aircraft.getId());
   
     int tetminutes = (aircraft.getTotalEngineTime()) / 60;

@@ -158,13 +158,13 @@ public class Stats
     }
 
     //get pending hours will list when hours are coming available - need to format 48: to hours
-    public List<PendingHours> getPendingHours(String user, int hours) throws DataError
+    public List<PendingHours> getPendingHours(int userId, int hours) throws DataError
     {
         ArrayList<PendingHours> result = new ArrayList<>();
         try
         {
-            String qry = "SELECT FlightEngineTime, hour(timediff('48:00:00',timediff(now(),time))),  minute(timediff('48:00:00',timediff(now(),time))) FROM `log` where user= ? and DATE_SUB(CURRENT_TIMESTAMP ,INTERVAL ? hour) <= `time` and type <> 'refuel'";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user, hours);
+            String qry = "SELECT FlightEngineTime, hour(timediff('48:00:00',timediff(now(),time))),  minute(timediff('48:00:00',timediff(now(),time))) FROM `log` where userid= ? and DATE_SUB(CURRENT_TIMESTAMP ,INTERVAL ? hour) <= `time` and type <> 'refuel'";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, userId, hours);
             while (rs.next())
             {
                 PendingHours pending = new PendingHours(rs.getInt(1)/3600.0f,rs.getString(2), rs.getString(3));

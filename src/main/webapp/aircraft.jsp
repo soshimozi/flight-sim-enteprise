@@ -59,10 +59,10 @@
 	<script type="text/javascript">
 		var gmapac = new PopupWindow();
 		
-		function doRental(reg, type)
+		function doRental(id, type)
 		{
 			var form = document.getElementById("aircraftForm");
-			form.reg.value = reg;
+			form.id.value = id;
 			form.rentalType.value = type;
 			form.elements["returnpage"].value = "myflight.jsp";
 			form.submit();
@@ -76,21 +76,20 @@
 			if( selItemText.indexOf("Rent") >= 0)
 			{
 				var s = selItemVal.split(",");
-				var reg = s[0];
+				var id = s[0];
 				var type = s[1];
-				doRental(reg, type);
+				doRental(id, type);
 			}	
 			else if(selItemText.indexOf("Return Lease") >= 0)
 			{
 				if(window.confirm("Are you sure you want to return this Lease?"))
 				{
 					var s = selItemVal.split(":");
-					var reg = s[1].trim();
+					var id = s[1].trim();
 		
 					var form = document.getElementById("aircraftForm");
 					form.event.value="AircraftLeaseReturn";
-					form.reg.value = reg;
-					form.id.value = -1;
+					form.id.value = id;
 					form.submit();
 				}
 			}
@@ -127,7 +126,7 @@
 	<form method="post" action="userctl" id="aircraftForm">
 		<div>
 			<input type="hidden" name="event" value="Aircraft"/>
-			<input type="hidden" name="reg" />
+			<input type="hidden" name="id" />
 			<input type="hidden" name="type" value="add" />
 			<input type="hidden" name="rentalType" />
 			<input type="hidden" name="returnpage" value="<%=returnPage%>" />
@@ -185,7 +184,7 @@
 %>
 	<tr>
 
-	<td><a href="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>"><%= aircraft.getRegistration() %></a>
+	<td><a href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><%= aircraft.getRegistration() %></a>
         <% if (aircraft.isBroken())
               {%>              
               <img src='img/repair.gif' style="border-style: none; vertical-align:middle;" />
@@ -247,34 +246,34 @@
 	<td>
 	<select onchange="actions(this);">
 	<option value="0">Select Action</option>
-	<option value="<%= response.encodeURL("editaircraft.jsp?registration=" + aircraft.getRegistration()) %>">Edit</option>
-	<option value="<%= response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>">Log</option>
-	<option value="<%= response.encodeURL("maintenance.jsp?registration=" + aircraft.getRegistration()) %>">Maintenance</option>
-	<option value="<%= response.encodeURL("transferac.jsp?registration=" + aircraft.getRegistration()) %>">Transfer</option>
+	<option value="<%= response.encodeURL("editaircraft.jsp?id=" + aircraft.getId()) %>">Edit</option>
+	<option value="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>">Log</option>
+	<option value="<%= response.encodeURL("maintenance.jsp?id=" + aircraft.getId()) %>">Maintenance</option>
+	<option value="<%= response.encodeURL("transferac.jsp?id=" + aircraft.getId()) %>">Transfer</option>
 <%
 				if(aircraft.getLessor() == 0)
 				{
 %>
-					<option value="<%= response.encodeURL("leaseac.jsp?registration=" + aircraft.getRegistration()) %>">Lease</option>
+					<option value="<%= response.encodeURL("leaseac.jsp?id=" + aircraft.getId()) %>">Lease</option>
 <%
 					if (aircraft.getCanShip()) 
 					{ 
 %>
-						<option value="<%= response.encodeURL("shipaircraft.jsp?registration=" + aircraft.getRegistration()) %>">Ship</option>
+						<option value="<%= response.encodeURL("shipaircraft.jsp?id=" + aircraft.getId()) %>">Ship</option>
 <% 		
 					} 
 				}
 				else
 				{
 %>	
-					<option value="LeaseReturn:<%=aircraft.getRegistration()%>">Return Lease</option>
+					<option value="LeaseReturn:<%=aircraft.getId()%>">Return Lease</option>
 <%
 				}
 
 				if (priceDry > 0) 
 				{ 
 %>
-					<option value="<%= aircraft.getRegistration() %>,dry">Rent Dry</option>
+					<option value="<%= aircraft.getId() %>,dry">Rent Dry</option>
 <% 
 				} 
 %>
@@ -282,7 +281,7 @@
 				if (priceWet > 0) 
 				{ 
 %>
-					<option value="<%= aircraft.getRegistration() %>,wet">Rent Wet</option>
+					<option value="<%= aircraft.getId() %>,wet">Rent Wet</option>
 <% 
 				} 
 %>
@@ -290,7 +289,7 @@
 				if (priceDry + priceWet == 0 && aircraft.canAlwaysRent(user)) 
 				{ 
 %>
-					<option value="<%= aircraft.getRegistration() %>,wet">Rent</option>
+					<option value="<%= aircraft.getId() %>,wet">Rent</option>
 <% 
 				} 
 %>
@@ -308,7 +307,7 @@
 				if (priceDry > 0) 
 				{ 
 %>
-					<option value="<%= aircraft.getRegistration() %>,dry">Rent Dry</option>
+					<option value="<%= aircraft.getId() %>,dry">Rent Dry</option>
 <% 
 				} 
 %>
@@ -316,7 +315,7 @@
 				if (priceWet > 0) 
 				{ 
 %>
-					<option value="<%= aircraft.getRegistration() %>,wet">Rent Wet</option>
+					<option value="<%= aircraft.getId() %>,wet">Rent Wet</option>
 <% 
 				} 
 %>
@@ -324,7 +323,7 @@
 				if (priceDry + priceWet == 0 && aircraft.canAlwaysRent(user)) 
 				{ 
 %>
-					<option value="<%= aircraft.getRegistration() %>,wet">Rent</option>
+					<option value="<%= aircraft.getId() %>,wet">Rent</option>
 <% 
 				} 
 %>
@@ -347,7 +346,7 @@
 				<td>
 				<select name="actionSelect" class = "formselect" onchange = "actions(this)" >
 					<option value="0">Select Action</option>
-					<option value="LeaseReturn:<%=aircraft.getRegistration()%>">Return Lease</option>
+					<option value="LeaseReturn:<%=aircraft.getId()%>">Return Lease</option>
 				</select>
 				</td>	
 <%		

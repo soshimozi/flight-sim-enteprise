@@ -2,7 +2,7 @@
 
 <%
     String sType = request.getParameter("type");
-    String sId = request.getParameter("groupid");
+    String sId = request.getParameter("id");
     String sTransferId = request.getParameter("transferid");
 %>
 
@@ -263,7 +263,7 @@
 
     <script>
         var type = "<%=sType%>";
-        var Id = <%=sId == null ? "undefined" : sId %>;
+        var id = <%=sId == null ? "undefined" : sId %>;
 
         //load assignments
         function loadAssigments(type, id) {

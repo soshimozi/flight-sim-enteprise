@@ -10,10 +10,10 @@
 	String returnPage = request.getHeader("referer");
 
 	String message = null;
+
+	int id = Integer.parseInt(request.getParameter("id"));
     
-	String aircraft = request.getParameter("registration");
-    
-	AircraftBean aircraftData = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(aircraft));
+	AircraftBean aircraftData = Aircraft.getAircraftById(id);
 	ModelBean modelData = Models.getModelById(aircraftData.getModelId());
 
     if (aircraftData.getLocation() == null)
@@ -148,7 +148,7 @@
 			<table>
 				<caption>Refuel Aircraft</caption>
 				<tbody>
-					<tr><td>Registration</td><td><%= aircraft %></td></tr>
+					<tr><td>Registration</td><td><%= aircraftData.getRegistration() %></td></tr>
 					<tr><td>Type</td><td><%= aircraftData.getMakeModel() %></td></tr>
 					<tr><td>Fuel Type</td><td><%= fueltype < 1 ? "100LL" : "JetA" %></td></tr>
 					<tr><td colspan="2">&nbsp;</td></tr>
@@ -184,7 +184,7 @@
 				<form method="post" action="userctl" id="refuelForm">
 					<div>
 						<input type="hidden" name="event" value="refuel" />
-						<input type="hidden" name="id" value="<%= aircraft %>" />
+						<input type="hidden" name="id" value="<%= aircraftData.getId() %>" />
 						<input type="hidden" name="type" value="<%= fueltype %>" />
 						<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
 					</div>

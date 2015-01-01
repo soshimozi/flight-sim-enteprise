@@ -17,7 +17,7 @@ public class Aircraft implements Serializable
     {
         try
         {
-            String qry = "UPDATE aircraft SET owner = ? WHERE owner = ? AND aircraftid = ?";
+            String qry = "UPDATE aircraft SET owner = ? WHERE owner = ? AND aircraft.id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, buyer, owner, aircraftId);
 
             Banking.doPayment(buyer, owner, 0, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraftId, "Aircraft Transfer", false);

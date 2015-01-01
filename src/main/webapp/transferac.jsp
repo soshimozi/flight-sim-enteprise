@@ -8,8 +8,8 @@
 <%
 	String returnPage = request.getHeader("referer");
 
-	String reg = request.getParameter("registration");
-	AircraftBean aircraft = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(reg));
+	int id = Integer.parseInt(request.getParameter("id"));
+	AircraftBean aircraft = Aircraft.getAircraftById(id);
 
 	UserBean owneraccount;
 	owneraccount = Accounts.getAccountById(aircraft.getOwner());
@@ -54,12 +54,12 @@
 				<div>
 					<input type="hidden" id="event" name="event" value="transferAircraft"/>
 				  	<input type="hidden" id="buyer" name="buyer" value=""/>
-				  	<input type="hidden" name="reg" value="<%=reg%>"/>
+				  	<input type="hidden" name="id" value="<%=aircraft.getId()%>"/>
 				  	<input type="hidden" name="fname" value="<%= aircraft.getMakeModel() %>" />
 			    	<input type="hidden" id="returnPage" name="returnpage" value="<%=returnPage%>"/>
 		    	</div>
 				<div class="formgroup high">
-				  	<strong>Aircraft Registration:</strong> <%=reg%><br><br>
+				  	<strong>Aircraft Registration:</strong> <%=aircraft.getRegistration()%><br><br>
 				  	<strong>Aircraft Make/Model:</strong> <%=aircraft.getMakeModel()%><br><br>
 				  	<strong>From:</strong> <%=owneraccount.getName()%><br><br>					  
 					<strong>To: </strong><br>

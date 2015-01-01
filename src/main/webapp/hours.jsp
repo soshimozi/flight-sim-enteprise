@@ -9,7 +9,7 @@
     List<PendingHours> pendingList = null;
     try
     {
-        pendingList = Stats.getInstance().getPendingHours(user.getName(), 48);
+        pendingList = Stats.getInstance().getPendingHours(user.getId(), 48);
     }
     catch(DataError e)
     {

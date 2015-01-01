@@ -20,13 +20,13 @@
 	int destSvc = -1;	
 	
 	String totalcost = "";
-	
-	String reg = request.getParameter("registration");
+
+	int id = Integer.parseInt(request.getParameter("id"));
 	String shipto = request.getParameter("shipTo");
 	
 	AircraftBean aircraft;
 
-	aircraft = Aircraft.getAircraftShippingInfoById(Aircraft.getAircraftIdByRegistration(reg));
+	aircraft = Aircraft.getAircraftShippingInfoById(id);
 	
 	AirportBean departairport = Airports.getAirport(aircraft.getLocation());
 	departfbos = Fbos.getFboForRepair( departairport, Fbos.FBO_REPAIR_MARGIN );
@@ -228,7 +228,7 @@
 		<form method="post" action="shipaircraft.jsp">
 			<div>
 				<input type="hidden" name="submit" value="step1"/>
-				<input type="hidden" name="registration" value="<%= aircraft.getRegistration() %>"/>
+				<input type="hidden" name="id" value="<%= aircraft.getId() %>"/>
 			    <input type="hidden" id="returnPage" name="returnpage" value="<%=returnPage%>"/>
 				Shipping Step 1
 				<table class="form">
@@ -250,7 +250,7 @@
 			<form method="post" action="shipaircraft.jsp">
 				<div>
 					<input type="hidden" name="submit" value="step2"/>
-					<input type="hidden" name="registration" value="<%= aircraft.getRegistration() %>"/>
+					<input type="hidden" name="id" value="<%= aircraft.getId() %>"/>
 					<input type="hidden" name="shipTo" value="<%= shipto %>"/>
 				    <input type="hidden" id="returnPage" name="returnpage" value="<%=returnPage%>"/>
 				</div>
@@ -333,7 +333,7 @@
 		<form method="post" action="userctl">
 			<div>
 				<input type="hidden" name="event" value="shipAircraft"/>
-				<input type="hidden" name="registration" value="<%= aircraft.getRegistration() %>"/>
+				<input type="hidden" name="id" value="<%= aircraft.getId() %>"/>
 				<input type="hidden" name="shipTo" value="<%= shipto %>"/>
 				<input type="hidden" name="repairFrom" value="<%= departSvc %>"/>
 				<input type="hidden" name="repairTo" value="<%= destSvc %>"/>				

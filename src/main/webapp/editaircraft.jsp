@@ -10,11 +10,11 @@
 
 	String error = null;
 
-	String registration = request.getParameter("registration");
+	int id = Integer.parseInt(request.getParameter("id"));
 	String mPrice;
 	String iPrice;
 	
-	AircraftBean aircraft = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(registration));
+	AircraftBean aircraft = Aircraft.getAircraftById(id);
 
 	mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
 	iPrice = Integer.toString(aircraft.getMinimumPrice());
@@ -76,7 +76,7 @@
         $(document).ready(function()
         {
             $(".regCheck").keypress(function (e) {
-                if (String.fromCharCode(e.keyCode).match(/[^0-9a-zA-Z\-]/g)) return false;
+                if (String.fromCharCode(e.which).match(/[^0-9a-zA-Z\-]/g)) return false;
             });
         });
 
@@ -104,8 +104,8 @@
 			<form method="post" action="userctl" name="aircraftform">
 				<div>
 					<input type="hidden" name="event" value="editAircraft"/>
+					<input type="hidden" name="id" value="<%=id%>"/>
 					<input type="hidden" name="returnpage" value="<%=returnPage%>" />
-					<input type="hidden" name="registration" value="<%= aircraft.getRegistration() %>"/>
 					<table>
 						<caption><%= aircraft.getRegistration() %></caption>
 <%

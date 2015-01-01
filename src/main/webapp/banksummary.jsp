@@ -75,11 +75,11 @@
             //event
             form.event.value = "bankDeposit";
             //bankActionTitle
-            document.getElementById("bankActionTitle").innerText = name + " - Deposit into Bank";
+            $("#bankActionTitle").text(name + " - Deposit into Bank");
             //bankAction
-            document.getElementById("bankAction").innerText = "Deposit";
+            $("#bankAction").text("Deposit");
             //buttonBankAction
-            document.getElementById("buttonBankAction").innerText = "Deposit";
+            $("#buttonBankAction").text("Deposit");
 
             $("#myModal").modal('show');
         }
@@ -91,11 +91,11 @@
             //event
             form.event.value = "bankWithdrawal";
             //bankActionTitle
-            document.getElementById("bankActionTitle").innerText = name + " - Withdraw from Bank";
+            $("#bankActionTitle").text(name + " - Withdraw from Bank");
             //bankAction
-            document.getElementById("bankAction").innerText = "Withdraw";
+            $("#bankAction").text("Withdraw");
             //buttonBankAction
-            document.getElementById("buttonBankAction").innerText = "Withdraw";
+            $("#buttonBankAction").text("Withdraw");
 
             $("#myModal").modal('show');
         }
@@ -262,12 +262,12 @@
             <%=url%>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=name%>');">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=id%>, '<%=name%>');">
                 <%= grpmoney %>
             </div>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=name%>');">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=id%>, '<%=name%>');">
                 <%= grpbank %>
             </div>
         </div>

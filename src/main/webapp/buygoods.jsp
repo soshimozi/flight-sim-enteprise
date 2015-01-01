@@ -58,11 +58,11 @@
 				var src = $("#owner").val();
 				$.ajax({
 					type: "GET",
-					url: "/rs/goodsquote/"+fueltype+'/'+amount+'/'+icao+'/'+src,
+					url: "/rest/api/goodsquote/"+fueltype+'/'+amount+'/'+icao+'/'+src,
 					dataType: "json",
 					success: function(response){
-						$("#goodsamt").html($("#amount option:selected").text());
-						$("#goodsprice").html(response);
+						$("#goodsamt").text($("#amount").val());
+						$("#goodsprice").text(response.data);
 					},
 					 error: function(e){
 					   alert('Error: ' + e);
@@ -113,7 +113,7 @@
 		<form>		
 			<div class="formgroup">
 				Amount: <input id="amount" type="text" class="textarea" size="5"/> Kg<br><br>
-				The cost for <span id="goodsamt">0</span>Kg equals <span id="goodsprice">$0.00</span>
+				The cost for <span id="goodsamt">0</span> Kg equals <span id="goodsprice">$0.00</span>
 			</div>
 			<div class="formgroup">
 				<input type="button" class="button" id="getGoodsQuote" value="Get Quote" />

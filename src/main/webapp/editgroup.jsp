@@ -34,6 +34,11 @@
             group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
             group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
             group.setBanList(request.getParameter("banList"));
+            int pilotFee = 0;
+            if(request.getParameter("defaultPilotFee") != null && !request.getParameter("defaultPilotFee").equals(""))
+                pilotFee = Integer.parseInt(request.getParameter("defaultPilotFee"));
+
+            group.setDefaultPilotFee(pilotFee);
             Groups.updateGroup(group, user);
 %>
             <jsp:forward page="groups.jsp" />

@@ -162,7 +162,7 @@ public class MaintenanceCycle implements Runnable
         logSignatureStats();
 		
 		doStatsAndLoanLimitChecks();			
-		doAircraftMaintenance();			
+		doAircraftMaintenance();
 		
 		//TODO: comment out for test server for faster cycle times
 		//Goods cleanup, opens and closes fbo's
@@ -862,7 +862,7 @@ public class MaintenanceCycle implements Runnable
 									"where location = '" + icao + "' " +
 									"and owner = 0 " + 
 									"and userlock is null " +
-									"and registration not in( select * from (select aircraft from assignments where aircraft is not null and location = '" + icao+ "') as t) " +
+									"and aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null and location = '" + icao+ "') as t) " +
 									"and models.id = aircraft.model ";
 							
 							//check for seats and cruise speed filters on aircraft assignment for template
@@ -913,6 +913,8 @@ public class MaintenanceCycle implements Runnable
 								aircraftId = aircraftRs.getInt(1);
 							else // no aircraft found, skip it
 								continue;
+							if(aircraftId==37506)
+								System.out.println("hit");
 						}
 						
 						int distance = (int) Math.round(to.distance);
@@ -966,7 +968,6 @@ public class MaintenanceCycle implements Runnable
 						
 						qry = "INSERT INTO assignments (" + fields.toString() + ") VALUES(" + values.toString() + ")";
 						DALHelper.getInstance().ExecuteUpdate(qry);
-
                     }
 				}
 			}

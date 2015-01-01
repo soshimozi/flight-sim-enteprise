@@ -275,6 +275,9 @@
                     if (fbo != null)
                         fboAirport = Airports.getAirport(fbo.getLocation());
 
+                    String aircraftReg = null;
+                    if(log.getAircraftId() > 0)
+                        aircraftReg = Aircraft.getAircraftRegistrationById(log.getAircraftId());
 %>
                 <tr>
                     <td><%= Formatters.getUserTimeFormat(user).format(log.getTime()) %></td>
@@ -283,7 +286,7 @@
                     <td class="numeric"><%= account != log.getOtherParty() ? Formatters.currency.format(log.getAmount()) : "<span style=\"color: red;\">" + Formatters.currency.format(-log.getAmount()) + "</span>" %></td>
                     <td><%= log.getSReason() %></td>
                     <td><%= Airports.airportLink(airport, response) %></td>
-                    <td><a class="normal" href="<%= response.encodeURL( log.getAircraft() != null ? "aircraftlog.jsp?registration=" + log.getAircraft() : "" )%>"><%= log.getAircraft() != null ? log.getAircraft() : "" %></a></td>
+                    <td><a class="normal" href="<%= response.encodeURL( aircraftReg != null ? "aircraftlog.jsp?id=" + log.getAircraftId() : "" )%>"><%= aircraftReg != null ? aircraftReg : "" %></a></td>
                     <td><%= fbo != null ? Airports.airportLink(fboAirport, airport, fboAirport, response) + " " + fbo.getName() : (log.getFboId() > 0 ? "(-)" : "") %></td>
                     <td><%= log.getComment() == null ? "" : log.getComment()  %></td>
                 </tr>

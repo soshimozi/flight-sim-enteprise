@@ -376,7 +376,7 @@
 			}
 %>
 		<tr>
-		<td><a class="normal" href="aircraftlog.jsp?registration=<%= reg %>"><%= reg2 %></a></td>
+		<td><a class="normal" href="aircraftlog.jsp?id=<%= aircraft.getId() %>"><%= reg2 %></a></td>
 		<td><%= aircraft.getMakeModel() %></td>
 		<td><%= aircraft.getSEquipment() %></td>
 		<td><a title="<%=acLocation%>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getLocation()) %>"><%= acICAO %></a></td>

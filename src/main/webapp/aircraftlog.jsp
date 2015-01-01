@@ -7,10 +7,9 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    String registration = request.getParameter("registration");
     String sFrom = request.getParameter("from");
     int from = 0;
-    
+
     if (sFrom != null)
     {
         from = Integer.parseInt(sFrom);
@@ -21,10 +20,12 @@
         from = 0;
     }
 
-    String linkOptions = "registration=" + registration + "&";
+    int id = Integer.parseInt(request.getParameter("id"));
+    String aircraftReg = Aircraft.getAircraftRegistrationById(id);
 
-    int aircraftId = Aircraft.getAircraftIdByRegistration(registration);
-    AircraftBean aircraftData = Aircraft.getAircraftById(aircraftId);
+    String linkOptions = "id=" + id + "&";
+
+    AircraftBean aircraftData = Aircraft.getAircraftById(id);
 
     List<LogBean> logs = Logging.getLogForAircraft(aircraftData.getId(), from, Constants.stepSize);
     String owner = "-";
@@ -150,7 +151,7 @@
             </tr>
             </thead>
             <tr>
-                <td align="center"><%= registration %></td>
+                <td align="center"><%= aircraftReg %></td>
                 <td align="center"><%= owner %></td>
                 <td align="center"><%= aircraftData.getMakeModel() %></td>
                 <td align="center"><%= aircraftData.getHome() %><%= aircraftData.isAdvertiseFerry() ? " (Aircraft is advertised for a ferry flight home)" : "" %></td>
@@ -403,7 +404,7 @@
 %>
 		</td></tr>
 	</table>
-	<a class="link" href="javascript:void(window.open('<%= response.encodeURL("logviewer.jsp?registration=" + registration)%>','LogViewer','status=no,toolbar=no,height=750,width=680'))">[View maps]</a>
+	<a class="link" href="javascript:void(window.open('<%= response.encodeURL("logviewer.jsp?aircraftid=" + id)%>','LogViewer','status=no,toolbar=no,height=750,width=680'))">[View maps]</a>
 <%
 	}
 %>

@@ -16,17 +16,16 @@
     }
 
     // registration is only passed when we are processing an admin command to reset a shipped aircraft
-    if (request.getParameter("registration") != null)
+    if (request.getParameter("id") != null)
     {
         int reassemToFrom;
-        String reg = request.getParameter("registration");
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
+        int id = Integer.parseInt(request.getParameter("id"));
         reassemToFrom = Integer.parseInt(request.getParameter("reassemtofrom"));
 
         if( reassemToFrom == 0 )
-            Aircraft.finalizeAircraftShipment(aircraftId, true, true);   // process aircraft back to its original location
+            Aircraft.finalizeAircraftShipment(id, true, true);   // process aircraft back to its original location
         else
-            Aircraft.finalizeAircraftShipment(aircraftId, false, true); // process aircraft back to the shipped to location
+            Aircraft.finalizeAircraftShipment(id, false, true); // process aircraft back to the shipped to location
     }
 %>
 
@@ -116,7 +115,7 @@
 %>
 	<tr>
 
-	<td><a class="normal" href="<%= response.encodeURL("/aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>"><%= aircraft.getRegistration() %></a>
+	<td><a class="normal" href="<%= response.encodeURL("/aircraftlog.jsp?id=" + aircraft.getId()) %>"><%= aircraft.getRegistration() %></a>
 <% 
 		if (aircraft.isBroken())
         {
@@ -151,8 +150,8 @@
 		<td>
 		<select name="Actionbox" class = "formselect" onchange = "doSubmit3(this)" >
 		<option value="0">Select Action</option>
-		<option value="<%= response.encodeURL("/admin/aircraftshippededit.jsp?registration=" + aircraft.getRegistration() + "&reassemtofrom=0") %>">Reassemble at Depart</option>
-		<option value="<%= response.encodeURL("/admin/aircraftshippededit.jsp?registration=" + aircraft.getRegistration() + "&reassemtofrom=1") %>">Reassemble at Dest</option>
+		<option value="<%= response.encodeURL("/admin/aircraftshippededit.jsp?id=" + aircraft.getId() + "&reassemtofrom=0") %>">Reassemble at Depart</option>
+		<option value="<%= response.encodeURL("/admin/aircraftshippededit.jsp?id=" + aircraft.getId() + "&reassemtofrom=1") %>">Reassemble at Dest</option>
 		</select>	
 		</td>
 	</tr>

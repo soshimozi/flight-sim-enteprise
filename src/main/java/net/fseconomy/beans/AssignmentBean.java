@@ -30,6 +30,7 @@ public class AssignmentBean implements Serializable
 	String location;
 	String comment;
 	double pay;
+	double realpay;
 	int type;
 	int distance;
 	int active;
@@ -78,6 +79,9 @@ public class AssignmentBean implements Serializable
 		fromFboTemplate = rs.getInt("fromFboTemplate");
 		mptTax = rs.getInt("mpttax");
 		daysClaimedActive = rs.getInt("daysClaimedActive");
+
+		//must be after pay, amount, distance
+		setRealPay(pay);
 	}
 	
 	public void writeBean(ResultSet rs) throws SQLException
@@ -259,6 +263,15 @@ public class AssignmentBean implements Serializable
 	public void setPay(double pay)
 	{
 		this.pay = pay;
+	}
+
+	/**
+	 * Sets the real pay value.
+	 * @param pay The pay to set
+	 */
+	public void setRealPay(double pay)
+	{
+		this.realpay = calcPay();
 	}
 
 	/**
@@ -707,7 +720,12 @@ public class AssignmentBean implements Serializable
 	{
 		return pay;
 	}
-	
+
+	public double getRealPay()
+	{
+		return realpay;
+	}
+
 	public int getFromTemplate()
 	{
 		return fromTemplate;

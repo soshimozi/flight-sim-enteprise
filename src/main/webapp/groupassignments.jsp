@@ -245,7 +245,7 @@
 
                         if (window.confirm("Are you sure you want to transfer selected assignments to " + name + "?")) {
                             if(displayGroupsOnly)
-                                transferAssignment($("input[name='select']:checked"), $("#groupSelect").val());
+                                transferAssignment($("input[name='select']:checked"), $("#selectedGroupId").val());
                             else
                                 transferAssignment($("input[name='select']:checked"), $("#selectedGroupId").val());
                         }
@@ -257,8 +257,8 @@
 
             $("#groupSelect").change(function() {
                 $("#groupSelect").find("option:selected" ).each(function() {
-                    $("#accountname").val($(this).text());
-                    $("#account").val($(this).val());
+                    $("#selectedGroupName").val($(this).text());
+                    $("#selectedGroupId").val($(this).val());
                 });
             });
 

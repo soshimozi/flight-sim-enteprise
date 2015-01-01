@@ -2569,6 +2569,10 @@ public class Datafeed extends HttpServlet
                 fromname = "Unknown";
             }
 
+			String aircraftReg = "";
+			if(payment.getAircraftId() > 0)
+				aircraftReg = Aircraft.getAircraftRegistrationById(payment.getAircraftId());
+
             buffer.append(payment.getId());
             buffer.append(Formatters.dateDataFeed.format(payment.getTime()));
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(toname));
@@ -2577,7 +2581,7 @@ public class Datafeed extends HttpServlet
             buffer.append(payment.getSReason());
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(fboname));
             buffer.append(payment.getLocation() == null ? "" : payment.getLocation());
-            buffer.append(payment.getAircraft() == null ? "" : payment.getAircraft());
+            buffer.append(aircraftReg);
             buffer.append(payment.getComment() == null ? "" : payment.getComment()); //Converters.XMLHelper.protectSpecialCharacters(payment.getComment()));
             buffer.newrow();
         }
@@ -2609,6 +2613,10 @@ public class Datafeed extends HttpServlet
                 fromname = "Unknown";
             }
 
+			String aircraftReg = "";
+			if(payment.getAircraftId() > 0)
+				aircraftReg = Aircraft.getAircraftRegistrationById(payment.getAircraftId());
+
             buffer.append("<Payment>\n");
             buffer.append("Id", payment.getId());
             buffer.append("Date", Formatters.dateDataFeed.format(payment.getTime()));
@@ -2618,7 +2626,7 @@ public class Datafeed extends HttpServlet
             buffer.append("Reason", payment.getSReason());
             buffer.append("Fbo", Converters.XMLHelper.protectSpecialCharacters(fboname));
             buffer.append("Location", payment.getLocation());
-            buffer.append("Aircraft", payment.getAircraft());
+            buffer.append("Aircraft", aircraftReg);
             buffer.append("Comment", Converters.XMLHelper.protectSpecialCharacters(payment.getComment()));
             buffer.append("</Payment>\n");
         }

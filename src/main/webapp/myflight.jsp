@@ -29,11 +29,9 @@
 	
 	if (event != null && "holdrental".contentEquals(event))
 	{
-		String reg = request.getParameter("reg");
 		int id = Integer.parseInt(request.getParameter("id"));
 		boolean hold = Boolean.parseBoolean(request.getParameter("hold"));
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-		Aircraft.setHoldRental(aircraftId, id, !hold);
+		Aircraft.setHoldRental(id, user.getId(), !hold);
 	}
 	
 	List<AssignmentBean> assignments = Assignments.getAssignmentsForUser(user.getId());
@@ -90,9 +88,9 @@
 		     document.hflightForm.id.value = id;
 		     document.hflightForm.submit();
 		}
-		function doSubmit2(reg)
+		function doSubmit2(id)
 		{
-		     document.aircraftForm.reg.value = reg;
+		     document.aircraftForm.id.value = id;
 		     document.aircraftForm.type.value = "remove";
 		     document.aircraftForm.submit();
 		}
@@ -119,13 +117,12 @@
 		     document.hflightForm.type.value = "load";
 		     document.hflightForm.submit();
 		}
-		function doSubmitX(reg,id,hold)
+		function doSubmitX(id,hold)
 		{
 			var form = document.getElementById("aircraftForm");
 			
 			form.action = "myflight.jsp";
 			form.event.value = "holdrental";
-			form.reg.value = reg;
 			form.id.value = id;
 			form.hold.value = hold;
 
@@ -233,9 +230,9 @@
 		<h2>Status: Flight in progress<%= groupFlight ? " for\"" + theGroup.getName() + "\"" : "" %></h2>
 		There is a flight in progress. If you cannot complete this flight you can cancel it.
 		<form method="post" action="userctl">
-		<input type="hidden" name="event" value="Cancel"/>
-		<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
-		<input type="submit" class="button" value="Cancel" />
+			<input type="hidden" name="event" value="Cancel"/>
+			<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+			<input type="submit" class="button" value="Cancel" />
 		</form>
 <%
 	}
@@ -269,7 +266,8 @@
 	    	{
 %>
 	                 This will not be a group flight.
-<%				if (!info.containsKey("hasAssignment"))
+<%
+				if (!info.containsKey("hasAssignment"))
      			{
 %>
              		You cannot fly for a group unless you have an assignment aboard.
@@ -415,9 +413,9 @@
 	    <tr>
 	    	<th class="sorter-checkbox" style="width: 35px">Select</th>
 			<th class="numeric" style="width: 75px">Pay</th>
-			<th style="width: 60px">Location</th>
-			<th style="width: 60px">From</th>
-			<th style="width: 60px">Dest</th>
+			<th style="width: 75px">Location</th>
+			<th style="width: 70px">From</th>
+			<th style="width: 75px">Dest</th>
 			<th class="numeric" style="width: 35px">NM</th>
 			<th class="numeric" style="width: 45px">Bearing</th>
 			<th style="max-width: 400px">Cargo</th>
@@ -479,10 +477,9 @@
 		        	</a>
 				</td>
 					<td>
-						<img src="<%=from.getDescriptiveImage(Fbos.getFboByLocation(bean.getFrom()))%>" style="border-style: none; vertical-align:middle;" />
 						<a class="normal" title="<%=from.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + bean.getFrom()) %>">
-		        		<%= bean.getFrom() %>
-		        	</a>
+		        			<%= bean.getFrom() %>
+						</a>
 		        </td>
 		        <td>
 	        		<img class="mapassignment" data-depart="<%= bean.getLocation()%>" data-dest="<%= bean.getTo()%>"
@@ -578,9 +575,9 @@
     	<tr>
 	    	<th class="sorter-checkbox" style="width: 35px;">Select</th>
 			<th class="numeric" style="width: 75px;">Pay</th>
-			<th style="width: 60px;">Location</th>
-			<th style="width: 60px;">From</th>
-			<th style="width: 60px;">Dest</th>
+			<th style="width: 75px;">Location</th>
+			<th style="width: 70px;">From</th>
+			<th style="width: 75px;">Dest</th>
 			<th class="numeric" style="width: 35px;">NM</th>
 			<th class="numeric" style="width: 45px;">Bearing</th>
 			<th style="max-width: 400px;">Cargo</th>
@@ -713,7 +710,6 @@
 		        		</a>
 		       		</td>
 		        	<td>
-		        		<img src="img/blankap.gif" style="border-style: none; vertical-align:middle;"/>
 						<a title="<%=from.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" +assignment.getFrom()) %>">
 		        			<%= assignment.getFrom() %>
 		        		</a>
@@ -733,7 +729,7 @@
 		        	</td>
 		        	<td><%= assignment.getSCargo() %></td>
 		        	<td class="assignmentType"><%= assignment.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>
-		        	<td><%= aircraftReg == null ? "[not provided]" : aircraftReg%></td>
+		        	<td><%= aircraftReg == null ? "[N/A]" : aircraftReg%></td>
 		        	<td><%= assignment.getSExpires() %></td>
 		        	<td><%= status %></td>
 		        	<td><%= assignment.getComment() %></td>
@@ -784,46 +780,53 @@
            			<b><%=weightKg %> Kg</b>/<span style="color: #666666; "><%=(int)Math.round(weightKg/0.45359237) %> Lb</span> (<span
                                 style="color: #003300; "><%= weightleft %> Kg remains available at current fuel load</span>)
            			</p>
-<% 				}
+<%
+				}
  				else if (weightleft == 0)
  				{
 %>			        <p>Pilot, crew &amp; payload weight for next flight: 
 					<b><%=weightKg %> Kg</b>/<span style="color: #666666; "><%=(int)Math.round(weightKg/0.45359237) %> Lb</span> (<span
-            style="color: #003300; ">Payload at weight limit for current fuel load</span>)
+            			style="color: #003300; ">Payload at weight limit for current fuel load</span>)
 					</p>
-<% 				}
+<%
+				}
  				else 
  				{
 %>        			<p>Pilot, crew &amp; payload weight for next flight: 
 					<b><%=weightKg %> Kg</b>/<span style="color: #666666; "><%=(int)Math.round(weightKg/0.45359237) %> Lb</span> (<span
-            style="color: #660000; ">Flight overweight by <%= (weightKg - payloadnow - (77 *(1 + additionalcrew))) %> Kg for current fuel load</span>)
+            			style="color: #660000; ">Flight overweight by <%= (weightKg - payloadnow - (77 *(1 + additionalcrew))) %> Kg for current fuel load</span>)
 					</p>
-<% 				}
+<%
+				}
 
      			if (seatsleft > 1) 
      			{
 %>         			<p>Passenger count for next flight: 
 					<b><%= passengerCount%></b> (<span style="color: #003300; "><%= seatsleft %>  seats available</span>)
 					</p>
-<% 				}
+<%
+				}
  				else if (seatsleft == 1) 
  				{
 %>		     		<p>Passenger count for next flight: 
 					<b><%= passengerCount %></b>(<span style="color: #003300; ">1 seat available</span>)
 					</p>
-<% 				}
+<%
+				}
  				else 	
  				{
 %>					<p>Passenger count for next flight: 
 					<b><%= passengerCount %></b>(<span style="color: #660000; ">No seats available</span>)
 					</p>
-<% 				}
+<%
+				}
      		}
 			assignmentsTotalAll = assignmentsTotalPay + assignmentsHoldPay;
 			
 			if(assignmentsHoldPay != 0)
 			{
-%>			<p>Total Value in Loading Area: <b><%=Formatters.currency.format(assignmentsTotalPay) %></b></p>
+%>
+			<p>Total Value in Loading Area: <b><%=Formatters.currency.format(assignmentsTotalPay) %></b></p>
 <%
 			}
 %>
@@ -853,12 +856,11 @@
 	   	<input type="hidden" name="event" value="Aircraft"/>
 	   	<input type="hidden" name="type" value="remove"/>
 	   	<input type="hidden" name="id" />
-	   	<input type="hidden" name="reg" />
 	   	<input type="hidden" name="hold" />
 		<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
 	   	<table>
 	        <caption>
-	       	Aircraft - <input type="button" onclick="doSubmitX('<%=aircraft.getRegistration() %>', <%= user.getId()%>, <%= aircraft.getHoldRental()%>)" name="holdRental" value="<%=aircraft.getHoldRental() ? "Hold" : "Release"%>" /> when no assignments on board.
+	       	Aircraft - <input type="button" onclick="doSubmitX('<%=aircraft.getId() %>', <%= aircraft.getHoldRental()%>)" name="holdRental" value="<%=aircraft.getHoldRental() ? "Hold" : "Release"%>" /> when no assignments on board.
 	        </caption>           
 	     	<thead>
 	     	<tr>
@@ -890,7 +892,7 @@
 		
 <%			}
 %>      	<tr>
-           	<td><a class="normal" href="<%=response.encodeURL("aircraftlog.jsp?registration=" + aircraft.getRegistration()) %>"><%= aircraft.getRegistration()%></a></td>
+           	<td><a class="normal" href="<%=response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><%= aircraft.getRegistration()%></a></td>
            	<td><%= aircraft.getMakeModel() %></td>
            	<td><%= aircraft.getSEquipment() %></td>
            	<td><a class="link" href="<%=response.encodeURL("airport.jsp?icao=" + aircraft.getSLocation())%>"> <%= aircraft.getSLocation() %></a></td>
@@ -903,13 +905,13 @@
 %>
 <% 			if (!isAllInPresent)
        		{ 
-%>     			<a class="link" href="javascript:doSubmit2('<%=aircraft.getRegistration() %>')">Cancel</a>
+%>     			<a class="link" href="javascript:doSubmit2('<%=aircraft.getId() %>')">Cancel</a>
 <%			}
-%>     			<a class="link" href="<%=response.encodeURL("refuel.jsp?registration=" + aircraft.getRegistration()) %>">Refuel</a>
+%>     			<a class="link" href="<%=response.encodeURL("refuel.jsp?id=" + aircraft.getId()) %>">Refuel</a>
 <% 		
 			if (aircraft.isBroken() && aircraft.isAllowRepair())
     		{
-%>         		<a class="link" href="<%= response.encodeURL("maintenance.jsp?registration=" + aircraft.getRegistration()) %>">Fix</a>
+%>         		<a class="link" href="<%= response.encodeURL("maintenance.jsp?id=" + aircraft.getId()) %>">Fix</a>
 <%			}
 		}
 %>			</td>
@@ -920,23 +922,23 @@
 </div>
 <div class="dataTable">
 <%
-	 int additionalcrew = aircraft.getCrew();
-	 double fuelCap = aircraft.getTotalCapacity();
-	 double payLoad = aircraft.getMaxWeight() - aircraft.getEmptyWeight() - (77 * (1 + additionalcrew));
-	 int fuelCapInt = (int)fuelCap;
-	 int payload75 = (int)Math.round(payLoad - fuelCap * 0.75 * Constants.GALLONS_TO_KG);
-	 int payload100 = (int)Math.round(payLoad - fuelCap * Constants.GALLONS_TO_KG);
-	 int payloadnow = (int)Math.round(payLoad - aircraft.getTotalFuel() * Constants.GALLONS_TO_KG);
-	 int crewseats;
-    if (additionalcrew > 0)
-    {
-        crewseats = 2;
-    }
-    else
-    {
-        crewseats = 1;
-    }
-	 int seats = aircraft.getSeats() - crewseats;
+		int additionalcrew = aircraft.getCrew();
+		double fuelCap = aircraft.getTotalCapacity();
+		double payLoad = aircraft.getMaxWeight() - aircraft.getEmptyWeight() - (77 * (1 + additionalcrew));
+		int fuelCapInt = (int)fuelCap;
+		int payload75 = (int)Math.round(payLoad - fuelCap * 0.75 * Constants.GALLONS_TO_KG);
+		int payload100 = (int)Math.round(payLoad - fuelCap * Constants.GALLONS_TO_KG);
+		int payloadnow = (int)Math.round(payLoad - aircraft.getTotalFuel() * Constants.GALLONS_TO_KG);
+		int crewseats;
+    	if (additionalcrew > 0)
+    	{
+        	crewseats = 2;
+    	}
+    	else
+    	{
+        	crewseats = 1;
+    	}
+	int seats = aircraft.getSeats() - crewseats;
 %>
 
      <table>
@@ -964,12 +966,12 @@
 			     <td>
 			     	<select id="mypax">
 <%
-    for (int c=0; c < seats +1; c++) 
-    {
+    	for (int c=0; c < seats +1; c++)
+    	{
 %>
 						<option value="<%= c %>"><%= c %></option>
 <%
-	} 
+		}
 %>	
      				</select>
      			</td>
@@ -996,38 +998,41 @@
      </form>
 
 <script>
-$("#calcFuel").click(function () {
-    var pl = parseInt(Math.min($("#mypayload").val()));
-    var pax = parseInt($("#mypax").val());
-    var totalpayload = pax * 77 + pl;
-    var percent = Math.round(100 - (25 * (totalpayload - <%= payload100%>) / (<%= payload75 %> - <%= payload100  %>)));
-    var cap = <%= fuelCap %> * percent / 100;
-    var maxgallons = cap;
-    
-    if (maxgallons <= 0)
-    {
-        $("#mygallons").val('Exceeds Limits');
-    } 
-    else
-    {
-        $("#mygallons").val(Math.min(maxgallons, <%= fuelCap %>) + ' gallons');
-    }
-});
-$("#calcLoad").click(function ()
-{
-    var gals = $("#entgallons");
-    var pload = $("#expayload");
-    var percent = Math.min(gals.val() / <%= fuelCap %> * 100, 100);
-    var maxpayload = Math.floor((100 - percent) * ((<%= payload75 %> - <%= payload100 %>) / 25) + <%= payload100 %>);
-    var maxpax = Math.min(<%=seats%>, Math.floor(maxpayload / 77));
-    
-    if (gals.val() > <%= fuelCap %>) {
-        pload.val('Exceeds Limits');
-    } 
-    else {
-        pload.val(maxpayload + ' Kg or ' + maxpax + ' pax');
-    }
-});
+
+	$("#calcFuel").click(function () {
+		var pl = parseInt(Math.min($("#mypayload").val()));
+		var pax = parseInt($("#mypax").val());
+		var totalpayload = pax * 77 + pl;
+		var percent = Math.round(100 - (25 * (totalpayload - <%= payload100%>) / (<%= payload75 %> - <%= payload100  %>)));
+		var cap = <%= fuelCap %> * percent / 100;
+		var maxgallons = cap;
+
+		if (maxgallons <= 0)
+		{
+			$("#mygallons").val('Exceeds Limits');
+		}
+		else
+		{
+			$("#mygallons").val(Math.min(maxgallons, <%= fuelCap %>) + ' gallons');
+		}
+	});
+
+	$("#calcLoad").click(function ()
+	{
+		var gals = $("#entgallons");
+		var pload = $("#expayload");
+		var percent = Math.min(gals.val() / <%= fuelCap %> * 100, 100);
+		var maxpayload = Math.floor((100 - percent) * ((<%= payload75 %> - <%= payload100 %>) / 25) + <%= payload100 %>);
+		var maxpax = Math.min(<%=seats%>, Math.floor(maxpayload / 77));
+
+		if (gals.val() > <%= fuelCap %>) {
+			pload.val('Exceeds Limits');
+		}
+		else {
+			pload.val(maxpayload + ' Kg or ' + maxpax + ' pax');
+		}
+	});
+
 </script>
 
 <% 
