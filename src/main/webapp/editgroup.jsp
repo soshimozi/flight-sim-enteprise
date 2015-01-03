@@ -6,6 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     String error = null;
 
     //setup return page if action used
@@ -31,6 +39,13 @@
     {
         try
         {
+            if(request.getParameter("name") != null
+                    && !request.getParameter("name").equals("")
+                    && request.getParameter("name").length() > 3)
+                group.setName(request.getParameter("name"));
+
+            group.setComment(request.getParameter("comment"));
+            group.setUrl(request.getParameter("url"));
             group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
             group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
             group.setBanList(request.getParameter("banList"));

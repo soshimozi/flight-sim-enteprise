@@ -7,6 +7,14 @@
 <jsp:useBean id="userMap" class="java.util.HashMap" scope="session" />
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     long tsStart = System.nanoTime();
     String sGroup = request.getParameter("groupid");
     String sFboId = request.getParameter("fboId");

@@ -6,6 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     String returnToPage = request.getRequestURI();
 
     int offset = user.getTimeZone().getRawOffset();

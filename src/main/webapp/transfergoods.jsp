@@ -7,6 +7,14 @@
 <jsp:useBean id="goods" class="net.fseconomy.beans.GoodsBean" scope="session" />
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
 	String fromICAO = request.getParameter("fromICAO");
 	int owner = Integer.parseInt(request.getParameter("owner"));
 	int commodityId = Integer.parseInt(request.getParameter("commodityId"));

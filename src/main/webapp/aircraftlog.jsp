@@ -3,10 +3,19 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+<%@ page import="net.fseconomy.servlets.UserCtl" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     String sFrom = request.getParameter("from");
     int from = 0;
 
@@ -20,8 +29,22 @@
         from = 0;
     }
 
-    int id = Integer.parseInt(request.getParameter("id"));
-    String aircraftReg = Aircraft.getAircraftRegistrationById(id);
+    if(request.getParameter("id") == null || request.getParameter("id").equals(""))
+    {
+        request.getSession().setAttribute("message", "Missing aircraft parameter.");
+        request.getRequestDispatcher("error.jsp").forward(request, response);
+    }
+
+    int id = -1;
+    try
+    {
+        id = Integer.parseInt(request.getParameter("id"));
+    }
+    catch(NumberFormatException e)
+    {
+        UserCtl.logger.error("aircraftlog.jsp: id=" + request.getParameter("id") + ", user: " + user.getName() + ", url=" + request.getRequestURI());
+    }
+
 
     String linkOptions = "id=" + id + "&";
 
@@ -151,7 +174,7 @@
             </tr>
             </thead>
             <tr>
-                <td align="center"><%= aircraftReg %></td>
+                <td align="center"><%= aircraftData.getRegistration() %></td>
                 <td align="center"><%= owner %></td>
                 <td align="center"><%= aircraftData.getMakeModel() %></td>
                 <td align="center"><%= aircraftData.getHome() %><%= aircraftData.isAdvertiseFerry() ? " (Aircraft is advertised for a ferry flight home)" : "" %></td>

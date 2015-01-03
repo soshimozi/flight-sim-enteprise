@@ -6,6 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
 	int id = Integer.parseInt(request.getParameter("id"));
 
 	//setup return page if action used

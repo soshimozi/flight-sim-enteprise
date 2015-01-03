@@ -9,6 +9,14 @@
 <jsp:useBean id="dataError" class="net.fseconomy.data.DataError" scope="session" />
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
 	String returnPage = request.getParameter("returnpage");
 
 	String amount100ll = request.getParameter("100LLAmount");

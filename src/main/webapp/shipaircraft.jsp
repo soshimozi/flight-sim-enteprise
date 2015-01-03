@@ -5,6 +5,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
 	String returnPage = request.getParameter("returnpage");
 
 	String error = null;

@@ -6,10 +6,10 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-	if(user == null || !user.isLoggedIn())
+	if(!user.isLoggedIn())
 	{
 %>
-        <script type="text/javascript">document.location.href="index.jsp"</script>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
 		return;
 	}
@@ -495,7 +495,7 @@
 		        </td>
 		        <td><%= bean.getSCargo() %></td>
 		        <td><%= bean.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>
-		        <td><%= aircraftReg == null ? "[not provided]" : aircraftReg%></td>
+		        <td><%= aircraftReg == null ? "[N/A]" : aircraftReg%></td>
 		        <td><%= bean.getSExpires() %></td>
 		        <td><%= status %></td>
 		        <td><%= bean.getComment() %></td>

@@ -6,6 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="../index.jsp"</script>
+<%
+		return;
+	}
+
 	String returnPage  = request.getHeader("referer");
 
 	UserBean account = user;
@@ -16,7 +24,7 @@
 	if (owner.equals("0") && (type.equals("3") || type.equals("4")) )  
 	{
 %>
-        <script type="text/javascript">document.location.href="index.jsp"</script>
+        <script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
 		return;
 	}

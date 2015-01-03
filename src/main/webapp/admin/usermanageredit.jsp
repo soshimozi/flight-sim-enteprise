@@ -131,7 +131,7 @@
                         </tr>
                         <tr>
                             <td>Last Logon: </td>
-                            <td><%=Formatters.datemmddyy.format(account.getLogon())%></td>
+                            <td><%=account.getLogon() != null ? Formatters.datemmddyy.format(account.getLogon()) : "never"%></td>
                         </tr>
                         <tr>
                             <td>Flights: </td>

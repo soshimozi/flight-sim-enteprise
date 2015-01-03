@@ -150,12 +150,12 @@
 				</tr>	
 				
 				<tr>
-					<td>From/To airports larger than</td><td><input name="matchMinSize" type="text" class="textarea" value="<%= template.getMatchMinSize() %>" size="7"/> 
-					combined meters of rwys</td>
+					<td>From/To runways minimum length</td><td><input name="matchMinSize" type="text" class="textarea" value="<%= template.getMatchMinSize() %>" size="7"/>
+					ft</td>
 				</tr>
 				<tr>
-					<td>From/To airports smaller than</td><td><input name="matchMaxSize" type="text" class="textarea" value="<%= template.getMatchMaxSize() %>" size="7"/> 
-					combined meters of rwys</td>
+					<td>From/To runways maximum length</td><td><input name="matchMaxSize" type="text" class="textarea" value="<%= template.getMatchMaxSize() %>" size="7"/>
+					ft</td>
 				</tr>
 				<tr>
 					<td>From</td>

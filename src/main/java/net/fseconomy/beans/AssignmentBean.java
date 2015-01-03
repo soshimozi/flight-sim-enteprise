@@ -60,7 +60,7 @@ public class AssignmentBean implements Serializable
 		setTo(rs.getString("toicao"));
 		setLocation(rs.getString("location"));
 		setPay(rs.getFloat("pay"));
-		setType(aircraft == null ? TYPE_TRIPONLY : TYPE_ALLIN);
+		setType(getAircraftId() == 0 ? TYPE_TRIPONLY : TYPE_ALLIN);
 		setAmount(rs.getInt("amount"));
 		setDistance(rs.getInt("distance"));
 		setActive(rs.getInt("active"));

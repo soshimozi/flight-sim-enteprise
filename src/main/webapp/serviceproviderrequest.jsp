@@ -6,13 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    if(user == null || !user.isLoggedIn())
-    {
+	if(!user.isLoggedIn())
+	{
 %>
-        <script type="text/javascript">document.location.href="index.jsp"</script>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
-        return;
-    }
+		return;
+	}
+
 %>
 
 <!DOCTYPE html>

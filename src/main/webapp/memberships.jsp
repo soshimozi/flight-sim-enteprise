@@ -6,6 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     String group = request.getParameter("groupid");
     int groupId = -1;
     if (group != null)

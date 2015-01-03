@@ -118,9 +118,9 @@ public class Logging implements Serializable
         return result;
     }
 
-    public static List<LogBean> getLogForAircraftByMonth(String reg, int month, int year)
+    public static List<LogBean> getLogForAircraftByMonth(int aircraftId, int month, int year)
     {
-        String sql = "SELECT * FROM log where Year(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))= " + year + " and Month(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))=" + month + "" + " AND aircraft = '" + Converters.escapeSQL(reg) + "'";
+        String sql = "SELECT * FROM log where Year(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))= " + year + " and Month(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))=" + month + "" + " AND aircraftid = " + aircraftId;
 
         return getLogSQL(sql);
     }
@@ -218,7 +218,7 @@ public class Logging implements Serializable
 
     public static List<LogBean> getLogForAircraft(int aircraftId, int entryid)
     {
-        return getLogSQL("SELECT * FROM log WHERE aircraft=" + aircraftId + " AND ID > " + entryid + " ORDER BY time DESC");
+        return getLogSQL("SELECT * FROM log WHERE aircraftid=" + aircraftId + " AND ID > " + entryid + " ORDER BY time DESC");
     }
 
     public static List<LogBean> getLogForMaintenanceAircraft(int aircraftId)
@@ -264,7 +264,11 @@ public class Logging implements Serializable
         return result;
     }
 
-    public static Object[] outputLog(String selection)
+    public static final int AIRCRAFTLOG = 1;
+    public static final int USERLOG = 2;
+    public static final int GROUPLOG = 3;
+
+    public static Object[] outputLog(int type, int id)
     {
         StringBuilder result1 = new StringBuilder();
         Set<String> aircraft = new HashSet<>();
@@ -273,9 +277,22 @@ public class Logging implements Serializable
         try
         {
             int count = 0;
+            String reg = "";
 
-            String qry = "SELECT log.user, log.aircraft, `from`, `to`, a.lat,  a.lon,  b.lat,  b.lon, log.time FROM log, airports a, airports b where log.`from` = a.icao and log.`to` = b.icao and log.type='flight' and " + selection;
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+            String qry = "SELECT log.userid, log.aircraftid, `from`, `to`, a.lat,  a.lon,  b.lat,  b.lon, log.time FROM log, airports a, airports b where log.`from` = a.icao and log.`to` = b.icao and log.type='flight' and ";
+            if(type == AIRCRAFTLOG)
+            {
+                qry = qry + " aircraftid = ?";
+                reg = Aircraft.getAircraftRegistrationById(id);
+            }
+            else if(type == USERLOG)
+                qry =  qry + " userid = ?";
+            else if(type == GROUPLOG)
+                qry =  qry + " groupId = ?";
+            else
+                throw new IllegalArgumentException("Unknown parameter: type = " + type);
+
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, id);
             while (rs.next())
             {
                 if (count++ > 0)
@@ -283,9 +300,10 @@ public class Logging implements Serializable
                     result1.append(",\n");
                 }
 
-                result1.append("['").append(rs.getString(1)).append("','").append(rs.getString(2)).append("','").append(rs.getString(3)).append("','").append(rs.getString(4)).append("',").append(rs.getDouble(5)).append(",").append(rs.getDouble(6)).append(",").append(rs.getDouble(7)).append(",").append(rs.getDouble(8)).append(",'").append(Formatters.datemmddyy.format(rs.getDate(9))).append("']");
-                users.add(rs.getString(1));
-                aircraft.add(rs.getString(2));
+                String name = Accounts.getAccountNameById(rs.getInt(1));
+                result1.append("['").append(name).append("','").append(reg).append("','").append(rs.getString(3)).append("','").append(rs.getString(4)).append("',").append(rs.getDouble(5)).append(",").append(rs.getDouble(6)).append(",").append(rs.getDouble(7)).append(",").append(rs.getDouble(8)).append(",'").append(Formatters.datemmddyy.format(rs.getDate(9))).append("']");
+                users.add(name);
+                aircraft.add(reg);
             }
         }
         catch (SQLException e)

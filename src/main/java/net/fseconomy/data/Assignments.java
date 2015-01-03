@@ -372,13 +372,13 @@ public class Assignments implements Serializable
                 }
             }
 
-            //Get aircraft registration for assignment
-            qry = "SELECT aircraft FROM assignments WHERE id = ?";
-            String reg = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), id);
+            //Get aircraft for assignment
+            qry = "SELECT aircraftid FROM assignments WHERE id = ?";
+            int aircraftId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
 
             //This is an All-In job if it has an assigned airplane to the job already
             //Do our checks and rent the aircraft
-            if (reg != null)
+            if (aircraftId > 0)
             {
                 //No jobs in the loading area
                 qry = "SELECT (count(*) > 0) AS found FROM assignments WHERE userlock = ? AND active <> 2";
@@ -396,7 +396,6 @@ public class Assignments implements Serializable
                     throw new DataError("FSE Validation Error: cannot have more than 1 All-In job in My Flight queue.");
                 }
 
-                int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
                 Aircraft.rentAircraft(aircraftId, user, false);
             }
             else
@@ -430,13 +429,12 @@ public class Assignments implements Serializable
             }
 
             //Get aircraft registration for assignment
-            qry = "SELECT aircraft FROM assignments WHERE id = ?";
-            String reg = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), id);
+            qry = "SELECT aircraftid FROM assignments WHERE id = ?";
+            int aircraftId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
 
             //if All-In job, remove lock on aircraft now that job is canceled
-            if (reg != null)
+            if (aircraftId > 0)
             {
-                int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
                 Aircraft.releaseAircraft(aircraftId, user);
             }
 
@@ -619,8 +617,8 @@ public class Assignments implements Serializable
     {
         try
         {
-            String qry = "SELECT (fuelSystemOnly=1) as found FROM aircraft, models where aircraft.model=models.id AND fuelSystemOnly=1 AND (rentalPrice is null OR rentalPrice=0) AND registration = ? AND location = ?";
-            boolean isAllInAircraft = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getRegistration(), aircraft.getLocation());
+            String qry = "SELECT (fuelSystemOnly=1) as found FROM aircraft, models where aircraft.model=models.id AND fuelSystemOnly=1 AND (rentalPrice is null OR rentalPrice=0) AND aircraft.id = ? AND location = ?";
+            boolean isAllInAircraft = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getId(), aircraft.getLocation());
 
             if (isAllInAircraft && !hasAllInJobInQueue(aircraft.getUserLock()))
             {
@@ -659,7 +657,7 @@ public class Assignments implements Serializable
 
         try
         {
-            String qry = "SELECT (count(id) > 0) AS found FROM assignments WHERE userlock = ? AND aircraft IS NOT NULL";
+            String qry = "SELECT (count(id) > 0) AS found FROM assignments WHERE userlock = ? AND aircraftid IS NOT NULL";
             hasAllInJob = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user);
         }
         catch (SQLException e)

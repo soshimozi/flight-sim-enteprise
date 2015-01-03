@@ -5,8 +5,17 @@
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
+<%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+%>
 <%!
-    String groupMenu(UserBean user, String name, boolean staffOnly, boolean includeBaseLink, String link, String arg, HttpServletResponse response)
+	String groupMenu(UserBean user, String name, boolean staffOnly, boolean includeBaseLink, String link, String arg, HttpServletResponse response)
     {
         Map memberships = user.getMemberships();
 

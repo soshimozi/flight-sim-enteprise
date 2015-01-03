@@ -6,15 +6,16 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    if(user == null || !user.isLoggedIn())
-    {
+	if(!user.isLoggedIn())
+	{
 %>
-        <script type="text/javascript">document.location.href="admin.jsp"</script>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
-        return;
-    }
+		return;
+	}
 
-    String error = null;
+
+	String error = null;
 
     boolean servicecreated = false;
     ServiceProviderBean service = ServiceProviders.getServiceProviderByOwner(user.getId());
@@ -644,7 +645,7 @@
 	<td style="background-color: #00AA33;" colspan="4">Misc. Data</td>
 	</tr>
 <% 
-	link = staticbase + "/datafeed_icaodata.zip"; 
+	link = staticbase + "/library/datafeed_icaodata.zip";
 %>
 	<tr>
 		<td>FSE ICAO Data Zip Archive (CSV format)</td>

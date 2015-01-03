@@ -6,21 +6,29 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     Object[] output = null;
 
     String sGroupId = request.getParameter("group");
     String sUser = request.getParameter("pilot");
-    String sAircraft = request.getParameter("aircraft");
+    String sAircraftId = request.getParameter("aircraftid");
 
-    if (sAircraft != null)
+    if (sAircraftId != null)
     {
-        output = Logging.outputLog("aircraft='" + Converters.escapeSQL(sAircraft) + "'");
+        output = Logging.outputLog(Logging.AIRCRAFTLOG, Integer.parseInt(sAircraftId));
     }
     else if (sUser != null)
     {
         if (sUser.equals(user.getName()))
         {
-            output = Logging.outputLog("user='" + Converters.escapeSQL(sUser) + "'");
+            output = Logging.outputLog(Logging.USERLOG, user.getId());
         }
     }
     else if (sGroupId != null)
@@ -28,7 +36,7 @@
         int groupId = Integer.parseInt(sGroupId);
         if (user.groupMemberLevel(groupId) > UserBean.GROUP_INVITED)
         {
-            output = Logging.outputLog("groupid=" + groupId);
+            output = Logging.outputLog(Logging.GROUPLOG, groupId);
         }
     }
     if (output == null)

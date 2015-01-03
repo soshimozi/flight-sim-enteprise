@@ -20,6 +20,7 @@
 package net.fseconomy.servlets;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -217,10 +218,10 @@ public class UserCtl extends HttpServlet
                         cancelFlight(req);
                         break;
                     case "Market":
-                        market(req);
+                        doBuyAircraft(req);
                         break;
                     case "sell":
-                        doSell(req);
+                        doAircraftSell(req);
                         break;
                     case "bank":
                         doBank(req);
@@ -996,6 +997,9 @@ public class UserCtl extends HttpServlet
 	void cancelFlight(HttpServletRequest req)
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if(user == null)
+            throw new InvalidParameterException("No user session");
+
 		Flights.cancelFlight(user);
 	}
 	
@@ -1237,6 +1241,9 @@ public class UserCtl extends HttpServlet
 
     void addAircraft(HttpServletRequest req) throws DataError
 	{
+        if (req.getParameter("id") == null)
+            return;
+
         int id = Integer.parseInt(req.getParameter("id"));
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
@@ -1256,6 +1263,9 @@ public class UserCtl extends HttpServlet
 
 	void returnLeaseAircraft(HttpServletRequest req) throws DataError
 	{
+        if (req.getParameter("id") == null)
+            return;
+
 		int id = Integer.parseInt(req.getParameter("id"));
 
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
@@ -1272,6 +1282,9 @@ public class UserCtl extends HttpServlet
 	
 	void doRefuel(HttpServletRequest req) throws DataError
 	{
+        if (req.getParameter("id") == null)
+            return;
+
 		String sProvider = req.getParameter("provider");
 		String sType = req.getParameter("type");
 		int type = Integer.parseInt(sType);
@@ -1287,29 +1300,27 @@ public class UserCtl extends HttpServlet
         Aircraft.refuelAircraft(id, user.getId(), fuel, Integer.parseInt(sProvider), type);
 	}
 	
-	void market(HttpServletRequest req) throws DataError
+	void doBuyAircraft(HttpServletRequest req) throws DataError
 	{
-		String reg = req.getParameter("id");
+        if (req.getParameter("id") == null)
+            return;
+
+        int id = Integer.parseInt(req.getParameter("id"));
 		String sAccount = req.getParameter("account");
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (reg == null)
-			return;
 
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-
-        Aircraft.buyAircraft(aircraftId, Integer.parseInt(sAccount), user);
+        Aircraft.buyAircraft(id, Integer.parseInt(sAccount), user);
 	}
 	
-	void doSell(HttpServletRequest req) throws DataError
+	void doAircraftSell(HttpServletRequest req) throws DataError
 	{
-		String reg = req.getParameter("registration");
+        if (req.getParameter("id") == null)
+            return;
+
+        int id = Integer.parseInt(req.getParameter("id"));
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (reg == null)
-			return;
 
-        int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
-
-        Aircraft.sellAircraft(aircraftId, user);
+        Aircraft.sellAircraft(id, user);
 	}	
 	
 	void newUser(HttpServletRequest req) throws DataError
@@ -1338,7 +1349,7 @@ public class UserCtl extends HttpServlet
 
         Accounts.createAccount(newusername, email, linkedId, user.getId());
 
-		req.getSession().setAttribute("message", "An account has been created.<br /><br /><strong>User:</strong> " + user + "<br /><strong>Email:</strong> " + email);
+		req.getSession().setAttribute("message", "An account has been created.<br /><br /><strong>User:</strong> " + newusername + "<br /><strong>Email:</strong> " + email);
 	}
 
     void updateAcct(HttpServletRequest req) throws DataError

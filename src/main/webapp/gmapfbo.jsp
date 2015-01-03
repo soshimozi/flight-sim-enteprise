@@ -6,6 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     boolean showFbo = request.getParameter("fboCheck")!= null;
     boolean showFuel = request.getParameter("fuelCheck") != null;
     boolean showRepair = request.getParameter("repairCheck") != null;

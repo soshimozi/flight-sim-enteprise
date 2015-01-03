@@ -109,7 +109,7 @@ public final class Authenticator
         boolean result = false;
         Cache<String, String> serviceKeyCache = UserCtl.cacheManager.getCache("ServiceKey-cache");
 
-        if(serviceKey.equals(Data.adminApiKey) || serviceKeyCache.get(serviceKey).equals(""))
+        if(serviceKey.equals(Data.adminApiKey) || serviceKeyCache.get(serviceKey) != null)
         {
             return true;
         }

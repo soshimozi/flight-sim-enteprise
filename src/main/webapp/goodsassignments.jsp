@@ -7,6 +7,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     int transferId;
     boolean isStaff;
 

@@ -1,6 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
+<jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
+
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     String sType = request.getParameter("type");
     String sId = request.getParameter("id");
     String sTransferId = request.getParameter("transferid");

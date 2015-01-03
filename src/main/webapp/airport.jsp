@@ -9,7 +9,7 @@
 	if(user == null || !user.isLoggedIn())
 	{
 %>
-        <script type="text/javascript">document.location.href="index.jsp"</script>
+        <script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
 		return;
 	}
@@ -904,7 +904,7 @@
                     <td><%= assignment.getSCargo() %></td>
                     <!-- AllIn Change -->
                     <td id="assignmentType-<%= id %>"><%= assignment.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>
-                    <td><%= aircraftReg == null ? "[not provided]" : aircraftReg %></td>
+                    <td><%= aircraftReg == null ? "[N/A]" : aircraftReg %></td>
                     <td><%= assignment.getSExpires() %></td>
                     <td>
                         <a class="link" title="Show aircraft that can handle this assignment" href="<%= response.encodeURL(URL + sAirportArea + sToAirport + "&aircraftArea=1&capable=" + id) %>">Aircraft</a>

@@ -6,7 +6,15 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    String icao = request.getParameter("icao");
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
+	String icao = request.getParameter("icao");
 
     String SfacilityId = request.getParameter("facilityId");
     int facilityId = -1;

@@ -179,12 +179,14 @@
 				</div>
 			</li>
 		</ul>
-		<h3>Number of Pilots</h3>
-		<ul>
-			<li>currently flying: <a href="#" onclick="onClickFlying()" id="flying"><%= flying %></a></li>
-			<li>currently parked at an airport: <a href="#" onclick="onClickParked()" id="parked"><%= parked %></a></li>
-		</ul>
 		<div style="display: table; margin: 5px auto; border-style:inset; font-size: 10pt; font-family: Arial,sans-serif;" id="clock" ></div>
+		<h3>Pilot and Activity Map</h3>
+		<div style="display: table; margin: 0 auto;">
+			<a href="http://server.fseconomy.net/static/html/index.html" target="_blank">
+				<img style="border-style: none; box-shadow: 5px 5px 5px #888888;" src="/img/pilotactivitymap.png">
+			</a>
+		</div>
+
 		<div style="display: table; margin: 0 auto;">
 			<a style="display: table; margin: 0 auto;" href="http://vatsim.net" onclick="this.target='_blank'"><img style="border-style: none;" src="img/VATSIM_logo_small.gif" width="90" /></a><br/>
 			<div style="font-size:x-small"><b>FSEconomy is a proud <a href="http://vatsim.net" onclick="this.target='_blank'">VATSIM</a> partner.</b></div>

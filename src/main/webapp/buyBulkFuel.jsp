@@ -6,6 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="../index.jsp"</script>
+<%
+		return;
+	}
+
 	String returnPage = request.getHeader("referer");
 
 	int baseBulkFuelKg=5000;
@@ -13,7 +21,7 @@
 	if (user == null || user.getId() == 0 || user.getId() == -1) 
 	{
 %>
-        <script type="text/javascript">document.location.href="index.jsp"</script>
+        <script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
 		return;
 	}

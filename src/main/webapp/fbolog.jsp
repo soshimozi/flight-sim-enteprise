@@ -6,7 +6,15 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    String sFbo = request.getParameter("id");
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
+	String sFbo = request.getParameter("id");
     String sFrom = request.getParameter("from");
     int from = 0;
     if (sFrom != null)

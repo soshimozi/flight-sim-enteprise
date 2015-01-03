@@ -6,6 +6,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
 	//setup return page if action used
 	String returnPage = request.getRequestURI();
 	response.addHeader("referer", request.getRequestURI());
@@ -382,12 +390,12 @@
 		<td><a title="<%=acLocation%>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getLocation()) %>"><%= acICAO %></a></td>
 		<td><%= price %></td>
 		<td><%= afTime %></td>
-		<td><a class="link" href="javascript:doSubmit('<%= reg %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
+		<td><a class="link" href="javascript:doSubmit('<%= aircraft.getId() %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
             for (Groups.groupMemberData staffGroup : staffGroups)
             {
 %>
-            | <a class="link" href="javascript:doSubmit('<%= reg %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
+            | <a class="link" href="javascript:doSubmit('<%= aircraft.getId() %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
                 for <%= staffGroup.groupName %>
             </a>
 <%

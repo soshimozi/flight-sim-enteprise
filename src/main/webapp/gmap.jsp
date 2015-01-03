@@ -6,7 +6,15 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    boolean isDest = false;
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
+	boolean isDest = false;
     boolean isFBO;
     double latd=0;
     double lond=0;

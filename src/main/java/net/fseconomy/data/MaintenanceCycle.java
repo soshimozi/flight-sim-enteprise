@@ -161,11 +161,11 @@ public class MaintenanceCycle implements Runnable
 
         logSignatureStats();
 		
-		doStatsAndLoanLimitChecks();			
+		doStatsAndLoanLimitChecks();
 		doAircraftMaintenance();
 		
 		//TODO: comment out for test server for faster cycle times
-		//Goods cleanup, opens and closes fbo's
+//		Goods cleanup, opens and closes fbo's
 	    checkGoodsRecords();
 	    processFboStatus();
 		processFboRenters();
@@ -776,7 +776,7 @@ public class MaintenanceCycle implements Runnable
 						having = having + " AND largest > " + minSize;
 					
 					needed = frequency + " * sqrt(sum(size)/6000) as needed";
-					query = "SELECT bucket, min(size) AS smallest, max(size) AS largest, " + needed +
+					query = "SELECT bucket, min(longestRwy) AS smallest, max(longestRwy) AS largest, " + needed +
 						 ", count(assignments.id) AS got, avg(lat) FROM airports LEFT join assignments ON assignments.fromicao = airports.icao AND fromtemplate = " + 
 						 id + " GROUP by bucket HAVING " + having;
 				} 
@@ -820,10 +820,10 @@ public class MaintenanceCycle implements Runnable
 							where.append(" AND type='civil'");
 						
 						if (maxSize > 0)
-							where.append(" AND size < ").append(maxSize);
+							where.append(" AND longestRwy < ").append(maxSize);
 						
 						if (minSize > 0)
-							where.append(" AND size > ").append(minSize);
+							where.append(" AND longestRwy > ").append(minSize);
 						
 						if (isAllIn)
 							where.append(" AND exists (SELECT * FROM aircraft WHERE aircraft.location = airports.icao and aircraft.owner = 0)");

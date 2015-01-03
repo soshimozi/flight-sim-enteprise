@@ -5,6 +5,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+    if(!user.isLoggedIn())
+    {
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+        return;
+    }
+
     String sDepart = request.getParameter("depart");
     String sDest = request.getParameter("dest");
     AirportInfo depart = Airports.cachedAPs.get(sDepart);

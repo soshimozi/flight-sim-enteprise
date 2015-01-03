@@ -54,7 +54,7 @@ public class Airports implements Serializable
             //pull the airports
             try
             {
-                String qry = "SELECT icao, name, city, state, country, lat, lon, size, type FROM airports";
+                String qry = "SELECT icao, name, city, state, country, lat, lon, longestRwy, type FROM airports";
                 ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
                 while (rs.next())
                 {
@@ -258,11 +258,6 @@ public class Airports implements Serializable
     {
         Hashtable<String, AirportInfo> results = new Hashtable<>();
         AirportInfo lls;
-        int minSz;
-        int maxSz;
-
-        minSz = minSize;
-        maxSz = maxSize == 0 ? Integer.MAX_VALUE : maxSize;
 
         for (Map.Entry<String, AirportInfo> entry : cachedAPs.entrySet())
         {
@@ -275,7 +270,10 @@ public class Airports implements Serializable
             if(clat > clipLat || clon > clipLon)
                 continue;
 
-            if(lls.size < minSz && lls.size > maxSz)
+            if(minSize != 0 && lls.size < minSize)
+                continue;
+
+            if(maxSize != 0 && lls.size > maxSize)
                 continue;
 
             //compare against current size and radius

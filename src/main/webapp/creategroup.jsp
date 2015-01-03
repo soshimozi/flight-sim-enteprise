@@ -9,7 +9,15 @@
 </jsp:useBean>
 
 <%
-    String error = null;
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
+	String error = null;
 
     //initial page load
     if (request.getParameter("submit") == null)

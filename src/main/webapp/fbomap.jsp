@@ -9,6 +9,14 @@
 </jsp:useBean>
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
 %>
 
 <!DOCTYPE html>

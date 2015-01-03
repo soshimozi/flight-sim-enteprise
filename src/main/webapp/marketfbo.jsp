@@ -7,6 +7,14 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
+	if(!user.isLoggedIn())
+	{
+%>
+<script type="text/javascript">document.location.href="/index.jsp"</script>
+<%
+		return;
+	}
+
 	//setup return page if action used
 	String returnPage = request.getRequestURI();
 	response.addHeader("referer", request.getRequestURI());

@@ -960,7 +960,7 @@ public class Datafeed extends HttpServlet
 
                 List<LogBean> log;
                 if (reg != null && !reg.isEmpty())
-                    log = Logging.getLogForAircraftByMonth(reg, month, year);
+                    log = Logging.getLogForAircraftByMonth(Aircraft.getAircraftIdByRegistration(reg), month, year);
                 else if (account.isGroup())
                     log = Logging.getLogForGroupByMonth(account.getId(), month, year);
                 else
