@@ -353,6 +353,8 @@ public class Goods implements Serializable
         {
             throw new DataError("Not enough goods available.");
         }
+        if(Airports.cachedAPs.get(location) == null)
+            throw new DataError("Invalid ICAO.");
 
         try
         {
@@ -515,7 +517,6 @@ public class Goods implements Serializable
             if (rs.next())
             {
                 exists = true;
-
             }
             else
             {

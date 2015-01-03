@@ -91,7 +91,7 @@
 %>
 		<div class="dataTable">	
 		<h2>User - <%= "account".equals(searchby) ? inputuser.getName() : request.getParameter("ip") %> - Client request log last 100 entries</h2><br/>
-		<a href="admin.jsp">Return to Admin Page</a><br/><br/>
+		<a href="/admin/admin.jsp">Return to Admin Page</a><br/><br/>
 		<a href="/admin/checkclientiplisting.jsp">Select new account or IP</a><br/>
 		<table id="sortableTableStats" class="sortable">
 		<thead>

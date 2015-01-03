@@ -1452,6 +1452,8 @@ public class Datafeed extends HttpServlet
 			//create an Aircraft tag
 			output.append("<Aircraft>");
 
+			output.append("SerialNumber", aircraft.getId());
+
 			if( aircraft.getLocation() == null)
 				output.append("Status", "In Flight");
 			else
@@ -2637,6 +2639,7 @@ public class Datafeed extends HttpServlet
 		//fill in the header if empty
 		if(buffer.isHeaderEmpty())
 		{
+			buffer.appendHeaderItem("SerialNumber");
 			buffer.appendHeaderItem("MakeModel");
 			buffer.appendHeaderItem("Registration");
 			buffer.appendHeaderItem("Owner");
@@ -2689,6 +2692,7 @@ public class Datafeed extends HttpServlet
             if (aircraft.getUserLock() > 0)
                 userlockname = Accounts.getAccountNameById(aircraft.getUserLock());
 
+			buffer.append(aircraft.getId());
             buffer.append(aircraft.getMakeModel());
             buffer.append(aircraft.getRegistration());
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(owner));
@@ -2746,6 +2750,7 @@ public class Datafeed extends HttpServlet
                 userlockname = Accounts.getAccountNameById(aircraft.getUserLock());
 
             buffer.append("<Aircraft>\n");
+			buffer.append("SerialNumber", aircraft.getId());
             buffer.append("MakeModel", aircraft.getMakeModel());
             buffer.append("Registration", aircraft.getRegistration());
             buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(owner));

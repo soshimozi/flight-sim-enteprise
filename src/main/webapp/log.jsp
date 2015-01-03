@@ -88,7 +88,6 @@
                 }
             }
 
-
             double total = (log.getIncome()) - log.getRentalCost() - log.getFuelCost() - log.getLandingCost() - log.getCrewCost() - log.getFboAssignmentFee() - log.getmptTax() + log.getBonus();
             int minutes = log.getFlightEngineTime() / 60;
             String rentalCost;

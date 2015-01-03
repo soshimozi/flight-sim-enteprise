@@ -28,6 +28,8 @@ public class Fbos implements Serializable
             conn = DALHelper.getInstance().getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
+            if(Airports.cachedAPs.get(icao) == null)
+                throw new DataError("Invalid ICAO.");
 
             int mergeWithId = 0;
             int mergeWithServices = 0;
@@ -98,7 +100,7 @@ public class Fbos implements Serializable
                 stmt.executeUpdate("update payments set fbo = " + mergeWithId + " where fbo = " + fbo.getId());
             }
 
-            Banking.doPayment(buyer, owner, 0, PaymentBean.FBO_SALE, 0, fbo.getId(), icao, 0, "FBO Transfer", false);
+            Banking.doPayment(owner, buyer, 0, PaymentBean.FBO_SALE, 0, fbo.getId(), icao, 0, "FBO Transfer", false);
         }
         catch (SQLException e)
         {

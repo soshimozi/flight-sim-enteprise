@@ -95,7 +95,7 @@
             <li><a href="/admin/datafeedrequests.jsp">Data Feed Requests</a></li>
             <li><a href="/admin/serviceproviderrequests.jsp">Service Provider Requests</a></li>
         </ul>
-        <form method="post" action="admin.jsp" name="adminform">
+        <form method="post" action="/admin/admin.jsp" name="adminform">
             <div>
                 <input type="hidden" name="issubmit" value="true"/>
                 <input type="hidden" name="event" value="ResetFilter"/>

@@ -34,8 +34,9 @@
         try
         {
             Fbos.transferFbo(fbo, user, ibuyer, iseller, icao, goods.equals("checkbox"));
+            String forwardpage = "fbo.jsp?id=" + sId;
 %>
-        <jsp:forward page="/admin/admin.jsp" />
+        <jsp:forward page="<%=forwardpage%>" />
 <%
             return;
         }

@@ -365,16 +365,16 @@ public class Groups implements Serializable
         }
     }
 
-    public static void mailMembers(UserBean user, int groupid, String[] members, String text) throws DataError
+    public static void mailMembers(UserBean user, int groupId, String[] members, String text) throws DataError
     {
-        UserBean group = Accounts.getGroupById(groupid);
+        UserBean group = Accounts.getGroupById(groupId);
 
         if (group == null)
         {
             throw new DataError("Group not found.");
         }
 
-        if (user.groupMemberLevel(groupid) < UserBean.GROUP_OWNER)
+        if (user.groupMemberLevel(groupId) < UserBean.GROUP_OWNER)
         {
             throw new DataError("Permission denied.");
         }
@@ -394,7 +394,7 @@ public class Groups implements Serializable
 
             List<String> toList = new ArrayList<>();
             String qry = "SELECT email FROM accounts, groupmembership WHERE accounts.id = groupmembership.userId AND groupId = ? AND accounts.id IN " + list.toString();
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, group);
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, groupId);
             while (rs.next()) //add recipients to receive this message
             {
                 toList.add(rs.getString(1));

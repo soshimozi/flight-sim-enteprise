@@ -17,6 +17,13 @@
     String depart = request.getParameter("depart");
     String dest = request.getParameter("dest");
 
+    if(request.getParameter("depart") == null || request.getParameter("depart").equals("")
+    || request.getParameter("dest") == null || request.getParameter("dest").equals(""))
+    {
+        request.getSession().setAttribute("message", "Missing parameter.");
+        request.getRequestDispatcher("error.jsp").forward(request, response);
+    }
+
     DistanceBearing distanceBearing = Airports.getDistanceBearing(depart, dest);
     int distance = (int)(distanceBearing.distance + .5);
     int bearing = (int)(distanceBearing.bearing + .5);

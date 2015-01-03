@@ -97,7 +97,7 @@
 			if (Accounts.needLevel(user, UserBean.LEV_MODERATOR))
 			{
 %>		
-				<a href="admin.jsp">Return to Admin Page</a><br/><br/>
+				<a href="/admin/admin.jsp">Return to Admin Page</a><br/><br/>
 <%
 			}
 %>

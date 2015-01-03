@@ -1511,7 +1511,7 @@ public class MaintenanceCycle implements Runnable
 		
 		try
 		{
-			String qry = "SELECT id, owner, registration, location, shippingState, shippingStateNext FROM aircraft WHERE (shippingState = 1 OR shippingState = 3)";
+			String qry = "SELECT id, owner, registration, location, shippingTo, shippingState, shippingStateNext FROM aircraft WHERE (shippingState = 1 OR shippingState = 3)";
 			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			
 			while (rs.next())

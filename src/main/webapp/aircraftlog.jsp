@@ -227,13 +227,13 @@
             <tr>
                 <td><%=saleprice%></td>
                 <td>
-                    <a class="link" href="javascript:doSubmit2('<%= reg %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
+                    <a class="link" href="javascript:doSubmit2('<%= aircraftData.getId() %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
         for (Groups.groupMemberData staffGroup : staffGroups)
         {
 %>
                     <a class="link"
-                       href="javascript:doSubmit2('<%= reg %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
+                       href="javascript:doSubmit2('<%= aircraftData.getId() %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
                         for <%= staffGroup.groupName %>
                     </a>
                     <%
