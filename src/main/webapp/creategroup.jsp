@@ -62,6 +62,17 @@
 
     <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+	<script>
+		$(document).ready(function()
+		{
+			$(".numericCheck").keypress(function (e) {
+				if (String.fromCharCode(e.which).match(/[^0-9]/g)) return false;
+			});
+		});
+	</script>
+
 </head>
 <body>
 
@@ -95,7 +106,7 @@
 		<td>Url of website</td><td><input name="url" type="text" class="textarea" value="<%= group.getUrl() == null?"":group.getUrl() %>" size="40"/></td>
 	</tr>	
 	<tr>
-		<td>Default pilot fee</td><td><input name="defaultPilotFee" type="text" class="textarea" value="<%= group.getDefaultPilotFee() %>" size="5"/>%</td>
+		<td>Default pilot fee</td><td><input class="numericCheck" name="defaultPilotFee" type="text" class="textarea" value="<%= group.getDefaultPilotFee() %>" size="5"/>% (0-100)</td>
 	</tr>
 	<tr>
 		<td>Rental Ban List</td>

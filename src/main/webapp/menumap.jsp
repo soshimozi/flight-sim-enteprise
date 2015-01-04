@@ -98,8 +98,7 @@ if (user.isLoggedIn())
 	<%= groupMenu(user, "Aircraft", false, true, "aircraft.jsp", "?id=", response) %>
 	<a href="market.jsp">Aircraft - Purchase</a><br/><br/>
 	<br/><br/>
-	<%= groupMenu(user, "Bank", true, true, "bank.jsp", "?id=", response) %>
-	<a href="banksummary.jsp">Summary of Accounts</a><br/><br/>
+	<a href="banksummary.jsp">Banking</a><br/><br/>
 	<br/>
 	<a href="groups.jsp">Groups - My Groups</a><br/><br/>
 	<a href="groups.jsp?all=1">Groups - All</a><br/><br/>
@@ -114,7 +113,7 @@ if (user.isLoggedIn())
 	<br/><br/>
 	<%= groupMenu(user, "Goods", true, true, "goods.jsp", "?groupid=", response) %>
 	<br/>
-	<a href="groupassignments.jsp">Goods Transfer Assignments</a><br/><br/>
+	<a href="goodsassignments.jsp">Goods Transfer Assignments</a><br/><br/>
 	<%= groupMenu(user, "Transfer Assignments", true, false, "goodsassignments.jsp", "?transferid=", response) %>
 	<br/><br/>
 	<%= groupMenu(user, "FBOs", true, true, "fbo.jsp", "?id=", response) %>
@@ -127,12 +126,7 @@ if (user.isLoggedIn())
 	{
 %>
 	<a href="admin/admin.jsp">Admin</a><br/><br/>
-    <a href="admin/usermanager.jsp">User Manager</a><br/><br/>
-	<a href="admin/aircraftmappings.jsp">Modify aircraft mappings</a><br/><br/>
-	<a href="admin/models.jsp">Modify aircraft models</a><br/><br/>
-	<a href="admin/templates.jsp">Modify assignment templates</a><br/><br/>
-	<a href="admin/banlistreset.jsp">Reset Rental Ban List</a><br/><br/>
-<% 
+<%
 	}
 	if (user.getLevel() == UserBean.LEV_CSR)
 	{

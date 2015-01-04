@@ -54,7 +54,7 @@
 	
 	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
-	<script src="scripts/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
 	<script>
 

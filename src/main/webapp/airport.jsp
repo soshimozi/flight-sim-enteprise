@@ -140,7 +140,7 @@
 	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
 
 	<% //regressed jquery so that lightbox would work %>
-	<script src="scripts/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
 	<script src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>

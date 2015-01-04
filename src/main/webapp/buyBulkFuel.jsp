@@ -46,8 +46,8 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
 	<link href="css/Master.css" rel="stylesheet" type="text/css" />
-	
-	<script src="scripts/jquery.min.js"></script>
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
 	<script>
 		function checkForm()

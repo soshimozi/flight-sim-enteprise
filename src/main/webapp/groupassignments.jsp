@@ -15,6 +15,12 @@
         return;
     }
 
+    if(request.getParameter("groupid") == null || request.getParameter("groupid").equals(""))
+    {
+        request.getSession().setAttribute("message", "Missing parameter.");
+        request.getRequestDispatcher("error.jsp").forward(request, response);
+    }
+
     int groupId;
     boolean isStaff;
 
@@ -251,6 +257,9 @@
                         else
                             name = $("#selectedGroupName").val();
 
+                        if($("#selectedGroupId").val() === null || $("#selectedGroupId").val() === '')
+                            return;
+
                         if (window.confirm("Are you sure you want to transfer selected assignments to " + name + "?")) {
                             if(displayGroupsOnly)
                                 transferAssignment($("input[name='select']:checked"), $("#selectedGroupId").val());
@@ -302,10 +311,10 @@
             <input class="btn btn-success" type="button" name="add_Selected" value="Add Selected to My Flight"
                    onclick="addToMyFlight()"/>
             <br/><br/>
-            <%
-                if (isStaff)
-                {
-            %>
+<%
+    if (isStaff)
+    {
+%>
             <div class="panel panel-primary alert-info" style="background: lightsteelblue; padding: 15px">
                 <h3>Owner and Staff Only</h3>
                 <div class="well">
@@ -338,19 +347,19 @@
                                 <span id="byGroup" style="display: none">
                                     <select class="form-control" id="groupSelect">
                                         <option value=""></option>
-                                        <%
-                                            List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
+<%
+        List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
 
-                                            for (UserBean group : groups)
-                                            {
-                                                if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
-                                                {
-                                        %>
+        for (UserBean group : groups)
+        {
+            if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
+            {
+%>
                                         <option value="<%=group.getId()%>"><%= group.getName()%></option>
-                                        <%
-                                                }
-                                            }
-                                        %>
+<%
+            }
+        }
+%>
                                     </select>
                                 </span>
                             </label>
@@ -360,9 +369,9 @@
                 </div>
             </div>
         </div>
-        <%
-            }
-        %>
+<%
+    }
+%>
     </div>
 </div>
 

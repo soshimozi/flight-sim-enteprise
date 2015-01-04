@@ -69,7 +69,7 @@ public class Aircraft implements Serializable
             String qry = "UPDATE aircraft SET sellprice=null, owner = ?, lessor = ? WHERE owner = ? AND id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, lessee, owner, owner, aircraftId);
 
-            Banking.doPayment(lessee, owner, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease", false);
+            Banking.doPayment(owner, lessee, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease", false);
         }
         catch (SQLException e)
         {
@@ -84,7 +84,7 @@ public class Aircraft implements Serializable
             String qry = "UPDATE aircraft SET owner = ?, lessor = null WHERE lessor = ? AND id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, owner, owner, aircraftId);
 
-            Banking.doPayment(owner, lessee, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease Return", false);
+            Banking.doPayment(lessee, owner, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease Return", false);
         }
         catch (SQLException e)
         {

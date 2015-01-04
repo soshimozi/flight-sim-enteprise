@@ -32,8 +32,8 @@
     <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css" />
     <link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
-    <script src="../scripts/jquery.min.js"></script>
-    <script src="../scripts/jquery-ui.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script src="../scripts/AutoComplete.js"></script>
     <script src="../scripts/AutoCompleteEmail.js"></script>
     <script src="../scripts/AutoCompleteIP.js"></script>
@@ -76,6 +76,23 @@
         <a href="/admin/admin.jsp">Return to Admin Page</a><br/>
 
         <p><%= message %></p>
+
+        <div class="form" style="width: 500px">
+            <h2>Sign up</h2>
+            <p>To sign up, enter your email address and a user name in the form below.</p>
+
+            <form method="post" action="/userctl">
+                <div>
+                    <input type="hidden" name="event" value="create">
+                    <input type="hidden" name="returnpage" value="<%=returnPage%>">
+                </div>
+                Username<br>
+                <input name="user" type="text" class="textarea" size="50" maxlength="45"><br>
+                Email<br/>
+                <input name="email" type="text" class="textarea" size="50"  maxlength="45"><br><br>
+                <input type="submit" class="button" value="Sign up">
+            </form>
+        </div>
 
         <div class="form" style="width: 400px">
             <h2>Search by User Account</h2>
@@ -135,23 +152,6 @@
                     <input type="button" class="button" onclick="doViewAccount('SearchByIP')" value="View Account" />&nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="hidden" name="returnpage" value="<%= returnPage %>"/>
                 </div>
-            </form>
-        </div>
-
-        <div class="form" style="width: 500px">
-            <h2>Sign up</h2>
-            <p>To sign up, enter your email address and a user name in the form below.</p>
-
-            <form method="post" action="/userctl">
-                <div>
-                    <input type="hidden" name="event" value="create">
-                    <input type="hidden" name="returnpage" value="<%=returnPage%>">
-                </div>
-                Username<br>
-                <input name="user" type="text" class="textarea" size="50" maxlength="45"><br>
-                Email<br/>
-                <input name="email" type="text" class="textarea" size="50"  maxlength="45"><br><br>
-                <input type="submit" class="button" value="Sign up">
             </form>
         </div>
 

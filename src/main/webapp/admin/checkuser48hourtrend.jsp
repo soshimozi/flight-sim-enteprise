@@ -31,8 +31,8 @@
     <script type='text/javascript' src='../scripts/common.js'></script>
     <script type='text/javascript' src='../scripts/css.js'></script>
     <script type='text/javascript' src='../scripts/standardista-table-sorting.js'></script>
-    <script type='text/javascript' src="../scripts/jquery.min.js"></script>
-    <script type='text/javascript' src="../scripts/jquery-ui.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script type='text/javascript' src="../scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">

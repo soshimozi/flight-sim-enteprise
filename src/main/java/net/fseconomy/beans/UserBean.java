@@ -476,6 +476,9 @@ public class UserBean implements Serializable
 	{
 		if (i < 0)
 			i = 0;
+		if(i > 100)
+			i = 100;
+
 		defaultPilotFee = i;
 	}
 

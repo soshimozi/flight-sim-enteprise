@@ -890,7 +890,7 @@ public class Datafeed extends HttpServlet
                             }
                             else
                             {
-                                aircraftIds = aircraftIds + aircraft.getRegistration();
+                                aircraftIds = aircraftIds + aircraft.getId();
                             }
 
                             if ((counter + 1) < aircraftList.size())
