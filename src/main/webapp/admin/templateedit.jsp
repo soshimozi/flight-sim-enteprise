@@ -2,6 +2,8 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.data.* "
 %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="template" class="net.fseconomy.beans.TemplateBean">
@@ -38,16 +40,28 @@
 	{
 		try
 		{
-			Templates.updateTemplate(template, user);
+			String saId[] = request.getParameterValues("surfType");
+			if(saId != null && saId.length > 0)
+			{
+				List<Integer> list = new ArrayList<>();
+				for(String s: saId)
+					list.add(Integer.parseInt(s));
+
+				template.setAllowedSurfaceTypes(list);
+
+				Templates.updateTemplate(template, user);
 %>
-			<jsp:forward page="/admin/templates.jsp" />
-<%		
+				<jsp:forward page="/admin/templates.jsp" />
+<%
+			}
 		} 
 		catch (DataError e)
 		{
 			error = e.getMessage();
 		}
 	}
+
+	List<Integer> surfList = template.getAllowedSurfaceTypes();
 %>
 <%!
 	String deviation(int current)
@@ -79,6 +93,36 @@
 
 	<link href="../css/Master.css" rel="stylesheet" type="text/css" />
 
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+	<script>
+
+		function checkAll() {
+			var field = document.getElementById("templateForm").surfType;
+			for (i = 0; i < field.length; i++) {
+				field[i].checked = true;
+			}
+			field.checked = true;  // needed in case of only one box
+		}
+
+		function uncheckAll() {
+			var field = document.getElementById("templateForm").surfType;
+			for (i = 0; i < field.length; i++)
+				field[i].checked = false;
+
+			field.checked = false;  // needed in case of only one box
+		}
+		$(function()
+		{
+			$('#selectAll').click(function () {
+				checkAll();
+			});
+			$('#deselectAll').click(function () {
+				uncheckAll();
+			});
+		});
+
+	</script>
 </head>
 <body>
 
@@ -98,7 +142,7 @@
 	int keepAlive = template.getTargetKeepAlive();
 %>
 	<div class="form" style="width: 500px">
-		<form method="post" action="/admin/templateedit.jsp">
+		<form method="post" action="/admin/templateedit.jsp" id="templateForm">
 			<input type="hidden" name="submit" value="true"/>
 			<input type="hidden" name="event" value="editTemplate"/>
 			<input type="hidden" name="id" value="<%= template.getId() %>"/>
@@ -147,8 +191,30 @@
 				<tr>
 					<td>Target Distance</td><td><input name="targetDistance" type="text" class="textarea" value="<%= template.getTargetDistance() %>" size="7"/>  
 					Dev <select name="distanceDev" class="formselect"><%= deviation(template.getDistanceDev())%></select></td>
-				</tr>	
-				
+				</tr>
+
+				<tr>
+					<td>Runway Surface Type</td>
+					<td>
+						<div style="border: 1px solid #000000">
+							<div><small>Note: if none are selected it will default to ALL</small><div>
+							<hr>
+							<div style="text-align: center;"><span id="selectAll" style="font-size: small;">Select All</span> <span id="deselectAll" style="font-size: small;">Deselect All</span><br></div>
+							<label><input type="checkbox" name="surfType" value="1" <%=surfList.contains(1) ? "checked" : ""%>> Asphalt</label><br>
+							<label><input type="checkbox" name="surfType" value="2" <%=surfList.contains(2) ? "checked" : ""%>> Concrete</label><br>
+							<label><input type="checkbox" name="surfType" value="3" <%=surfList.contains(3) ? "checked" : ""%>> Coral</label><br>
+							<label><input type="checkbox" name="surfType" value="4" <%=surfList.contains(4) ? "checked" : ""%>> Dirt</label><br>
+							<label><input type="checkbox" name="surfType" value="5" <%=surfList.contains(5) ? "checked" : ""%>> Grass</label><br>
+							<label><input type="checkbox" name="surfType" value="6" <%=surfList.contains(6) ? "checked" : ""%>> Gravel</label><br>
+							<label><input type="checkbox" name="surfType" value="7" <%=surfList.contains(7) ? "checked" : ""%>> Helipad</label><br>
+							<label><input type="checkbox" name="surfType" value="8" <%=surfList.contains(8) ? "checked" : ""%>> Oil Treated</label><br>
+							<label><input type="checkbox" name="surfType" value="9" <%=surfList.contains(9) ? "checked" : ""%>> Snow</label><br>
+							<label><input type="checkbox" name="surfType" value="10" <%=surfList.contains(10) ? "checked" : ""%>> Steel Mats</label><br>
+							<label><input type="checkbox" name="surfType" value="11" <%=surfList.contains(11) ? "checked" : ""%>> Water</label>
+						</div>
+					</td>
+				</tr>
+
 				<tr>
 					<td>From/To runways minimum length</td><td><input name="matchMinSize" type="text" class="textarea" value="<%= template.getMatchMinSize() %>" size="7"/>
 					ft</td>

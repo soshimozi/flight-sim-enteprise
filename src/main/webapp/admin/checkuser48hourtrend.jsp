@@ -63,7 +63,7 @@
 %>
 
 <%
-    if (request.getParameter("submit") == null && (message == null))
+    if (request.getParameter("submit") == null && (message == null) && request.getParameter("id") == null)
     {
 %>	<h2>Enter User Account</h2>
 	<div class="form" style="width: 400px">
@@ -79,27 +79,33 @@
 	</div>
 <%
     }
-    else if (request.getParameter("submit") != null)
+    else if (request.getParameter("submit") != null || request.getParameter("id") != null)
     {
-        UserBean inputuser = Accounts.getAccountByName(request.getParameter("username"));
-        if (inputuser == null)
+        int userid = 0;
+
+        if(request.getParameter("id") != null)
+            userid = Integer.parseInt(request.getParameter("id"));
+        else
+            userid = Accounts.getAccountIdByName(request.getParameter("username"));
+
+        if (userid == 0)
         {
             message = "User Not Found";
         }
 
         List<TrendHours> trend;
-        trend = Data.getTrendHoursQuery(inputuser.getId(), 500);
+        trend = Data.getTrendHoursQuery(userid, 500);
 
         if (message != null)
         {
 %>	<div class="message"><%= message %></div>
 <%
         }
-        else if (inputuser != null)
+        else if (userid != 0)
         {
 %>
         <div class="dataTable">
-		<h2>User - <%= inputuser.getName() %> - 48 Hour Trend - Last 500 Flights</h2><br/>
+		<h2>User - <%= Accounts.getAccountNameById(userid) %> - 48 Hour Trend - Last 500 Flights</h2><br/>
 		<a href="/admin/admin.jsp">Return to Admin Page</a><br/>
 		<table id="sortableTableStats" class="sortable">
 		<thead>

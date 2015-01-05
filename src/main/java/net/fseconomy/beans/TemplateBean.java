@@ -19,9 +19,14 @@
 
 package net.fseconomy.beans;
 
+import org.apache.commons.lang3.BitField;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
 
 /**
  * @author Marty
@@ -48,6 +53,7 @@ public class TemplateBean implements Serializable
 	String comment;
 	String icaoSet1, icaoSet2;
 	int units;
+	int surfaceTypes;
 	
 	//All-In template changes
 	int speedFrom, speedTo;
@@ -76,7 +82,8 @@ public class TemplateBean implements Serializable
 		setIcaoSet1(rs.getString("icaoset1"));
 		setIcaoSet2(rs.getString("icaoset2"));
 		setUnits(rs.getString("units"));
-		
+		setAllowedSurfaceTypes(rs.getInt("allowedSurfaceTypes"));
+
 		//All-In changes
 		setSeatsFrom(rs.getInt("seatsFrom"));
 		setSeatsTo(rs.getInt("seatsTo"));
@@ -96,6 +103,7 @@ public class TemplateBean implements Serializable
 		rs.updateInt("distanceDev", getDistanceDev());
 		rs.updateString("typeOfPay", getSTypeOfPay());
 		rs.updateString("units", getSUnits());
+		rs.updateInt("allowedSurfaceTypes", surfaceTypes);
 		if (getMatchMaxSize() == 0)
 			rs.updateNull("matchMaxSize");
 		else
@@ -289,7 +297,34 @@ public class TemplateBean implements Serializable
 	{
 		setUnits(AssignmentBean.unitsId(s));
 	}
-	
+
+	public void setAllowedSurfaceTypes(int i)
+	{
+		surfaceTypes = i;
+	}
+
+	public void setAllowedSurfaceTypes(List<Integer> list)
+	{
+		BitSet bs = BitSet.valueOf(new long[]{(long)surfaceTypes});
+
+		for(int i: list)
+			bs.set(i-1);
+
+		surfaceTypes = (int)bs.toLongArray()[0];
+	}
+
+	public List<Integer> getAllowedSurfaceTypes()
+	{
+		BitSet bs = BitSet.valueOf(new long[]{(long)surfaceTypes});
+		List<Integer> list = new ArrayList<>();
+
+		for(int i = 0; i<11; i++)
+			if(bs.get(i))
+				list.add(i+1);
+
+		return list;
+	}
+
 	public int getSeatsFrom() {
 		return seatsFrom;
 	}

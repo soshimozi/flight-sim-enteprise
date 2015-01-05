@@ -143,7 +143,8 @@ public class MaintenanceCycle implements Runnable
 		if(oneTimeStats)
 		{
 			oneTimeStats = false;
-			doStatsAndLoanLimitChecks();			
+			doStatsAndLoanLimitChecks();
+			Stats.FlightSummaryList = Stats.getInstance().getFlightSummary();
 			return;
 		}
 		
@@ -165,7 +166,7 @@ public class MaintenanceCycle implements Runnable
 		doAircraftMaintenance();
 		
 		//TODO: comment out for test server for faster cycle times
-//		Goods cleanup, opens and closes fbo's
+		//Goods cleanup, opens and closes fbo's
 	    checkGoodsRecords();
 	    processFboStatus();
 		processFboRenters();
@@ -688,7 +689,8 @@ public class MaintenanceCycle implements Runnable
 				int keepAlive = rsTemplate.getInt("targetKeepAlive");
 				int targetAmount = rsTemplate.getInt("targetAmount");
 				int maxSize = rsTemplate.getInt("matchMaxSize");
-				int minSize = rsTemplate.getInt("matchMinSize");					
+				int minSize = rsTemplate.getInt("matchMinSize");
+				int surfType = rsTemplate.getInt("allowedSurfaceTypes");
 				
 				boolean isAllIn = rsTemplate.getString("typeOfPay").equals("allin");
 				boolean waterOk = !isAllIn;
@@ -774,10 +776,17 @@ public class MaintenanceCycle implements Runnable
 					
 					if (minSize > 0)
 						having = having + " AND largest > " + minSize;
-					
+
+					if(surfType != 0)
+					{
+						String sSurfaceTypes = BitSet.valueOf(new long[]{(long) surfType}).toString();
+						sSurfaceTypes = sSurfaceTypes.replace("{", "").replace("}", "");
+
+						having = having + " AND surfaceType in (" + sSurfaceTypes + ")";
+					}
 					needed = frequency + " * sqrt(sum(size)/6000) as needed";
 					query = "SELECT bucket, min(longestRwy) AS smallest, max(longestRwy) AS largest, " + needed +
-						 ", count(assignments.id) AS got, avg(lat) FROM airports LEFT join assignments ON assignments.fromicao = airports.icao AND fromtemplate = " + 
+						 ", count(assignments.id) AS got, avg(lat), surfaceType FROM airports LEFT join assignments ON assignments.fromicao = airports.icao AND fromtemplate = " +
 						 id + " GROUP by bucket HAVING " + having;
 				} 
 				else

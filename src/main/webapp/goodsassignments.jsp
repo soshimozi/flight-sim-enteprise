@@ -304,7 +304,7 @@
                     <input class="btn btn-danger" type="button" name="delete_Selected" value="Delete assignments" onclick="deleteGoodsAssignments()"/>
                 </div>
                 <div class="well alert-danger">
-                    <h4>Add Comment to selected assignemnts</h4>
+                    <h4>Add Comment to selected assignments</h4>
                     <strong>Warning:</strong> This will overwrite any existing comment for the selected assignments!<br/>
                     <label>
                         You must click the "Add comment" button!<br/>
