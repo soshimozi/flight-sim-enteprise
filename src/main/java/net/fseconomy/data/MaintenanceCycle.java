@@ -922,8 +922,6 @@ public class MaintenanceCycle implements Runnable
 								aircraftId = aircraftRs.getInt(1);
 							else // no aircraft found, skip it
 								continue;
-							if(aircraftId==37506)
-								System.out.println("hit");
 						}
 						
 						int distance = (int) Math.round(to.distance);
