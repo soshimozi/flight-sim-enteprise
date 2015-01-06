@@ -1277,7 +1277,7 @@ public class UserCtl extends HttpServlet
         if (aircraft == null)
             throw new DataError("Aircraft not found.");
 
-        Aircraft.leasereturnac(aircraft.getId(), aircraft.getOwner(), aircraft.getLessor(), aircraft.getLocation());
+        Aircraft.leasereturnac(aircraft.getId());
 	}
 	
 	void doRefuel(HttpServletRequest req) throws DataError
