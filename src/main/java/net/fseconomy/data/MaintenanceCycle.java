@@ -12,6 +12,7 @@ import net.fseconomy.dto.CloseAirport;
 import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.GlobalLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +48,9 @@ public class MaintenanceCycle implements Runnable
 		return maintenanceInstance;
 	}
 
-    public final static Logger logger = LoggerFactory.getLogger(MaintenanceCycle.class);
-
 	public MaintenanceCycle()
 	{
-		logger.info("MaintenanceCycle Constructor called");
+		GlobalLogger.logApplicationLog("MaintenanceCycle Constructor called", MaintenanceCycle.class);
 		
 		lastDailyRun = -1;
 		//interestPositive = Math.pow(1.05, 1/365.0) - 1;
@@ -80,7 +79,7 @@ public class MaintenanceCycle implements Runnable
         long elapsed = endtime-starttime;
         long currTime = System.currentTimeMillis();
 
-		logger.info(new Timestamp(System.currentTimeMillis()) + ": " + "Cycle Completed: type = " + cycletype + ", elapsed time = " + elapsed + "ms");
+		GlobalLogger.logApplicationLog(new Timestamp(System.currentTimeMillis()) + ": " + "Cycle Completed: type = " + cycletype + ", elapsed time = " + elapsed + "ms", MaintenanceCycle.class);
 
 		if(cycleTimeHistory == null)
 			cycleTimeHistory = new CycleTimeData();
@@ -207,7 +206,7 @@ public class MaintenanceCycle implements Runnable
 		long bytesServed = Stats.bytesServed;
 		long totalImagesSent = Stats.totalImagesSent;
 
-		logger.info("Signature stats: defaultCount = " + defaultCount + ", createCount = " + createCount + " , cacheCount = " + cacheCount + ", totalImagesSent = " + totalImagesSent + ", totalBytes = " + bytesServed);
+		GlobalLogger.logApplicationLog("Signature stats: defaultCount = " + defaultCount + ", createCount = " + createCount + " , cacheCount = " + cacheCount + ", totalImagesSent = " + totalImagesSent + ", totalBytes = " + bytesServed, MaintenanceCycle.class);
 	}
 
 	void doAircraftMaintenance()
@@ -470,8 +469,8 @@ public class MaintenanceCycle implements Runnable
 	    		
 	    		qry = "UPDATE accounts SET interest = 0.00 where type = 'person'";
 	    		DALHelper.getInstance().ExecuteUpdate(qry);
-	    		
-	    		logger.info("Interest Payments: Total Payout - " + totalPaid.toString() + " to " + counter + " pilots");
+
+				GlobalLogger.logApplicationLog("Interest Payments: Total Payout - " + totalPaid.toString() + " to " + counter + " pilots", MaintenanceCycle.class);
 	    	}
 	    	
 	    	//1 million balance cap - no additional interest on balances over 1 million
@@ -1380,7 +1379,7 @@ public class MaintenanceCycle implements Runnable
 					
 					qry = "UPDATE aircraft SET sellPrice = ?, markettimeOut = ? where id = ?";
 					DALHelper.getInstance().ExecuteUpdate(qry, sellPrice,  new Timestamp(expires.getTime().getTime()), aircraft.getId());
-					logger.info("Selling aircraft: " + aircraft.getMakeModel() + ", " + aircraft.getRegistration() + ", Price = " + sellPrice + ", expires = " + expires.getTime().toString());
+					GlobalLogger.logApplicationLog("Selling aircraft: " + aircraft.getMakeModel() + ", " + aircraft.getRegistration() + ", Price = " + sellPrice + ", expires = " + expires.getTime().toString(), MaintenanceCycle.class);
 					
 					//remove any AllIn assignments that might be attached to this aircraft
 					qry = "DELETE FROM assignments WHERE aircraftid = ?";
@@ -1791,8 +1790,8 @@ public class MaintenanceCycle implements Runnable
 						if (capacity[6] > 0)
 							updateSet.updateDouble("fuelRightTip", 0.5);
 						
-						updateSet.insertRow();	
-						logger.info("CreateAircraft creating unit - Model:" + model.getId());
+						updateSet.insertRow();
+						GlobalLogger.logApplicationLog("CreateAircraft creating unit - Model:" + model.getId(), MaintenanceCycle.class);
 					}
 					
 					airportSet.close();
@@ -1804,7 +1803,7 @@ public class MaintenanceCycle implements Runnable
 					updateSet = updater.executeQuery("SELECT * FROM aircraft WHERE userlock IS NULL AND owner = 0 AND engine1 IS NULL AND NOT EXISTS (SELECT * FROM assignments WHERE assignments.aircraft = aircraft.registration) AND model = " + model.getId() + " AND rand() < " + probability);
 					while (updateSet.next())
 					{
-						logger.info("CreateAircraft deleting unit - Model:" + updateSet.getInt("model"));
+						GlobalLogger.logApplicationLog("CreateAircraft deleting unit - Model:" + updateSet.getInt("model"), MaintenanceCycle.class);
 						updateSet.deleteRow();
 					}
 				}						
@@ -1880,7 +1879,7 @@ public class MaintenanceCycle implements Runnable
 			if(loopCounter > 1000)
 			{
 				//Apparently we have ran out of registration codes, add a extended postfix
-				logger.info("New Registration generator excessive looping: prefix [" + prefix + "], postfix [" + postfix + "]");
+				GlobalLogger.logDebugLog("New Registration generator excessive looping: prefix [" + prefix + "], postfix [" + postfix + "]", MaintenanceCycle.class);
 				
 				registration.append('-');
 				int ran = (int)Math.round(Math.random()*100);
@@ -1926,8 +1925,8 @@ public class MaintenanceCycle implements Runnable
 				break;
 				
 			default:
-				logger.info( "createNewAircraftBaseEquipment(): model equipment not defined for: " + modelequipment +
-									", Default VFR used.");
+				GlobalLogger.logApplicationLog("createNewAircraftBaseEquipment(): model equipment not defined for: " + modelequipment +
+						", Default VFR used.", MaintenanceCycle.class);
 		}
 		
 		return mask;
@@ -1997,15 +1996,14 @@ public class MaintenanceCycle implements Runnable
 			}
 			else
 			{
-				logger.debug("Error in isValidRegistration(), did not find country for ICAO: " + icao);
+				GlobalLogger.logDebugLog("Error in isValidRegistration(), did not find country for ICAO: " + icao, MaintenanceCycle.class);
 
 				return "Default";
 			}
 		}
 		catch (SQLException e)
 		{
-			System.err.println(qry);
-			e.printStackTrace();				
+			e.printStackTrace();
 		} 
 		
 		return null;
@@ -2048,7 +2046,7 @@ public class MaintenanceCycle implements Runnable
 			}
 			else //should never reach, force new registration
 			{
-				logger.info("Error in isValidRegistrationFormat(), registration postfix not a valid format symbol!: [" + c + "] of [" + postfix + "]");
+				GlobalLogger.logDebugLog("Error in isValidRegistrationFormat(), registration postfix not a valid format symbol!: [" + c + "] of [" + postfix + "]", MaintenanceCycle.class);
 				return false;
 			}
 		}
@@ -2094,7 +2092,7 @@ public class MaintenanceCycle implements Runnable
 		}
 		catch (SQLException e)
 		{
-			logger.error("ERROR: Changing aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]");
+			GlobalLogger.logDebugLog("ERROR: Changing aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]", MaintenanceCycle.class);
 			e.printStackTrace();				
 		} 
 	}
@@ -2128,8 +2126,8 @@ public class MaintenanceCycle implements Runnable
 		
 		currRegs.add(newreg);		
 		updateAircraftToNewRegistration(reg, newreg);
-		
-		logger.info("Changed aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]");
+
+		GlobalLogger.logApplicationLog("Changed aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]", MaintenanceCycle.class);
 	}	
 	
 	void checkRegistrations()

@@ -82,7 +82,6 @@
             service.setNotes(notes);
             ServiceProviders.updateServiceProvider(service);
 
-            System.out.println("newnote = " + newnote);
             if(newnote == null || newnote.isEmpty())
             {
 %>

@@ -5,6 +5,7 @@ import net.fseconomy.dto.CloseAirport;
 import net.fseconomy.dto.DepartFlight;
 import net.fseconomy.dto.DistanceBearing;
 import net.fseconomy.util.Constants;
+import net.fseconomy.util.GlobalLogger;
 
 import java.sql.*;
 import java.util.*;
@@ -153,14 +154,14 @@ public class Flights
                 //Is valid aircraft
                 if (aircraft == null)
                 {
-                    System.err.println(new Timestamp(System.currentTimeMillis()) + " processFlight: No Aircraft lock.  SimType = " + simType.name() + ", User = " + user.getId());
+                    GlobalLogger.logFlightLog(new Timestamp(System.currentTimeMillis()) + " processFlight: No Aircraft lock.  SimType = " + simType.name() + ", User = " + user.getId(), Flights.class);
                     throw new DataError("VALIDATIONERROR: No aircraft in use, flight aborted.");
                 }
 
                 //Check flight in progress
                 if (aircraft.getDepartedFrom() == null)
                 {
-                    System.err.println(new Timestamp(System.currentTimeMillis()) + " processFlight: No flight in progress.  SimType = " + simType.name() + ", User = " + user.getId());
+                    GlobalLogger.logFlightLog(new Timestamp(System.currentTimeMillis()) + " processFlight: No flight in progress.  SimType = " + simType.name() + ", User = " + user.getId(), Flights.class);
                     throw new DataError("VALIDATIONERROR: It appears that a duplicate flight was submitted and canceled. Please check your My Flight page for current flight status.");
                 }
 
@@ -177,7 +178,7 @@ public class Flights
                     cancelFlight(user);
                     //Added more debugging variables to the system message, this happens rarely but we have no idea why
 
-                    System.err.println(new Timestamp(System.currentTimeMillis()) + " Excess Speed Calculated, rejecting flight. SimType = " + simType.name() + ", Reg = " + aircraft.getRegistration() + " User = " + user.getId() + " DepartICAO = " + aircraft.getDepartedFrom() + " ArriveICAO = " + location.icao + " Distance = " + flightDistance + " Airspeed = " + flightMPH + " EngineTime = " + engineTime);
+                    GlobalLogger.logFlightLog(new Timestamp(System.currentTimeMillis()) + " Excess Speed Calculated, rejecting flight. SimType = " + simType.name() + ", Reg = " + aircraft.getRegistration() + " User = " + user.getId() + " DepartICAO = " + aircraft.getDepartedFrom() + " ArriveICAO = " + location.icao + " Distance = " + flightDistance + " Airspeed = " + flightMPH + " EngineTime = " + engineTime, Flights.class);
                     throw new DataError("VALIDATIONERROR: Invalid speed calculated. (" + flightMPH + "-MPH) between DepartICAO = " + aircraft.getDepartedFrom() + " to ArriveICAO = " + location.icao + " in " + (int)(engineTime/60.0 + .5) + " Minutes, flight aborted");
                 }
 
@@ -253,7 +254,7 @@ public class Flights
                     boolean allInAssignment = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getId());
                     if( !allInAssignment )
                     {
-                        System.err.println("  Flight kicked: AllIn flight with no assignment at current aircraft location");
+                        GlobalLogger.logFlightLog("  Flight kicked: AllIn flight with no assignment at current aircraft location", Flights.class);
                         String errmsg = "VALIDATIONERROR: AllIn flights must have the assignment co-located with aircraft. It appears the assignment was not transported -- flight aborted!";
 
                         cancelFlight(user);
@@ -316,22 +317,24 @@ public class Flights
                     toPayOwner = flightCost;  // Pay this to the owner of the aircraft
 
                     if(flightCost == 0 && price != 0)
-                        System.err.println("****> Rental costs for Reg: " + aircraft.getRegistration() +
-                                ", Date: " + new Timestamp(System.currentTimeMillis()) +
-                                ", Owner: " + Accounts.getAccountNameById(aircraft.getOwner()) +
-                                ", By: " + user.getName() +
-                                ", From: " + aircraft.getDepartedFrom() +
-                                ", To: " + location.icao +
-                                ", EngineTimeType: " + (aircraft.getAccounting() == AircraftBean.ACC_HOUR ? "Hourly" : "Tach") +
-                                ", EngineTime: " + engineTime +
-                                ", RentalTime: " + rentalTime +
-                                ", RentalType: " + (aircraft.wasWetRent() ? "Wet" : "Dry") +
-                                ", InvalidFuel: " + invalidFuel +
-                                ", pricePerHour: " + price +
-                                ", Rental Cost: " + rentalCost +
-                                ", FuelCost: " + fuelCost +
-                                ", Bonus: " + bonus +
-                                ", TotalToOwner: " + flightCost );
+                        GlobalLogger.logFlightLog(
+                                new StringBuilder()
+                                        .append("****> Rental costs for Reg: ").append(aircraft.getRegistration())
+                                        .append(", Date: ").append(new Timestamp(System.currentTimeMillis()))
+                                        .append(", Owner: ").append(Accounts.getAccountNameById(aircraft.getOwner()))
+                                        .append(", By: ").append(user.getName())
+                                        .append(", From: ").append(aircraft.getDepartedFrom())
+                                        .append(", To: ").append(location.icao)
+                                        .append(", EngineTimeType: ").append(aircraft.getAccounting() == AircraftBean.ACC_HOUR ? "Hourly" : "Tach")
+                                        .append(", EngineTime: ").append(engineTime).append(", RentalTime: ")
+                                        .append(rentalTime).append(", RentalType: ").append(aircraft.wasWetRent() ? "Wet" : "Dry")
+                                        .append(", InvalidFuel: ").append(invalidFuel)
+                                        .append(", pricePerHour: ").append(price)
+                                        .append(", Rental Cost: ").append(rentalCost)
+                                        .append(", FuelCost: ").append(fuelCost)
+                                        .append(", Bonus: ").append(bonus)
+                                        .append(", TotalToOwner: ").append(flightCost).toString(),
+                                Flights.class);
 
                     // Crew Cost added  - deducts $100 per hour per additional crew member from payout
                     crewCost = m.getCrew() * 100 * (float)(engineTime/3600.0);
@@ -749,7 +752,7 @@ public class Flights
                 }
                 else if(rs.getString("departedFrom") == null)
                 {
-                    System.err.println("Data error for aircraft " + rs.getString("registration") + ": location = null and departedFrom = null, reverting to home");
+                    GlobalLogger.logFlightLog("Data error for aircraft " + rs.getString("registration") + ": location = null and departedFrom = null, reverting to home", Flights.class);
                     location = rs.getString("home");
                 }
                 else

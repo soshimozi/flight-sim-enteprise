@@ -22,25 +22,44 @@
     <link href="css/Master.css" rel="stylesheet" type="text/css" />
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="scripts/bootstrap.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="scripts/bootstrap-3-typeahead.js"></script>
+
 
     <script>
 
         $(document).ready(function() {
 
-            $("#modelSelect").change(function(){
-                $("#modelData").load( "aircraftmodeldata.jsp?id=" + $(this).val() );
+            var $input = $('.typeahead');
+            $input.typeahead(
+                {source:
+                [
+<%
+    List<MakeModel> makeModels = Models.getMakeModels();
+    for(MakeModel makeModel : makeModels)
+    {
+        for(Model model: makeModel.Models)
+        {
+%>
+                    {id: "<%=model.Id%>", name: "<%= makeModel.MakeName + " " + model.ModelName%>"},
+<%
+        }
+    }
+%>
+                ],
+                autoSelect: true}
+            );
+
+            $input.change(function() {
+                var current = $input.typeahead("getActive");
+                if (current)
+                {
+                    // Some item from your model is active!
+                    $("#modelData").load( "aircraftmodeldata.jsp?id=" + current.id );
+                }
             });
 
         });
-
-        function selectModel(modelId, modelName)
-        {
-            //var e = document.getElementById("dropdownSelectModel");
-            //e.innerHTML = modelName + '<span class="caret"></span>';
-
-            $("#modelData").load( "aircraftmodeldata.jsp?id=" + modelId );
-        }
 
     </script>
 
@@ -57,31 +76,13 @@
                 <h3>
                     Aircraft Model Data
                 </h3>
-                <a href="aircraftconfigs.jsp">Open Table View</a>
-                <div class="dropdown">
-                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownSelectModel" data-toggle="dropdown" aria-expanded="true">
-                        Select Aircraft Model...
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdownSelectModel">
-                        <%
-                            List<MakeModel> makeModels = Models.getMakeModels();
-                            for(MakeModel makeModel : makeModels)
-                            {
-                        %>
-                        <li role="presentation" class="dropdown-header"><%=makeModel.MakeName%></li>
-                        <%
-                            for(int j=0;j<makeModel.Models.length; j++)
-                            {
-                        %>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="selectModel(<%=makeModel.Models[j].Id%>, '<%=makeModel.Models[j].ModelName %>')"><%=makeModel.Models[j].ModelName %></a></li>
-                        <%
-                                }
-                            }
-                        %>
-                    </ul>
+                <div class="form-group">
+                    <label>Search: </label>
+                    <input type="text" class="typeahead form-control" data-provide="typeahead">
                 </div>
-
+                <div>
+                    <small><a href="aircraftconfigs.jsp">Open Table View</a></small>
+                </div>
                 <div id="modelData" style="margin: 10px">
                 </div>
 

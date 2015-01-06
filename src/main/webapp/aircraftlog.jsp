@@ -42,7 +42,7 @@
     }
     catch(NumberFormatException e)
     {
-        UserCtl.logger.error("aircraftlog.jsp: id=" + request.getParameter("id") + ", user: " + user.getName() + ", url=" + request.getRequestURI());
+        GlobalLogger.logJspLog("aircraftlog.jsp: id=" + request.getParameter("id") + ", user: " + user.getName() + ", url=" + request.getRequestURI());
     }
 
 

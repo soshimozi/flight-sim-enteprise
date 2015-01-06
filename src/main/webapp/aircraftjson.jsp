@@ -6,6 +6,7 @@
 <%@ page import="net.fseconomy.beans.AircraftBean" %>
 <%@ page import="net.fseconomy.dto.*" %>
 <%@ page import="net.fseconomy.data.*" %>
+<%@ page import="net.fseconomy.util.GlobalLogger" %>
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" %>
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 <%
@@ -111,6 +112,6 @@
   {
     response.setStatus(400);
     output = "Error: " + e.getMessage();
-    System.out.println(output);
+    GlobalLogger.logJspLog(output);
   }
 %><%= output %>

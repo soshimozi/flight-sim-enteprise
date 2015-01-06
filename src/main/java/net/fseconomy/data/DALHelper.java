@@ -31,14 +31,13 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 
 import net.fseconomy.fixes.FixedCachedRowSetImpl;
+import net.fseconomy.util.GlobalLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DALHelper
 {
 	private static DataSource dataSource = null;
-
-    public final static Logger logger = LoggerFactory.getLogger(Data.class);
 
     //Singleton pattern
 	private static DALHelper singleton = new DALHelper();
@@ -49,7 +48,7 @@ public class DALHelper
 
 	public DALHelper()
 	{
-		logger.info("DALHelper constructor called");
+		GlobalLogger.logApplicationLog("DALHelper constructor called", DALHelper.class);
 
         try
         {

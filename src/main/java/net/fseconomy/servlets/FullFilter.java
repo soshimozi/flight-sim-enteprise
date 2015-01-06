@@ -21,6 +21,7 @@ package net.fseconomy.servlets;
 
 import net.fseconomy.data.DALHelper;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.GlobalLogger;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -86,7 +87,7 @@ public class FullFilter implements Filter
     //Logging variables
 	FileHandler logfile;
 	Logger logger;
-	
+
 	//Init arguments for Filter servlet
 	static FilterConfig filterconfig;
 	
@@ -94,18 +95,15 @@ public class FullFilter implements Filter
 	public void init(FilterConfig arg0) throws ServletException 
 	{
 		filterconfig = arg0;
-		//setupLogging();
-		//DALHelper.initDataSource();
-		//updateFilter();
 	}
 	
 	@Override
 	public void destroy() 
 	{
-		//logfile.close();
 	}
 
 	private static final String HEADER_X_FORWARDED_FOR = "X-FORWARDED-FOR";
+
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException 
 	{		
@@ -114,7 +112,6 @@ public class FullFilter implements Filter
 		HttpServletResponse response = (HttpServletResponse) res;
 		 
 		//Get the IP address of requesting machine.
-        //String ipAddress = request.getRemoteAddr().toString();
 		String remoteAddr = request.getRemoteAddr();
 		String x;
 		if ((x = request.getHeader(HEADER_X_FORWARDED_FOR)) != null)
@@ -226,7 +223,7 @@ public class FullFilter implements Filter
 		}
 		catch(Exception e)
 		{
-			System.out.println("Exception thrown: " + e);
+			GlobalLogger.logDebugLog("Exception thrown: " + e, FullFilter.class);
 		    e.printStackTrace();		    
 		}
 	}
@@ -252,8 +249,6 @@ public class FullFilter implements Filter
 	//
 	public static void updateFilter(DALHelper dalHelper)
 	{
-		//data.Data data = Data.getInstance();
-		
 		ResultSet rs;
 		String qry;
 		try
@@ -267,7 +262,6 @@ public class FullFilter implements Filter
 			while (rs.next())
 			{
 				blist.add(rs.getString(1));
-				//System.err.println("IPBan: " + rs.getString(1));
 			}
 			rs.close();
 

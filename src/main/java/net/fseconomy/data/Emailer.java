@@ -19,6 +19,7 @@
 
 package net.fseconomy.data;
 
+import net.fseconomy.util.GlobalLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +126,7 @@ public class Emailer
 			{
 				if(!isValidEmailAddress(emailAddress))
 				{
-					logger.info("SendMail Error: invalid email address format for[" + emailAddress + "]");
+					GlobalLogger.logApplicationLog("SendMail Error: invalid email address format for[" + emailAddress + "]", Emailer.class);
 					throw new DataError("SendMail Error: invalid email address format for[" + emailAddress + "]");
 				}
 				

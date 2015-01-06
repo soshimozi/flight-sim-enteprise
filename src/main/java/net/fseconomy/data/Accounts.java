@@ -23,8 +23,6 @@ public class Accounts implements Serializable
     public static final int LINK_INACTIVE = 0;
     public static final int LINK_ACTIVE = 1;
 
-    public static Logger logger = LoggerFactory.getLogger(Accounts.class);
-
     private static final Object lock = new Object();
 
     public Accounts()

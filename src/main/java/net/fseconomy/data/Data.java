@@ -24,6 +24,7 @@ import java.sql.*;
 import java.util.*;
 
 import net.fseconomy.dto.*;
+import net.fseconomy.util.GlobalLogger;
 
 public class Data implements Serializable
 {
@@ -66,7 +67,7 @@ public class Data implements Serializable
 		catch (SQLException e)
 		{
 			e.printStackTrace();
-			System.err.println(qry);
+			GlobalLogger.logDebugLog(qry, Data.class);
 		} 
 
 		if (result.size() == 0)

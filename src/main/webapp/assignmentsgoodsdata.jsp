@@ -44,7 +44,7 @@
             <tr>
                 <td class="sorter-false"></td>
                 <td class="sorter-false" colspan="3">
-                    Click Pay to edit
+                    Click Pay Amt to edit
                 </td>
             </tr>
             <tr>

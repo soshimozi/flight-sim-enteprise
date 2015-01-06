@@ -964,7 +964,7 @@ public class Datafeed extends HttpServlet
                 else if (account.isGroup())
                     log = Logging.getLogForGroupByMonth(account.getId(), month, year);
                 else
-                    log = Logging.getLogForUserByMonth(account.getName(), month, year);
+                    log = Logging.getLogForUserByMonth(account.getId(), month, year);
 
                 results = ProcessFlightLogs(req, log, "FlightLogsByMonthYear");
                 break;

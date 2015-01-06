@@ -37,6 +37,7 @@ import javax.servlet.http.HttpSession;
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.GlobalLogger;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
@@ -49,13 +50,11 @@ public class UserCtl extends HttpServlet
 	private static ScheduledFuture<?> future = null;
 	public static MaintenanceCycle maintenanceObject = null;	
 
-	public static Logger logger = LoggerFactory.getLogger(UserCtl.class);
-
     public static EmbeddedCacheManager cacheManager;
 
     public void init()
 	{
-		logger.info("UserCtl init() called");
+        GlobalLogger.logApplicationLog("UserCtl init() called", UserCtl.class);
 
 		FullFilter.updateFilter(DALHelper.getInstance());
 
@@ -73,9 +72,9 @@ public class UserCtl extends HttpServlet
 		}
 		else
 		{
-			long delay = minutesToNextHalfHour();			
-			
-			logger.info("Restart: Main cycle starts in (minutes): " + delay);
+			long delay = minutesToNextHalfHour();
+
+            GlobalLogger.logApplicationLog("Restart: Main cycle starts in (minutes): " + delay, UserCtl.class);
 
 			//if delay is 3 minutes or greater then run the cycle now to update stats
 			if(delay >= 3)
@@ -115,7 +114,7 @@ public class UserCtl extends HttpServlet
 	
 	public void destroy()
 	{
-		logger.info("UserCtl destroy() called");
+        GlobalLogger.logApplicationLog("UserCtl destroy() called", UserCtl.class);
 
         cacheManager.stop();
 		future.cancel(false);

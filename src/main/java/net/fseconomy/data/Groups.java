@@ -47,7 +47,6 @@ public class Groups implements Serializable
             boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), group.getId());
             if (!exists)
             {
-                System.err.println("id=" + group.getId());
                 throw new DataError("Group not found!");
             }
 

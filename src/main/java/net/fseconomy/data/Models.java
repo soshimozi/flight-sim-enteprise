@@ -5,6 +5,7 @@ import net.fseconomy.beans.UserBean;
 import net.fseconomy.dto.MakeModel;
 import net.fseconomy.dto.Model;
 import net.fseconomy.dto.ModelAliases;
+import net.fseconomy.util.GlobalLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +20,6 @@ import java.util.List;
 public class Models implements Serializable
 {
     static final int MAX_MODEL_TITLE_LENGTH = 128;
-
-    public final static Logger logger = LoggerFactory.getLogger(Data.class);
 
     public static String addModel(String aircraft, int[] fuelCapacities)
     {
@@ -283,7 +282,7 @@ public class Models implements Serializable
 
             if(!rs.next())
             {
-                logger.error("getModelAliases() unable to find modelId: " + modelId);
+                GlobalLogger.logApplicationLog("getModelAliases() unable to find modelId: " + modelId, Models.class);
                 return new ModelAliases();
             }
 

@@ -38,6 +38,7 @@ import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
 import net.fseconomy.dto.CloseAirport;
 import net.fseconomy.dto.DepartFlight;
+import net.fseconomy.util.GlobalLogger;
 
 public class FSagentFSX extends HttpServlet
 {	
@@ -207,7 +208,7 @@ public class FSagentFSX extends HttpServlet
 			String msg = e.getMessage();
 			
 			if(!msg.contains("is not compatible") && !msg.contains("no rented aircraft"))
-				System.err.println(new Timestamp(System.currentTimeMillis()) + " DataError: " + msg);
+				GlobalLogger.logFlightLog(new Timestamp(System.currentTimeMillis()) + " DataError: " + msg, FSagentFSX.class);
 			
 			if( msg.contains("VALIDATIONERROR"))
 				content = "<result>" + msg + "</result>";
@@ -503,7 +504,7 @@ public class FSagentFSX extends HttpServlet
 				fLeftTip == null || fRightMain == null || fRightAux == null|| fRightTip == null ||
 				fCenter2 == null || fCenter3 == null || fExt1 == null || fExt2 == null)
 			{
-				System.err.println("Flight data missing parameters");
+				GlobalLogger.logFlightLog("Flight data missing parameters: fuel and engine time.", FSagentFSX.class);
 				throw new DataError("Flight data missing parameters, flight aborted.");
 			}
 	
@@ -524,9 +525,8 @@ public class FSagentFSX extends HttpServlet
 				Float.parseFloat(fExt1), Float.parseFloat(fExt2) };
 			
 			CloseAirport closest = closestAirport(req);
-			if (closest == null) //added 6/25/10 Airboss - no icao returned, no processing
+			if (closest == null)
 			{
-				System.err.println("closestAirport: Failed to find");
 				throw new DataError("Invalid lat/lon, flight aborted.");
 			}
 			

@@ -139,9 +139,9 @@ public class Logging implements Serializable
         return getLogSQL(sql);
     }
 
-    public static List<LogBean> getLogForUserByMonth(String username, int month, int year)
+    public static List<LogBean> getLogForUserByMonth(int userId, int month, int year)
     {
-        String sql = "SELECT * FROM log where Year(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))= " + year + " and Month(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))=" + month + "" + " AND user = '" + Converters.escapeSQL(username) + "'";
+        String sql = "SELECT * FROM log where Year(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))= " + year + " and Month(CONVERT_TZ(`time`, @@session.time_zone, '+00:00'))=" + month + "" + " AND userid = " + userId;
 
         return getLogSQL(sql);
     }
