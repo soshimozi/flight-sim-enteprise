@@ -21,7 +21,8 @@ public class RestServlet
 {
     @GET
     @Path("/account/bank/{account}")
-    public Response getBalanceBank(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account)
+    public Response getBalanceBank(@HeaderParam("servicekey") String servicekey,
+                                   @PathParam("account") final int account)
     {
         PermissionCategory category = PermissionCategory.BANK;
 
@@ -33,7 +34,8 @@ public class RestServlet
 
     @GET
     @Path("/account/cash/{account}")
-    public Response getBalanceCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account)
+    public Response getBalanceCash(@HeaderParam("servicekey") String servicekey,
+                                   @PathParam("account") final int account)
     {
         PermissionCategory category = PermissionCategory.CASH;
 
@@ -45,7 +47,9 @@ public class RestServlet
 
     @POST
     @Path("/account/withdraw/{account}")
-    public Response getWithdrawIntoCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("amount") final String amount)
+    public Response getWithdrawIntoCash(@HeaderParam("servicekey") String servicekey,
+                                        @PathParam("account") final int account,
+                                        @FormParam("amount") final String amount)
     {
         PermissionCategory category = PermissionCategory.BANK;
 
@@ -57,7 +61,9 @@ public class RestServlet
 
     @POST
     @Path("/account/deposit/{account}")
-    public Response getDepositIntoBank(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("amount") final String amount)
+    public Response getDepositIntoBank(@HeaderParam("servicekey") String servicekey,
+                                       @PathParam("account") final int account,
+                                       @FormParam("amount") final String amount)
     {
         PermissionCategory category = PermissionCategory.BANK;
 
@@ -69,7 +75,11 @@ public class RestServlet
 
     @POST
     @Path("/account/transfer/{account}")
-    public Response getTransferFromCash(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("transferto") final int transferto, @FormParam("amount") final String amount, @FormParam("note") final String note)
+    public Response getTransferFromCash(@HeaderParam("servicekey") String servicekey,
+                                        @PathParam("account") final int account,
+                                        @FormParam("transferto") final int transferto,
+                                        @FormParam("amount") final String amount,
+                                        @FormParam("note") final String note)
     {
         PermissionCategory category = PermissionCategory.CASH;
 
@@ -81,19 +91,26 @@ public class RestServlet
 
     @POST
     @Path("/aircraft/purchase/{account}")
-    public Response PurchaseAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("note") final String note)
+    public Response PurchaseAircraft(@HeaderParam("servicekey") String servicekey,
+                                     @PathParam("account") final int account,
+                                     @FormParam("serialnumber")int serialNumber,
+                                     @FormParam("note") final String note)
     {
         PermissionCategory category = PermissionCategory.AIRCRAFT;
 
         if(!hasPermission(servicekey, account, category, PermissionSet.PURCHASE))
             return ResponseAccessDenied();
 
-        return ServiceData.PurchaseAircraft(servicekey, account, reg, note);
+        return ServiceData.PurchaseAircraft(servicekey, account, serialNumber, note);
     }
 
     @POST
     @Path("/aircraft/transfer/{account}")
-    public Response TransferAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("transferto") final int transferto, @FormParam("note") final String note)
+    public Response TransferAircraft(@HeaderParam("servicekey") String servicekey,
+                                     @PathParam("account") final int account,
+                                     @FormParam("serialnumber")int serialNumber,
+                                     @FormParam("transferto") final int transferto,
+                                     @FormParam("note") final String note)
     {
         PermissionCategory category = PermissionCategory.AIRCRAFT;
 
@@ -103,25 +120,30 @@ public class RestServlet
         if(transferto == 0) //no transfers to bank
             return createErrorResponse(400, "Bad Request", "No transfer account specified.");
 
-        return ServiceData.TransferAircraft(servicekey, reg, account, transferto, note);
+        return ServiceData.TransferAircraft(servicekey, serialNumber, account, transferto, note);
     }
 
     @POST
     @Path("/aircraft/lease/{account}")
-    public Response LeaseAircraft(@HeaderParam("servicekey") String servicekey, @PathParam("account") final int account, @FormParam("reg")String reg, @FormParam("leaseto") final int leaseto, @FormParam("note") final String note)
+    public Response LeaseAircraft(@HeaderParam("servicekey") String servicekey,
+                                  @PathParam("account") final int account,
+                                  @FormParam("serialnumber")int serialNumber,
+                                  @FormParam("leaseto") final int leaseto,
+                                  @FormParam("note") final String note)
     {
         PermissionCategory category = PermissionCategory.AIRCRAFT;
 
         if(!hasPermission(servicekey, account, category, PermissionSet.LEASE))
             return ResponseAccessDenied();
 
-        return ServiceData.LeaseAircraft(servicekey, account, reg, leaseto, note);
+        return ServiceData.LeaseAircraft(servicekey, account, serialNumber, leaseto, note);
     }
 
     @PermitAll
     @POST
     @Path("/account/search/name")
-    public Response getAccountId(@HeaderParam("servicekey") String servicekey, @FormParam("accountname")String name)
+    public Response getAccountId(@HeaderParam("servicekey") String servicekey,
+                                 @FormParam("accountname")String name)
     {
         return ServiceData.getAccountId(name);
     }
@@ -129,7 +151,8 @@ public class RestServlet
     @PermitAll
     @POST
     @Path("/account/search/id")
-    public Response getAccountId(@HeaderParam("servicekey") String servicekey, @FormParam("id") final int id)
+    public Response getAccountId(@HeaderParam("servicekey") String servicekey,
+                                 @FormParam("id") final int id)
     {
         return ServiceData.getAccountName(id);
     }

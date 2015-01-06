@@ -17,10 +17,8 @@ public class Aircraft implements Serializable
     {
         try
         {
-            String qry = "UPDATE aircraft SET owner = ? WHERE owner = ? AND aircraft.id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, buyer, owner, aircraftId);
-
-            Banking.doPayment(buyer, owner, 0, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraftId, "Aircraft Transfer", false);
+            String qry = "{call AircraftTransfer(?,?,?,?)}";
+            DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, buyer, "Aircraft Transfer");
         }
         catch (SQLException e)
         {
@@ -66,10 +64,8 @@ public class Aircraft implements Serializable
     {
         try
         {
-            String qry = "UPDATE aircraft SET sellprice=null, owner = ?, lessor = ? WHERE owner = ? AND id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, lessee, owner, owner, aircraftId);
-
-            Banking.doPayment(owner, lessee, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease", false);
+            String qry = "{call AircraftLease(?,?,?,?)}";
+            DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, lessee, "Aircraft Lease");
         }
         catch (SQLException e)
         {
@@ -77,14 +73,12 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void leasereturnac(int aircraftId, int lessee, int owner, String location) throws DataError
+    public static void leasereturnac(int aircraftId) throws DataError
     {
         try
         {
-            String qry = "UPDATE aircraft SET owner = ?, lessor = null WHERE lessor = ? AND id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, owner, owner, aircraftId);
-
-            Banking.doPayment(lessee, owner, 0, PaymentBean.AIRCRAFT_LEASE, 0, -1, location, aircraftId, "Aircraft Lease Return", false);
+            String qry = "{call AircraftUnlease(?,?,?)}";
+            DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, "Aircraft Lease Return");
         }
         catch (SQLException e)
         {
@@ -95,12 +89,6 @@ public class Aircraft implements Serializable
     public static List<AircraftBean> getAircraftForSale()
     {
         return getAircraftSQL("SELECT * FROM (SELECT id FROM aircraft WHERE sellPrice is not null ) a left join aircraft on a.id=aircraft.id left join models on aircraft.model=models.id ORDER BY models.make, models.model, sellPrice");
-    }
-
-    public static AircraftBean getAircraftByRegistrationX(String reg)
-    {
-        List<AircraftBean> result = getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND registration='" + Converters.escapeSQL(reg) + "'");
-        return result.size() == 0 ? null : result.get(0);
     }
 
     public static AircraftBean getAircraftById(int aircraftId)
