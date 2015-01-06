@@ -78,8 +78,12 @@ public class Formatters
 	
 	public static String getHourMin(int seconds)
 	{
-		int minutes = seconds/60;
-		return Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
+		boolean negative = seconds < 0;
+		int minutes = Math.abs(seconds)/60;
+
+		String hhmm = Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
+
+		return negative ? "-" + hhmm : hhmm;
 	}
 	
 	public static String getElapsedYearMonthDay(Timestamp ts)

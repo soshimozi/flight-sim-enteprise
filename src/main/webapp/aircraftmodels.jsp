@@ -77,8 +77,8 @@
                     Aircraft Model Data
                 </h3>
                 <div class="form-group">
-                    <label>Search: </label>
-                    <input type="text" class="typeahead form-control" data-provide="typeahead">
+                    <label for="search">Search: </label>
+                    <input id="search" type="text" class="typeahead form-control" data-provide="typeahead">
                 </div>
                 <div>
                     <small><a href="aircraftconfigs.jsp">Open Table View</a></small>

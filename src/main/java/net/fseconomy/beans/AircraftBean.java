@@ -575,9 +575,7 @@ public class AircraftBean implements Serializable
 	 */
 	public String getHoursSinceLastCheckString()
 	{
-		int minutes = (int)(getHoursSinceLastCheck() * 60.0);
-
-        return Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
+		return Formatters.getHourMin(getTotalEngineTime()-getLastCheck());
 	}
 	
 	public double getEngineHours()
@@ -602,9 +600,7 @@ public class AircraftBean implements Serializable
 	 */
 	public String getEngineHoursString()
 	{
-		int minutes = (int)(getEngineHours() * 60.0);
-
-        return Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
+		return Formatters.getHourMin(getTotalEngineTime());
 	}
 
     // TBO and Condition added PRD
@@ -1462,9 +1458,7 @@ public class AircraftBean implements Serializable
 	 */
 	public String getAirframeHoursString()
 	{
-		int minutes = (int)(getAirframe() / 60.0);
-
-        return Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60);
+		return Formatters.getHourMin(getAirframe());
 	}
 	
 	public void setCondition(int i) 
