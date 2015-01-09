@@ -998,7 +998,7 @@ public class Aircraft implements Serializable
                 rs.moveToInsertRow();
                 rs.updateTimestamp("time", new Timestamp(System.currentTimeMillis()));
                 rs.updateInt("aircraftid", aircraftId);
-                rs.updateString("user", pilot.getName());
+                rs.updateInt("userid", pilot.getId());
                 rs.updateString("type", "refuel");
                 rs.updateFloat("fuelCost", cost);
                 rs.updateInt("fbo", provider);
