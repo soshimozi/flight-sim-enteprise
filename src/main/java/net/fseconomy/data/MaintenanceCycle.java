@@ -670,7 +670,7 @@ public class MaintenanceCycle implements Runnable
 			while (rsTemplate.next())
 			{
                 int id = rsTemplate.getInt("id");
-				
+
 				updateStatus("Working on assignments for template " + id);
 				
 				double frequency = rsTemplate.getDouble("frequency");					
@@ -704,7 +704,8 @@ public class MaintenanceCycle implements Runnable
 				int speedFrom = rsTemplate.getInt("speedFrom");
 				int speedTo = rsTemplate.getInt("speedTo");
 
-				Set<String> icaoSet1, icaoSet2;
+				Set<String> icaoSet1;
+				Set<String> icaoSet2;
 				StringBuffer where = new StringBuffer();
 
                 if(icaos1 == null)
@@ -832,7 +833,7 @@ public class MaintenanceCycle implements Runnable
 						
 						if (minSize > 0)
 							where.append(" AND longestRwy > ").append(minSize);
-						
+
 						if (isAllIn)
 							where.append(" AND exists (SELECT * FROM aircraft WHERE aircraft.location = airports.icao and aircraft.owner = 0)");
 													

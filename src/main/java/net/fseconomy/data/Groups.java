@@ -304,7 +304,7 @@ public class Groups implements Serializable
             String qry = "{call groupTransfer(?,?,?,?)}";
             boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, groupId, userId, transferTo);
             if(success)
-                Banking.addPaymentRecord(transferTo, userId, new Money(0), PaymentBean.TRANSFER_GROUP, -1, -1, "", -1, "Group Transfer");
+                Banking.addPaymentRecord(transferTo, userId, new Money(0), PaymentBean.TRANSFER_GROUP, -1, -1, "", -1, "Group Transfer: " + groupId);
         }
         catch(SQLException e)
         {

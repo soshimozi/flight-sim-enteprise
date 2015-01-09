@@ -9,7 +9,7 @@
   int groupId = Integer.parseInt(request.getParameter("groupid"));
   List<UserBean> members = Accounts.getUsersForGroup(groupId);
 %>
-<select id="transferto" name="transferto">
+<select id="transferto" name="transferto" class="form-control">
 <%
     for(UserBean member: members)
     {

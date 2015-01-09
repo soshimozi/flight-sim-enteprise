@@ -70,6 +70,8 @@
             var form = document.getElementById("formTransferModal");
             form.groupid.value = id;
 
+            $("#selectListData").load("groupmembersdata.jsp?groupid=" + id);
+
             $("#myModal").modal('show');
         }
 
@@ -81,10 +83,6 @@
 
         $(function()
         {
-            <%--$('#myModal').on('shown.bs.modal', function () {--%>
-                <%--initAutoComplete("input[name='username']", "input[name='userid']", <%= Accounts.ACCT_TYPE_PERSON %>);--%>
-            <%--})--%>
-            initAutoComplete("#username", "#userid", <%= Accounts.ACCT_TYPE_PERSON %>);
         });
 
 
@@ -230,7 +228,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">Transfer Group</h4>
+                <h4 class="modal-title">Transfer Group Ownership</h4>
             </div>
             <div class="modal-body">
                 <div class="panel panel-danger">
@@ -238,19 +236,26 @@
                         <h3 class="panel-title">Warning!</h3>
                     </div>
                     <div class="panel-body">
-                        This will transfer all group assets including money, aircraft, and FBOs to the new owner.
-                        Triple check that you have selected the correct pilot to transfer the group. If you make a mistake that will be between you and the person that you transferred the group to.
+                        <div>
+                            <strong>This transfers group ownership to another member</strong>
+                        </div>
+                        <div>
+                            The owner will become <strong>STAFF</strong> and the selected group member will become the new <strong>OWNER</strong>.
+                        </div>
+                        <div>
+                            This will transfer all group assets including money, aircraft, FBOs, and goods to the new owner.
+                            Triple check that you have selected the correct pilot to transfer the group. If you make a mistake that will be between you and the person that you transferred the group to.
+                        </div>
                     </div>
                 </div>
                 <form id="formTransferModal" method="post" action="userctl" class="ui-front">
                     <input type="hidden" name="event" value="transfergroup"/>
                     <input type="hidden" name="groupid" value=""/>
                     <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
-                    <div>
-                        Enter Account:
-                        <input type="hidden" id="userid" name="userid" value="-1"/>
-                        <input type="text" id="username" name="username" placeholder="Type Pilot Name here"/>
-                        <br/>
+                    <div class="form-group">
+                        <div>Transfer to:</div>
+                        <div id="selectListData">
+                        </div>
                     </div>
                 </form>
             </div>

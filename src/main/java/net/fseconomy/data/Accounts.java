@@ -403,9 +403,7 @@ public class Accounts implements Serializable
                     qry = "SELECT max(linkid) FROM linkedaccounts";
                     int newSetId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer());
 
-                    //have to have for brand new table, no records returns 0
-                    if(newSetId == 0)
-                        newSetId = 1;
+                    newSetId++;
 
                     qry = "INSERT INTO linkedaccounts (linkid, accountid, status) VALUES(?,?,?);";
                     DALHelper.getInstance().ExecuteNonQuery(qry, newSetId, linkToId, LINK_ACTIVE);
@@ -458,12 +456,28 @@ public class Accounts implements Serializable
     {
         try
         {
-            //Check if accountId exists in the table
-            String qry = "DELETE FROM linkedaccounts WHERE accountid = ?";
+            String note = "Account unlinked";
+
+            String qry = "SELECT linkid FROM linkedaccounts WHERE accountid = ?";
+            int linkId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), accountId);
+
+            qry = "DELETE FROM linkedaccounts WHERE accountid = ?";
             DALHelper.getInstance().ExecuteNonQuery(qry, accountId);
 
-            String note = "Account unlinked";
             addAccountNote(accountId, userId, note);
+
+            qry = "SELECT count(accountid) FROM linkedaccounts WHERE linkid = ?";
+            int count = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), linkId);
+            if(count == 1)
+            {
+                qry = "SELECT accountid FROM linkedaccounts WHERE linkid = ?";
+                int lastId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), linkId);
+
+                qry = "DELETE FROM linkedaccounts WHERE accountid = ?";
+                DALHelper.getInstance().ExecuteNonQuery(qry, lastId);
+
+                addAccountNote(lastId, userId, note);
+            }
         }
         catch (SQLException e)
         {

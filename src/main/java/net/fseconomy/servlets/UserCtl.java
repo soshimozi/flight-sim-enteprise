@@ -1788,18 +1788,18 @@ public class UserCtl extends HttpServlet
     {
         UserBean user = (UserBean) req.getSession().getAttribute("user");
 
-        String sUserId = req.getParameter("userid");
+        String sTransferTo = req.getParameter("transferto");
         String sGroupId = req.getParameter("groupid");
 
-        if (sUserId == null || sGroupId == null || user == null)
+        if (sTransferTo == null || sGroupId == null || user == null)
             throw new DataError("Invalid parameters.");
 
-        int userId = Integer.parseInt(sUserId);
+        int transferTo = Integer.parseInt(sTransferTo);
         int groupId = Integer.parseInt(sGroupId);
         if (user.groupMemberLevel(groupId) != UserBean.GROUP_OWNER)
             throw new DataError("Permission denied.");
 
-        Groups.transferGroup(user.getId(), userId, groupId);
+        Groups.transferGroup(user.getId(), transferTo, groupId);
     }
 
     void doInvitation(HttpServletRequest req) throws DataError
