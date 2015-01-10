@@ -63,18 +63,7 @@ public class Airports implements Serializable
                     String icao = rs.getString(1);
                     String type = rs.getString(6);
 
-                    if (type.contains("military"))
-                    {
-                        itype = AirportBean.TYPE_MILITARY;
-                    }
-                    else if (type.contains("water"))
-                    {
-                        itype = AirportBean.TYPE_WATER;
-                    }
-                    else
-                    {
-                        itype = AirportBean.TYPE_CIVIL;
-                    }
+                    itype = AirportBean.getTypeFromString(type);
 
                     String title = rs.getString(2) + ", " + rs.getString(3) + ", " + rs.getString(4) + ", " + rs.getString(5);
                     AirportInfo lls = new AirportInfo(icao, title, rs.getDouble(6), rs.getDouble(7), rs.getInt(8), itype);
@@ -123,11 +112,6 @@ public class Airports implements Serializable
 
         if (lls1 == null || lls2 == null)
         {
-            //			if(lls1 == null)
-            //				System.err.println("-->distanceBearing Error, bad From ICAO: " + from);
-            //			if(lls2 == null)
-            //				System.err.println("-->distanceBearing Error, bad To ICAO: " + to);
-
             return 0;
         }
 
@@ -143,11 +127,6 @@ public class Airports implements Serializable
 
         if (lls1 == null || lls2 == null)
         {
-            //			if(lls1 == null)
-            //				System.err.println("-->distanceBearing Error, bad From ICAO: " + from);
-            //			if(lls2 == null)
-            //				System.err.println("-->distanceBearing Error, bad To ICAO: " + to);
-
             return null;
         }
         return getDistanceBearing(lls1.latlon, lls2.latlon);
@@ -366,11 +345,6 @@ public class Airports implements Serializable
                 degrees *= 2;
             }
         } while (!found);
-
-        if (bestIcao == null)
-        {
-            return null;
-        }
 
         return new CloseAirport(bestIcao, bestDistance);
     }
@@ -718,7 +692,7 @@ public class Airports implements Serializable
         //see if we still have a year to go
         if (endyear > curryear)
         {
-            for (int i = 1; i > 12; i++)
+            for (int i = 1; i <= 12; i++)
             {
                 results.add(new FlightOp(curryear, i, icao, 0));
             }
@@ -765,46 +739,46 @@ public class Airports implements Serializable
 
         //get the current year and month
         Calendar cal = Calendar.getInstance();
-        int curryear = cal.get(Calendar.YEAR);
-        int currmonth = cal.get(Calendar.MONTH) + 1; //0 based instead of 1
+        int currYear = cal.get(Calendar.YEAR);
+        int currMonth = cal.get(Calendar.MONTH) + 1; //0 based instead of 1
 
         //setup our loop variables
-        int loopyear = curryear;
-        int loopmonth = currmonth;
+        int loopYear = currYear;
+        int loopMonth = currMonth;
 
         try
         {
-            //get our records, using opyear in (?,?,?) allows index to be used
+            //get our records, using op year in (?,?,?) allows index to be used
             String qry = "SELECT * FROM flightops WHERE opyear in (?,?,?) AND icao= ? ORDER BY opyear DESC, opmonth DESC";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, curryear - 2, curryear - 1, curryear, icao);
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, currYear - 2, currYear - 1, currYear, icao);
 
-            int opyear;
-            int opmonth;
+            int opYear;
+            int opMonth;
             int ops;
 
             //loop though results, remember this is a spare array and might be missing 1 or more
             while (rs.next())
             {
                 //get our data
-                opyear = rs.getInt("opyear");
-                opmonth = rs.getInt("opmonth");
+                opYear = rs.getInt("opyear");
+                opMonth = rs.getInt("opmonth");
                 ops = rs.getInt("ops");
 
                 //if everything matches just add it
-                if (opyear == loopyear && opmonth == loopmonth)
+                if (opYear == loopYear && opMonth == loopMonth)
                 {
-                    results.add(new FlightOp(opyear, opmonth, icao, ops));
+                    results.add(new FlightOp(opYear, opMonth, icao, ops));
                 }
                 else //oops no match
                 {
                     //Fill in months with no ops
-                    FillZeroOps(results, icao, opmonth + 1, opyear, loopmonth, loopyear);
+                    FillZeroOps(results, icao, opMonth + 1, opYear, loopMonth, loopYear);
 
-                    //ok, we are ready to add in our current record now after backfilling the data
-                    results.add(new FlightOp(opyear, opmonth, icao, ops));
+                    //ok, we are ready to add in our current record now after back filling the data
+                    results.add(new FlightOp(opYear, opMonth, icao, ops));
 
-                    loopmonth = opmonth;
-                    loopyear = opyear;
+                    loopMonth = opMonth;
+                    loopYear = opYear;
                 }
 
                 //if we have 24 (or more) we are done
@@ -814,17 +788,17 @@ public class Airports implements Serializable
                 }
 
                 //decrement to our next anticipated month
-                loopmonth--;
+                loopMonth--;
 
                 //if the month is 0, then we need to loop back around to 12
-                if (loopmonth <= 0)
+                if (loopMonth <= 0)
                 {
-                    loopmonth = 12;
+                    loopMonth = 12;
                     //Since we moved to december, we also need to decrement the year
-                    loopyear--;
+                    loopYear--;
 
-                    //If we are past the two year mark something bad has happend so exit the loop
-                    if (loopyear < curryear - 2)
+                    //If we are past the two year mark something bad has happened so exit the loop
+                    if (loopYear < currYear - 2)
                     {
                         break;
                     }
@@ -832,15 +806,15 @@ public class Airports implements Serializable
             }
             if (results.size() < 25)
             {
-                int amtleft = 24 - results.size();
-                if (loopmonth >= amtleft)
+                int amtLeft = 24 - results.size();
+                if (loopMonth >= amtLeft)
                 {
-                    FillZeroOps(results, icao, loopmonth - amtleft, loopyear, loopmonth, loopyear);
+                    FillZeroOps(results, icao, loopMonth - amtLeft, loopYear, loopMonth, loopYear);
                 }
                 else
                 {
-                    int amt = amtleft - loopmonth;
-                    FillZeroOps(results, icao, 12 - amt, loopyear - 1, loopmonth, loopyear);
+                    int amt = amtLeft - loopMonth;
+                    FillZeroOps(results, icao, 12 - amt, loopYear - 1, loopMonth, loopYear);
                 }
             }
         }
@@ -873,7 +847,7 @@ public class Airports implements Serializable
             return result;
         }
         //only add up the last 12 months, skip current month
-        for (int i = 1; i <= 12; i++) //correction Airboss 8/1/2011
+        for (int i = 1; i <= 12; i++)
         {
             average += ao.get(i).ops;
         }
@@ -930,7 +904,7 @@ public class Airports implements Serializable
 
             if (modelId >= 0 || ferry || acForSale)
             {
-                //Code correction to prevent Sql error when fuel and ferry selected in aiport search parameters - Airboss 6/6/11
+                //Code correction to prevent Sql error when fuel and ferry selected in aiport search parameters
                 tables.append(" LEFT JOIN aircraft on aircraft.location = airports.icao ");
 
                 query.append(and);
@@ -939,7 +913,7 @@ public class Airports implements Serializable
                 if (modelId >= 0)
                 {
                     query.append("AND aircraft.model = ").append(modelId).append(" ");
-                    //gurka - added suport for rentable flag
+                    //added support for rentable flag
                     if (isRentable)
                     {
                         query.append("AND (aircraft.rentalDry > 0 OR aircraft.rentalWet > 0) ");
@@ -1155,7 +1129,9 @@ public class Airports implements Serializable
         }
 
         return result;
-    }/* airportLink with a gmap pop require in the jsp page:
+    }
+
+    /* airportLink with a gmap pop require in the jsp page:
      * <head>
 	 * <script type="text/javascript" src="scripts/PopupWindow.js"></script>
 	 * <script type="text/javascript"> var gmap = new PopupWindow(); </script>
@@ -1282,7 +1258,6 @@ public class Airports implements Serializable
      * @param groupId - Group of interest
      * @param month - Month of interest
      * @param year - Year of interest
-     * Airboss 7/1/11
      **/
     public static int getGroupOperationsByMonthYear(int groupId, int month, int year)
     {

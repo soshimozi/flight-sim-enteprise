@@ -28,11 +28,30 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
     <link href="../css/Master.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="../css/tablesorter-style.css"/>
 
-    <script type='text/javascript' src='../scripts/common.js'></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type='text/javascript' src='../scripts/common.js'></script>
     <script type='text/javascript' src='../scripts/css.js'></script>
-    <script type='text/javascript' src='../scripts/standardista-table-sorting.js'></script>
+	<script type='text/javascript' src='../scripts/jquery.tablesorter.js'></script>
+	<script type='text/javascript' src="../scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src='../scripts/parser-checkbox.js'></script>
+	<script type='text/javascript' src='../scripts/parser-timeHrMin.js'></script>
+	<script type="text/javascript">
 
+		$(function()
+		{
+			$.extend($.tablesorter.defaults,
+					{
+						widthFixed: false,
+						widgets : ['zebra','columns']
+					});
+
+			$('.modelTable').tablesorter();
+
+		});
+
+	</script>
 </head>
 <body>
 
@@ -42,21 +61,21 @@
 <div id="wrapper">
 <div class="content">
 <div class="dataTable">	
-	<table  id="sortableTableModels" class="sortable">
+	<table class="modelTable tablesorter-default tablesorter">
 	<caption>Aircraft models</caption>
 	<thead>
 	<tr>
 		<th>Model</th>
-		<th>Crew</th>
-		<th>Price</th>
-		<th>Rental</th>
+		<th class="numeric">Crew</th>
+		<th class="numeric">Price</th>
+		<th class="numeric">Rental</th>
 		<th>Accounting</th>
-		<th>Max Rent Time</th>
-		<th>Bonus</th>
-		<th>Amount</th>
-		<th>For Sale</th>
-		<th>AirportSize</th>
-		<th>Action</th>
+		<th class="sorter-timeHrMin numeric">Max Rent Time</th>
+		<th class="numeric">Bonus</th>
+		<th class="numeric">Amount</th>
+		<th class="numeric">For Sale</th>
+		<th class="numeric">AirportSize</th>
+		<th class="sorter-false">Action</th>
 	</tr>
 	</thead>
 	<tbody>

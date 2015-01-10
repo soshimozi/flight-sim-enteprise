@@ -239,21 +239,56 @@ public class AirportBean implements Serializable
 		return type;
 	}
 
+	public void setType(int i)
+	{
+		type = i;
+	}
+
+	public void setType(String apType)
+	{
+		type = getTypeFromString(apType);
+	}
+
+	public static int getTypeFromString(String sType)
+	{
+		if(sType == null)
+			sType = "";
+
+		switch (sType)
+		{
+			case "civil":
+				return TYPE_CIVIL;
+			case "military":
+				return TYPE_MILITARY;
+			case "water":
+				return TYPE_WATER;
+			default:
+				throw new IllegalArgumentException("Invalid airport type");
+		}
+	}
+
 	public static String getTypeDescription(int type, int size)
 	{
 		if (type == TYPE_WATER)
 			return "Seaplane base";
 
-		String add = type == TYPE_MILITARY ? "military " : "";
-		
-		if (size < MIN_SIZE_MED)
-			return type == TYPE_MILITARY ? "Military airstrip" : "Airstrip";
-		else if (size < MIN_SIZE_BIG)
-			return "Small " + add + "airport";
+		String prefix = "";
+		String postfix = " airport";
+		String military = type == TYPE_MILITARY ? "Military" : "";
 
-        return "Large " + add + "airport";
+		if(size >=MIN_SIZE_BIG)
+		{
+			prefix = "Large";
+		}
+		else if(size < MIN_SIZE_MED)
+		{
+			prefix = "Small";
+			postfix = " airstrip";
+		}
+
+		return prefix + military + postfix;
 	}
-	
+
 	public String getDescriptiveImage(List<FboBean> fbos)
 	{
 		String base;
@@ -296,30 +331,6 @@ public class AirportBean implements Serializable
     	return 3;
 	}
 
-	public void setType(int i)
-	{
-		type = i;
-	}
-
-	public void setType(String apType)
-	{
-        if(apType == null)
-            apType = "";
-
-        switch (apType)
-        {
-            case "civil":
-                type = TYPE_CIVIL;
-                break;
-            case "military":
-                type = TYPE_MILITARY;
-                break;
-            default:
-                type = TYPE_WATER;
-                break;
-        }
-	}
-
 	public int getSize()
 	{
 		return size;
@@ -343,6 +354,25 @@ public class AirportBean implements Serializable
 	public int getSurfaceType()
 	{
 		return surfaceType;
+	}
+
+	public String getSurfaceTypeName()
+	{
+		switch (surfaceType)
+		{
+			case 1: return "Asphalt";
+			case 2: return "Concrete";
+			case 3: return "Coral";
+			case 4: return "Dirt";
+			case 5: return "Grass";
+			case 6: return "Gravel";
+			case 7: return "Helipad";
+			case 8: return "Oil Treated";
+			case 9: return "Snow";
+			case 10: return "Steel Mats";
+			case 11: return "Water";
+			default: return "Unknown";
+		}
 	}
 
 	public void setSurfaceType(int i)

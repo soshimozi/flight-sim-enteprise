@@ -60,7 +60,6 @@
 	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
 	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css'>
 	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css"/>
-	<link rel="stylesheet" type="text/css" href="fancybox/jquery.fancybox-1.3.1.css"/>
 	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css"/>
 	<link rel="stylesheet" type="text/css" href="css/Master.css"/>
 

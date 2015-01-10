@@ -51,23 +51,28 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="css/Master.css" rel="stylesheet" type="text/css" />
-	<link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
-	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
-
+	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
+	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css'>
+	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css"/>
+	<link rel="stylesheet" type="text/css" href="css/Master.css"/>
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="http://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>
+
+	<script type='text/javascript' src="scripts/jquery.cookie.js"></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type="text/javascript" src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
+	<script src="scripts/AutoComplete.js"></script>
+
+	<script src="scripts/js/highcharts.js"> </script>
+	<script src="scripts/PopupWindow.js"></script>
 	
-	<script type="text/javascript" src="scripts/PopupWindow.js"></script>
-	<script type="text/javascript" src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script type="text/javascript" src="scripts/js/highcharts.js"> </script>
-	
-	<script type="text/javascript"> 
-        var gmap = new PopupWindow(); 
+	<script type="text/javascript">
 
 		function makeChart ( ) {
 		    var months = { '1': 'Jan', '2': 'Feb', '3': 'Mar', '4': 'Apr', '5': 'May', '6': 'Jun', '7': 'Jul', '8': 'Aug', '9': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec' };
@@ -116,7 +121,7 @@
 				chart: {
 					renderTo: 'chart-container',
 					type: 'line',
-		            width: 690,
+		            width: 580,
 		            height: 440
 				},
 				xAxis: {
@@ -161,23 +166,12 @@
 			});
 		}
 			
-		$(document).ready(function() {
-		    $('#aircraft-operations').fancybox({
-		        width: '700px',
-		        height: '450px',
-		        onStart: function () {
-		            document.getElementById('chart-popup').style.display = 'block';
-		        },
-		        onClosed: function () {
-		            document.getElementById('chart-popup').style.display = 'none';
-		        }
-		    });
-		    
-		    makeChart();
-		});
 	</script>
 	
 	<script type="text/javascript">
+
+		var gmap = new PopupWindow();
+
 		$(function() {
 		
 			$.extend($.tablesorter.defaults, {
@@ -186,7 +180,13 @@
 			});
 		
 			$('.fboTable').tablesorter();
-		
+
+			$('.airportOps').click(function () {
+				$("#airportOpsModal").modal('show');
+			});
+
+			makeChart();
+
 		});
 		
 	</script>
@@ -201,9 +201,11 @@
 	<table class="fboTable tablesorter-default tablesorter">
 
 	<caption>
-		FBO Management for: <%= account.getName() %>	
-		<a href="gmapfbo.jsp?fboOwner=<%= account.getId() %>"><img src="img/wmap.gif" width="50" height="32" style="border-style: none; vertical-align:middle;" /></a>
-		<a id="aircraft-operations" href="#chart-popup" style="padding-left:10px;">FBO Operations</a>
+	FBO Management for: <%= account.getName() %>
+		<a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmapfbo.jsp?fboOwner=<%= account.getId() %>');gmap.showPopup('gmap');return false;" id="gmap">
+			<img src="img/wmap.gif" width="50" height="32" style="border-style: none; vertical-align:middle;" />
+		</a>
+		<span class="airportOps btn btn-link">FBO Operations</span>
 	</caption>
 
 	<thead>
@@ -296,8 +298,24 @@
 	</table>	
 </div>
 
-<div id="chart-popup" style="display:none;width:700px;height:450px;">
-	<div id="chart-container"></div>
+<div class="modal fade" id="airportOpsModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button class="close" aria-hidden="true" type="button" data-dismiss="modal">×</button>
+				<h4 class="modal-title">Airport Operations</h4>
+			</div>
+			<div class="modal-body">
+				<div class="container">
+					<div class="row" id="chart-container">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 </body>

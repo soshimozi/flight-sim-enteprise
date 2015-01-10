@@ -135,22 +135,27 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>	
 	
-	<link href="css/Master.css" rel="stylesheet" type="text/css" />
-	<link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
-	<link href="fancybox/jquery.fancybox-1.3.1.css" rel="stylesheet" type="text/css" />
+	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
+	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css'>
+	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css"/>
+	<link rel="stylesheet" type="text/css" href="css/Master.css"/>
 
-	<% //regressed jquery so that lightbox would work %>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="http://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>
+
+	<script type='text/javascript' src="scripts/jquery.cookie.js"></script>
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
 	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
-	
+	<script src="scripts/AutoComplete.js"></script>
+
+	<script src="scripts/js/highcharts.js"> </script>
 	<script src="scripts/PopupWindow.js"></script>
-	
-	<script src="fancybox/jquery.fancybox-1.3.1.pack.js"></script>
-	<script charset="iso-8859-1" src="scripts/js/highcharts.js"> </script>
-	
+
 	<script type="text/javascript">
 		
 		function makeChart ( ) 
@@ -202,7 +207,7 @@
 		            chart: {
 		                    renderTo: 'chart-container',
 		                    type: 'line',
-		                    width: 600,
+		                    width: 580,
 		                    height: 440
 		            },
 		            xAxis: {
@@ -248,23 +253,6 @@
 		    });
 		}
 			
-		$(document).ready(function() 
-		{
-			$('#aircraft-operations').fancybox({
-				width: '700px',
-				height: '450px',
-				onStart: function () {
-					document.getElementById('chart-popup').style.display = 'block';
-				},
-				onClosed: function () {
-					document.getElementById('chart-popup').style.display = 'none';
-				}
-			});
-			
-			makeChart();
-		});
-		
-		
 		var gmap = new PopupWindow();
 		
 		function doSubmit(id)
@@ -346,28 +334,28 @@
 		
 			$('.assigmentTable').tablesorter();
 		
-		});
-		
-		$(function() 
-		{		
-			$.extend($.tablesorter.defaults, 
+			$.extend($.tablesorter.defaults,
 			{
 				widthFixed: false,
 				widgets : ['zebra','columns']
 			});
 		
 			$('.aircraftTable').tablesorter();		
-		});
-		
-		$(function() 
-		{		
-			$.extend($.tablesorter.defaults, 
+
+			$.extend($.tablesorter.defaults,
 			{
 				widthFixed: false,
 				widgets : ['zebra','columns']
 			});
 		
-			$('.goodsearchTable').tablesorter();
+			$('.goodsearchTable').tablesorter()
+
+			$('.airportOps').click(function () {
+				$("#airportOpsModal").modal('show');
+			});
+
+			makeChart();
+
 		});
 
 	</script>
@@ -411,6 +399,7 @@
         }
 
         int elev = airport.getElev();
+		String surfType = airport.getSurfaceTypeName();
 
 %>
 	<div class="infoBlock">
@@ -469,7 +458,7 @@
                         </td>
                         <td>
                             <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= airport.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap">
-                                <img style="border-style: none;" src="<%= airport.getDescriptiveImage(fbos) %>">
+                                <img style="border-style: none;" title="<%= AirportBean.getTypeDescription(airport.getType(), airport.getSize()) %>" src="<%= airport.getDescriptiveImage(fbos) %>">
                             </a>
                         </td>
                         <td>
@@ -478,17 +467,16 @@
                             </a>
                         </td>
                     </tr>
-                </table>
-	            <%= airport.getTitle() %><br>
-	            Landing fee: <%= Formatters.currency.format(airport.getLandingFee()) %>&nbsp;&nbsp;
-	            <i><%= AirportBean.getTypeDescription(airport.getType(), airport.getSize()) %></i><br>
+				</table>
+	            <div><%= airport.getTitle() %></div>
 <%
 		int[] aopm = Airports.getAirportOperationsPerMonth(airport.getIcao());
 		int currentops = aopm[0];
 		int averageops = aopm[1];
 %>
-	            <a href="#chart-popup" id="aircraft-operations">Aircraft Operations - Avg: <%=averageops%>, Current Month: <%=currentops%><br/></a>
-	            Lat: <%= latNS %>, Long: <%= lonEW %>, Elev: <%= elev %><br/><br/>
+	            <div>Lat: <%= latNS %>, Long: <%= lonEW %></div>
+				<div>Elev: <%= elev %>, Surface: <%= surfType %></div>
+				<div class="airportOps btn btn-link">Aircraft Operations - Avg: <%=averageops%>, Current Month: <%=currentops%></div>
 
                 <table id="fboInfo">
                     <thead>
@@ -797,8 +785,8 @@
                 <tr>
                     <th class="sorter-checkbox" style="width: 35px;">Add</th>
                     <th class="numeric" style="width: 75px;">Pay</th>
-                    <th style="width: 60px;">From</th>
-                    <th style="width: 60px;">Dest</th>
+                    <th style="width: 70px;">From</th>
+                    <th style="width: 80px;">Dest</th>
                     <th class="numeric" style="width: 35px;">NM</th>
                     <th class="numeric" style="width: 45px;">Bearing</th>
                     <th>Cargo</th>
@@ -1558,8 +1546,24 @@ else
 </div>
 
 
-<div id="chart-popup" style="display:none;width:640px;height:480px;">
-	<div id="chart-container"></div>
+<div class="modal fade" id="airportOpsModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button class="close" aria-hidden="true" type="button" data-dismiss="modal">×</button>
+				<h4 class="modal-title">Airport Operations</h4>
+			</div>
+			<div class="modal-body">
+				<div class="container">
+					<div class="row" id="chart-container">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 </body>

@@ -38,13 +38,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
+	<link href="../css/Master.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="../css/tablesorter-style.css"/>
 
-    <script src="../scripts/AnchorPosition.js"></script>
-    <script src="../scripts/PopupWindow.js"></script>
-    <script type='text/javascript' src='/scripts/common.js'></script>
-    <script type='text/javascript' src='/scripts/css.js'></script>
-    <script type='text/javascript' src='/scripts/standardista-table-sorting.js'></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type='text/javascript' src='../scripts/common.js'></script>
+	<script type='text/javascript' src='../scripts/css.js'></script>
+	<script type='text/javascript' src='../scripts/jquery.tablesorter.js'></script>
+	<script type='text/javascript' src="../scripts/jquery.tablesorter.widgets.js"></script>
+	<script type='text/javascript' src='../scripts/parser-checkbox.js'></script>
+	<script type='text/javascript' src='../scripts/parser-timeHrMin.js'></script>
+
     <script type="text/javascript">
 
         function doSubmit(id)
@@ -72,6 +76,22 @@
 
     </script>
 
+	<script type="text/javascript">
+
+		$(function()
+		{
+			$.extend($.tablesorter.defaults,
+					{
+						widthFixed: false,
+						widgets : ['zebra','columns']
+					});
+
+			$('.shipmentTable').tablesorter();
+
+		});
+
+	</script>
+
 </head>
 
 <body>
@@ -85,7 +105,7 @@
 	<form method="post" action="/admin/aircraftshippededit.jsp" name="aircraftForm">
 	<input type="hidden" name="submit" value="true"/>
 	
-	<table id="sortableTableAC0" class="sortable">
+	<table class="shipmentTable tablesorter-default tablesorter">
 	<caption>
 	Aircraft currently being shipped 
 	</caption>
@@ -99,8 +119,7 @@
 		<th>Shipping State - Next Update</th>
 		<th>Shipped By</th>
 		<th>Shipped To</th>
-
-		<th>Action</th>
+		<th class="sorter-false">Action</th>
 	</tr>
 	</thead>
 	<tbody>

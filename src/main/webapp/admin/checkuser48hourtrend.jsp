@@ -25,15 +25,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css">
-    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/Master.css"/>
 
-    <script type='text/javascript' src='../scripts/common.js'></script>
-    <script type='text/javascript' src='../scripts/css.js'></script>
-    <script type='text/javascript' src='../scripts/standardista-table-sorting.js'></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-    <script type='text/javascript' src="../scripts/AutoComplete.js"></script>
+    <script src="../scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -62,10 +59,7 @@
     }
 %>
 
-<%
-    if (request.getParameter("submit") == null && (message == null) && request.getParameter("id") == null)
-    {
-%>	<h2>Enter User Account</h2>
+	<h2>Enter User Account</h2>
 	<div class="form" style="width: 400px">
 	<form method="post">
     	Account Name:
@@ -78,8 +72,7 @@
 	</form>
 	</div>
 <%
-    }
-    else if (request.getParameter("submit") != null || request.getParameter("id") != null)
+    if (request.getParameter("submit") != null || request.getParameter("id") != null)
     {
         int userid = 0;
 
@@ -107,7 +100,7 @@
         <div class="dataTable">
 		<h2>User - <%= Accounts.getAccountNameById(userid) %> - 48 Hour Trend - Last 500 Flights</h2><br/>
 		<a href="/admin/admin.jsp">Return to Admin Page</a><br/>
-		<table id="sortableTableStats" class="sortable">
+		<table>
 		<thead>
 		<tr>
 			<th>Date</th>
