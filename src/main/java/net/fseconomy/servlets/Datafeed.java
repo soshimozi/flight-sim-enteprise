@@ -2388,6 +2388,7 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("MakeModel");
 			buffer.appendHeaderItem("From");
 			buffer.appendHeaderItem("To");
+			buffer.appendHeaderItem("AirframeTime");
 			buffer.appendHeaderItem("TotalEngineTime");
 			buffer.appendHeaderItem("FlightTime");
 			buffer.appendHeaderItem("GroupName");		
@@ -2448,6 +2449,7 @@ public class Datafeed extends HttpServlet
             buffer.append(aircraft.getMakeModel());
             buffer.append(log.getFrom() == null ? "" : log.getFrom());
             buffer.append(log.getTo() == null ? "" : log.getTo());
+			buffer.append(aircraft.getAirframeHoursString());
             buffer.append(totalenginetime);
             buffer.append(totalflighttime);
             buffer.append(groupName);
@@ -2506,13 +2508,14 @@ public class Datafeed extends HttpServlet
             buffer.append("<FlightLog>\n");
             buffer.append("Id", log.getId());
             buffer.append("Type", log.getType());
-            buffer.append("Time", Formatters.dateDataFeed.format(log.getTime()));
+			buffer.append("Time", Formatters.dateDataFeed.format(log.getTime()));
             buffer.append("Distance", log.getDistance());
             buffer.append("Pilot", username);
             buffer.append("Aircraft", aircraft.getRegistration());
             buffer.append("MakeModel", makemodel == null ? "None" : makemodel);
             buffer.append("From", log.getFrom() == null ? "" : log.getFrom());
             buffer.append("To", log.getFrom() == null ? "" : log.getTo());
+			buffer.append("AirframeTime", aircraft.getAirframeHoursString());
             buffer.append("TotalEngineTime", totalenginetime);
             buffer.append("FlightTime", totalflighttime);
             buffer.append("GroupName", groupName);
