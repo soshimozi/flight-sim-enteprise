@@ -579,7 +579,7 @@ public class MaintenanceCycle implements Runnable
                     switch (macro)
                     {
                         case "$FBO":
-                            sql = "SELECT DISTINCT a.icao FROM airports a JOIN fbo f ON f.location = a.icao AND f.active = 1";
+                            sql = "SELECT DISTINCT f.location as icao FROM fbo f WHERE f.active = 1";
                             break;
                         case "$WATER":
                             sql = "SELECT icao FROM airports where type = 'water'";
