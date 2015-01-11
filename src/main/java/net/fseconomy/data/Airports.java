@@ -61,7 +61,7 @@ public class Airports implements Serializable
                     int itype;
 
                     String icao = rs.getString(1);
-                    String type = rs.getString(6);
+                    String type = rs.getString(9);
 
                     itype = AirportBean.getTypeFromString(type);
 
