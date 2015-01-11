@@ -263,7 +263,7 @@ public class AirportBean implements Serializable
 			case "water":
 				return TYPE_WATER;
 			default:
-				throw new IllegalArgumentException("Invalid airport type");
+				throw new IllegalArgumentException("Invalid airport type: " + sType);
 		}
 	}
 
