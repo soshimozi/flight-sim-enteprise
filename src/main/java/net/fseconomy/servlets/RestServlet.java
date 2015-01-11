@@ -118,7 +118,7 @@ public class RestServlet
             return ResponseAccessDenied();
 
         if(transferto == 0) //no transfers to bank
-            return createErrorResponse(400, "Bad Request", "No transfer account specified.");
+            return createErrorResponse(200, "Bad Request", "No transfer account specified.");
 
         return ServiceData.TransferAircraft(servicekey, serialNumber, account, transferto, note);
     }
@@ -139,7 +139,6 @@ public class RestServlet
         return ServiceData.LeaseAircraft(servicekey, account, serialNumber, leaseto, note);
     }
 
-    @PermitAll
     @POST
     @Path("/account/search/name")
     public Response getAccountId(@HeaderParam("servicekey") String servicekey,
@@ -148,7 +147,6 @@ public class RestServlet
         return ServiceData.getAccountId(name);
     }
 
-    @PermitAll
     @POST
     @Path("/account/search/id")
     public Response getAccountId(@HeaderParam("servicekey") String servicekey,
