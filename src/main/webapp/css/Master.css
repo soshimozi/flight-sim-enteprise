@@ -455,3 +455,6 @@ a { cursor: pointer; }
     overflow-x: hidden;
 }
 
+.nowrap {
+   white-space: nowrap;
+}

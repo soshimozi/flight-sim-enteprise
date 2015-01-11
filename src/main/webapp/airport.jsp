@@ -785,14 +785,14 @@
                 <tr>
                     <th class="sorter-checkbox" style="width: 35px;">Add</th>
                     <th class="numeric" style="width: 75px;">Pay</th>
-                    <th style="width: 70px;">From</th>
-                    <th style="width: 80px;">Dest</th>
-                    <th class="numeric" style="width: 35px;">NM</th>
-                    <th class="numeric" style="width: 45px;">Bearing</th>
+                    <th style="width: 75px;">From</th>
+                    <th style="width: 75px;">Dest</th>
+                    <th style="width: 35px;">NM</th>
+                    <th style="width: 35px;">Brg</th>
                     <th>Cargo</th>
                     <th style="width: 35px;">Type</th>
                     <th style="width: 75px;">Aircraft</th>
-                    <th class="sorter-timeExpire" style="width: 85px;">Expires</th>
+                    <th class="sorter-timeExpire"  style="width: 80px;">Expires</th>
                     <th class="sorter-false">Action</th>
                 </tr>
             </thead>
@@ -833,7 +833,7 @@
                     <td class="numeric"><%= Formatters.currency.format(assignment.calcPay()) %></td>
 <% 				if (ap.equals(locap))
 				{
-%>					<td>
+%>					<td class="nowrap">
 						<img src="img/blankap.gif" style="vertical-align:middle;" />
 						<a title="<%= location.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getLocation()) %>">
 							<%= assignment.getLocation() %>
@@ -844,7 +844,7 @@
 				{
 		  			if(!toAirport) 
 		  			{
-%>					<td>
+%>					<td class="nowrap">
 						<a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + location.getIcao()+"&icaod="+ airport.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
 							<img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(location.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
 						</a>
@@ -855,7 +855,7 @@
 <%					} 
 		  			else 
 		  			{ 
-%>					<td>
+%>					<td class="nowrap">
 						<a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + location.getIcao()+"&icaod="+ destination.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
 							<img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(location.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
 						</a>
@@ -868,7 +868,7 @@
 
 	 			if (ap.equals(desap))
 				{
-%>					<td>
+%>					<td class="nowrap">
 						<img src="img/blankap.gif" style="vertical-align:middle;" />
 						<a class="normal" title="<%= destination.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>">
 							<%= assignment.getTo() %>
@@ -877,7 +877,7 @@
 <%				} 
 	 			else 
 	 			{
-%>					<td>
+%>					<td class="nowrap">
 						<a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + location.getIcao()+"&icaod="+ destination.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
 							<img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(destination.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
 						</a>
@@ -892,8 +892,8 @@
                     <td><%= assignment.getSCargo() %></td>
                     <!-- AllIn Change -->
                     <td id="assignmentType-<%= id %>"><%= assignment.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>
-                    <td><%= aircraftReg == null ? "[N/A]" : aircraftReg %></td>
-                    <td><%= assignment.getSExpires() %></td>
+                    <td class="nowrap"><%= aircraftReg == null ? "[N/A]" : aircraftReg %></td>
+                    <td class="nowrap"><%= assignment.getSExpires() %></td>
                     <td>
                         <a class="link" title="Show aircraft that can handle this assignment" href="<%= response.encodeURL(URL + sAirportArea + sToAirport + "&aircraftArea=1&capable=" + id) %>">Aircraft</a>
                     </td>
