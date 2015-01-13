@@ -3,7 +3,6 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, java.util.List, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%@ page import="net.fseconomy.servlets.UserCtl" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -11,7 +10,7 @@
     if(!user.isLoggedIn())
     {
 %>
-<script type="text/javascript">document.location.href="/index.jsp"</script>
+        <script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
         return;
     }

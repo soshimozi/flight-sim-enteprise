@@ -2349,6 +2349,9 @@ public class Datafeed extends HttpServlet
             String location;
             location = assignment.getLocation() == null ? "enroute" : assignment.getLocation();
 
+			//handles weird case where browser xml parsers blow up on this.
+			location = assignment.getLocation().equals("CGA") ? "&#67;&#71;&#65;" : assignment.getLocation();
+
             String noHTMLAssignment = assignment.getSCargo().replaceAll("<.*?>", "");
 
             String expires;

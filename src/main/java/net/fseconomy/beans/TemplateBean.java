@@ -307,10 +307,10 @@ public class TemplateBean implements Serializable
 	{
 		BitSet bs = BitSet.valueOf(new long[]{(long)surfaceTypes});
 
-		for(int i: list)
-			bs.set(i-1);
+		for (int i : list)
+			bs.set(i - 1);
 
-		surfaceTypes = (int)bs.toLongArray()[0];
+		surfaceTypes = bs.isEmpty() ? 0 : (int)bs.toLongArray()[0];
 	}
 
 	public List<Integer> getAllowedSurfaceTypes()

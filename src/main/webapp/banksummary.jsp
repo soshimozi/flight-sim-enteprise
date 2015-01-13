@@ -39,8 +39,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <link href="css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
     <link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
     <link href="css/Master.css" rel="stylesheet" type="text/css" />
 

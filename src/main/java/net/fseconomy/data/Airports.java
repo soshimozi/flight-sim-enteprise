@@ -54,7 +54,7 @@ public class Airports implements Serializable
             //pull the airports
             try
             {
-                String qry = "SELECT icao, name, city, state, country, lat, lon, longestRwy, type FROM airports";
+                String qry = "SELECT icao, name, city, state, country, lat, lon, longestRwy, type, surfaceType FROM airports";
                 ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
                 while (rs.next())
                 {
@@ -66,7 +66,7 @@ public class Airports implements Serializable
                     itype = AirportBean.getTypeFromString(type);
 
                     String title = rs.getString(2) + ", " + rs.getString(3) + ", " + rs.getString(4) + ", " + rs.getString(5);
-                    AirportInfo lls = new AirportInfo(icao, title, rs.getDouble(6), rs.getDouble(7), rs.getInt(8), itype);
+                    AirportInfo lls = new AirportInfo(icao, title, rs.getDouble(6), rs.getDouble(7), rs.getInt(8), itype, rs.getInt(10));
                     cachedAPs.put(icao, lls);
                 }
             }
@@ -198,7 +198,7 @@ public class Airports implements Serializable
      * @param waterOk - airport types to include in the search
      * @param militaryOk - airport types to include in the search
      */
-    public static Hashtable<String, AirportInfo> getAirportsInRange(String icao, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk)
+    public static Hashtable<String, AirportInfo> getAirportsInRange(String icao, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk, int surfType)
     {
         //Get the lat/lon to pass in
         AirportInfo lls = cachedAPs.get(icao.toUpperCase());
@@ -209,7 +209,7 @@ public class Airports implements Serializable
             return null;
         }
 
-        Hashtable<String, AirportInfo> results = getAirportsInRange(lls.latlon.lat, lls.latlon.lon, clipLat, clipLon, minSize, maxSize, civilOk, waterOk, militaryOk);
+        Hashtable<String, AirportInfo> results = getAirportsInRange(lls.latlon.lat, lls.latlon.lon, clipLat, clipLon, minSize, maxSize, civilOk, waterOk, militaryOk, surfType);
 
         //removed center airport
         if (results.size() > 0)
@@ -233,10 +233,11 @@ public class Airports implements Serializable
      * @param waterOk - airport types to include in the search
      * @param militaryOk - airport types to include in the search
      */
-    public static Hashtable<String, AirportInfo> getAirportsInRange(double lat, double lon, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk)
+    public static Hashtable<String, AirportInfo> getAirportsInRange(double lat, double lon, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk, int surfType)
     {
         Hashtable<String, AirportInfo> results = new Hashtable<>();
         AirportInfo lls;
+        BitSet bitSet = BitSet.valueOf(new long[]{(long) surfType});
 
         for (Map.Entry<String, AirportInfo> entry : cachedAPs.entrySet())
         {
@@ -255,6 +256,10 @@ public class Airports implements Serializable
             if(maxSize != 0 && lls.size > maxSize)
                 continue;
 
+            if(surfType != 0)
+                if(!bitSet.get(lls.surface))
+                    continue;
+
             //compare against current size and radius
             if ((civilOk && lls.type == 1) ||
                 (waterOk && lls.type == 2) ||
@@ -263,25 +268,6 @@ public class Airports implements Serializable
                 results.put(entry.getKey(), lls);
             }
         }
-//        while (keys.hasMoreElements())
-//        {
-//            //get our current loop key and value
-//            key = keys.nextElement();
-//            value = cachedAPs.get(key);
-//
-//            double clat = Math.abs(value.lat - lat);
-//            double clon = Math.abs(value.lon - lon);
-//
-//            //compare against current size and radius
-//            if (value.size >= minSz && value.size <= maxSz &&
-//                    clat <= clipLat && clon <= clipLon &&
-//                    ((civil && value.type == 1) ||
-//                            (water && value.type == 2) ||
-//                            (military && value.type == 3)))
-//            {
-//                results.put(key, value);
-//            }
-//        }
 
         return results;
     }
@@ -318,7 +304,7 @@ public class Airports implements Serializable
             double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(lat)));
 
             //get the airports in range
-            Hashtable<String, AirportInfo> results = getAirportsInRange(lat, lon, degreeClipLat, degreeClipLon, minSize, 0, true, waterOk, true);
+            Hashtable<String, AirportInfo> results = getAirportsInRange(lat, lon, degreeClipLat, degreeClipLon, minSize, 0, true, waterOk, true, 0);
 
             //loop through the results to see if any are closest
             Enumeration<String> keys = results.keys();
@@ -361,7 +347,7 @@ public class Airports implements Serializable
      * @param icaoSet     - preselected icaos to search through
      * @param waterOk     - ok, to include water airports
      */
-    public static CloseAirport getRandomCloseAirport(String id, double minDistance, double maxDistance, int minsize, int maxsize, double lat, Set<String> icaoSet, boolean waterOk)
+    public static CloseAirport getRandomCloseAirport(String id, double minDistance, double maxDistance, int minsize, int maxsize, double lat, Set<String> icaoSet, boolean waterOk, int surfType)
     {
         CloseAirport returnValue = null;
 
@@ -404,7 +390,7 @@ public class Airports implements Serializable
         double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(lat)));
 
         //get the airports that met the criteria passed
-        Hashtable<String, AirportInfo> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, minsize, maxsize, true, waterOk, true);
+        Hashtable<String, AirportInfo> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, minsize, maxsize, true, waterOk, true, surfType);
 
         //Don't bother if none found
         if (results != null && results.size() != 0)
@@ -550,7 +536,7 @@ public class Airports implements Serializable
         //adjust for compression toward poles
         double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(icao.latlon.lat)));
 
-        Hashtable<String, AirportInfo> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, 0, 0, true, true, true);
+        Hashtable<String, AirportInfo> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, 0, 0, true, true, true, 0);
 
         //loop through the results to see if any are closest
         Enumeration<String> keys = results.keys();
