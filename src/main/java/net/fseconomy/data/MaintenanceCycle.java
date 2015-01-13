@@ -834,6 +834,14 @@ public class MaintenanceCycle implements Runnable
 						if (minSize > 0)
 							where.append(" AND longestRwy > ").append(minSize);
 
+						if(surfType != 0)
+						{
+							String sSurfaceTypes = BitSet.valueOf(new long[]{(long) surfType}).toString();
+							sSurfaceTypes = sSurfaceTypes.replace("{", "").replace("}", "");
+
+							where.append (" AND surfaceType in (" + sSurfaceTypes + ")");
+						}
+
 						if (isAllIn)
 							where.append(" AND exists (SELECT * FROM aircraft WHERE aircraft.location = airports.icao and aircraft.owner = 0)");
 													
@@ -858,7 +866,7 @@ public class MaintenanceCycle implements Runnable
 						
 						double pay = targetPay * (1 + (Math.random() * 2*payDev) - payDev);
 
-						CloseAirport to = Airports.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk);
+						CloseAirport to = Airports.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk, surfType);
 						if (to == null)
 							continue;
 	
@@ -1240,7 +1248,7 @@ public class MaintenanceCycle implements Runnable
 						qry = "select avg(lat) FROM assignments LEFT join  airports ON fromicao = airports.icao where fromFboTemplate = ?"; 
 						double lat = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.DoubleResultTransformer(), id);
 						
-						CloseAirport to = Airports.getRandomCloseAirport(icao, minDistance, maxDistance, minSize, maxSize, lat, icaoSet2, template.getAllowWater());
+						CloseAirport to = Airports.getRandomCloseAirport(icao, minDistance, maxDistance, minSize, maxSize, lat, icaoSet2, template.getAllowWater(), 0);
 						if (to == null)
 							continue;
 	
