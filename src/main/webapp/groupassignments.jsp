@@ -134,7 +134,7 @@
                 return;
             }
 
-            var comment = $("#assignmentComment").val();
+            var comment = $("#comment").val();
             if (comment == "") {
                 if (!confirm("The comment is blank, are you sure you want to reset the selected assignments?"))
                     return;
@@ -227,7 +227,7 @@
             });
 
             $('.newassignment').click(function () {
-                $("#assignmentData").load("editnewassignmentdata.jsp", function () {
+                $("#assignmentData").load("newassignmentdata.jsp", function () {
                     newAssignmentInit(<%=groupId%>, '<%=returnPage%>');
                 });
 
@@ -256,14 +256,15 @@
                         else
                             name = $("#selectedGroupName").val();
 
-                        if($("#selectedGroupId").val() === null || $("#selectedGroupId").val() === '')
+                        var sgId = $("#selectedGroupId").val();
+                        if( sgId === null || sgId === '')
                             return;
 
                         if (window.confirm("Are you sure you want to transfer selected assignments to " + name + "?")) {
                             if(displayGroupsOnly)
-                                transferAssignment($("input[name='select']:checked"), $("#selectedGroupId").val());
+                                transferAssignment($("input[name='select']:checked"), sgId);
                             else
-                                transferAssignment($("input[name='select']:checked"), $("#selectedGroupId").val());
+                                transferAssignment($("input[name='select']:checked"), sgId);
                         }
                     }
             );
@@ -295,27 +296,30 @@
 
 <div id="wrapper">
     <div class="content">
+
         <jsp:include flush="true" page="assignmentsgroupdata.jsp">
             <jsp:param name="groupid" value="<%=groupId%>"/>
             <jsp:param name="isStaff" value="<%=isStaff%>"/>
             <jsp:param name="returnPage" value="<%=returnPage%>"/>
         </jsp:include>
 
-        <br>
-        <a href="gmapfull.jsp?type=group&id=<%=groupId%>" target="_blank">Map Group Assignments</a>
-        <br>
-        <a class="btn btn-default" href="javascript:checkAll()">Select All</a>
-        <a class="btn btn-default" href="javascript:uncheckAll()">De-Select</a>
         <div>
+            <a href="gmapfull.jsp?type=group&id=<%=groupId%>" target="_blank">Map Group Assignments</a>
+        </div>
+        <div style="margin: 10px;">
+            <a class="btn btn-default" href="javascript:checkAll()">Select All</a>
+            <a class="btn btn-default" href="javascript:uncheckAll()">De-Select</a>
             <input class="btn btn-success" type="button" name="add_Selected" value="Add Selected to My Flight"
-                   onclick="addToMyFlight()"/>
-            <br/><br/>
+                onclick="addToMyFlight()"/>
+        </div>
+        <div>
 <%
     if (isStaff)
     {
 %>
             <div class="panel panel-primary alert-info" style="background: lightsteelblue; padding: 15px">
                 <h3>Owner and Staff Only</h3>
+                <form class="form-horizontal" id="assignmentForm">
                 <div class="well">
                     <h4>Assignment Actions</h4>
                     <input class="btn btn-warning" type="button" name="unlock_Selected" value="Unlock Selected" onclick="unlockAssignments()"/>
@@ -324,16 +328,13 @@
                 </div>
                 <div class="well">
                     <h4>Add Comment to selected assignments</h4>
-                    <span class="alert-danger"><strong>Warning:</strong> This will overwrite any existing comment for the selected assignments!</span><br/>
-                    <label>
-                        You must click the "Add comment" button!<br/>
-                        <input class="form-control" id="assignmentComment" type="text" size="65" maxlength="250">
-                    </label>
+                    <div class="alert-danger"><strong>Warning:</strong> This will overwrite any existing comment for the selected assignments!</div>
+                    <label>You must click the "Add comment" button!</label>
+                    <input class="form-control" type="text" id="comment" name="comment" size="65" maxlength="250"/>
                     <input class="btn btn-primary" type="button" value="Add Comment" onclick="addComment()"/><br/>
                 </div>
                 <div class="well">
                     <h4>Transfer selected assignments to group:</h4>
-                    <form class="form-horizontal">
                         <div class="formgroup">
                             <label><input type="checkbox" id="groupsOnly" onclick="doGroupsOnly();"> Limit to my groups only</label>
                         </div>
@@ -364,8 +365,8 @@
                             </label>
                             <input class="btn btn-primary" type="button" id="transferButton" name="transferButton" value="Transfer"/>
                         </div>
-                    </form>
                 </div>
+                </form>
             </div>
         </div>
 <%
