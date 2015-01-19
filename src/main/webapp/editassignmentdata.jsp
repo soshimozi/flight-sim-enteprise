@@ -18,11 +18,25 @@
 
 <div class="modal-header alert-success">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<%
+    if(assignment.isGoods())
+    {
+%>
+    <h4 class="modal-title">Edit Goods Assignment (<%=assignment.getCommodity()%>)</h4>
+
+<%
+    }
+    else
+    {
+%>
     <h4 class="modal-title">Edit Assignment</h4>
+<%
+    }
+%>
 </div>
 <div class="modal-body">
     <form class="form-horizontal" id="formEditAssignmentModal" method="post" action="userctl">
-        <input type="hidden" name="event" value="updateAssignment"/>
+        <input type="hidden" name="event" value="<%=assignment.isGoods() ? "updateGoodsAssignment" : "updateAssignment"%>"/>
         <input type="hidden" name="returnpage" value=""/>
         <input id="groupid" name="groupid" type="hidden" value="<%= assignment.getGroupId() %>">
         <input id="ownerid" name="ownerid" type="hidden" value="<%= assignment.getOwner() %>">
@@ -40,12 +54,31 @@
                     <p class="form-control-static"><%= assignment.getTo() %></p>
                 </div>
             </div>
+<%
+    if(assignment.isGoods())
+    {
+%>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Amount</label>
+                <div class="col-sm-2">
+                    <input class="form-control" id="editAmount" name="amount" type="text"
+                           value="<%= assignment.getAmount() %>" size="10"/>
+                </div>
+            </div>
+<%
+    }
+    else
+    {
+%>
             <div class="form-group">
                 <label class="col-sm-2 control-label">Amount</label>
                 <div class="col-sm-2">
                     <p class="form-control-static"><%= assignment.getAmount() %></p>
                 </div>
             </div>
+<%
+    }
+%>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="editPilotFee">Pilot Fee</label>
                 <div class="col-sm-2">
