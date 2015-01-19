@@ -55,10 +55,10 @@
                 <th style="width: 60px;">From</th>
                 <th style="width: 75px;">Dest</th>
                 <th class="numeric" style="width: 35px;">NM</th>
-                <th class="numeric" style="width: 45px;">Bearing</th>
+                <th class="numeric" style="width: 50px;">Brg</th>
                 <th style="width: 20em;">Cargo</th>
                 <th>Comment</th>
-                <th class="sorter-timeExpire" style="width: 85px;">Expires</th>
+                <th class="sorter-timeExpire" style="width: 8px;">Expires</th>
             </tr>
             </thead>
             <tbody>
@@ -154,7 +154,7 @@
         else
         {
 %>
-                <td>
+                <td class="nowrap">
                     <img class="mapassignment" data-depart="<%= assignment.getLocation()%>" data-dest="<%= assignment.getTo()%>"
                          src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(assignment.getLocation())) %>"
                          style="border-style: none; vertical-align:middle;"/>
@@ -168,13 +168,13 @@
 <%
         }
 %>
-                <td>
+                <td class="nowrap">
                     <img src="img/blankap.gif" style="vertical-align:middle;"/>
                     <a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getFrom()) %>">
                         <%= assignment.getFrom() %>
                     </a>
                 </td>
-                <td>
+                <td class="nowrap">
                     <img class="mapassignment" data-depart="<%= assignment.getLocation()%>" data-dest="<%= assignment.getTo()%>"
                          src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo())) %>"
                          style="border-style: none; vertical-align:middle;"/>
