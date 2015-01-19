@@ -272,18 +272,23 @@ public class AirportBean implements Serializable
 		if (type == TYPE_WATER)
 			return "Seaplane base";
 
-		String prefix = "Medium";
-		String postfix = " airport";
-		String military = type == TYPE_MILITARY ? "Military" : "";
+		String prefix = "";
+		String postfix;
+		String military = type == TYPE_MILITARY ? "Military " : "";
 
-		if(size >=MIN_SIZE_BIG)
+		if(size >= MIN_SIZE_BIG)
 		{
-			prefix = "Large";
+			prefix = "Large ";
+			postfix = " airport (3-Lot)";
 		}
-		else if(size < MIN_SIZE_MED)
+		else if(size >= MIN_SIZE_MED)
 		{
-			prefix = "Small";
-			postfix = " airstrip";
+			prefix = "Small ";
+			postfix = " airport (2-Lot)";
+		}
+		else
+		{
+			postfix = "Airstrip (1-Lot)";
 		}
 
 		return prefix + military + postfix;
