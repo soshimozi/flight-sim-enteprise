@@ -500,6 +500,83 @@ public class Assignments implements Serializable
         }
     }
 
+    public static void updateGoodsAssignment(int assignmentId, int goodsAmount, int pilotFee, String comment) throws DataError
+    {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+
+        try
+        {
+            conn = DALHelper.getInstance().getConnection();
+
+            stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+            rs = stmt.executeQuery("SELECT * from assignments WHERE id = " + assignmentId);
+
+            if (!rs.next())
+            {
+                throw new DataError("No assignment found for id: " + assignmentId);
+            }
+
+            AssignmentBean assignment = new AssignmentBean(rs);
+
+            if (assignment.getActive() == 1)
+            {
+                throw new DataError("The assignment is in flight");
+            }
+
+            if (assignment.isGoods() && goodsAmount < 1)
+            {
+                throw new DataError("Transfer assignments must have a quantity greater than zero");
+            }
+
+            if (assignment.isCreatedByUser() && assignment.calcPay() < 0)
+            {
+                throw new DataError("Assignment pay may not be less than zero");
+            }
+
+            if (assignment.getPilotFee() < 0)
+            {
+                throw new DataError("Pilot fee may not be less than zero");
+            }
+
+            if (assignment.isGroup() && !Banking.checkAnyFunds(assignment.getGroupId(), pilotFee))
+            {
+                throw new DataError("Not enough money for paying this pilot fee.");
+            }
+
+            if (assignment.calcPay() != 0 && assignment.isCreatedByUser() && !Banking.checkAnyFunds(assignment.getOwner(), assignment.calcPay()))
+            {
+                throw new DataError("Not enough money for paying this assignment. ");
+            }
+
+            int diffAmount = assignment.getAmount() - goodsAmount;
+
+            //added for aircraft shipping - Airboss 1/10/11
+            if (diffAmount != 0 && assignment.getCommodityId() > 0 && assignment.getCommodityId() < 99) //ignore aircraft crate
+            {
+                Goods.changeGoodsRecord(assignment.getLocation(), assignment.getCommodityId(), assignment.getOwner(), diffAmount, false);
+            }
+
+            assignment.setAmount(goodsAmount);
+            assignment.setPilotFee(pilotFee);
+            assignment.setComment(comment);
+            assignment.writeBean(rs);
+
+            rs.updateRow();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            DALHelper.getInstance().tryClose(rs);
+            DALHelper.getInstance().tryClose(stmt);
+            DALHelper.getInstance().tryClose(conn);
+        }
+    }
+
     public static void updateAssignment(AssignmentBean assignment, UserBean user) throws DataError
     {
         Connection conn = null;
