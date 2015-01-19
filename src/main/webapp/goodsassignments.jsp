@@ -72,14 +72,6 @@
     <script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
     <script src="scripts/AutoComplete.js"></script>
 
-    <script type="text/javascript">
-
-        $(function () {
-            initAutoComplete("#selectedGroupName", "#selectedGroupId", <%= Accounts.ACCT_TYPE_GROUP %>);
-        });
-
-    </script>
-
     <script type="text/javaScript">
 
         function checkAll() {
@@ -138,7 +130,7 @@
                 return;
             }
 
-            var comment = $("#assignmentComment").val();
+            var comment = $("#comment").val();
             if (comment == "") {
                 if (!confirm("The comment is blank, are you sure you want to reset the selected assignments?"))
                     return;
@@ -228,11 +220,10 @@
                 $("#myModal").modal('show');
             });
 
-
             $('.newassignment').click(function () {
                 var id = this.getAttribute("data-id");
 
-                $("#assignmentData").load("editnewassignmentdata.jsp", function () {
+                $("#assignmentData").load("newassignmentdata.jsp", function () {
                     newAssignmentInit(<%=transferId%>, '<%=returnPage%>');
                 });
 
@@ -262,6 +253,10 @@
 
         });
 
+        $(function () {
+            initAutoComplete("#selectedGroupName", "#selectedGroupId", <%= Accounts.ACCT_TYPE_GROUP %>);
+        });
+
         var loc = {};
         var assignment = {};
         var i = 0;
@@ -282,15 +277,17 @@
             <jsp:param name="returnPage" value="<%=returnPage%>"/>
         </jsp:include>
 
-        <br>
-        <a href="gmapfull.jsp?type=transfer&id=<%=transferId%>" target="_blank">Map Transfer Assignments</a>
-        <br>
-        <a class="btn btn-default" href="javascript:checkAll()">Select All</a>
-        <a class="btn btn-default" href="javascript:uncheckAll()">De-Select</a>
         <div>
+            <a href="gmapfull.jsp?type=transfer&id=<%=transferId%>" target="_blank">Map Transfer Assignments</a>
+        </div>
+        <div style="margin: 10px;">
+            <a class="btn btn-default" href="javascript:checkAll()">Select All</a>
+            <a class="btn btn-default" href="javascript:uncheckAll()">De-Select</a>
             <input class="btn btn-success" type="button" name="add_Selected" value="Add Selected to My Flight"
                    onclick="addToMyFlight()"/>
-            <br/><br/>
+        </div>
+
+        <div>
 <%
     if (isStaff)
     {
