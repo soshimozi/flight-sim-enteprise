@@ -28,7 +28,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link href="css/Master.css" rel="stylesheet" type="text/css" />
+	<link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon"/>
+	<link href="css/Master.css" rel="stylesheet" type="text/css" />
 
     <%--<script src="scripts/AnchorPosition.js"></script>--%>
     <script src="scripts/PopupWindow.js"></script>
