@@ -38,11 +38,10 @@ import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
 import net.fseconomy.util.GlobalLogger;
+import net.fseconomy.util.Helpers;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class UserCtl extends HttpServlet
 {
@@ -200,6 +199,12 @@ public class UserCtl extends HttpServlet
                         break;
                     case "deleteAssignment":
                         deleteGroupAssignment(req);
+                        break;
+                    case "newGoodsAssignment":
+                        newGoodsAssignment(req);
+                        break;
+                    case "updateGoodsAssignment":
+                        updateGoodsAssignment(req);
                         break;
                     case "deleteGoodsAssignment":
                         deleteGoodsAssignment(req);
@@ -1164,7 +1169,7 @@ public class UserCtl extends HttpServlet
         String sPilotFee = req.getParameter("pilotfee");
         String comment = req.getParameter("comment");
 
-        if (sAssignmentId == null || (sGroupId == null && sOwnerId == null) || sPilotFee == null)
+        if (Helpers.isNullOrBlank(sAssignmentId) || (Helpers.isNullOrBlank(sGroupId) && Helpers.isNullOrBlank(sOwnerId)) || Helpers.isNullOrBlank(sPilotFee))
             throw new DataError("Invalid parameters.");
 
         int ownerId = 0;
@@ -1182,6 +1187,160 @@ public class UserCtl extends HttpServlet
             throw new DataError("You do not have permission to do that.");
 
         Assignments.updateAssignment(assignmentId, pilotFee, comment);
+    }
+
+    void updateGoodsAssignment(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        String sGroupId = req.getParameter("groupid");
+        String sOwnerId = req.getParameter("ownerid");
+        String sAssignmentId = req.getParameter("assignmentid");
+        String sAmount = req.getParameter("amount");
+        String sPilotFee = req.getParameter("pilotfee");
+        String comment = req.getParameter("comment");
+
+        if (Helpers.isNullOrBlank(sAssignmentId) || (Helpers.isNullOrBlank(sGroupId) && Helpers.isNullOrBlank(sOwnerId)) || Helpers.isNullOrBlank(sPilotFee) || Helpers.isNullOrBlank(sAmount))
+            throw new DataError("Invalid parameters.");
+
+        int ownerId = 0;
+        int groupId = Integer.parseInt(sGroupId);
+        int assignmentId = Integer.parseInt(sAssignmentId);
+        int amount = Integer.parseInt(sAmount);
+        int pilotFee = (int)Double.parseDouble(sPilotFee);
+
+        if ( groupId > 0 && Groups.getRole(groupId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        if(!Helpers.isNullOrBlank(sOwnerId))
+            ownerId = Integer.parseInt(sOwnerId);
+
+        if ( ownerId > 0 && Groups.getRole(ownerId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        Assignments.updateGoodsAssignment(assignmentId, amount, pilotFee, comment);
+    }
+
+    void newGoodsAssignment(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        String sOwner = req.getParameter("ownerid");
+        String sGroup = req.getParameter("groupid");
+        String fromIcao = req.getParameter("fromicao");
+        String toIcao = req.getParameter("toicao");
+        String sCommodity = req.getParameter("commodityid");
+        String sAmount = req.getParameter("amount");
+        String sPay = req.getParameter("pay");
+        String sRepeat = req.getParameter("numtocreate");
+
+        AssignmentBean assignment = new AssignmentBean();
+        assignment.setId(-1);
+        assignment.setCreation(new java.sql.Timestamp(System.currentTimeMillis()));
+        assignment.setCreatedByUser(true);
+        assignment.setUnits(AssignmentBean.UNIT_KG);
+
+        if(Helpers.isNullOrBlank(sOwner))
+            throw new DataError("Missing owner");
+
+        if(sOwner.equals(sGroup))
+        {
+            assignment.setGroup(true);
+            assignment.setGroupId(Integer.parseInt(sGroup));
+        }
+        if (fromIcao.equalsIgnoreCase(toIcao))
+            throw new DataError("Goods already at destination");
+
+        if (!Airports.isValidIcao(fromIcao.toUpperCase()))
+            throw new DataError("From airport not found.");
+
+        if (!Airports.isValidIcao(toIcao.toUpperCase()))
+            throw new DataError("To airport not found.");
+
+        if(Helpers.isNullOrBlank(sCommodity))
+            throw new DataError("Missing commodity.");
+
+        if (Helpers.isNullOrBlank(sAmount) && !sAmount.matches("[0-9]+"))
+            throw new DataError("Amount Invalid");
+
+        if (Helpers.isNullOrBlank(sPay) && !sPay.matches("[0-9]+"))
+            throw new DataError("Pay Invalid");
+
+        if (Helpers.isNullOrBlank(sRepeat) && !sRepeat.matches("[0-9]+"))
+            throw new DataError("Number of Assignments Invalid");
+
+        int numToCreate = Integer.parseInt(sRepeat);
+        if (numToCreate <= 0)
+            throw new DataError("Number of Assignments must be greater than 0");
+
+        int amount = Integer.parseInt(sAmount);
+        int commodity = Integer.parseInt(sCommodity);
+        int owner = Integer.parseInt(sOwner);
+
+        assignment.setAmount(amount);
+        assignment.setCommodityId(commodity);
+        assignment.setOwner(owner);
+        assignment.setLocation(fromIcao);
+        assignment.setFrom(fromIcao);
+        assignment.setTo(toIcao);
+        assignment.setCommodity(Goods.commodities[assignment.getCommodityId()].getName());
+
+        if (!Goods.checkGoodsAvailable(fromIcao, owner, commodity, amount*numToCreate))
+            throw new DataError("Not enough Goods available!");
+
+        if (assignment.isGroup() && Groups.getRole(assignment.getGroupId(), user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        if (!assignment.isGroup() && assignment.getOwner() != user.getId())
+            throw new DataError("You do not have permission to do that.");
+
+        //reset group id so that the assignment is unlocked
+        assignment.setGroupId(0);
+
+        for (int i = 0; i < numToCreate; i++)
+            Assignments.updateAssignment(assignment, user);
+    }
+
+    void updateTransferGoods(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        //id = assignment id - single record
+        String sGroupId = req.getParameter("groupid");
+        String sOwnerId = req.getParameter("ownerid");
+        String sAssignmentId = req.getParameter("assignmentid");
+        String sGoodsAmount = req.getParameter("amount");
+        String sPilotFee = req.getParameter("pilotfee");
+        String comment = req.getParameter("comment");
+
+        if (sAssignmentId == null
+            || (sGroupId == null && sOwnerId == null)
+            || sPilotFee == null
+            || sGoodsAmount == null)
+            throw new DataError("Invalid parameters.");
+
+        int ownerId = 0;
+        int groupId = Integer.parseInt(sGroupId);
+        int assignmentId = Integer.parseInt(sAssignmentId);
+        int goodsAmount = Integer.parseInt(sGoodsAmount);
+        int pilotFee = (int)Double.parseDouble(sPilotFee);
+
+        if ( groupId > 0 && Groups.getRole(groupId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        if(!Helpers.isNullOrBlank(sOwnerId))
+            ownerId = Integer.parseInt(sOwnerId);
+
+        if ( ownerId > 0 && Groups.getRole(ownerId, user.getId()) < UserBean.GROUP_STAFF)
+            throw new DataError("You do not have permission to do that.");
+
+        Assignments.updateGoodsAssignment(assignmentId, goodsAmount, pilotFee, comment);
     }
 
     void deleteGoodsAssignment(HttpServletRequest req) throws DataError
