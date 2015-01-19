@@ -12,4 +12,10 @@ public class Helpers
 
         return message;
     }
+
+    public static boolean isNullOrBlank(String s)
+    {
+        return (s==null || s.trim().equals(""));
+    }
+
 }
