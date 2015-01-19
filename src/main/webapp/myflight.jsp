@@ -416,7 +416,7 @@
 			<th style="width: 80px">From</th>
 			<th style="width: 80px">Dest</th>
 			<th class="numeric" style="width: 35px">NM</th>
-			<th class="numeric" style="width: 45px">Bearing</th>
+			<th class="numeric" style="width: 50px">Brg</th>
 			<th style="max-width: 400px">Cargo</th>
 			<th style="width: 35px">Type</th>
 			<th style="width: 75px">Aircraft</th>
@@ -578,7 +578,7 @@
 			<th style="width: 80px;">From</th>
 			<th style="width: 80px;">Dest</th>
 			<th class="numeric" style="width: 35px;">NM</th>
-			<th class="numeric" style="width: 45px;">Bearing</th>
+			<th class="numeric" style="width: 50px;">Brg</th>
 			<th style="max-width: 400px;">Cargo</th>
 			<th style="width: 35px;">Type</th>
 			<th style="width: 75px;">Aircraft</th>
