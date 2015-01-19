@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.data.*, net.fseconomy.util.Formatters, java.util.List, net.fseconomy.dto.*, net.fseconomy.beans.UserBean"
 %>
+<%@ page import="java.util.HashMap" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -25,6 +26,7 @@
     List<LinkedAccount> linkedList = null;
     List<TrendHours> trendList = null;
     List<String> ipList = null;
+    HashMap<String, ClientIP> ipHitCount = null;
     UserBean account = null;
     int accountId = -1;
     String flights = "Not avail.";
@@ -40,9 +42,10 @@
         linkedList = Accounts.getLinkedAccountList(accountId);
         trendList = Data.getTrendHoursQuery(account.getId(), 10);
         ipList = SimClientRequests.getClientRequestCountsByAccountId(accountId);
+        ipHitCount = SimClientRequests.getCountIpWithMultipleUsers();
 
-        if (Stats.statsmap != null && Stats.statsmap.containsKey(account.getName()))
-            flights = Integer.toString(Stats.statsmap.get(account.getName()).flights);
+        if (Stats.statsmap != null && Stats.statsmap.containsKey(account.getName().toLowerCase()))
+            flights = Integer.toString(Stats.statsmap.get(account.getName().toLowerCase()).flights);
     }
 %>
 
@@ -56,11 +59,22 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css" />
     <link href="../css/Master.css" rel="stylesheet"/>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="../scripts/AutoComplete.js"></script>
+
+    <script type="text/javascript">
+
+        $(function()
+        {
+            initAutoComplete("#username", "#userid", <%= Accounts.ACCT_TYPE_PERSON %>);
+        });
+
+    </script>
 
 </head>
 <body>
@@ -73,8 +87,19 @@
         <div class="container">
 
         <div class="row clearfix">
-            <div class="col-md-12 column">
+            <div class="col-md-4 column">
                 <h3>Admin User Manager</h3>
+            </div>
+            <div class="col-md-6 column">
+                <form id="SearchByName" method="post" action="usermanageredit.jsp">
+                    <div class="formgroup">
+                        Enter Account:
+                        <input type="hidden" id="userid" name="userid" value=""/>
+                        <input type="text" id="username" name="username"/>
+                        <input type="submit" class="button" value="Search" />
+                        <input type="hidden" name="returnpage" value="<%= returnPage %>"/>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -164,6 +189,7 @@
                                 <tr>
                                     <th>IP</th>
                                     <th style="padding-left: 20px">Hits</th>
+                                    <th style="padding-left: 20px">Other users</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -171,6 +197,9 @@
                                     for (String item: ipList)
                                     {
                                         String[] s = item.split("\\|");
+                                        ClientIP cip = null;
+                                        if(ipHitCount != null && ipHitCount.containsKey(s[0]))
+                                            cip = ipHitCount.get(s[0]);
                                 %>
                                 <tr>
                                     <td>
@@ -178,6 +207,11 @@
                                     </td>
                                     <td style="padding-left: 20px">
                                         <a href="/admin/checkclientiplisting.jsp?searchby=account&searchfor=<%= account.getName() %>"><%= s[1] %></a>
+                                    </td>
+                                    <td style="padding-left: 20px">
+                                        <span title="<%=cip != null ? cip.users : ""%>">
+                                        <%= cip != null ? cip.count  : 0 %>
+                                        </span>
                                     </td>
                                 </tr>
                                 <%
@@ -211,7 +245,7 @@
       for (LinkedAccount item : linkedList)
         {
 %>
-                                <li><%=item.accountName%></li>
+                                <li><a href="/admin/usermanageredit.jsp?userid=<%=item.accountId%>"><%=item.accountName%></a></li>
 <%
         }
 %>

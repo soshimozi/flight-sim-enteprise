@@ -1,10 +1,12 @@
 package net.fseconomy.data;
 
+import net.fseconomy.dto.ClientIP;
 import net.fseconomy.dto.ClientRequest;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SimClientRequests
@@ -155,11 +157,31 @@ public class SimClientRequests
         List<String> list = new ArrayList<>();
         try
         {
-            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT pilot) AS users FROM clientrequests GROUP BY ip HAVING COUNT(DISTINCT pilot) > 1 ORDER BY COUNT(DISTINCT pilot) DESC";
+            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT pilot) AS users, COUNT(DISTINCT pilot) as count FROM clientrequests GROUP BY ip HAVING COUNT(DISTINCT pilot) > 1 ORDER BY COUNT(DISTINCT pilot) DESC";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 
             while(rs.next())
                 list.add(rs.getString("ip") + "|" + rs.getString("users"));
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+            throw new DataError("getClientRequestIps: SQL Error");
+        }
+
+        return list;
+    }
+
+    public static HashMap<String,ClientIP> getCountIpWithMultipleUsers() throws DataError
+    {
+        HashMap<String,ClientIP> list = new HashMap<>();
+        try
+        {
+            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT pilot) AS users, COUNT(DISTINCT pilot) as count FROM clientrequests GROUP BY ip HAVING COUNT(DISTINCT pilot) > 1 ORDER BY COUNT(DISTINCT pilot) DESC";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+
+            while(rs.next())
+                list.put(rs.getString("ip"), new ClientIP(rs.getString("ip"), rs.getInt("count"), rs.getString("users")));
         }
         catch (SQLException e)
         {
