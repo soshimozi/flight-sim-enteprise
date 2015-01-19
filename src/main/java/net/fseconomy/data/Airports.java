@@ -77,6 +77,14 @@ public class Airports implements Serializable
         }
     }
 
+    public static boolean isValidIcao(String icao)
+    {
+        if(cachedAPs.containsKey(icao))
+            return true;
+
+        return false;
+    }
+
     public static int findDistance(String from, String to)
     {
         int result = 0;
