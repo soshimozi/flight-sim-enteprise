@@ -1247,11 +1247,12 @@ public class UserCtl extends HttpServlet
         if(Helpers.isNullOrBlank(sOwner))
             throw new DataError("Missing owner");
 
-        if(sOwner.equals(sGroup))
-        {
-            assignment.setGroup(true);
-            assignment.setGroupId(Integer.parseInt(sGroup));
-        }
+//        if(sOwner.equals(sGroup))
+//        {
+//            assignment.setGroup(true);
+//            assignment.setGroupId(Integer.parseInt(sGroup));
+//        }
+
         if (fromIcao.equalsIgnoreCase(toIcao))
             throw new DataError("Goods already at destination");
 
@@ -1280,7 +1281,7 @@ public class UserCtl extends HttpServlet
         int amount = Integer.parseInt(sAmount);
         int commodity = Integer.parseInt(sCommodity);
         int owner = Integer.parseInt(sOwner);
-
+        boolean isGroup = Accounts.isGroup(owner);
         assignment.setAmount(amount);
         assignment.setCommodityId(commodity);
         assignment.setOwner(owner);
@@ -1292,10 +1293,10 @@ public class UserCtl extends HttpServlet
         if (!Goods.checkGoodsAvailable(fromIcao, owner, commodity, amount*numToCreate))
             throw new DataError("Not enough Goods available!");
 
-        if (assignment.isGroup() && Groups.getRole(assignment.getGroupId(), user.getId()) < UserBean.GROUP_STAFF)
+        if (isGroup && Groups.getRole(owner, user.getId()) < UserBean.GROUP_STAFF)
             throw new DataError("You do not have permission to do that.");
 
-        if (!assignment.isGroup() && assignment.getOwner() != user.getId())
+        if (!isGroup && assignment.getOwner() != user.getId())
             throw new DataError("You do not have permission to do that.");
 
         //reset group id so that the assignment is unlocked
