@@ -220,16 +220,6 @@
                 $("#myModal").modal('show');
             });
 
-            $('.newassignment').click(function () {
-                var id = this.getAttribute("data-id");
-
-                $("#assignmentData").load("newassignmentdata.jsp", function () {
-                    newAssignmentInit(<%=transferId%>, '<%=returnPage%>');
-                });
-
-                $("#myModal").modal('show');
-            });
-
             $("#transferButton").click(
                     function () {
                         if (window.confirm("Are you sure you want to transfer selected assignments to " + $("#transfername").val() + "?")) {
