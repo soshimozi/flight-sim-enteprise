@@ -269,7 +269,7 @@ public class AssignmentBean implements Serializable
 	 * Sets the real pay value.
 	 * @param pay The pay to set
 	 */
-	public void setRealPay(double pay)
+	void setRealPay(double pay)
 	{
 		this.realpay = calcPay();
 	}
