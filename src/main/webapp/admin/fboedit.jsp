@@ -23,18 +23,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-    <link rel="stylesheet" type="text/css" href="../css/redmond/jquery-ui.css">
-    <link href="../css/Master.css" rel="stylesheet" type="text/css" />
-
-    <script type='text/javascript' src='../scripts/common.js'></script>
-    <script type='text/javascript' src='../scripts/css.js'></script>
-    <script type='text/javascript' src='../scripts/standardista-table-sorting.js'></script>
-
-    <script type='text/javascript' src="../scripts/PopupWindow.js"></script>
+    <link href="../css/redmond/jquery-ui.css" rel="stylesheet"/>
+    <link href="../css/tablesorter-style.css" rel="stylesheet"/>
+    <link href="../css/Master.css" rel="stylesheet"/>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-    <script type='text/javascript' src="../scripts/AutoComplete.js"></script>
+
+    <script src='../scripts/jquery.tablesorter.js'></script>
+    <script src="../scripts/jquery.tablesorter.widgets.js"></script>
+    <script src='../scripts/parser-checkbox.js'></script>
+    <script src='../scripts/parser-timeExpire.js'></script>
+    <script src="../scripts/AutoComplete.js"></script>
 
     <script type="text/javascript">
 
@@ -47,6 +47,14 @@
         $(function()
         {
             initAutoComplete("#ownername", "#owner", <%= Accounts.ACCT_TYPE_ALL %>)
+
+            $.extend($.tablesorter.defaults, {
+                widthFixed: false,
+                widgets : ['zebra','columns']
+            });
+
+            $('.fboTable').tablesorter();
+
         });
 
     </script>
@@ -123,7 +131,7 @@
             <input type="hidden" name="id" value="" />
             <input type="hidden" name="return" value="fbo.jsp<%= account.isGroup() ? "?id=" + account.getId() : "" %>" />
         </div>
-    	<table id="sortableTablefbo0" class="sortable">
+    	<table class="fboTable">
 	        <caption>
                 <div>
 	            FBO's owned by <%= account.getName() %>
@@ -137,7 +145,7 @@
                     <th>Location</th>
                     <th>Name</th>
                     <th>Active</th>
-                    <th>Price</th>
+                    <th class="numeric">Price</th>
                     <th>Lots</th>
                     <th>Supplies</th>
                     <th>S/Day</th>
@@ -145,7 +153,7 @@
                     <th>100LL Fuel</th>
                     <th>JetA Fuel</th>
                     <th>Bldg. M.</th>
-                    <th>Status</th>
+                    <th class="sorter-false">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -170,7 +178,9 @@
                     <td class="numeric"><%= fuel != null ? fuel.getAmount() : "" %></td>
                     <td class="numeric"><%= jeta != null ? jeta.getAmount() : "" %></td>
                     <td class="numeric"><%= buildingmaterials != null ? buildingmaterials.getAmount() : "" %></td>
-                    <td> | <a class="link" href="<%= response.encodeURL("/fbotransfer.jsp?id=" + fbo.getId()) %>">Transfer</a></td>
+                    <td>
+                        <a class="link" href="<%= response.encodeURL("/fbotransfer.jsp?id=" + fbo.getId()) %>">Transfer</a>
+                    </td>
                 </tr>
 <%
         }

@@ -156,4 +156,10 @@ public class common
         return balance >= amount;
     }
 
+    static boolean isAircraftLeased(int aircraftid) throws SQLException
+    {
+        String qry = "SELECT IFNULL(id, 0) FROM aircraft WHERE id = ? and lessor is not null";
+
+        return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraftid);
+    }
 }

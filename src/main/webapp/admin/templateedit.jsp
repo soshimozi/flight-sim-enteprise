@@ -41,20 +41,21 @@
 		try
 		{
 			String saId[] = request.getParameterValues("surfType");
+			List<Integer> list = new ArrayList<>();
+
 			if(saId != null && saId.length > 0)
 			{
-				List<Integer> list = new ArrayList<>();
-				for(String s: saId)
+				for (String s : saId)
 					list.add(Integer.parseInt(s));
-
-				template.setAllowedSurfaceTypes(list);
-
-				Templates.updateTemplate(template, user);
-%>
-				<jsp:forward page="/admin/templates.jsp" />
-<%
 			}
-		} 
+
+			template.setAllowedSurfaceTypes(list);
+
+			Templates.updateTemplate(template, user);
+%>
+			<jsp:forward page="/admin/templates.jsp" />
+<%
+		}
 		catch (DataError e)
 		{
 			error = e.getMessage();
@@ -189,8 +190,13 @@
 					Dev <select name="payDev" class="formselect"><%= deviation(template.getPayDev())%></select></td>
 				</tr>
 				<tr>
-					<td>Target Distance</td><td><input name="targetDistance" type="text" class="textarea" value="<%= template.getTargetDistance() %>" size="7"/>  
-					Dev <select name="distanceDev" class="formselect"><%= deviation(template.getDistanceDev())%></select></td>
+					<td>
+						Target Distance
+					</td>
+					<td>
+						<input name="targetDistance" type="text" class="textarea" value="<%= template.getTargetDistance() %>" size="7"/>
+						Dev <select name="distanceDev" class="formselect"><%= deviation(template.getDistanceDev())%></select>
+					</td>
 				</tr>
 
 				<tr>

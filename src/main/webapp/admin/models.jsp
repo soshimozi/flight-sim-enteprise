@@ -31,8 +31,8 @@
 	<link rel="stylesheet" type="text/css" href="../css/tablesorter-style.css"/>
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<script type='text/javascript' src='../scripts/common.js'></script>
-    <script type='text/javascript' src='../scripts/css.js'></script>
+	<%--<script type='text/javascript' src='../scripts/common.js'></script>--%>
+    <%--<script type='text/javascript' src='../scripts/css.js'></script>--%>
 	<script type='text/javascript' src='../scripts/jquery.tablesorter.js'></script>
 	<script type='text/javascript' src="../scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='../scripts/parser-checkbox.js'></script>

@@ -29,18 +29,18 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-	<link href="css/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
-	<link href="css/Master.css" rel="stylesheet" type="text/css" />
-	<link href="css/tablesorter-style.css" rel="stylesheet" type="text/css" />
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css" rel="stylesheet">
+	<link type="text/css" href="css/redmond/jquery-ui.css" rel="stylesheet"/>
+	<link href="css/Master.css" rel="stylesheet"/>
+	<link href="css/tablesorter-style.css" rel="stylesheet"/>
 
-	<script type='text/javascript' src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
-	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
-	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
-	<script type='text/javascript' src='scripts/parser-timeExpire.js'></script>
+	<script src='scripts/jquery.tablesorter.js'></script>
+	<script src="scripts/jquery.tablesorter.widgets.js"></script>
+	<script src='scripts/parser-checkbox.js'></script>
+	<script src='scripts/parser-timeExpire.js'></script>
 	<script src="scripts/PopupWindow.js"></script>
 
 
