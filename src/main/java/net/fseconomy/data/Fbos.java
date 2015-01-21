@@ -423,7 +423,34 @@ public class Fbos implements Serializable
 
     public static List<FboBean> getFboForSale()
     {
-        return getFboSql("SELECT f.* FROM fbo f WHERE f.saleprice > 0 ORDER BY f.saleprice");
+        //id, name, price, location
+        ArrayList<FboBean> result = new ArrayList<>();
+
+        try
+        {
+            String qry = "SELECT id, owner, name, fbosize, services, saleprice, location FROM fbo f WHERE f.saleprice > 0 ORDER BY f.saleprice";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+            while (rs.next())
+            {
+                FboBean fbo = new FboBean();
+
+                fbo.setId(rs.getInt("id"));
+                fbo.setOwner(rs.getInt("owner"));
+                fbo.setName(rs.getString("name"));
+                fbo.setLocation(rs.getString("location"));
+                fbo.setPrice(rs.getInt("saleprice"));
+                fbo.setFboSize(rs.getInt("fbosize"));
+                fbo.setServices(rs.getInt("services"));
+
+                result.add(fbo);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     public static FboBean getFbo(int id)
