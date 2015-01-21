@@ -199,6 +199,11 @@ public class FboBean implements Serializable
 		return name == null ? "" : name;
 	}
 
+	public void setOwner(int pOwner)
+	{
+		owner = pOwner;
+	}
+
 	public int getOwner()
 	{
 		return owner;
@@ -258,11 +263,16 @@ public class FboBean implements Serializable
 			equipmentInstallMargin = 0;
 	}
 	
+	public void setId(int pId)
+	{
+		id = pId;
+	}
+
 	public int getId()
 	{
 		return id;
 	}
-	
+
 	public int getPrice()
 	{
 		return price;
@@ -284,7 +294,11 @@ public class FboBean implements Serializable
 	{
 		return priceincludesgoods;
 	}
-	
+
+	public void setFboSize(int pSize)
+	{
+		 fbosize = pSize;
+	}
 	public int getFboSize()
 	{
 		return fbosize;
