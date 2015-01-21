@@ -1030,4 +1030,22 @@ public class Accounts implements Serializable
 
         return result;
     }
+
+    public static String getGroupOwnerName(int groupId)
+    {
+        String retval = null;
+
+        try
+        {
+            String qry = "SELECT  a.name as ownername FROM groupmembership g LEFT JOIN accounts a on g.userId=a.id WHERE g.level = 'owner' and g.groupId = ?";
+            retval = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), groupId);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return retval;
+    }
+
 }
