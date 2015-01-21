@@ -213,6 +213,10 @@ public class FboBean implements Serializable
 	{
 		return active;
 	}
+	public void setActive(int pActive)
+	{
+		active = pActive > 0;
+	}
 
 	public void setFuel100LL(double d)
 	{
