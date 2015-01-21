@@ -42,30 +42,29 @@
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="toicao">To</label>
-                <div class="col-sm-2">
-                    <input class="form-control" id="toicao" name="toicao" type="text" value="" size="4"
-                           maxlength="4"/>
+                <div class="col-sm-4">
+                    <input class="form-control" id="toicao" name="toicao" type="text" value="" size="4" maxlength="4"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label">Amount (Kg)</label>
-                <div class="col-sm-2">
+                <div class="col-sm-4">
                     <input class="form-control" id="amount" name="amount" type="text" value=""
-                           size="10" maxlength="10"/>
+                           size="8" maxlength="8"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="pay">Pay (each)</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="pay" name="pay" type="text" value="0" size="10"
-                           maxlength="10"/>
+                <div class="col-sm-4">
+                    <input class="form-control" id="pay" name="pay" type="text" value="0" size="8"
+                           maxlength="8"/>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="numtocreate"># to Create</label>
-                <div class="col-sm-3">
-                    <input class="form-control" id="numtocreate" name="numtocreate" type="text" value="1" size="10"
-                           maxlength="10"/>
+                <div class="col-sm-4">
+                    <input class="form-control" id="numtocreate" name="numtocreate" type="text" value="1" size="8"
+                           maxlength="8"/>
                 </div>
             </div>
         </div>
