@@ -2968,15 +2968,25 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("SellPrice");
 		}
 
+		int groupOwnerId;
+		UserBean ultimateOwner = null;
+
         for (FboBean fbo : fbos)
         {
             AirportBean airport = Airports.getAirport(fbo.getLocation());
 
-            UserBean fboowner = Accounts.getAccountById(fbo.getOwner());
-            int groupOwnerid = Accounts.accountUltimateGroupOwner(fbo.getOwner());
-            UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
+//            UserBean fboOwner = Accounts.getAccountById(fbo.getOwner());
+//			if(fboOwner.isGroup())
+//			{
+//				groupOwnerId = Accounts.accountUltimateGroupOwner(fbo.getOwner());
+//				ultimateOwner = Accounts.getAccountById(groupOwnerId);
+//			}
+			String fboOwnerName = Accounts.getAccountNameById(fbo.getOwner());
+			String fboGroupOwnerName = null;
+			if(Accounts.isGroup(fbo.getOwner()))
+				fboGroupOwnerName = Accounts.getGroupOwnerName(fbo.getOwner());
 
-            int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+			int totalSpace = fbo.getFboSize() * airport.getFboSlots();
             int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
@@ -2984,7 +2994,7 @@ public class Datafeed extends HttpServlet
             buffer.append((fbo.isActive() ? "Active" : "Closed"));
             buffer.append(airport.getName());
             buffer.append(fbo.getName());
-            buffer.append(Converters.XMLHelper.protectSpecialCharacters(fboowner.getName()) + (fboowner.isGroup() ? "(" + Converters.XMLHelper.protectSpecialCharacters(ultimateOwner.getName()) + ")" : ""));
+            buffer.append(Converters.XMLHelper.protectSpecialCharacters(fboOwnerName) + (fboGroupOwnerName != null ? "(" + Converters.XMLHelper.protectSpecialCharacters(fboGroupOwnerName) + ")" : ""));
             buffer.append(fbo.getLocation());
             buffer.append(airport.getCity() + ", " + airport.getCountry());
             buffer.append(fbo.getFboSize());
@@ -3022,15 +3032,25 @@ public class Datafeed extends HttpServlet
 	
 	private void AddXMLFboItems(Converters.xmlBuffer buffer, List<FboBean> fbos, boolean showsupplies)
 	{
+		int groupOwnerid;
+		UserBean ultimateOwner = null;
+
         for (FboBean fbo : fbos)
         {
             AirportBean airport = Airports.getAirport(fbo.getLocation());
 
-            UserBean fboowner = Accounts.getAccountById(fbo.getOwner());
-            int groupOwnerid = Accounts.accountUltimateGroupOwner(fbo.getOwner());
-            UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
+//            UserBean fboowner = Accounts.getAccountById(fbo.getOwner());
+//			if(fboowner.isGroup())
+//			{
+//				groupOwnerid = Accounts.accountUltimateGroupOwner(fbo.getOwner());
+//				ultimateOwner = Accounts.getAccountById(groupOwnerid);
+//			}
+			String fboOwnerName = Accounts.getAccountNameById(fbo.getOwner());
+			String fboGroupOwnerName = null;
+			if(Accounts.isGroup(fbo.getOwner()))
+				fboGroupOwnerName = Accounts.getGroupOwnerName(fbo.getOwner());
 
-            int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+			int totalSpace = fbo.getFboSize() * airport.getFboSlots();
             int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
@@ -3039,7 +3059,7 @@ public class Datafeed extends HttpServlet
             buffer.append("Status", (fbo.isActive() ? "Active" : "Closed"));
             buffer.append("Airport", airport.getName());
             buffer.append("Name", Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));
-            buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(fboowner.getName()) + (fboowner.isGroup() ? "(" + Converters.XMLHelper.protectSpecialCharacters(ultimateOwner.getName()) + ")" : ""));
+            buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(fboOwnerName) + (fboGroupOwnerName != null ? "(" + Converters.XMLHelper.protectSpecialCharacters(fboGroupOwnerName) + ")" : ""));
             buffer.append("Icao", fbo.getLocation());
             buffer.append("Location", airport.getCity() + ", " + airport.getCountry());
             buffer.append("Lots", fbo.getFboSize());
