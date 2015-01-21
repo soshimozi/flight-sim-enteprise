@@ -189,7 +189,7 @@
                                 <tr>
                                     <th>IP</th>
                                     <th style="padding-left: 20px">Hits</th>
-                                    <th style="padding-left: 20px">Other users</th>
+                                    <th style="padding-left: 20px"><span>IP Users</span><span title="Hover over non-zero count to see pilot names"><img height="16" width="16" src="../img/helpicon.png"></span></th>
                                 </tr>
                                 </thead>
                                 <tbody>
