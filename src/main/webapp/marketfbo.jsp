@@ -89,9 +89,6 @@
 <div id="wrapper">
 	<div class="content">
 		<div class="dataTable">
-			<%
-				List<FboBean> fbos = Fbos.getFboForSale();
-			%>
 			<form method="post" action="userctl" name="fboForm">
 				<input type="hidden" name="event" value="MarketFbo"/>
 				<input type="hidden" name="id">
@@ -115,16 +112,17 @@
 					</tr>
 					</thead>
 					<tbody>
-					<%
-						//Get hashmap of airports in list
-						HashMap<String, AirportBean> aps = Airports.getAirportsFromFboList(fbos);
-						for (FboBean fbo : fbos)
-						{
-							String fboname = fbo.getName(); // + "<br><span class=\"small\"><i>" + fboowner.getName() + (fboowner.isGroup() ? "(" + ultimateOwner.getName() + ")" : "") + fboservices + "</i></span>";
-							String price = Formatters.currency.format(fbo.getPrice());
-							AirportBean airport = aps.get(fbo.getLocation());
-							String location = airport.getCity() + "<br />" + airport.getCountry();
-					%>
+<%
+	List<FboBean> fbos = Fbos.getFboForSale();
+
+	//Get hashmap of airports in list
+	HashMap<String, AirportBean> aps = Airports.getAirportsFromFboList(fbos);
+	for (FboBean fbo : fbos)
+	{
+		String fboname = fbo.getName();
+		String price = Formatters.currency.format(fbo.getPrice());
+		AirportBean airport = aps.get(fbo.getLocation());
+%>
 					<tr>
 						<td onclick="selectFbo(<%=fbo.getId()%>)"><%= fboname %></td>
 						<td><%= Airports.airportLink(airport, airport, response) %></td>
@@ -132,9 +130,9 @@
 						<td><%= airport.getCountry() %></td>
 						<td style="text-align: right;"><%= price %></td>
 					</tr>
-					<%
-						}
-					%>
+<%
+	}
+%>
 					</tbody>
 				</table>
 			</form>
