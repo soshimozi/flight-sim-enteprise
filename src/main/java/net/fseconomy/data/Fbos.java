@@ -428,7 +428,7 @@ public class Fbos implements Serializable
 
         try
         {
-            String qry = "SELECT id, owner, name, fbosize, services, saleprice, location FROM fbo f WHERE f.saleprice > 0 ORDER BY f.saleprice";
+            String qry = "SELECT id, owner, name, active, fbosize, services, saleprice, location FROM fbo f WHERE f.saleprice > 0 ORDER BY f.saleprice";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
             while (rs.next())
             {
@@ -437,6 +437,7 @@ public class Fbos implements Serializable
                 fbo.setId(rs.getInt("id"));
                 fbo.setOwner(rs.getInt("owner"));
                 fbo.setName(rs.getString("name"));
+                fbo.setActive(rs.getInt("active"));
                 fbo.setLocation(rs.getString("location"));
                 fbo.setPrice(rs.getInt("saleprice"));
                 fbo.setFboSize(rs.getInt("fbosize"));
