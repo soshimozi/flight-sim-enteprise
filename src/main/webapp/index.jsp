@@ -107,31 +107,7 @@
         }
 
         // Popup Windows
-        var manual = new PopupWindow();
-        var flying = new PopupWindow();
-        var parked = new PopupWindow();
         var team = new PopupWindow();
-
-        function onClickFlying()
-        {
-            var plus = <%= flying %> * 24;
-            flying.setWindowProperties('toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable,alwaysRaised,dependent,titlebar=no');
-            flying.setSize(170,50 + plus);
-            flying.setUrl('<%= response.encodeURL("whoisflying.jsp")%>');
-            flying.showPopup('flying');
-
-            return false;
-        }
-        function onClickParked()
-        {
-            var plus = <%= parked %> * 24;
-            parked.setWindowProperties('toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable,alwaysRaised,dependent,titlebar=no');
-            parked.setSize(170,50 + plus);
-            parked.setUrl('<%= response.encodeURL("whoisparked.jsp")%>');
-            parked.showPopup('parked');
-
-            return false;
-        }
 
     </script>
 
@@ -180,13 +156,15 @@
 				</div>
 			</li>
 		</ul>
-		<div style="display: table; margin: 5px auto; border-style:inset; font-size: 10pt; font-family: Arial,sans-serif;" id="clock" ></div>
+
 		<h3>Pilot and Activity Map</h3>
 		<div style="display: table; margin: 0 auto;">
 			<a href="http://server.fseconomy.net/static/html/index.html" target="_blank">
 				<img style="border-style: none; box-shadow: 5px 5px 5px #888888;" src="/img/pilotactivitymap.png">
 			</a>
 		</div>
+
+		<div style="display: table; margin: 5px auto; border-style:inset; font-size: 10pt; font-family: Arial,sans-serif;" id="clock" ></div>
 
 		<div style="display: table; margin: 0 auto;">
 			<a style="display: table; margin: 0 auto;" href="http://vatsim.net" onclick="this.target='_blank'"><img style="border-style: none;" src="img/VATSIM_logo_small.gif" width="90" /></a><br/>
@@ -364,7 +342,7 @@
 	<!-- MAIN PAGE FOOTER  ======================================================= -->
 	<div class="message">
 	<p>FSEconomy is managed by an appointed Board of Directors and all members of our community agree to abide by the FSEconomy <a href="http://www.fseconomy.net/tos" onclick="this.target='_blank'">Etiquette and Rules of Fair Play</a> whenever they log on to the server.</p>
-	<p>&copy; Copyright 2005-2012, <a href="#" onclick="team.setWindowProperties('toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,alwaysRaised,dependent,titlebar=no');team.setSize(200,325);team.setUrl('<%= response.encodeURL("team.htm")%>');team.showPopup('team');return false;" id="team">FSE Development Team</a>. You can redistribute and/or modify this source code under the terms of the <a href="gnu.jsp">GNU General Public License</a> as published by the Free Software Foundation; either version 2 of the License, or any later version.&nbsp; FSEconomy and its authors must be publically credited on any site that uses this source code or work derived from this source code. </p>
+	<p>&copy; Copyright 2005-2015, <a href="#" onclick="team.setWindowProperties('toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,alwaysRaised,dependent,titlebar=no');team.setSize(400,325);team.setUrl('<%= response.encodeURL("team.htm")%>');team.showPopup('team');return false;" id="team">FSE Development Team</a>. You can redistribute and/or modify this source code under the terms of the <a href="gnu.jsp">GNU General Public License</a> as published by the Free Software Foundation; either version 2 of the License, or any later version.&nbsp; FSEconomy and its authors must be publicly credited on any site that uses this source code or work derived from this source code. </p>
 	</div>
 	</div>
 	</div>
