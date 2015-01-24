@@ -9,8 +9,21 @@ public class Helpers
         String message = (String)request.getSession().getAttribute("message");
         if(message != null)
             request.getSession().setAttribute("message", null);
+        else
+            return "";
 
         return message;
+    }
+
+    public static String getSessionReturnUrl(HttpServletRequest request)
+    {
+        String url = (String)request.getSession().getAttribute("returnUrl");
+        if(url != null)
+            request.getSession().setAttribute("back", null);
+        else
+            return "javascript:window.history.back();";
+
+        return url;
     }
 
     public static boolean isNullOrBlank(String s)
