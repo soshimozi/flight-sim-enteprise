@@ -58,12 +58,21 @@
 
 	<script>
 
-		$(document).ready(function() {
+		$(function()
+		{
 			$("#getGoodsQuote").click(function(){
 				var icao = $("#icao").val();
 				var fueltype = $("#goodstype").val();
 				var amount = $("#amount").val();
 				var src = $("#owner").val();
+
+				if (amount == undefined || amount == "")
+				{
+					window.alert("Please enter an amount!");
+					thisForm.dest.focus();
+					return ;
+				}
+
 				$.ajax({
 					type: "GET",
 					url: "/rest/api/goodsquote/"+fueltype+'/'+amount+'/'+icao+'/'+src,
@@ -77,8 +86,13 @@
 					 }
 					});
 			});
+
+			$(".digitCheck").keypress(function (e) {
+				if (String.fromCharCode(e.which).match(/[^0-9]/g)) return false;
+			});
+
 		});
-		
+
 	</script>
 	
 </head>
@@ -98,7 +112,7 @@
 			<br/>
 			<form method="post" action="userctl">		
 				<div class="formgroup">
-					Amount: <input name="amount" type="text" class="textarea" size="5"/> Kg
+					Amount: <input name="amount" type="text" class="" size="5"/> Kg
 				</div>
 				<div class="formgroup">
 					<input type="submit" class="button" value="Buy" />
@@ -118,9 +132,9 @@
 		<h2>Goods Price Quote</h2>
 		<h3><i>No goods or money will be transferred</i></h3>
 		
-		<form>		
+		<form>
 			<div class="formgroup">
-				Amount: <input id="amount" type="text" class="textarea" size="5"/> Kg<br><br>
+				Amount: <input id="amount" type="text" class="digitCheck" size="5"/> Kg<br><br>
 				The cost for <span id="goodsamt">0</span> Kg equals <span id="goodsprice">$0.00</span>
 			</div>
 			<div class="formgroup">
