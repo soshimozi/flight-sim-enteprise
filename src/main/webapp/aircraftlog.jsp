@@ -18,7 +18,7 @@
     String sFrom = request.getParameter("from");
     int from = 0;
 
-    if (sFrom != null)
+    if (!Helpers.isNullOrBlank(sFrom))
     {
         from = Integer.parseInt(sFrom);
     }
@@ -28,7 +28,8 @@
         from = 0;
     }
 
-    if(request.getParameter("id") == null || request.getParameter("id").equals(""))
+    String sId = request.getParameter("id");
+    if(Helpers.isNullOrBlank("id"))
     {
         request.getSession().setAttribute("message", "Missing aircraft parameter.");
         request.getRequestDispatcher("error.jsp").forward(request, response);
@@ -37,36 +38,28 @@
     int id = -1;
     try
     {
-        id = Integer.parseInt(request.getParameter("id"));
+        id = Integer.parseInt(sId);
     }
     catch(NumberFormatException e)
     {
         GlobalLogger.logJspLog("aircraftlog.jsp: id=" + request.getParameter("id") + ", user: " + user.getName() + ", url=" + request.getRequestURI());
+        request.getSession().setAttribute("message", "Invalid Aircraft Id.");
+        request.getRequestDispatcher("error.jsp").forward(request, response);
     }
-
 
     String linkOptions = "id=" + id + "&";
 
-    AircraftBean aircraftData = Aircraft.getAircraftById(id);
+    AircraftBean aircraft = Aircraft.getAircraftById(id);
 
-    List<LogBean> logs = Logging.getLogForAircraft(aircraftData.getId(), from, Constants.stepSize);
     String owner = "-";
-    if (aircraftData.getOwner() != 0)
+    if (aircraft.getOwner() != 0)
     {
-        UserBean uOwner = Accounts.getAccountById(aircraftData.getOwner());
+        UserBean uOwner = Accounts.getAccountById(aircraft.getOwner());
         if (uOwner != null)
         {
             if (uOwner.isGroup())
             {
-                UserBean gOwner = Accounts.getAccountById(Accounts.accountUltimateGroupOwner(uOwner.getId()));
-                if (gOwner != null)
-                {
-                    owner = uOwner.getName() + " (" + gOwner.getName() + ")";
-                }
-                else
-                {
-                    owner = uOwner.getName();
-                }
+                owner = uOwner.getName() + " (" + Accounts.getGroupOwnerName(uOwner.getId()) + ")";
             }
             else
             {
@@ -75,23 +68,19 @@
         }
     }
 
-    int eminutes = aircraftData.getTotalEngineTime()/60;
-    int minutes = (aircraftData.getTotalEngineTime() - aircraftData.getLastCheck())/60;
-    int afminutes = aircraftData.getAirframe()/60;
+    String lastCheck = Formatters.getHourMin(aircraft.getTotalEngineTime());
+    String airFrame = Formatters.getHourMin(aircraft.getAirframe());
+    String engineHours = Formatters.getHourMin(aircraft.getTotalEngineTime());
 
-    String lastCheck = (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
-    String airFrame = (Formatters.twoDigits.format(afminutes/60) + ":" + Formatters.twoDigits.format(afminutes%60));
-    String engineHours = (Formatters.twoDigits.format(eminutes/60) + ":" + Formatters.twoDigits.format(eminutes%60));
+    int additionalcrew = aircraft.getCrew();
 
-    int additionalcrew = aircraftData.getCrew();
-
-    double fuelCap = aircraftData.getTotalCapacity();
-    double payLoad = aircraftData.getMaxWeight() - aircraftData.getEmptyWeight() - (77 * (1 + additionalcrew));
+    double fuelCap = aircraft.getTotalCapacity();
+    double payLoad = aircraft.getMaxWeight() - aircraft.getEmptyWeight() - (77 * (1 + additionalcrew));
     int payload25 = (int)Math.round(payLoad - fuelCap * 0.25 * Constants.GALLONS_TO_KG);
     int payload50 = (int)Math.round(payLoad - fuelCap * 0.50 * Constants.GALLONS_TO_KG);
     int payload75 = (int)Math.round(payLoad - fuelCap * 0.75 * Constants.GALLONS_TO_KG);
     int payload100 = (int)Math.round(payLoad - fuelCap * Constants.GALLONS_TO_KG);
-    int payloadnow = (int)Math.round(payLoad - aircraftData.getTotalFuel() * Constants.GALLONS_TO_KG);
+    int payloadnow = (int)Math.round(payLoad - aircraft.getTotalFuel() * Constants.GALLONS_TO_KG);
     int crewseats;
 
     if (additionalcrew > 0)
@@ -103,18 +92,16 @@
         crewseats = 1;
     }
 
-    int seats = aircraftData.getSeats() - crewseats;
+    int seats = aircraft.getSeats() - crewseats;
 
-    int amount = Logging.getAmountLogForAircraft(aircraftData.getId());
-    int sellprice=aircraftData.getSellPrice();
-    String saleprice = Formatters.currency.format(aircraftData.getSellPrice());
-    String price = Formatters.currency.format(aircraftData.getSellPrice());
-    String reg = aircraftData.getRegistration();
+    int amount = Logging.getAmountLogForAircraft(aircraft.getId());
+    int sellPrice = aircraft.getSellPrice();
+    String salePrice = Formatters.currency.format(aircraft.getSellPrice());
+    String price = Formatters.currency.format(aircraft.getSellPrice());
     Groups.groupMemberData[] staffGroups = user.getStaffGroups();
 
     //find how many planes of this type for sale in the FSE world
-    int acForSale = Aircraft.FindAircraftForSaleByModelCount(aircraftData.getModelId());
-    //data.AircraftBean[] aircraftForSale = data.findAircraftForSale(aircraftData[0].getModelId(), -1, -1, -1, -1, -1, -1, -1, -1, -1, null, false, false, false, false, false, false, "");
+    int acForSale = Aircraft.FindAircraftForSaleByModelCount(aircraft.getModelId());
 %>
 
 <!DOCTYPE html>
@@ -167,17 +154,17 @@
             <tr>
                 <th>Registration</th>
                 <th>Owner</th>
-                <th>Type (<a class="normal" href="<%= response.encodeURL("market.jsp?model=" + aircraftData.getModelId() + "&submit=" +"true" )%>"><%= acForSale %> for sale</a>)</th>
+                <th>Type (<a class="normal" href="<%= response.encodeURL("market.jsp?model=" + aircraft.getModelId() + "&submit=" +"true" )%>"><%= acForSale %> for sale</a>)</th>
                 <th>Home</th>
                 <th>Current Location</th>
             </tr>
             </thead>
             <tr>
-                <td align="center"><%= aircraftData.getRegistration() %></td>
+                <td align="center"><%= aircraft.getRegistration() %></td>
                 <td align="center"><%= owner %></td>
-                <td align="center"><%= aircraftData.getMakeModel() %></td>
-                <td align="center"><%= aircraftData.getHome() %><%= aircraftData.isAdvertiseFerry() ? " (Aircraft is advertised for a ferry flight home)" : "" %></td>
-                <td align="center"><%= aircraftData.getSLocation() %></td>
+                <td align="center"><%= aircraft.getMakeModel() %></td>
+                <td align="center"><%= aircraft.getHome() %><%= aircraft.isAdvertiseFerry() ? " (Aircraft is advertised for a ferry flight home)" : "" %></td>
+                <td align="center"><%= aircraft.getSLocation() %></td>
             </tr>
         </table><br>
         <table border="1">
@@ -192,7 +179,7 @@
             <tr>
                 <td align="center"><%= seats + crewseats %></td>
                 <td align="center"><%= additionalcrew %></td>
-                <td align="center"><%= aircraftData.getCruise() %> kts</td>
+                <td align="center"><%= aircraft.getCruise() %> kts</td>
             </tr>
         </table><br>
         <table border="1">
@@ -206,14 +193,14 @@
             </tr>
             </thead>
             <tr>
-                <td><%= aircraftData.getTotalCapacity()%> Gallons</td>
-                <td><%= Formatters.oneDigit.format(aircraftData.getTotalFuel()) %> Gallons</td>
-                <td><%= aircraftData.getGph() %> Gallons/Hour</td>
-                <td><%= aircraftData.getFuelType() > 0 ? "JetA" : "100LL" %></td>
+                <td><%= aircraft.getTotalCapacity()%> Gallons</td>
+                <td><%= Formatters.oneDigit.format(aircraft.getTotalFuel()) %> Gallons</td>
+                <td><%= aircraft.getGph() %> Gallons/Hour</td>
+                <td><%= aircraft.getFuelType() > 0 ? "JetA" : "100LL" %></td>
             </tr>
         </table><br>
 <%
-    if( sellprice != 0)
+    if( sellPrice != 0)
     {
 %>
         <table border="1">
@@ -224,15 +211,15 @@
             </tr>
             </thead>
             <tr>
-                <td><%=saleprice%></td>
+                <td><%=salePrice%></td>
                 <td>
-                    <a class="link" href="javascript:doSubmit2('<%= aircraftData.getId() %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
+                    <a class="link" href="javascript:doSubmit2('<%= aircraft.getId() %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
         for (Groups.groupMemberData staffGroup : staffGroups)
         {
 %>
                     <a class="link"
-                       href="javascript:doSubmit2('<%= aircraftData.getId() %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
+                       href="javascript:doSubmit2('<%= aircraft.getId() %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
                         for <%= staffGroup.groupName %>
                     </a>
                     <%
@@ -283,7 +270,7 @@
             <tr>
                 <td align="center">VFR</td>
 <%
-        int equipment = aircraftData.getEquipment();
+        int equipment = aircraft.getEquipment();
 
         StringBuilder sb = new StringBuilder();
         if ((equipment & ModelBean.EQUIPMENT_IFR_MASK) != 0)
@@ -315,10 +302,10 @@
             </thead>
             <tr>
                 <td><%= engineHours %></td>
-                <td><%= aircraftData.getFuelType()==0 ? AircraftBean.TBO_RECIP/3600 : AircraftBean.TBO_JET/3600 %></td>
+                <td><%= aircraft.getFuelType()==0 ? AircraftBean.TBO_RECIP/3600 : AircraftBean.TBO_JET/3600 %></td>
                 <td><%= lastCheck %></td>
                 <td><%= airFrame %></td>
-                <td align="center"><%=aircraftData.getMaxRentTime()/3600%></td>
+                <td align="center"><%=aircraft.getMaxRentTime()/3600%></td>
             </tr>
         </table>
 	</form>
@@ -326,7 +313,8 @@
 	
 	<div class="dataTable">
 <%
-	if (logs.size() > 0)
+    List<LogBean> logs = Logging.getLogForAircraft(aircraft.getId(), from, Constants.stepSize);
+    if (logs.size() > 0)
 	{
 %>
 	<table>
@@ -346,10 +334,8 @@
 <%
         for (LogBean log : logs)
         {
-            minutes = log.getTotalEngineTime()/60;
-            String engineTime = minutes == 0 ? "" : (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
-            minutes = log.getFlightEngineTime()/60;
-            String flightTime = minutes == 0 ? "" : (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
+            String engineTime = log.getTotalEngineTime() == 0 ? "" : Formatters.getHourMin(log.getTotalEngineTime());
+            String flightTime = log.getFlightEngineTime() == 0 ? "" : Formatters.getHourMin(log.getFlightEngineTime());
             String action = log.getType();
             float money = 0;
 
