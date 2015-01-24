@@ -68,7 +68,7 @@
         }
     }
 
-    String lastCheck = Formatters.getHourMin(aircraft.getTotalEngineTime());
+    String lastCheck = Formatters.getHourMin(aircraft.getTotalEngineTime() - aircraft.getLastCheck());
     String airFrame = Formatters.getHourMin(aircraft.getAirframe());
     String engineHours = Formatters.getHourMin(aircraft.getTotalEngineTime());
 
