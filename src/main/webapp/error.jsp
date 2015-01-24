@@ -14,6 +14,8 @@
         return;
     }
 
+    String message = Helpers.getSessionMessage(request);
+    String returnUrl = Helpers.getSessionReturnUrl(request);
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,8 +36,8 @@
 
 <div id="wrapper">
     <div class="content error">
-    <%= Helpers.getSessionMessage(request) %><br/>
-    <a href="<%= (String) request.getSession().getAttribute("back") %>">Back</a>
+    <%= message %><br/>
+    <a href="<%= returnUrl %>">Back</a>
     </div>
 </div>
 </body>
