@@ -672,64 +672,63 @@ public class UserCtl extends HttpServlet
 	
 	void doBankBalance(HttpServletRequest req) throws DataError
 	{
-		int uid;
+		String sUId = req.getParameter("uid");
+		if(Helpers.isNullOrBlank(sUId) || !Helpers.isInteger(sUId))
+			throw new DataError("Missing or Invalid User Id.");
 
-		String sId = req.getParameter("uid");
-		if(sId == null)
-			throw new DataError("Missing User Id.");
-		
-		uid = Integer.parseInt(sId);
-		UserBean account = Accounts.getAccountById(uid);
+        String sSelectedBalance = req.getParameter("selectedBalance");
+        if (Helpers.isNullOrBlank(sSelectedBalance) || !Helpers.isInteger(sSelectedBalance))
+            throw new DataError("Invalid parameter.");
+
+		int uId = Integer.parseInt(sUId);
+		UserBean account = Accounts.getAccountById(uId);
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 
 		if(account.isGroup() && !Accounts.isGroupOwnerStaff(account.getId(), user.getId()))
 			throw new DataError("Permission Denied.");
-		
-		if (req.getParameter("selectedBalance") != null)
-		{
-			int index = Integer.parseInt(req.getParameter("selectedBalance"));
 
-			//check that index is >= 0, if not skip
-			if(index >= 0)
-			{
-				double money = account.getMoney();
-				double bank = account.getBank();
+        int index = Integer.parseInt(sSelectedBalance);
 
-				double balanceAmount = index * 1000;
+        //check that index is >= 0, if not skip
+        if(index >= 0)
+        {
+            double money = account.getMoney();
+            double bank = account.getBank();
 
-				if( index == 999)
-					balanceAmount = bank;
-				
-				if( money > balanceAmount && index != 999 )
-				{
-					//transfer to bank
-					double amountToTransfer = money - balanceAmount;
-					Banking.doBanking(account.getId(), amountToTransfer);
-				}
-				else
-				{
-					double amountToTransfer;
-					
-					//withdraw from bank
-					if(index != 999)
-						amountToTransfer = balanceAmount - money;
-					else
-						amountToTransfer = balanceAmount;
-					
-					if (index == 999 && balanceAmount < 0)
-					{
-						throw new DataError("Sorry, the requested transaction would cause a negative cash balance.");
-					}
-					else 
-					{
-						if(bank >= amountToTransfer)
-							Banking.doBanking(account.getId(), -amountToTransfer);
-						else						
-							throw new DataError("Sorry, the requested transaction would cause a negative bank balance.");
-					}
-				}				
-			}
-		}
+            double balanceAmount = index * 1000;
+
+            if( index == 999)
+                balanceAmount = bank;
+
+            if( money > balanceAmount && index != 999 )
+            {
+                //transfer to bank
+                double amountToTransfer = money - balanceAmount;
+                Banking.doBanking(account.getId(), amountToTransfer);
+            }
+            else
+            {
+                double amountToTransfer;
+
+                //withdraw from bank
+                if(index != 999)
+                    amountToTransfer = balanceAmount - money;
+                else
+                    amountToTransfer = balanceAmount;
+
+                if (index == 999 && balanceAmount < 0)
+                {
+                    throw new DataError("Sorry, the requested transaction would cause a negative cash balance.");
+                }
+                else
+                {
+                    if(bank >= amountToTransfer)
+                        Banking.doBanking(account.getId(), -amountToTransfer);
+                    else
+                        throw new DataError("Sorry, the requested transaction would cause a negative bank balance.");
+                }
+            }
+        }
 	}
 	
 	void doEditFbo(HttpServletRequest req) throws DataError
