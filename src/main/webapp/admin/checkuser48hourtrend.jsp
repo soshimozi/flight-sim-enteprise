@@ -89,7 +89,7 @@
         List<TrendHours> trend;
         trend = Data.getTrendHoursQuery(userid, 500);
 
-        if (message != null)
+        if (!Helpers.isNullOrBlank(message))
         {
 %>	<div class="message"><%= message %></div>
 <%
