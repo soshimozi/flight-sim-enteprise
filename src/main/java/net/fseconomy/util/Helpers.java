@@ -31,4 +31,14 @@ public class Helpers
         return (s==null || s.trim().equals(""));
     }
 
+    //ok performance, if you need this A LOT find something else.
+    public static boolean isInteger( String input ) {
+        try {
+            Integer.parseInt( input );
+            return true;
+        }
+        catch( Exception e ) {
+            return false;
+        }
+    }
 }
