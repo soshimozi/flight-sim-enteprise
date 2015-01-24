@@ -21,6 +21,9 @@
 		      });
 		    }
 		    var cb = $c.find('input[type=checkbox]')[0];
+			if(cb == undefined)
+				return 2;
+
 		    return (cb.checked) ? 1 : cb.disabled ? 3 : 2;
 		  },
 		  type: 'numeric'
