@@ -30,6 +30,7 @@ import javax.servlet.http.HttpSession;
 
 import net.fseconomy.beans.UserBean;
 import net.fseconomy.data.*;
+import net.fseconomy.util.Helpers;
 
 public class Autologon extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -41,7 +42,7 @@ public class Autologon extends HttpServlet {
 		String sOffset = request.getParameter("offset");
 		UserBean userBean;
 
-		if (user == null || password == null || sOffset == null || ((userBean = Accounts.userExists(user, password)) == null))
+		if (Helpers.isNullOrBlank(user) || Helpers.isNullOrBlank(password) || !Helpers.isInteger(sOffset) || ((userBean = Accounts.userExists(user, password)) == null))
 		{
 			response.sendRedirect("/welcome.jsp");
 			return;			
@@ -58,6 +59,4 @@ public class Autologon extends HttpServlet {
 
 		response.sendRedirect("/index.jsp");
 	}
-	
-
 }
