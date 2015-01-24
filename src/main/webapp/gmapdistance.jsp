@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*, net.fseconomy.dto.DistanceBearing"
 %>
+<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -9,7 +10,7 @@
     if(!user.isLoggedIn())
     {
 %>
-<script type="text/javascript">document.location.href="/index.jsp"</script>
+    <script type="text/javascript">document.location.href="/index.jsp"</script>
 <%
         return;
     }
@@ -17,10 +18,25 @@
     String depart = request.getParameter("depart");
     String dest = request.getParameter("dest");
 
-    if(request.getParameter("depart") == null || request.getParameter("depart").equals("")
-    || request.getParameter("dest") == null || request.getParameter("dest").equals(""))
+    if(Helpers.isNullOrBlank(depart)
+    || Helpers.isNullOrBlank(dest) )
     {
         request.getSession().setAttribute("message", "Missing parameter.");
+        request.getRequestDispatcher("error.jsp").forward(request, response);
+    }
+
+    depart = depart.trim().toUpperCase();
+    dest = dest.trim().toUpperCase();
+
+    if(!Airports.isValidIcao(depart))
+    {
+        request.getSession().setAttribute("message", "Invalid departure ICAO.");
+        request.getRequestDispatcher("error.jsp").forward(request, response);
+    }
+
+    if(!Airports.isValidIcao(dest))
+    {
+        request.getSession().setAttribute("message", "Invalid destination ICAO.");
         request.getRequestDispatcher("error.jsp").forward(request, response);
     }
 
@@ -28,8 +44,8 @@
     int distance = (int)(distanceBearing.distance + .5);
     int bearing = (int)(distanceBearing.bearing + .5);
 
-    AirportBean apDepart = Airports.getAirport(depart);
-    AirportBean apDest = Airports.getAirport(dest);
+    AirportInfo apDepart = Airports.cachedAPs.get(depart);
+    AirportInfo apDest = Airports.cachedAPs.get(dest);
 %>
 
 <!DOCTYPE html>
@@ -65,7 +81,7 @@
 	// End -->
 	</script>
 </form>
-<span style="color: red"><%=depart.toUpperCase()%></span> to <span style="color: red"><%=dest.toUpperCase()%></span>&nbsp;&nbsp;&nbsp;&nbsp;Distance: <span style="color: red"><%=distance%> NM </span>&nbsp;&nbsp;&nbsp;&nbsp;Bearing: <span style="color: red"><%=bearing%>&#186;</span>;
+<span style="color: red"><%=depart%></span> to <span style="color: red"><%=dest%></span>&nbsp;&nbsp;&nbsp;&nbsp;Distance: <span style="color: red"><%=distance%> NM </span>&nbsp;&nbsp;&nbsp;&nbsp;Bearing: <span style="color: red"><%=bearing%>&#186;</span>;
 <div id="map" style="width: 640px; height: 480px;"></div>
   <script type="text/javascript">
     var locations = 
@@ -73,33 +89,27 @@
 <%
 StringBuilder sb = new StringBuilder();
 
-	double latDepart = apDepart.getLat();
-	double lonDepart = apDepart.getLon();
-	
-	String airportLink = Converters.escapeJavaScript(Airports.airportLink(apDepart, response));
+	double latDepart = apDepart.latlon.lat;
+	double lonDepart = apDepart.latlon.lon;
 	
 	sb.append("<div class=\"infowindow-content\">");
-	sb.append(airportLink);
-	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(apDepart.getName()));
-	sb.append(", ");
-	sb.append(Converters.escapeJavaScript(apDepart.getCountry()));
+    sb.append("<a href=\"airport.jsp?icao=" + depart + "\">");
+	sb.append(Converters.escapeJavaScript(apDepart.name));
+	sb.append("</a>");
 	sb.append("</div>");
 	String departInfo = sb.toString();
 	
-	double latDest = apDest.getLat();
-	double lonDest = apDest.getLon();
+	double latDest = apDest.latlon.lat;
+	double lonDest = apDest.latlon.lon;
 	
 	sb = new StringBuilder();
-	airportLink = Converters.escapeJavaScript(Airports.airportLink(apDest, response));
 	sb.append("<div class=\"infowindow-content\">");
-	sb.append(airportLink);
-	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(apDest.getName()));
-	sb.append(", ");
-	sb.append(Converters.escapeJavaScript(apDest.getCountry()));
+    sb.append("<a href=\"airport.jsp?icao="+ dest + "\">");
+	sb.append(Converters.escapeJavaScript(apDest.name));
+	sb.append("</a>");
 	sb.append("</div>");
-	String destInfo = sb.toString();	
+
+	String destInfo = sb.toString();
 %>
 			[<%=latDepart%>, <%=lonDepart%>, 0, '<%=departInfo%>'], 
 			[<%=latDest%>, <%=lonDest%>, 1, '<%=destInfo%>'] 
