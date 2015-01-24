@@ -1274,12 +1274,16 @@ public class UserCtl extends HttpServlet
         if (Helpers.isNullOrBlank(sRepeat) && !sRepeat.matches("[0-9]+"))
             throw new DataError("Number of Assignments Invalid");
 
+        int amount = Integer.parseInt(sAmount);
+        if (amount <= 0)
+            throw new DataError("Amount must be greater than 0");
+
         int numToCreate = Integer.parseInt(sRepeat);
         if (numToCreate <= 0)
             throw new DataError("Number of Assignments must be greater than 0");
 
-        int amount = Integer.parseInt(sAmount);
         int commodity = Integer.parseInt(sCommodity);
+        int pay = Integer.parseInt(sPay);
         int owner = Integer.parseInt(sOwner);
         boolean isGroup = Accounts.isGroup(owner);
         assignment.setAmount(amount);
@@ -1298,6 +1302,10 @@ public class UserCtl extends HttpServlet
 
         if (!isGroup && assignment.getOwner() != user.getId())
             throw new DataError("You do not have permission to do that.");
+
+        assignment.updateData();
+        double payscale = pay*100.0/(assignment.getDistance()*amount);
+        assignment.setPay(payscale);
 
         //reset group id so that the assignment is unlocked
         assignment.setGroupId(0);
