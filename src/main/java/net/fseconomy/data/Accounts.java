@@ -741,6 +741,23 @@ public class Accounts implements Serializable
         return getAccountSQL("SELECT * FROM accounts WHERE type = 'person' AND name = '" + name + "'");
     }
 
+    public static boolean doesUserOrGroupNameExist(String name)
+    {
+        boolean retval = false;
+
+        try
+        {
+            String qry = "SELECT (COUNT(id) = 1) as found FROM accounts WHERE name = ?";
+            retval = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), name);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return retval;
+    }
+
     public static int getAccountIdByName(String name)
     {
         int retval = 0;
