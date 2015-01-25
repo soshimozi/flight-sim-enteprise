@@ -164,11 +164,11 @@
 			</a>
 		</div>
 
-		<div style="display: table; margin: 5px auto; border-style:inset; font-size: 10pt; font-family: Arial,sans-serif;" id="clock" ></div>
+		<div style="display: table; margin: 15px auto; border-style:inset; font-size: 10pt; font-family: Arial,sans-serif;" id="clock" ></div>
 
 		<div style="display: table; margin: 0 auto;">
-			<a style="display: table; margin: 0 auto;" href="http://vatsim.net" onclick="this.target='_blank'"><img style="border-style: none;" src="img/VATSIM_logo_small.gif" width="90" /></a><br/>
-			<div style="font-size:x-small"><b>FSEconomy is a proud <a href="http://vatsim.net" onclick="this.target='_blank'">VATSIM</a> partner.</b></div>
+			<a style="display: table; margin: 0 auto;" href="http://vatsim.net" onclick="this.target='_blank'"><img style="border-style: none;" src="img/VATSIM_logo_small.gif" width="90" /></a>
+			<div style="display: table; margin: 0 auto; font-size:x-small"><b>FSEconomy is a proud <a href="http://vatsim.net" onclick="this.target='_blank'">VATSIM</a> partner.</b></div>
 		</div>
 	</div>
 	
@@ -185,7 +185,7 @@
 %>  
 	<div>
 	<h3>Welcome to the exciting world of <em>FSEconomy</em></h3>
-	<p>FSEconomy is a environment where flight simulation enthusiasts can add a new aspect to their flying. Since 2005, FSEconomy has allowed over 4,000 registered simulator pilots to earn in-game virtual money by flying general aviation aircraft to and from nearly every airport on Earth. With those virtual earnings, pilots can purchase their own airplanes, join or start virtual businesses, open up FBOs, and more - all within the free world of FSEconomy. FSEconomy adds a new dimension to your flight simulation experience, and that doesn't even count all the people you will meet along the way.</p> 
+	<p>FSEconomy is a environment where flight simulation enthusiasts can add a new aspect to their flying. Since 2005, FSEconomy has registered over 10,000 simulator pilots to earn in-game virtual money by flying general aviation aircraft to and from nearly every airport on Earth. With those virtual earnings, pilots can purchase their own airplanes, join or start virtual businesses, open up FBOs, and more - all within the free world of FSEconomy. FSEconomy adds a new dimension to your flight simulation experience, and that doesn't even count all the people you will meet along the way.</p>
 	<p>If you would like to know more about this free community, just read the manual and visit our community forum. Links can be found on the right of this page.</p>
 	</div>
 <% 	} 
