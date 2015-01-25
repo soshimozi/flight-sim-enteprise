@@ -65,7 +65,13 @@ public class Airports implements Serializable
 
                     itype = AirportBean.getTypeFromString(type);
 
-                    String title = rs.getString(2) + ", " + rs.getString(3) + ", " + rs.getString(4) + ", " + rs.getString(5);
+                    String state = rs.getString(4);
+                    if(state != null)
+                        state = ", " + state;
+                    else
+                        state = "";
+
+                    String title = rs.getString(2) + ", " + rs.getString(3) + state + ", " + rs.getString(5);
                     AirportInfo lls = new AirportInfo(icao, title, rs.getDouble(6), rs.getDouble(7), rs.getInt(8), itype, rs.getInt(10));
                     cachedAPs.put(icao, lls);
                 }
