@@ -302,7 +302,7 @@
             </caption>
             <thead>
                 <tr>
-                    <th style="width: 55px;">ICAO</th>
+                    <th style="width: 65px;">ICAO</th>
                     <th>FBO Name</th>
                     <th>Status</th>
                     <th class="numeric" style="width: 45px;">Price</th>
@@ -327,7 +327,7 @@
 		AirportBean ap = Airports.getAirport(fbo.getLocation());
 %>
     		<tr>
-                <td><%= Airports.airportLink(ap, ap, response) %></td>
+                <td class="nowrap"><%= Airports.airportLink(ap, ap, response) %></td>
                 <td><%= fbo.getName() %></td>
                 <td><%= fbo.isActive() ? "Open" : "<span style=\'color: red;\'>Closed</span>" %></td>
                 <td class="numeric"><%= fbo.isForSale() ? Formatters.currency.format(fbo.getPrice()) + (fbo.getPriceIncludesGoods() ? " + goods" : "") : "" %></td>
@@ -399,7 +399,7 @@
 		{	 
 %>
 			<tr>
-				<td><%= Airports.airportLink(airport, airport, response) %></td>
+				<td class="nowrap"><%= Airports.airportLink(airport, airport, response) %></td>
 				<td><%= airport.getTitle() %></td>
 			</tr>
 <% 		

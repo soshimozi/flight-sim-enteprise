@@ -259,7 +259,7 @@
 		int availJobs = Fbos.getFacilityJobCount(fbo.getOwner(), fbo.getLocation());
 %>
 	<tr>
-	<td><%= Airports.airportLink(ap, ap, response) %></td>
+	<td class="nowrap"><%= Airports.airportLink(ap, ap, response) %></td>
 	<td><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(ap) < 1) ? "<span style=\'color: red;\'><small>" + fbo.getName() + "</small></span>" : "<small>" + fbo.getName() + "</small>"): fbo.getName() %></td>
 
 	<td><%= availJobs %></td>		
