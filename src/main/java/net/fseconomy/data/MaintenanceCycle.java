@@ -1365,7 +1365,7 @@ public class MaintenanceCycle implements Runnable
 				
 				double probability = toSell/(double)notForSale;					
 				
-				qry = "SELECT id FROM aircraft WHERE sellPrice is null AND owner=0 AND location <> 'DEAD' AND model = ?";
+				qry = "SELECT id FROM aircraft WHERE sellPrice is null AND owner=0 AND model = ?";
 				ResultSet toSellRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, model);
 				while (toSellRS.next())
 				{
