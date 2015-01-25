@@ -1242,7 +1242,7 @@ public class Datafeed extends HttpServlet
                 String icao = req.getParameter("icao");
 
                 //get selected aircraft
-                List<AircraftBean> aircraftList = Aircraft.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND location='" + icao + "' ORDER BY make, models.model");
+                List<AircraftBean> aircraftList = Aircraft.getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND location='" + icao + "' ORDER BY make, models.model");
 
                 results = ProcessAircraft(req, aircraftList, "IcaoAircraft");
                 break;
@@ -1379,7 +1379,7 @@ public class Datafeed extends HttpServlet
 			aircraftname = aircraftname.replaceAll("'", "\\\\'").replaceAll(";","");
 			
 			//get selected aircraft
-            aircraftList = Aircraft.getAircraftSQL("SELECT * FROM aircraft, models WHERE Upper(aircraft.location)!='DEAD' AND aircraft.model = models.id AND concat(concat(models.make,' '), models.model)='" + aircraftname + "' ORDER BY make, models.model");
+            aircraftList = Aircraft.getAircraftSQL("SELECT * FROM aircraft, models WHERE aircraft.model = models.id AND concat(concat(models.make,' '), models.model)='" + aircraftname + "' ORDER BY make, models.model");
 			queryname = "AircraftByMakeModel";
 		}
 		else if(searchParam.toLowerCase().equals("ownername"))
@@ -1399,16 +1399,16 @@ public class Datafeed extends HttpServlet
 			//To allow admins to examine Bank owner aircraft a special key for owner name is used
 			if( ownersname.toLowerCase().equals("knabaccess"))
 				ownersname = "Bank";
-			
+
+			int ownerId;
+			if(!Accounts.doesUserOrGroupNameExist(ownersname))
+				throw new DataError("No User or Group found.");
+
+			ownerId= Accounts.getAccountIdByName(ownersname);
+
 			//get selected aircraft
-            aircraftList = Aircraft.getAircraftSQL(
-					" SELECT aircraft.*, models.* " +
-					" FROM aircraft, models, accounts " +
-					" WHERE Upper(aircraft.location)!='DEAD' " +
-					" AND aircraft.model = models.id " +
-					" AND accounts.id=aircraft.owner " +
-					" AND accounts.name='" + ownersname + "' " + 
-					" ORDER BY models.make, models.model");
+			aircraftList = Aircraft.getAircraftOwnedByUser(ownerId);
+
 			queryname = "AircraftByOwnerName";
 		}
 		else if(searchParam.toLowerCase().equals("registration"))
@@ -2689,8 +2689,9 @@ public class Datafeed extends HttpServlet
             {
                 owner = Accounts.getAccountNameById(aircraft.getOwner());
                 if(Accounts.isGroup(aircraft.getOwner()))
-                    owner += " (" + Accounts.getAccountNameById(Accounts.accountUltimateGroupOwner(aircraft.getOwner())) + ")";
+                    owner += " (" + Accounts.getGroupOwnerName(aircraft.getOwner()) + ")";
             }
+
             String userlockname = "Not rented.";
             if (aircraft.getUserLock() > 0)
                 userlockname = Accounts.getAccountNameById(aircraft.getUserLock());
@@ -2746,8 +2747,9 @@ public class Datafeed extends HttpServlet
             {
                 owner = Accounts.getAccountNameById(aircraft.getOwner());
                 if(Accounts.isGroup(aircraft.getOwner()))
-                    owner += " (" + Accounts.getAccountNameById(Accounts.accountUltimateGroupOwner(aircraft.getOwner())) + ")";
+                    owner += " (" + Accounts.getGroupOwnerName(aircraft.getOwner()) + ")";
             }
+
             String userlockname = "Not rented.";
             if (aircraft.getUserLock() > 0)
                 userlockname = Accounts.getAccountNameById(aircraft.getUserLock());
