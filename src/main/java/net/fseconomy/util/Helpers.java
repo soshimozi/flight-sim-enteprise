@@ -10,7 +10,7 @@ public class Helpers
         if(message != null)
             request.getSession().setAttribute("message", null);
         else
-            return "";
+            return null;
 
         return message;
     }
