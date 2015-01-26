@@ -21,15 +21,10 @@
 
  	AircraftBean aircraft = Aircraft.getAircraftById(id);
  	List<LogBean> logs = Logging.getLogForMaintenanceAircraft(aircraft.getId());
-  
-    int tetminutes = (aircraft.getTotalEngineTime()) / 60;
- 	int lcminutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck()) / 60;
-    int afminutes = (aircraft.getAirframe()) / 60;
-    int minutes;
-    
-    String totalEngineTime = (Formatters.twoDigits.format(tetminutes / 60) + ":" + Formatters.twoDigits.format(tetminutes % 60));
- 	String lastCheck = (Formatters.twoDigits.format(lcminutes / 60) + ":" + Formatters.twoDigits.format(lcminutes % 60));
-    String airFrameTime = (Formatters.twoDigits.format(afminutes / 60) + ":" + Formatters.twoDigits.format(afminutes % 60));
+
+	String lastCheck = Formatters.getHourMin(aircraft.getTotalEngineTime() - aircraft.getLastCheck());
+	String airFrame = Formatters.getHourMin(aircraft.getAirframe());
+	String engineHours = Formatters.getHourMin(aircraft.getTotalEngineTime());
     
 	List<FboBean> fbos = null;
     if (aircraft.getLocation() != null && !aircraft.getLocation().equals(""))
@@ -131,7 +126,7 @@
 					</tr>
 					<tr>
 					  	<td>Total Engine Time</td>
-					  	<td><%=totalEngineTime%></td>
+					  	<td><%=engineHours%></td>
 					</tr>
 					<tr>
 					  	<td>Time since last check</td>
@@ -143,7 +138,7 @@
 					</tr>
 					<tr>
 					  	<td>Airframe Hours</td>
-					  	<td><%=airFrameTime%></td>
+					  	<td><%=airFrame%></td>
 					</tr>
 				</tbody>
 			</table>
@@ -379,8 +374,7 @@
 <%
 		for (LogBean log : logs)
 		{
-			minutes = log.getTotalEngineTime() / 60;
-			String engineTime = minutes == 0 ? "" : (Formatters.twoDigits.format(minutes / 60) + ":" + Formatters.twoDigits.format(minutes % 60));
+			String engineTime = Formatters.getHourMin(aircraft.getTotalEngineTime());
 %>
 		    	<tr>
 		      		<td><%=Formatters.getUserTimeFormat(user).format(log.getTime())%></td>
