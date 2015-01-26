@@ -59,7 +59,11 @@
 	String commodityParam = request.getParameter("commodity");
 	int minAmount = NumberUtils.toInt(request.getParameter("minAmount"), 100);
 	boolean isRentable = request.getParameter("rentable") != null;
-		
+	String sKgFilterQty = request.getParameter("KGFilterQty");
+	String sKgFilter = request.getParameter("KGFilter");
+	String sPaxFilterQty = request.getParameter("PaxFilterQty");
+	String sPaxFilter = request.getParameter("PaxFilter");
+
 	//Strings for the lat long display.
 	String latNS;
 	String lonEW;
@@ -74,10 +78,10 @@
 	int PaxFilter = 0;
 	int PaxFilterQty = -1;
 
-    if (request.getParameter("PaxFilterQty") != null)
+    if (!Helpers.isNullOrBlank(sPaxFilterQty))
         PaxFilterQty = Integer.parseInt(request.getParameter("PaxFilterQty"));
 
-    if (request.getParameter("PaxFilter") != null)
+    if (!Helpers.isNullOrBlank(sPaxFilter))
         PaxFilter = Integer.parseInt(request.getParameter("PaxFilter"));
 
     if (PaxFilter == 1)
@@ -90,37 +94,40 @@
 	int KGFilter = 0;
 	int KGFilterQty = -1;
 
-    if (request.getParameter("KGFilterQty") != null)
-        KGFilterQty = Integer.parseInt(request.getParameter("KGFilterQty"));
+    if (!Helpers.isNullOrBlank(sKgFilterQty))
+        KGFilterQty = Integer.parseInt(sKgFilterQty);
 
-    if (request.getParameter("KGFilter") != null)
-        KGFilter = Integer.parseInt(request.getParameter("KGFilter"));
+    if (!Helpers.isNullOrBlank(sKgFilter))
+        KGFilter = Integer.parseInt(sKgFilter);
 
     if (KGFilter == 1)
         minKG = KGFilterQty;
     else if (KGFilter == 2)
         maxKG = KGFilterQty;
 
-    if (nameParam != null && nameParam.equals(""))
+    if (Helpers.isNullOrBlank(nameParam))
         nameParam = null;
 
-    if (fromParam != null && fromParam.equals(""))
+    if (Helpers.isNullOrBlank(fromParam))
         fromParam = null;
 
-    if (commodityParam != null && !commodityParam.equals(""))
+    if (!Helpers.isNullOrBlank(commodityParam))
         commodity = Integer.parseInt(commodityParam);
 
-    if (capableParam != null)
+    if (!Helpers.isNullOrBlank(capableParam))
         capable = Integer.parseInt(capableParam);
 
-	if (registration != null && !registration.equals("") && isSearch)
+	if (!Helpers.isNullOrBlank(registration) && isSearch)
 	{
 		AircraftBean ac = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(registration));
-        if (ac != null)
-            airport.setIcao(ac.getLocation());
+        if (ac != null && ac.getLocation() != null)
+		{
+			airport.setIcao(ac.getLocation());
+			selectedIcao = ac.getLocation();
+		}
 	}
 
-    if (airport.getIcao() != null && Airports.cachedAPs.containsKey(airport.getIcao().toUpperCase()))
+    if (!Helpers.isNullOrBlank(airport.getIcao()) && Airports.cachedAPs.containsKey(airport.getIcao().toUpperCase()))
         Airports.fillAirport(airport);
 
 	HashSet<String> assignmentAircraftList = new HashSet<>();
