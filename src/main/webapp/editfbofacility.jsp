@@ -97,7 +97,7 @@
 	String sizedesc;
 	if (facility.getIsDefault())
 	{
-		int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+		int totalSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
 		int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
 		sizedesc = totalSpace + " gates (" + rented + " rented)";
 	} 
@@ -115,13 +115,13 @@
 %>		
 			<tr>
 				<td>Space available</td>
-				<td colspan="2"><%= Fbos.calcFboFacilitySpaceAvailable(facility, fbo, airport) %> gates</td>
+				<td colspan="2"><%= Fbos.calcFboFacilitySpaceAvailable(facility, fbo) %> gates</td>
 			</tr>
 			<tr>
 				<td>Reserve</td>
 				<td>
 					<select class="formselect" name="pd_reservedSpace">
-<%		int passSpace = fbo.getFboSize() * airport.getFboSlots();
+<%		int passSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
 		for (int i = 0; i <= passSpace; i++)
 		{
 %>						<option value="<%= i %>"<%= (facility.getReservedSpace() == i ? " selected " : "") %>><%= i %> gates</option>
@@ -191,7 +191,7 @@
 	} 
 	else 
 	{
-		int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(landlord, fbo, airport);
+		int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(landlord, fbo);
 %>		
 			<tr>
 				<td>Space available</td>
