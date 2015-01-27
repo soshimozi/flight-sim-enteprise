@@ -8,6 +8,7 @@
 <%@ page import="net.fseconomy.data.Fbos" %>
 <%@ page import="net.fseconomy.util.Formatters" %>
 <%@ page import="java.util.List" %>
+<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
@@ -87,13 +88,13 @@
         String icao = location.getIcao();
         String destIcao = destination.getIcao();
 
-        AirportBean mapAirport = Airports.getAirport(icao);
-        double latl = mapAirport.getLat();
-        double lonl = mapAirport.getLon();
+        AirportInfo airportInfo = Airports.cachedAPs.get(icao);
+        double latl = airportInfo.latlon.lat;
+        double lonl = airportInfo.latlon.lon;
 
-        AirportBean mapDestAirport = Airports.getAirport(destIcao);
-        double destLatl = mapDestAirport.getLat();
-        double destLonl = mapDestAirport.getLon();
+        airportInfo = Airports.cachedAPs.get(destIcao);
+        double destLatl = airportInfo.latlon.lat;
+        double destLonl = airportInfo.latlon.lon;
 
         assignmentsTotalPay += assignment.calcPay();
 %>
