@@ -1179,13 +1179,16 @@ public class UserCtl extends HttpServlet
         String sPilotFee = req.getParameter("pilotfee");
         String comment = req.getParameter("comment");
 
-        if (Helpers.isNullOrBlank(sAssignmentId) || (Helpers.isNullOrBlank(sGroupId) && Helpers.isNullOrBlank(sOwnerId)) || Helpers.isNullOrBlank(sPilotFee))
+        if (Helpers.isNullOrBlank(sAssignmentId) || (Helpers.isNullOrBlank(sGroupId) && Helpers.isNullOrBlank(sOwnerId)))
             throw new DataError("Invalid parameters.");
 
         int ownerId = 0;
         int groupId = Integer.parseInt(sGroupId);
         int assignmentId = Integer.parseInt(sAssignmentId);
-        double pilotFee = Double.parseDouble(sPilotFee);
+
+        double pilotFee = -1;
+        if(!Helpers.isNullOrBlank(sPilotFee))
+            pilotFee = Double.parseDouble(sPilotFee);
 
         if ( groupId > 0 && Groups.getRole(groupId, user.getId()) < UserBean.GROUP_STAFF)
             throw new DataError("You do not have permission to do that.");
@@ -1196,7 +1199,7 @@ public class UserCtl extends HttpServlet
         if ( ownerId > 0 && Groups.getRole(ownerId, user.getId()) < UserBean.GROUP_STAFF)
             throw new DataError("You do not have permission to do that.");
 
-        Assignments.updateAssignment(assignmentId, pilotFee, comment);
+        Assignments.updateAssignment(assignmentId, groupId, pilotFee, comment);
     }
 
     void updateGoodsAssignment(HttpServletRequest req) throws DataError
