@@ -29,7 +29,7 @@
 	List<FboBean> fbos = null;
     if (aircraft.getLocation() != null && !aircraft.getLocation().equals(""))
     {
-        fbos = Fbos.getFboForRepair(Airports.getAirport(aircraft.getLocation()));
+        fbos = Fbos.getFboForRepair(aircraft.getLocation());
     }
  %>
 
