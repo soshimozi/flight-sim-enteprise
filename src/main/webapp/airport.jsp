@@ -543,7 +543,7 @@
                 if (UserIsFBOStaff)
                 {
                     GoodsBean suppliesleft = Goods.getGoods(airport.getIcao(), aFbo.getOwner(), GoodsBean.GOODS_SUPPLIES);
-                    int DaysSupplied = suppliesleft != null ? suppliesleft.getAmount() / aFbo.getSuppliesPerDay(airport) : 0;
+                    int DaysSupplied = suppliesleft != null ? suppliesleft.getAmount() / aFbo.getSuppliesPerDay(aFbo.getFboSize()) : 0;
 
                     if (DaysSupplied > 14)
                         fboname = fboname + "<br><span class=\"small\">" + DaysSupplied + " days supplies</span>";
@@ -663,7 +663,7 @@
                 {
                     FboBean parentFbo = Fbos.getFbo(carrier.getFboId());
 
-                    if (Fbos.calcFboFacilitySpaceAvailable(carrier, parentFbo, airport) > 0)
+                    if (Fbos.calcFboFacilitySpaceAvailable(carrier, parentFbo) > 0)
                         spaceAvailable = true;
                 }
             }
