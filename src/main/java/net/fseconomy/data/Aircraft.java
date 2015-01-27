@@ -192,8 +192,7 @@ public class Aircraft implements Serializable
         //system fbo
         if (fromfbo == null)
         {
-            AirportBean airport = Airports.getAirport(aircraft.getLocation());
-            List<FboBean> fbos = Fbos.getFboForRepair(airport, Fbos.FBO_REPAIR_MARGIN);
+            List<FboBean> fbos = Fbos.getFboForRepair(aircraft.getLocation(), Fbos.FBO_REPAIR_MARGIN);
 
             if (fbos.size() == 0)
             {
@@ -206,8 +205,7 @@ public class Aircraft implements Serializable
         if (tofbo == null)
         {
             // Get a Default FBO if none is specified
-            AirportBean airport = Airports.getAirport(shipto);
-            List<FboBean> fbos = Fbos.getFboForRepair(airport, Fbos.FBO_REPAIR_MARGIN);
+            List<FboBean> fbos = Fbos.getFboForRepair(shipto, Fbos.FBO_REPAIR_MARGIN);
 
             if (fbos.size() == 0)
             {
@@ -1201,7 +1199,9 @@ public class Aircraft implements Serializable
                 throw new DataError("Permission denied");
             }
 
-            if (newRegistration != null && getAircraftIdByRegistration(newRegistration) != 0)
+            if (newRegistration != null
+                && !aircraft.getRegistration().equals(newRegistration)
+                && getAircraftIdByRegistration(newRegistration) != 0)
             {
                 throw new DataError("Registration already in use.");
             }
@@ -1314,8 +1314,7 @@ public class Aircraft implements Serializable
                 return;
             }
 
-            AirportBean airport = Airports.getAirport(aircraft.getLocation());
-            List<FboBean> fbos = Fbos.getFboForRepair(airport, Fbos.FBO_EQUIPMENT_MARGIN);
+            List<FboBean> fbos = Fbos.getFboForRepair(aircraft.getLocation(), Fbos.FBO_EQUIPMENT_MARGIN);
 
             if (fbos.size() == 0)
             {
@@ -1648,8 +1647,7 @@ public class Aircraft implements Serializable
             if (location == null)
                 return;
 
-            AirportBean airport = Airports.getAirport(aircraft.getLocation());
-            List<FboBean> fbos = Fbos.getFboForRepair(airport, Fbos.FBO_ID);
+            List<FboBean> fbos = Fbos.getFboForRepair(aircraft.getLocation(), Fbos.FBO_ID);
 
             if (fbos.size() == 0)
                 return;
