@@ -103,7 +103,7 @@
 		String type = request.getParameter("commodity");
 		String location = request.getParameter("location").toUpperCase();
 		int commodity = Integer.parseInt(request.getParameter("commodity"));
-		if (Airports.getAirport(location) == null)
+		if (!Airports.isValidIcao(location))
 			message = "Invalid Location ICAO";
 
 		int goodsOnSite = Goods.getGoodsQty(location,owner,commodity);
