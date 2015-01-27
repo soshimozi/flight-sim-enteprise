@@ -2872,7 +2872,7 @@ public class Datafeed extends HttpServlet
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(fac.getName()));
             buffer.append(fac.getCommodity() != null ? fac.getCommodity().trim() : "");
 
-            int totalgates = fbo.getFboSize() * airport.getFboSlots();
+            int totalgates = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
             int rentedgates;
             if (fac.getReservedSpace() >= 0)
             {
@@ -2917,7 +2917,7 @@ public class Datafeed extends HttpServlet
             buffer.append("Carrier", Converters.XMLHelper.protectSpecialCharacters(fac.getName()));
             buffer.append("CommodityNames", fac.getCommodity() != null ? fac.getCommodity().trim() : "");
 
-            int totalgates = fbo.getFboSize() * airport.getFboSlots();
+            int totalgates = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
             int rentedgates;
             if (fac.getReservedSpace() >= 0)
             {
@@ -2988,7 +2988,7 @@ public class Datafeed extends HttpServlet
 			if(Accounts.isGroup(fbo.getOwner()))
 				fboGroupOwnerName = Accounts.getGroupOwnerName(fbo.getOwner());
 
-			int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+			int totalSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
             int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
@@ -3016,11 +3016,11 @@ public class Datafeed extends HttpServlet
                 buffer.append("0");
             }
 
-            buffer.append(fbo.getSuppliesPerDay(airport));
+            buffer.append(fbo.getSuppliesPerDay(fbo.getFboSize()));
 
             if (showsupplies)
             {
-                buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
+                buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(fbo.getFboSize()));
             }
             else
             {
@@ -3040,19 +3040,13 @@ public class Datafeed extends HttpServlet
         for (FboBean fbo : fbos)
         {
             AirportBean airport = Airports.getAirport(fbo.getLocation());
-
-//            UserBean fboowner = Accounts.getAccountById(fbo.getOwner());
-//			if(fboowner.isGroup())
-//			{
-//				groupOwnerid = Accounts.accountUltimateGroupOwner(fbo.getOwner());
-//				ultimateOwner = Accounts.getAccountById(groupOwnerid);
-//			}
 			String fboOwnerName = Accounts.getAccountNameById(fbo.getOwner());
+
 			String fboGroupOwnerName = null;
 			if(Accounts.isGroup(fbo.getOwner()))
 				fboGroupOwnerName = Accounts.getGroupOwnerName(fbo.getOwner());
 
-			int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+			int totalSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
             int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
@@ -3081,11 +3075,11 @@ public class Datafeed extends HttpServlet
                 buffer.append("Supplies", 0);
             }
 
-            buffer.append("SuppliesPerDay", fbo.getSuppliesPerDay(airport));
+            buffer.append("SuppliesPerDay", fbo.getSuppliesPerDay(fbo.getFboSize()));
 
             if (showsupplies)
             {
-                buffer.append("SuppliedDays", Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(airport));
+                buffer.append("SuppliedDays", Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(fbo.getFboSize()));
             }
             else
             {
