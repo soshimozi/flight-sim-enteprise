@@ -428,4 +428,21 @@ public class Groups implements Serializable
 
         return result;
     }
+
+    public static int getDefaultPay(int groupId)
+    {
+        int result = 0;
+
+        try
+        {
+            String qry = "SELECT defaultPilotFee FROM accounts WHERE id = ?";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), groupId);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 }
