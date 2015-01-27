@@ -54,14 +54,14 @@ public class Airports implements Serializable
             //pull the airports
             try
             {
-                String qry = "SELECT icao, name, city, state, country, lat, lon, longestRwy, type, surfaceType FROM airports";
+                String qry = "SELECT icao, name, city, state, country, lat, lon, size, longestRwy, type, surfaceType FROM airports";
                 ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
                 while (rs.next())
                 {
                     int itype;
 
                     String icao = rs.getString(1);
-                    String type = rs.getString(9);
+                    String type = rs.getString(10);
 
                     itype = AirportBean.getTypeFromString(type);
 
@@ -72,7 +72,7 @@ public class Airports implements Serializable
                         state = "";
 
                     String title = rs.getString(2) + ", " + rs.getString(3) + state + ", " + rs.getString(5);
-                    AirportInfo lls = new AirportInfo(icao, title, rs.getDouble(6), rs.getDouble(7), rs.getInt(8), itype, rs.getInt(10));
+                    AirportInfo lls = new AirportInfo(icao, title, rs.getDouble(6), rs.getDouble(7), rs.getInt(8), rs.getInt(9), itype, rs.getInt(11));
                     cachedAPs.put(icao, lls);
                 }
             }
@@ -264,10 +264,10 @@ public class Airports implements Serializable
             if(clat > clipLat || clon > clipLon)
                 continue;
 
-            if(minSize != 0 && lls.size < minSize)
+            if(minSize != 0 && lls.longestRwy < minSize)
                 continue;
 
-            if(maxSize != 0 && lls.size > maxSize)
+            if(maxSize != 0 && lls.longestRwy > maxSize)
                 continue;
 
             if(surfType != 0)
