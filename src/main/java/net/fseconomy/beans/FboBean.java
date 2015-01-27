@@ -308,9 +308,9 @@ public class FboBean implements Serializable
 		return fbosize;
 	}
 	
-	public int getSuppliesPerDay(AirportBean airport)
+	public int getSuppliesPerDay(int fboSlots)
 	{
-		return fbosize * airport.getFboSlots() * GoodsBean.AMOUNT_FBO_SUPPLIES_PER_DAY;
+		return fbosize * fboSlots * GoodsBean.AMOUNT_FBO_SUPPLIES_PER_DAY;
 	}
 	
 	public boolean getPublicLogs()
