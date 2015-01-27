@@ -74,7 +74,10 @@
             if (goodsList[thegood.getType()] == null)
                 goodsList[thegood.getType()] = thegood;
         }
-	
+
+		airport = Airports.getAirport(fbo.getLocation());
+		Airports.fillAirport(airport);
+
 		for (int c=0; c < goodsList.length; c++)
 		{
             if (Goods.commodities[c] == null)
