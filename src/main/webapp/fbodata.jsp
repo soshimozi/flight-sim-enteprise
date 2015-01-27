@@ -8,6 +8,7 @@
 <%@ page import="net.fseconomy.data.Fbos" %>
 <%@ page import="net.fseconomy.data.Goods" %>
 <%@ page import="net.fseconomy.util.Formatters" %>
+<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
@@ -26,10 +27,10 @@
     int groupOwnerid = Accounts.accountUltimateGroupOwner(owner);
 
     String icao = fbo.getLocation();
-    AirportBean airport = Airports.getAirport(icao);
+    AirportInfo airportInfo = Airports.cachedAPs.get(icao);
     UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
     int lots = fbo.getFboSize();
-    int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+    int totalSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
     int rented = Fbos.getFboFacilityBlocksInUse(fboId);
 
     String price = Formatters.currency.format(fbo.getPrice());
@@ -41,7 +42,7 @@
     else
         fboname = fbo.getName();
 
-    String location = airport.getCity() + "<br />" + airport.getCountry();
+    String location = airportInfo.name;
     String goodsincluded = "";
 
     if (fbo.getPriceIncludesGoods())
@@ -62,6 +63,7 @@
         goodsincluded = goodsincluded + "Building Materials: " + Formatters.oneDigit.format(bms) + " KG<br>";
     }
 
+    AirportBean airport = Airports.getAirport(icao);
 %>
 
 <div class="row clearfix">
