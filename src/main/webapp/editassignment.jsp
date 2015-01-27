@@ -75,7 +75,7 @@
         assignment.setCommodity(Goods.commodities[assignment.getCommodityId()].getName());
     }
 
-    if (sPay != null && (Airports.getAirport(assignment.getTo()) != null))
+    if (sPay != null && Airports.isValidIcao(assignment.getTo()))
     {
         if (sAmount != null && sAmount.matches("[0-9]+") && !assignment.isFerry() && assignment.isCreatedByUser())
         {
@@ -127,10 +127,10 @@
             if (assignment.getId() <= 0 && assignment.getCommodityId() > 0 && !Goods.checkGoodsAvailable(from, goodsOwner.getId(), assignment.getCommodityId(), assignment.getAmount()*cnt))
                 throw new DataError("Not enough Goods available!");
 
-            if (Airports.getAirport(assignment.getFrom()) == null)
+            if (!Airports.isValidIcao(assignment.getFrom()))
                 throw new DataError("From airport not found.");
 
-            if (Airports.getAirport(assignment.getTo()) == null)
+            if (!Airports.isValidIcao(assignment.getTo()))
                 throw new DataError("To airport not found.");
 
             for (i=0;i<cnt;i++)
