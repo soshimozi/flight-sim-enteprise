@@ -11,6 +11,7 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
@@ -25,10 +26,14 @@ import java.util.Set;
 @Provider
 public class SecurityInterceptor implements ContainerRequestFilter
 {
+    static final int MAXCONTENTLENGTH = 512;
     @Override
     public void filter(ContainerRequestContext ctx) throws IOException
     {
         PostMatchContainerRequestContext pmContext = (PostMatchContainerRequestContext) ctx;
+
+        if(ctx.getLength() > MAXCONTENTLENGTH)
+            ctx.abortWith(createErrorResponse(200, "Bad Request", "Invalid content-length (max=" + MAXCONTENTLENGTH + ")"));
 
         // When HttpMethod comes as OPTIONS, just acknowledge that it accepts...
         if ( ctx.getRequest().getMethod().equals( "OPTIONS" ) )
