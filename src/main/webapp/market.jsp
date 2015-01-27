@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
 	    import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -356,8 +357,9 @@
 			String price = Formatters.currency.format(aircraft.getSellPrice());
 			if (aircraft.getLocation() != null)
 			{		
-				AirportBean location = Airports.getAirport(aircraft.getLocation());
-				acLocation=location.getTitle();
+				AirportInfo airportInfo = Airports.cachedAPs.get(aircraft.getLocation());
+
+				acLocation=airportInfo.name;
 				acICAO=aircraft.getLocation();
 			}
 			
