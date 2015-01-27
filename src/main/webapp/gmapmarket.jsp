@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -121,9 +122,11 @@ if (message != null)
             continue;
 
         boolean bankOwned = aircraft.getOwner() == 0;
+        AirportInfo airportInfo = Airports.cachedAPs.get(aircraft.getLocation());
+        double lat = airportInfo.latlon.lat;
+        double lon = airportInfo.latlon.lon;
+
         AirportBean airport = Airports.getAirport(aircraft.getLocation());
-        double lat = airport.getLat();
-        double lon = airport.getLon();
         String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
 
         sb.append("<div class=\"infowindow-content\">");
