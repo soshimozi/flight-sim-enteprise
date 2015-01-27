@@ -67,9 +67,6 @@
 			goodsList[c] = good;
 		}
 				
-		airport = Airports.getAirport(fbo.getLocation());
-		Airports.fillAirport(airport);
-
         List<GoodsBean> goodsBeanList = Goods.getGoodsForFbo(fbo.getLocation(), fbo.getOwner());
 		GoodsBean[] thegoods = goodsBeanList.toArray(new GoodsBean[goodsBeanList.size()]);
         for (GoodsBean thegood : thegoods)
@@ -213,7 +210,7 @@
 <% 	if ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0) 
 	{
 %>
- 			You own <%= fbo.getFboSize() * airport.getFboSlots() %> Terminal Gates<br />
+ 			You own <%= fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation()) %> Terminal Gates<br />
 			<%= defaultPass.getReservedSpace() %> gates are reserved for your own use (the rest can be rented out)
 			<br />
 			Monthly rent $<%= defaultPass.getRent() %>.00 per gate
