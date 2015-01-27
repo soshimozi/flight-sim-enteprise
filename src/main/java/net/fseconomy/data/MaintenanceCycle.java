@@ -1152,8 +1152,7 @@ public class MaintenanceCycle implements Runnable
 					updateStatus("Working on FBO Assignments for template " + id + " Processing " + fboLoopCounter + " of " + fboCount + " FBO's");
 
 					FboBean fbo = Fbos.getFbo(template.getFboId());
-					AirportBean airport = Airports.getAirport(template.getLocation());
-					
+
 					//This section will either use the facility size if player rented
 					//or if the fbo own has reserved all gates or none have rented (size==0)
 					//then the available units allowed are calculated
@@ -1161,7 +1160,7 @@ public class MaintenanceCycle implements Runnable
 					if (unitsAllowed == 0) //owner reserved or none rented
 					{
 						// small - 1*3, medium - 2*3, large - 3*3
-						unitsAllowed = fbo.getFboSize() * airport.getFboSlots();
+						unitsAllowed = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
 						
 						//see if any gates are rented (reservedspace == -1)
 						qry = "select sum(size) from fbofacilities where reservedSpace < 0 and fboId = ?";
