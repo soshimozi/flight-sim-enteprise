@@ -137,13 +137,13 @@
 		String sizedesc;
 		if (facility.getIsDefault())
 		{
-			int totalSpace = fbo.getFboSize() * ap.getFboSlots();
+			int totalSpace = fbo.getFboSize() * Airports.getFboSlots(facility.getLocation());
 			int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
 			sizedesc = totalSpace + " gates (" + rented + " rented)";
 		} else {
 			sizedesc = facility.getSize() + " gates";
 		}
-		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(ap);
+		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(fbo.getFboSize());
 		int availJobs = Fbos.getFacilityJobCount(facility.getOccupant(), facility.getLocation());
 %>
 				<tr>
