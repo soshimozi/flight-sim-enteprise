@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
+import net.fseconomy.dto.AirportInfo;
 import net.fseconomy.util.Formatters;
 import net.fseconomy.util.GlobalLogger;
 import net.fseconomy.util.Helpers;
@@ -578,9 +579,12 @@ public class UserCtl extends HttpServlet
 	void doEditAircraft(HttpServletRequest req) throws DataError
 	{		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		
-		int id = Integer.parseInt(req.getParameter("id"));
 
+        String sId = req.getParameter("id");
+        if(Helpers.isNullOrBlank(sId))
+            throw new DataError("Invalid parameter.");
+
+		int id = Integer.parseInt(sId);
         AircraftBean aircraft = Aircraft.getAircraftById(id);
  
         if (aircraft == null)
@@ -591,57 +595,64 @@ public class UserCtl extends HttpServlet
 
 		String newReg = req.getParameter("newreg");
 		
-		if (newReg != null && newReg.equals(""))
-			newReg = null;
-		
-		if (newReg != null)
-			newReg = newReg.toUpperCase();
-		
-		if (newReg != null && !newReg.matches("^[A-Z,0-9,-]*$"))
-			throw new DataError("You can only use [0-9][A-Z] and [-] in Registration Number");
-		
-		if(newReg != null && !Aircraft.isAircraftRegistrationUnique(newReg))
-			throw new DataError("Registration already in use!");
-		
-		if (Airports.getAirport(aircraft.getHome()) == null)
+		if (Helpers.isNullOrBlank(newReg))
+        {
+            newReg = null;
+        }
+		else
+        {
+            newReg = newReg.toUpperCase();
+
+            if(!aircraft.getRegistration().equals(newReg))
+            {
+                if (!newReg.matches("^[A-Z,0-9,-]*$"))
+                    throw new DataError("You can only use [0-9][A-Z] and [-] in Registration Number");
+
+                if (!Aircraft.isAircraftRegistrationUnique(newReg))
+                    throw new DataError("Registration already in use!");
+
+                if (newReg.length() > 20)
+                    throw new DataError("Aircraft Registration max length is 20 characters!");
+            }
+        }
+
+        String home = req.getParameter("home");
+		if (!Airports.isValidIcao(home))
 			throw new DataError("Aircraft Home airport not found.");
-		
-		if(newReg != null && newReg.length() > 20)
-			throw new DataError("Aircraft Registration max length is 20 characters!");
-		
+
 		//update fields
-		aircraft.setHome(req.getParameter("home"));
+		aircraft.setHome(home);
 		
 		String sBonus = req.getParameter("bonus");
-		if(sBonus != null && !sBonus.contentEquals(""))
-			aircraft.setBonus(Integer.parseInt(sBonus));
+		if(Helpers.isNullOrBlank(sBonus))
+            aircraft.setBonus(0);
 		else
-			aircraft.setBonus(0);
-		
+            aircraft.setBonus(Integer.parseInt(sBonus));
+
 		String sRentalPriceWet = req.getParameter("rentalPriceWet");
-		if(sRentalPriceWet != null && !sRentalPriceWet.contentEquals(""))
-			aircraft.setRentalPriceWet(Integer.parseInt(sRentalPriceWet));
+		if(Helpers.isNullOrBlank(sRentalPriceWet))
+            aircraft.setRentalPriceWet(0);
 		else
-			aircraft.setRentalPriceWet(0);
-		
+            aircraft.setRentalPriceWet(Integer.parseInt(sRentalPriceWet));
+
 		String sRentalPriceDry = req.getParameter("rentalPriceDry");
-		if(sRentalPriceDry != null && !sRentalPriceDry.contentEquals(""))
-			aircraft.setRentalPriceDry(Integer.parseInt(sRentalPriceDry));
+		if(Helpers.isNullOrBlank(sRentalPriceDry))
+            aircraft.setRentalPriceDry(0);
 		else
-			aircraft.setRentalPriceDry(0);
-		
+            aircraft.setRentalPriceDry(Integer.parseInt(sRentalPriceDry));
+
 		String sMaxRentalTime = req.getParameter("maxRentTime");
-		if(sMaxRentalTime != null && !sMaxRentalTime.contentEquals(""))
-			aircraft.setMaxRentTime(Integer.parseInt(sMaxRentalTime));
+		if(Helpers.isNullOrBlank(sMaxRentalTime))
+            aircraft.setMaxRentTime(0);
 		else
-			aircraft.setMaxRentTime(0);
-		
+            aircraft.setMaxRentTime(Integer.parseInt(sMaxRentalTime));
+
 		String sSellPrice = req.getParameter("sellPrice");
-		if(sSellPrice != null && !sSellPrice.contentEquals(""))
-			aircraft.setSellPrice(Integer.parseInt(sSellPrice));
+		if(Helpers.isNullOrBlank(sSellPrice))
+            aircraft.setSellPrice(0);
 		else
-			aircraft.setSellPrice(0);
-		
+            aircraft.setSellPrice(Integer.parseInt(sSellPrice));
+
 		boolean advertiseFerry = Boolean.parseBoolean(req.getParameter("advertiseFerry"));
 		aircraft.setAdvertiseFerry(advertiseFerry);
 		
@@ -2140,14 +2151,17 @@ public class UserCtl extends HttpServlet
 	void doBuySellGoods(HttpServletRequest req, boolean isBuy) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		String location = req.getParameter("icao");
 		String sOwner = req.getParameter("owner");
 		String sType = req.getParameter("type");
 		String sAmount = req.getParameter("amount");
 		String sAccount = req.getParameter("account");
-		if (location == null || sOwner == null || sType == null || sAmount == null || sAccount == null)
+		if (sOwner == null || sType == null || sAmount == null || sAccount == null)
 			return;
-			
+
+        String location = req.getParameter("icao");
+        if(!Airports.isValidIcao(location))
+            throw new DataError("Invalid location.");
+
 		int type = Integer.parseInt(sType);
 		if(type < GoodsBean.GOODS_LOWEST || type > GoodsBean.GOODS_HIGHEST)
 			throw new DataError("Invalid Goods Type!");
@@ -2161,12 +2175,11 @@ public class UserCtl extends HttpServlet
 		if (account != user.getId() && user.groupMemberLevel(account) < UserBean.GROUP_STAFF)
 			throw new DataError("Permission denied");
 		
-		boolean found = false;
-		AirportBean airport = Airports.getAirport(location);
-
-		List<GoodsBean> goods = Goods.getGoodsAtAirport(airport.getIcao(), airport.getSize(), 0, 0);
+        AirportInfo airportInfo = Airports.cachedAPs.get(location);
+		List<GoodsBean> goods = Goods.getGoodsAtAirport(airportInfo.icao, airportInfo.size, 0, 0);
 		
 		int checkid = isBuy ? from : to;
+        boolean found = false;
 
         for (GoodsBean good : goods)
         {
@@ -2323,7 +2336,7 @@ public class UserCtl extends HttpServlet
 		String ownername = account.getName();
 
 		String location = req.getParameter("location").toUpperCase();
-		if (Airports.getAirport(location) == null)
+		if (!Airports.isValidIcao(location))
 			throw new DataError("Invalid Location ICAO");
 		
 		int commodity = Integer.parseInt(req.getParameter("commodity"));
