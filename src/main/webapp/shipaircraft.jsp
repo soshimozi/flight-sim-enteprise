@@ -36,8 +36,7 @@
 
 	aircraft = Aircraft.getAircraftShippingInfoById(id);
 	
-	AirportBean departairport = Airports.getAirport(aircraft.getLocation());
-	departfbos = Fbos.getFboForRepair( departairport, Fbos.FBO_REPAIR_MARGIN );
+	departfbos = Fbos.getFboForRepair( aircraft.getLocation(), Fbos.FBO_REPAIR_MARGIN );
 
 	boolean isRented = aircraft.getUserLock() != 0;
 	boolean isForSale = aircraft.getSellPrice() != 0;
@@ -71,8 +70,7 @@
             shipto = shipto.toUpperCase();
 
 		//check that we can find the destination airfield
-		AirportBean destairport = Airports.getAirport(shipto);
-		if( destairport == null )
+		if( !Airports.isValidIcao(shipto) )
 		{
 			error = "Invalid ICAO entered for destination. Please try again.";
 			
@@ -85,7 +83,7 @@
 			step2 = true;
 			
 			//need to get find the list of active repair stations for departure and destination airfields
-			destfbos = Fbos.getFboForRepair( destairport );
+			destfbos = Fbos.getFboForRepair(shipto);
 
 			hasActiveShopDest = false;
             for (FboBean destfbo : destfbos)
