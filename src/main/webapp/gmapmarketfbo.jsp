@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
+<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -59,18 +60,16 @@
 <%
 for (FboBean fbo : fbos)
 {
-	AirportBean airport = Airports.getAirport(fbo.getLocation());
-	double lat = airport.getLat();
-	double lon = airport.getLon();
+    AirportInfo airportInfo = Airports.cachedAPs.get(fbo.getLocation());
+    double lat = airportInfo.latlon.lat;
+    double lon = airportInfo.latlon.lon;
 	int sizeIcon = fbo.getFboSize() - 1;
-	
+
 	StringBuilder sb = new StringBuilder();
 	sb.append("<div class=\"infowindow-content\">");
-	sb.append(airport.getIcao());
+	sb.append(fbo.getLocation());
 	sb.append("<br>");
-	sb.append(Converters.escapeJavaScript(airport.getName()));
-	sb.append(", ");
-	sb.append(Converters.escapeJavaScript(airport.getCountry()));
+	sb.append(Converters.escapeJavaScript(airportInfo.name));
 	sb.append("<br>");
 	sb.append(Converters.escapeJavaScript(Accounts.getAccountNameById(fbo.getOwner())));
 	sb.append("<br>");
