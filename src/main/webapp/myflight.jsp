@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
     	import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*, java.util.*"
 %>
+<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -665,12 +666,12 @@
 
 				String icao = location.getIcao();
 				String destIcao = destination.getIcao();
-				AirportBean mapAirport = Airports.getAirport(icao);
-				double latl = mapAirport.getLat();
-				double lonl = mapAirport.getLon();
-				AirportBean mapDestAirport = Airports.getAirport(destIcao);
-				double destLatl = mapDestAirport.getLat();
-				double destLonl = mapDestAirport.getLon();
+				AirportInfo airportInfo = Airports.cachedAPs.get(icao);
+				double lat1 = airportInfo.latlon.lat;
+				double lon1 = airportInfo.latlon.lon;
+				airportInfo = Airports.cachedAPs.get(destIcao);
+				double destLatl = airportInfo.latlon.lat;
+				double destLonl = airportInfo.latlon.lon;
 %>
 	<script type="text/javascript">
 		if (typeof loc['<%=icao%>'] != 'undefined') {
@@ -681,8 +682,8 @@
 			len = 0;
 		}
 		loc['<%=icao%>'][len] = [];
-		loc['<%=icao%>'][len].latl = <%=latl%>;
-		loc['<%=icao%>'][len].lonl = <%=lonl%>;
+		loc['<%=icao%>'][len].latl = <%=lat1%>;
+		loc['<%=icao%>'][len].lonl = <%=lon1%>;
 		loc['<%=icao%>'][len].pay = "<%=Formatters.currency.format(assignment.calcPay())%>";
 		loc['<%=icao%>'][len].cargo = "<%=assignment.getSCargo()%>";
 		loc['<%=icao%>'][len].status =
@@ -692,7 +693,7 @@
 		loc['<%=icao%>'][len].dest.icao = '<%=destIcao%>';
 		loc['<%=icao%>'][len].dest.latl = <%=destLatl%>;
 		loc['<%=icao%>'][len].dest.lonl = <%=destLonl%>;
-		var mapCenter = {latl: <%=latl%>, lonl: <%=lonl%>};
+		var mapCenter = {latl: <%=lat1%>, lonl: <%=lon1%>};
 	</script>
 
 	     		<tr>
@@ -875,18 +876,18 @@
 		if (!departed) 
 		{
 			String icao = aircraft.getSLocation();
-			AirportBean mapAirport = Airports.getAirport(icao);
-			double latl = mapAirport.getLat();
-			double lonl = mapAirport.getLon();
+			AirportInfo airportInfo = Airports.cachedAPs.get(icao);
+			double lat1 = airportInfo.latlon.lat;
+			double lon1 = airportInfo.latlon.lon;
 %>
 		<script type="text/javascript">
 			loc['plane'] = [];
 			loc['plane'][0] = [];
 			loc['plane'][0].icao = '<%=icao%>';
-			loc['plane'][0].latl = <%=latl%>;
-			loc['plane'][0].lonl = <%=lonl%>;
+			loc['plane'][0].latl = <%=lat1%>;
+			loc['plane'][0].lonl = <%=lon1%>;
 			loc['plane'][0].status = 'plane';
-			var mapCenter = {latl: <%=latl%>, lonl: <%=lonl%>}
+			var mapCenter = {latl: <%=lat1%>, lonl: <%=lon1%>}
 		</script>
 		
 <%			}
