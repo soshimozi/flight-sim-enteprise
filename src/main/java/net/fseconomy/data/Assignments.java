@@ -473,7 +473,7 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void updateAssignment(int assignmentId, double pilotFee, String comment) throws DataError
+    public static void updateAssignment(int assignmentId, int groupId, double pilotFee, String comment) throws DataError
     {
         try
         {
@@ -491,8 +491,17 @@ public class Assignments implements Serializable
                 throw new DataError("Assignment is locked!");
             }
 
-            qry = "UPDATE assignments SET pilotFee = ?, comment = ? WHERE id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, pilotFee,comment, assignmentId);
+            if(groupId > 0 && pilotFee <= 0)
+            {
+                int defaultPay = Groups.getDefaultPay(groupId);
+                qry = "UPDATE assignments SET pilotFee = pay*amount*distance*0.01*?, comment = ? WHERE id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, defaultPay/100.0, comment, assignmentId);
+            }
+            else
+            {
+                qry = "UPDATE assignments SET pilotFee = ?, comment = ? WHERE id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, pilotFee, comment, assignmentId);
+            }
         }
         catch (SQLException e)
         {
