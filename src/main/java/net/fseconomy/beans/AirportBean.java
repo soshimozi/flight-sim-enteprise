@@ -326,16 +326,6 @@ public class AirportBean implements Serializable
 		return "/img/" + base + ext + ".gif";
 	}
 
-	public int getFboSlots()
-	{
-		if (size < MIN_SIZE_MED)
-			return 1;
-		else if (size < MIN_SIZE_BIG)
-			return 2;
-
-    	return 3;
-	}
-
 	public int getSize()
 	{
 		return size;
