@@ -84,6 +84,9 @@
                 <div class="col-sm-2">
                     <input class="form-control" id="editPilotFee" name="pilotfee" type="text" value="<%= assignment.getPilotFee() %>" size="10"/>
                 </div>
+                <div class="col-sm-5">
+                * - Blank = Group default pay.
+                </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="editComment">Comment</label>
