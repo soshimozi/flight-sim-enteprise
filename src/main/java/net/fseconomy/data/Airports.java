@@ -1303,4 +1303,17 @@ public class Airports implements Serializable
 
         return result;
     }
+
+    public static int getFboSlots(String icao)
+    {
+        int size = cachedAPs.get(icao).size;
+
+        if (size < AirportBean.MIN_SIZE_MED)
+            return 1;
+        else if (size < AirportBean.MIN_SIZE_BIG)
+            return 2;
+
+        return 3;
+    }
+
 }
