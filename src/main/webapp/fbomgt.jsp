@@ -257,16 +257,17 @@
 		GoodsBean buildingmaterials = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
 		AirportBean ap = Airports.getAirport(fbo.getLocation());
 		int availJobs = Fbos.getFacilityJobCount(fbo.getOwner(), fbo.getLocation());
+		int daysAvail = supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize());
 %>
 	<tr>
 	<td class="nowrap"><%= Airports.airportLink(ap, ap, response) %></td>
-	<td><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize()) < 1) ? "<span style=\'color: red;\'><small>" + fbo.getName() + "</small></span>" : "<small>" + fbo.getName() + "</small>"): fbo.getName() %></td>
+	<td><%= supplies != null ? (daysAvail < 1) ? "<span style=\'color: red;\'><small>" + fbo.getName() + "</small></span>" : "<small>" + fbo.getName() + "</small>" : fbo.getName() %></td>
 
 	<td><%= availJobs %></td>		
 	<td><%= ap.getSize() > 2999 ? ((ap.getSize() > 4999) ? "BdM/Sp" : "Supply") : "<span style=\'color: gray;\'><small>NONE</small></span>" %></td>
 	
 	<td class="numeric"><%= fbo.getSuppliesPerDay(fbo.getFboSize()) %></td>
-	<td class="numeric"><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize()) > 14) ? supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize()) : "<span style=\'color: red;\'>" + supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize())+ "</span>" ): "" %></td>
+	<td class="numeric"><%= supplies != null ? (daysAvail > 14) ? daysAvail : "<span style=\'color: red;\'>" + daysAvail + "</span>" : "" %></td>
 
 	<td><%= fbo.getServices() == 1 | fbo.getServices() == 5 ? "<small>" + fbo.getRepairShopMargin() + "%/" + fbo.getEquipmentInstallMargin() + "%</small>" : "<span style=\'color: gray;\'><small>No Shop</small></span>" %></td>
 	
