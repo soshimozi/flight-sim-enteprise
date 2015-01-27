@@ -260,13 +260,13 @@
 %>
 	<tr>
 	<td class="nowrap"><%= Airports.airportLink(ap, ap, response) %></td>
-	<td><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(ap) < 1) ? "<span style=\'color: red;\'><small>" + fbo.getName() + "</small></span>" : "<small>" + fbo.getName() + "</small>"): fbo.getName() %></td>
+	<td><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize()) < 1) ? "<span style=\'color: red;\'><small>" + fbo.getName() + "</small></span>" : "<small>" + fbo.getName() + "</small>"): fbo.getName() %></td>
 
 	<td><%= availJobs %></td>		
 	<td><%= ap.getSize() > 2999 ? ((ap.getSize() > 4999) ? "BdM/Sp" : "Supply") : "<span style=\'color: gray;\'><small>NONE</small></span>" %></td>
 	
-	<td class="numeric"><%= fbo.getSuppliesPerDay(ap) %></td>
-	<td class="numeric"><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(ap) > 14) ? supplies.getAmount() / fbo.getSuppliesPerDay(ap) : "<span style=\'color: red;\'>" + supplies.getAmount() / fbo.getSuppliesPerDay(ap)+ "</span>" ): "" %></td>
+	<td class="numeric"><%= fbo.getSuppliesPerDay(fbo.getFboSize()) %></td>
+	<td class="numeric"><%= supplies != null ? ((supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize()) > 14) ? supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize()) : "<span style=\'color: red;\'>" + supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize())+ "</span>" ): "" %></td>
 
 	<td><%= fbo.getServices() == 1 | fbo.getServices() == 5 ? "<small>" + fbo.getRepairShopMargin() + "%/" + fbo.getEquipmentInstallMargin() + "%</small>" : "<span style=\'color: gray;\'><small>No Shop</small></span>" %></td>
 	
