@@ -256,10 +256,11 @@ public class Fbos implements Serializable
             String qry = "UPDATE fbo SET services = services | ? WHERE owner = ? AND location = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, FboBean.FBO_PASSENGERTERMINAL, fbo.getOwner(), fbo.getLocation());
 
-            AirportBean airport = Airports.getAirport(fbo.getLocation());
+            int fboSlots = Airports.getFboSlots(fbo.getLocation());
 
             qry = "INSERT INTO fbofacilities (location, fboId, occupant, reservedSpace, size, rent, name, units, commodity, maxDistance, matchMaxSize, publicByDefault) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
-            DALHelper.getInstance().ExecuteUpdate(qry, fbo.getLocation(), fbo.getId(), fbo.getOwner(), fbo.getFboSize() * airport.getFboSlots(), 0, FboFacilityBean.DEFAULT_RENT, fbo.getName(), AssignmentBean.UNIT_PASSENGERS, FboFacilityBean.DEFAULT_COMMODITYNAME_PASSENGERS, 300, 99999, 1);
+
+            DALHelper.getInstance().ExecuteUpdate(qry, fbo.getLocation(), fbo.getId(), fbo.getOwner(), fbo.getFboSize() * fboSlots, 0, FboFacilityBean.DEFAULT_RENT, fbo.getName(), AssignmentBean.UNIT_PASSENGERS, FboFacilityBean.DEFAULT_COMMODITYNAME_PASSENGERS, 300, 99999, 1);
 
             return true;
         }
@@ -295,9 +296,9 @@ public class Fbos implements Serializable
             }
 
             FboBean fbo = getFbo(landlord.getFboId());
-            AirportBean airport = Airports.getAirport(landlord.getLocation());
+            //AirportBean airport = Airports.getAirport(landlord.getLocation());
 
-            if (blocks > calcFboFacilitySpaceAvailable(landlord, fbo, airport))
+            if (blocks > calcFboFacilitySpaceAvailable(landlord, fbo))
             {
                 throw new DataError("Not enough space available.");
             }
@@ -390,12 +391,12 @@ public class Fbos implements Serializable
         return getFboSql("SELECT * FROM fbo WHERE active = 0 AND location='" + location + "' ORDER BY id");
     }
 
-    public static List<FboBean> getFboForRepair(AirportBean airport)
+    public static List<FboBean> getFboForRepair(String icao)
     {
-        return getFboForRepair(airport, 0);
+        return getFboForRepair(icao, 0);
     }
 
-    public static List<FboBean> getFboForRepair(AirportBean airport, int orderby)
+    public static List<FboBean> getFboForRepair(String icao, int orderby)
     {
         //0 = id, 1 = repair margin, 2 = equipment margin
         String order;
@@ -408,12 +409,14 @@ public class Fbos implements Serializable
             default:
                 order = "id";
         }
-        List<FboBean> returnValue = getFboSql("SELECT * from fbo WHERE active = 1 AND (services & " + FboBean.FBO_REPAIRSHOP + ") > 0 AND location='" + airport.getIcao() + "' ORDER BY " + order);
+        
+        AirportInfo airportInfo = Airports.cachedAPs.get(icao);
+        List<FboBean> returnValue = getFboSql("SELECT * from fbo WHERE active = 1 AND (services & " + FboBean.FBO_REPAIRSHOP + ") > 0 AND location='" + icao + "' ORDER BY " + order);
 
-        if (airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE)
+        if (airportInfo.size >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE)
         {
             FboBean fb = FboBean.getInstance();
-            fb.setLocation(airport.getIcao());
+            fb.setLocation(icao);
 
             returnValue.add(fb);
         }
@@ -572,10 +575,11 @@ public class Fbos implements Serializable
         return result;
     }
 
-    public static int calcFboFacilitySpaceAvailable(FboFacilityBean facility, FboBean fbo, AirportBean airport)
+    public static int calcFboFacilitySpaceAvailable(FboFacilityBean facility, FboBean fbo)
     {
         int spaceInUse = getFboFacilityBlocksInUse(fbo.getId());
-        int totalSpace = fbo.getFboSize() * airport.getFboSlots();
+        int fboSlots = Airports.getFboSlots(fbo.getLocation());
+        int totalSpace = fbo.getFboSize() * fboSlots;
         return Math.max(0, totalSpace - spaceInUse - facility.getReservedSpace());
     }
 
@@ -616,8 +620,7 @@ public class Fbos implements Serializable
             }
 
             int inUse = getFboFacilityBlocksInUse(fbo.getId());
-            AirportBean airport = Airports.getAirport(fbo.getLocation());
-            int newSpace = (fbo.getFboSize() - 1) * airport.getFboSlots();
+            int newSpace = (fbo.getFboSize() - 1) * Airports.getFboSlots(fbo.getLocation());
             if (inUse > newSpace)
             {
                 throw new DataError("An FBO with tennants can not be torn down.");
