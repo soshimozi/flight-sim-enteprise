@@ -172,7 +172,7 @@ public class MaintenanceCycle implements Runnable
 		processBulkFuelOrders();
 		
 		//TODO: comment out for test server for faster cycle times
-		processFboAssigments(); //green assignments
+		//processFboAssigments(); //green assignments
 		processTemplateAssignments(); //template assignments
 		
 		//TODO examine to see if we need to randomize release times on this a bit more
@@ -669,11 +669,11 @@ public class MaintenanceCycle implements Runnable
 			ResultSet rsTemplate = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rsTemplate.next())
 			{
-                int id = rsTemplate.getInt("id");
+				int id = rsTemplate.getInt("id");
 
 				updateStatus("Working on assignments for template " + id);
-				
-				double frequency = rsTemplate.getDouble("frequency");					
+
+				double frequency = rsTemplate.getDouble("frequency");
 				int maxDistance = rsTemplate.getInt("targetDistance");
 
 				//if its a dead template, skip it
@@ -681,8 +681,8 @@ public class MaintenanceCycle implements Runnable
 					continue;
 
 				double targetPay = rsTemplate.getDouble("targetPay");
-				double Deviation = maxDistance * ((double)rsTemplate.getInt("distanceDev")/100.0);
-				double amountDev = rsTemplate.getInt("amountDev")/100.0;
+				double Deviation = maxDistance * ((double) rsTemplate.getInt("distanceDev") / 100.0);
+				double amountDev = rsTemplate.getInt("amountDev") / 100.0;
 				double payDev = (double) rsTemplate.getInt("payDev") / 100.0;
 
 				int keepAlive = rsTemplate.getInt("targetKeepAlive");
@@ -690,15 +690,15 @@ public class MaintenanceCycle implements Runnable
 				int maxSize = rsTemplate.getInt("matchMaxSize");
 				int minSize = rsTemplate.getInt("matchMinSize");
 				int surfType = rsTemplate.getInt("allowedSurfaceTypes");
-				
+
 				boolean isAllIn = rsTemplate.getString("typeOfPay").equals("allin");
 				boolean waterOk = !isAllIn;
-				
-				String commodity = rsTemplate.getString("commodity");	
+
+				String commodity = rsTemplate.getString("commodity");
 				String units = rsTemplate.getString("units");
 				String icaos1 = rsTemplate.getString("icaoSet1");
 				String icaos2 = rsTemplate.getString("icaoSet2");
-				
+
 				int seatsFrom = rsTemplate.getInt("seatsFrom");
 				int seatsTo = rsTemplate.getInt("seatsTo");
 				int speedFrom = rsTemplate.getInt("speedFrom");
@@ -708,11 +708,62 @@ public class MaintenanceCycle implements Runnable
 				Set<String> icaoSet2;
 				StringBuffer where = new StringBuffer();
 
-                if(icaos1 == null)
-                {
-                    icaoSet1 = null;
-                }
-                else
+				//check for seats and cruise speed filters on aircraft assignment for template
+				StringBuilder aircraftFilterWhereClause = new StringBuilder();
+
+				//if no filters are set for seats size filter, just add a condition to be bigger then the units specified in the job
+				//this will ensure a 172 is not chosen to take a 10 pax job
+				//if filter values are set those are used instead in the where clause
+				if (seatsFrom == 0 && seatsTo == 0)
+				{	//no filters set, use some base values to make sure an in appropriate plane is not assigned
+					if (units.equals("passengers"))
+					{
+						aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
+						aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount * 77).append(" < maxWeight");
+					}
+					else if (units.equals("KGs"))
+					{
+						aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount).append(" < maxWeight");
+					}
+				}
+				else
+				{	//filters set
+					if (seatsFrom > 0)
+						aircraftFilterWhereClause.append(" and seats >= ").append(seatsFrom);
+
+					if (seatsFrom == 0 && seatsTo > 0)
+						aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
+
+					if (seatsTo > 0)
+						aircraftFilterWhereClause.append(" and seats <= ").append(seatsTo);
+
+					if (speedFrom > 0)
+						aircraftFilterWhereClause.append(" and cruisespeed >= ").append(speedFrom);
+
+					if (speedTo > 0)
+						aircraftFilterWhereClause.append(" and cruisespeed <= ").append(speedTo);
+
+					if (units.equals("passengers"))
+						aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount * 77).append(" < maxWeight");
+					else
+						aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount).append(" < maxWeight");
+				}
+
+				if (isAllIn)
+				{
+					icaoSet1 = new HashSet<>();
+
+					qry = "Select location as icao from aircraft, models where aircraft.model=models.id AND owner=0 AND location is not null " + aircraftFilterWhereClause.toString();
+					ResultSet result = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+
+					while(result.next())
+						icaoSet1.add(result.getString("icao"));
+				}
+				else if (icaos1 == null)
+				{
+					icaoSet1 = null;
+				}
+				else
                 {
                     switch (icaos1)
                     {
@@ -796,10 +847,14 @@ public class MaintenanceCycle implements Runnable
 					if (where.length() > 0)
 						whereString = whereString + "WHERE icao in (" + where.toString() + ")";
 					
-					needed = frequency + " as needed";
+					if(isAllIn)
+						needed = icaoSet1.size() * frequency + " as needed";
+					else
+						needed = frequency + " as needed";
+
 					query = "SELECT 0, 0, 0, " + needed + ", count(assignments.id) AS got, avg(lat) FROM airports LEFT JOIN assignments ON assignments.fromicao = airports.icao AND fromtemplate = " + id + " " + whereString ;						
 				}
-				
+
 				ResultSet bucketRs = DALHelper.getInstance().ExecuteReadOnlyQuery(query);
 				while (bucketRs.next())
 				{
@@ -814,7 +869,7 @@ public class MaintenanceCycle implements Runnable
 						continue;
 					
 					togo = (int) Math.max(1, dTogo);
-					
+
 					if (icaoSet1 != null || icaoSet2 != null)
 					{
 						airportFromList = new ArrayList<>(icaoSet1);
@@ -882,46 +937,6 @@ public class MaintenanceCycle implements Runnable
 									"and aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null and location = '" + icao+ "') as t) " +
 									"and models.id = aircraft.model ";
 							
-							//check for seats and cruise speed filters on aircraft assignment for template
-							StringBuilder aircraftFilterWhereClause = new StringBuilder();
-
-							//if no filters are set for seats size filter, just add a condition to be bigger then the units specified in the job
-							//this will ensure a 172 is not chosen to take a 10 pax job
-							//if filter values are set those are used instead in the where clause
-							if (seatsFrom == 0 && seatsTo == 0) 
-							{	//no filters set, use some base values to make sure an in appropriate plane is not assigned
-								if (units.equals("passengers"))
-								{
-									aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
-									aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount * 77).append(" < maxWeight");
-								}
-								else if (units.equals("KGs"))
-								{
-									aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount).append(" < maxWeight");
-								}
-							}
-							else 
-							{	//filters set
-								if (seatsFrom > 0) 
-									aircraftFilterWhereClause.append(" and seats >= ").append(seatsFrom);
-								
-								if (seatsFrom == 0 && seatsTo > 0)										
-									aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
-								
-								if (seatsTo > 0)
-									aircraftFilterWhereClause.append(" and seats <= ").append(seatsTo);
-								
-								if (speedFrom > 0) 
-									aircraftFilterWhereClause.append(" and cruisespeed >= ").append(speedFrom);
-								
-								if (speedTo > 0)
-										aircraftFilterWhereClause.append(" and cruisespeed <= ").append(speedTo);
-								
-								if (units.equals("passengers"))
-									aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount * 77).append(" < maxWeight");
-								else 
-									aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount).append(" < maxWeight");
-							}
 
                             //We only use one, so limit it.
                             ResultSet aircraftRs = DALHelper.getInstance().ExecuteReadOnlyQuery(queryToFindFreeAircraft + aircraftFilterWhereClause.toString() + " LIMIT 1");
