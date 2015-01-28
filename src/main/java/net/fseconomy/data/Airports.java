@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import net.fseconomy.beans.*;
 import net.fseconomy.dto.*;
 import net.fseconomy.util.Converters;
+import net.fseconomy.util.Helpers;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
@@ -66,7 +67,7 @@ public class Airports implements Serializable
                     itype = AirportBean.getTypeFromString(type);
 
                     String state = rs.getString(4);
-                    if(state != null)
+                    if(!Helpers.isNullOrBlank(state))
                         state = ", " + state;
                     else
                         state = "";

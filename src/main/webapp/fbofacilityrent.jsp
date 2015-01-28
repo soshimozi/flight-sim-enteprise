@@ -44,7 +44,7 @@
         }
 
         fbo = Fbos.getFbo(facility.getFboId());
-        suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(fbo.getFboSize());
+        suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation()));
         madeBlocksSelection = request.getParameter("selectBlocks") != null;
 
         if (madeBlocksSelection)

@@ -2680,7 +2680,7 @@ public class Datafeed extends HttpServlet
             {
                 loc = aircraft.getLocation();
 
-                locname = Airports.getAirportName(loc);
+                locname = Airports.cachedAPs.get(loc).name;
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
@@ -2737,8 +2737,7 @@ public class Datafeed extends HttpServlet
             else
             {
                 loc = aircraft.getLocation();
-
-                locname = Airports.getAirportName(loc);
+                locname = Airports.cachedAPs.get(loc).name;
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
@@ -3016,11 +3015,11 @@ public class Datafeed extends HttpServlet
                 buffer.append("0");
             }
 
-            buffer.append(fbo.getSuppliesPerDay(fbo.getFboSize()));
+            buffer.append(fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())));
 
             if (showsupplies)
             {
-                buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(fbo.getFboSize()));
+                buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())));
             }
             else
             {
@@ -3075,11 +3074,11 @@ public class Datafeed extends HttpServlet
                 buffer.append("Supplies", 0);
             }
 
-            buffer.append("SuppliesPerDay", fbo.getSuppliesPerDay(fbo.getFboSize()));
+            buffer.append("SuppliesPerDay", fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())));
 
             if (showsupplies)
             {
-                buffer.append("SuppliedDays", Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(fbo.getFboSize()));
+                buffer.append("SuppliedDays", Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())));
             }
             else
             {

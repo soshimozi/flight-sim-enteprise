@@ -326,7 +326,7 @@
 		GoodsBean buildingmaterials = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
 		AirportBean ap = Airports.getAirport(fbo.getLocation());
 
-		int daysAvail = supplies.getAmount() / fbo.getSuppliesPerDay(fbo.getFboSize());
+		int daysAvail = supplies.getAmount() / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation()));
 %>
     		<tr>
                 <td class="nowrap"><%= Airports.airportLink(ap, ap, response) %></td>
@@ -335,7 +335,7 @@
                 <td class="numeric"><%= fbo.isForSale() ? Formatters.currency.format(fbo.getPrice()) + (fbo.getPriceIncludesGoods() ? " + goods" : "") : "" %></td>
                 <td class="numeric"><%= fbo.getFboSize() %></td>
                 <td class="numeric"><%= supplies != null ? (daysAvail > 14) ? supplies.getAmount() : "<span style=\"color: red;\">" + supplies.getAmount() + "</span>" : "" %></td>
-                <td class="numeric"><%= fbo.getSuppliesPerDay(fbo.getFboSize()) %></td>
+                <td class="numeric"><%= fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())) %></td>
                 <td class="numeric"><%= supplies != null ? (daysAvail > 14) ? daysAvail : "<span style=\"color: red;\">" + daysAvail + "</span>" : "" %></td>
                 <td class="numeric"><%= fuel != null ? fuel.getAmount() : "" %></td>
                 <td class="numeric"><%= jeta != null ? jeta.getAmount() : "" %></td>

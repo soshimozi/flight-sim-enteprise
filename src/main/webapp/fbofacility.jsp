@@ -143,7 +143,7 @@
 		} else {
 			sizedesc = facility.getSize() + " gates";
 		}
-		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(fbo.getFboSize());
+		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation()));
 		int availJobs = Fbos.getFacilityJobCount(facility.getOccupant(), facility.getLocation());
 %>
 				<tr>
