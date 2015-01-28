@@ -172,7 +172,7 @@ public class MaintenanceCycle implements Runnable
 		processBulkFuelOrders();
 		
 		//TODO: comment out for test server for faster cycle times
-		//processFboAssigments(); //green assignments
+		processFboAssigments(); //green assignments
 		processTemplateAssignments(); //template assignments
 		
 		//TODO examine to see if we need to randomize release times on this a bit more
