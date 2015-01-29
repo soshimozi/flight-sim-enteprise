@@ -2680,7 +2680,7 @@ public class Datafeed extends HttpServlet
             {
                 loc = aircraft.getLocation();
 
-                locname = Airports.cachedAPs.get(loc).name;
+                locname = Airports.cachedAPs.get(loc).title;
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
@@ -2737,7 +2737,7 @@ public class Datafeed extends HttpServlet
             else
             {
                 loc = aircraft.getLocation();
-                locname = Airports.cachedAPs.get(loc).name;
+                locname = Airports.cachedAPs.get(loc).title;
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
