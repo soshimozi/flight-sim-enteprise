@@ -42,7 +42,7 @@
     else
         fboname = fbo.getName();
 
-    String location = airportInfo.name;
+    String location = airportInfo.title;
     String goodsincluded = "";
 
     if (fbo.getPriceIncludesGoods())
