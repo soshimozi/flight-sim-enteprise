@@ -463,18 +463,9 @@ public class AssignmentBean implements Serializable
 	{
 		if (actualDistance == 0)
 		{
-			AirportBean loc = getLocationAirport();
-			/*
-			if (loc == null)
+			if (location != null)
 			{
-				AircraftBean ac[] = data.getAircraftForUser(userlock);
-				if (ac.length > 0)
-					loc = data.getAirport(ac[0].getDepartedFrom());
-			}
-			*/
-			if (loc != null)
-			{
-				DistanceBearing distanceBearing = Airports.getDistanceBearing(loc, getDestinationAirport());
+				DistanceBearing distanceBearing = Airports.getDistanceBearing(location, to);
 				actualDistance = (int)Math.round(distanceBearing.distance);
 				actualBearing = (int)Math.round(distanceBearing.bearing);
 			} else {
