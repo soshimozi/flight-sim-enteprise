@@ -94,7 +94,7 @@ StringBuilder sb = new StringBuilder();
 	
 	sb.append("<div class=\"infowindow-content\">");
     sb.append("<a href=\"airport.jsp?icao=" + depart + "\">");
-	sb.append(Converters.escapeJavaScript(apDepart.name));
+	sb.append(Converters.escapeJavaScript(apDepart.title));
 	sb.append("</a>");
 	sb.append("</div>");
 	String departInfo = sb.toString();
@@ -105,7 +105,7 @@ StringBuilder sb = new StringBuilder();
 	sb = new StringBuilder();
 	sb.append("<div class=\"infowindow-content\">");
     sb.append("<a href=\"airport.jsp?icao="+ dest + "\">");
-	sb.append(Converters.escapeJavaScript(apDest.name));
+	sb.append(Converters.escapeJavaScript(apDest.title));
 	sb.append("</a>");
 	sb.append("</div>");
 
