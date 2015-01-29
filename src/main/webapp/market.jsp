@@ -359,7 +359,7 @@
 			{		
 				AirportInfo airportInfo = Airports.cachedAPs.get(aircraft.getLocation());
 
-				acLocation=airportInfo.name;
+				acLocation=airportInfo.title;
 				acICAO=aircraft.getLocation();
 			}
 			
