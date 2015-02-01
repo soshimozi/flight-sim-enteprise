@@ -374,7 +374,7 @@
 <%
 		for (LogBean log : logs)
 		{
-			String engineTime = Formatters.getHourMin(aircraft.getTotalEngineTime());
+			String engineTime = Formatters.getHourMin(log.getTotalEngineTime());
 %>
 		    	<tr>
 		      		<td><%=Formatters.getUserTimeFormat(user).format(log.getTime())%></td>
