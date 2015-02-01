@@ -862,7 +862,7 @@ public class Fbos implements Serializable
                 for (String item1 : items)
                 {
                     String icao = item1.trim();
-                    if (Airports.isValidIcao(icao))
+                    if (!Airports.isValidIcao(icao))
                     {
                         throw new DataError("ICAO '" + icao + "' not found.");
                     }
