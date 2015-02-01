@@ -277,11 +277,11 @@
 <%
                 for (PaymentBean log : logs)
                 {
-                    AirportBean airport = Airports.getAirport(log.getLocation());
+                    CachedAirportBean airport = Airports.cachedAirports.get(log.getLocation());
                     FboBean fbo = Fbos.getFbo(log.getFboId());
-                    AirportBean fboAirport = null;
+                    CachedAirportBean fboAirport = null;
                     if (fbo != null)
-                        fboAirport = Airports.getAirport(fbo.getLocation());
+                        fboAirport = Airports.cachedAirports.get(fbo.getLocation());
 
                     String aircraftReg = null;
                     if(log.getAircraftId() > 0)
@@ -293,9 +293,9 @@
                     <td><%= getUser(log.getUser(), userMap) %></td>
                     <td class="numeric"><%= account != log.getOtherParty() ? Formatters.currency.format(log.getAmount()) : "<span style=\"color: red;\">" + Formatters.currency.format(-log.getAmount()) + "</span>" %></td>
                     <td><%= log.getSReason() %></td>
-                    <td><%= Airports.airportLink(airport, response) %></td>
+                    <td><%= airport != null ? Airports.airportLink(airport.getIcao(), response) : "" %></td>
                     <td><a class="normal" href="<%= response.encodeURL( aircraftReg != null ? "aircraftlog.jsp?id=" + log.getAircraftId() : "" )%>"><%= aircraftReg != null ? aircraftReg : "" %></a></td>
-                    <td><%= fbo != null ? Airports.airportLink(fboAirport, airport, fboAirport, response) + " " + fbo.getName() : (log.getFboId() > 0 ? "(-)" : "") %></td>
+                    <td><%= fbo != null ? Airports.airportLink(fboAirport.getIcao(), airport.getIcao(), fboAirport.getIcao(), response) + " " + fbo.getName() : (log.getFboId() > 0 ? "(-)" : "") %></td>
                     <td><%= log.getComment() == null ? "" : log.getComment()  %></td>
                 </tr>
 <%

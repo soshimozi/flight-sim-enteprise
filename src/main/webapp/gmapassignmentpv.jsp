@@ -1,5 +1,5 @@
-<%@ page import="net.fseconomy.dto.AirportInfo" %>
 <%@ page import="net.fseconomy.data.Airports" %>
+<%@ page import="net.fseconomy.beans.CachedAirportBean" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
@@ -15,8 +15,8 @@
 
     String sDepart = request.getParameter("depart");
     String sDest = request.getParameter("dest");
-    AirportInfo depart = Airports.cachedAPs.get(sDepart);
-    AirportInfo dest = Airports.cachedAPs.get(sDest);
+    CachedAirportBean depart = Airports.cachedAirports.get(sDepart);
+    CachedAirportBean dest = Airports.cachedAirports.get(sDest);
 %>
 
 <div class="container-map">
@@ -45,7 +45,7 @@
         var myOptions =
         {
             zoom: 6,
-            center: new google.maps.LatLng(<%=depart.latlon.lat%>, <%=depart.latlon.lon%>),
+            center: new google.maps.LatLng(<%=depart.getLatLon().lat%>, <%=depart.getLatLon().lon%>),
             mapTypeId: google.maps.MapTypeId.TERRAIN,
             disableDefaultUI: false,
             scrollwheel: true,
@@ -61,22 +61,22 @@
 
         var line = new google.maps.Polyline({
             map: map,
-            path: [new google.maps.LatLng(<%=depart.latlon.lat%>, <%=depart.latlon.lon%>), new google.maps.LatLng(<%=dest.latlon.lat%>, <%=dest.latlon.lon%>)],
+            path: [new google.maps.LatLng(<%=depart.getLatLon().lat%>, <%=depart.getLatLon().lon%>), new google.maps.LatLng(<%=dest.getLatLon().lat%>, <%=dest.getLatLon().lon%>)],
             geodesic: true
         });
 
         var markerDepart = new google.maps.Marker({
             map: map,
             icon: iconTakeoff,
-            position: new google.maps.LatLng(<%=depart.latlon.lat%>, <%=depart.latlon.lon%>),
-            title: "<%=depart.icao%> - <%=depart.title%>"
+            position: new google.maps.LatLng(<%=depart.getLatLon().lat%>, <%=depart.getLatLon().lon%>),
+            title: "<%=depart.getIcao()%> - <%=depart.getTitle()%>"
         });
 
         var markerDest = new google.maps.Marker({
             map: map,
             icon: iconLanding,
-            position: new google.maps.LatLng(<%=dest.latlon.lat%>, <%=dest.latlon.lon%>),
-            title: "<%=dest.icao%> - <%=dest.title%>"
+            position: new google.maps.LatLng(<%=dest.getLatLon().lat%>, <%=dest.getLatLon().lon%>),
+            title: "<%=dest.getIcao()%> - <%=dest.getTitle()%>"
         });
 
         //google.maps.event.trigger(map, 'resize');

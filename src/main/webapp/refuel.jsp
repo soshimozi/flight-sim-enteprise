@@ -36,15 +36,13 @@
     }
 
     List<FboBean> fbos = Fbos.getFboByLocation(aircraftData.getLocation());
-    AirportBean airport = Airports.getAirport(aircraftData.getLocation());
+    CachedAirportBean airport = Airports.cachedAirports.get(aircraftData.getLocation());
     int fueltype = aircraftData.getFuelType();
 
     GoodsBean fuelDrums = Goods.getGoods(aircraftData.getLocation(), user.getId(), GoodsBean.GOODS_FUEL100LL);
 
     if (fueltype > 0)
         fuelDrums = Goods.getGoods(aircraftData.getLocation(), user.getId(), GoodsBean.GOODS_FUELJETA);
-
-    Airports.fillAirport(airport);
 
     boolean defuelAllowed = aircraftData.changeAllowed(user);
 %>
@@ -70,7 +68,7 @@
 	<div class="content">
 		<div class="dataTable">
 <%		
-		if(!defuelAllowed && !airport.isAvgas() && fbos.size() == 0 && fuelDrums == null && modelData.getFuelSystemOnly() == 0)  
+		if(!defuelAllowed && !airport.has100ll() && fbos.size() == 0 && fuelDrums == null && modelData.getFuelSystemOnly() == 0)
 		{ 
 %>
 			<div class="message">No fuel available</div>
@@ -121,13 +119,13 @@
 <%	 		
 			}
 	
-			if (airport.isAvgas() || modelData.getFuelSystemOnly() == 1)
+			if (airport.has100ll() || modelData.getFuelSystemOnly() == 1)
 			{ 
 %>
 				<tr>
 					<td>Local Market</td>
 					<td>Unlimited</td>
-					<td><%= fueltype > 0 ? Formatters.currency.format(airport.getJetAPrice()) : Formatters.currency.format(airport.getFuelPrice()) %></td>
+					<td><%= fueltype > 0 ? Formatters.currency.format(airport.getPriceJetA()) : Formatters.currency.format(airport.getPrice100ll()) %></td>
 				</tr>
 <%	 		
 			} 
@@ -207,7 +205,7 @@
 						<option class="formselect" value="<%= fbos.get(c).getId() %>"><%= fbos.get(c).getName() %></option>
 <%		 		
 				}
-				if (airport.isAvgas() || modelData.getFuelSystemOnly() == 1)
+				if (airport.has100ll() || modelData.getFuelSystemOnly() == 1)
 				{ 
 %>	
 						<option class="formselect" value="0">Local market</option>

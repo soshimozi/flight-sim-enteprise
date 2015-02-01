@@ -25,7 +25,7 @@
     List<LogBean> logs = Logging.getLogForFbo(fbo, from, Constants.stepSize);
     int amount = Logging.getAmountLogForFbo(fbo);
     FboBean fboinfo = Fbos.getFbo(fbo);
-    AirportBean airport = Airports.getAirport(fboinfo.getLocation());
+    CachedAirportBean airport = Airports.cachedAirports.get(fboinfo.getLocation());
     String paymentUrl = "paymentlog.jsp?groupid=" + fboinfo.getOwner() + "&fboId=" + fbo;
 %>
 
@@ -53,7 +53,7 @@
 	
 	<div class="dataTable">
 	<table>
-		<caption>FBO log for <%= Airports.airportLink(airport, airport, response) %> | <%= fboinfo.getName() %> | <a class="link" href="<%= response.encodeURL(paymentUrl) %>">Payments...</a></caption>
+		<caption>FBO log for <%= Airports.airportLink(airport.getIcao(), airport.getIcao(), response) %> | <%= fboinfo.getName() %> | <a class="link" href="<%= response.encodeURL(paymentUrl) %>">Payments...</a></caption>
 		<thead>
 			<tr>
 				<th>Date</th>

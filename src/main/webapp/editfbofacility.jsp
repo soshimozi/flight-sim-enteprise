@@ -1,7 +1,10 @@
 <%@ page language="java"
          contentType="text/html; charset=ISO-8859-1"
-	    import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*"
+	    import="java.util.List, net.fseconomy.data.*"
 %>
+<%@ page import="net.fseconomy.beans.FboFacilityBean" %>
+<%@ page import="net.fseconomy.beans.FboBean" %>
+<%@ page import="net.fseconomy.beans.CachedAirportBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -23,7 +26,7 @@
 	List<FboFacilityBean> renters = null;
 	FboFacilityBean landlord = null;
 	FboBean fbo = null;
-	AirportBean airport = null;
+	CachedAirportBean airport = null;
 	
 	if (facility.updateAllowed(user))
 	{	
@@ -41,8 +44,7 @@
 		
 		session.setAttribute(facility.getLocation() + "Rent", request.getParameter("pd_rent"));
 			
-		airport = Airports.getAirport(fbo.getLocation());
-		Airports.fillAirport(airport);
+		airport = Airports.cachedAirports.get(fbo.getLocation());
 	}
 	else
 	{
@@ -97,7 +99,7 @@
 	String sizedesc;
 	if (facility.getIsDefault())
 	{
-		int totalSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
+		int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
 		int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
 		sizedesc = totalSpace + " gates (" + rented + " rented)";
 	} 
@@ -121,7 +123,7 @@
 				<td>Reserve</td>
 				<td>
 					<select class="formselect" name="pd_reservedSpace">
-<%		int passSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
+<%		int passSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
 		for (int i = 0; i <= passSpace; i++)
 		{
 %>						<option value="<%= i %>"<%= (facility.getReservedSpace() == i ? " selected " : "") %>><%= i %> gates</option>
@@ -335,32 +337,32 @@
 <%
 	int matchId;
 	int matchSize = facility.getMatchMinSize();
-	if (matchSize < AirportBean.MIN_SIZE_MED)
+	if (matchSize < CachedAirportBean.MIN_SIZE_MED)
 		matchId = 1;
-	else if (matchSize < AirportBean.MIN_SIZE_BIG) 
+	else if (matchSize < CachedAirportBean.MIN_SIZE_BIG)
 		matchId = 2;
 	else
 		matchId = 3;
 %>
 					<select class="formselect" name="pd_matchMinSize">
 						<option value="0"<%= (matchId == 1 ? " selected " : "") %>>Airstrip</option>
-						<option value="<%= AirportBean.MIN_SIZE_MED %>"<%= (matchId == 2 ? " selected " : "") %>>Small Airport</option>
-						<option value="<%= AirportBean.MIN_SIZE_BIG %>"<%= (matchId == 3 ? " selected " : "") %>>Large Airport</option>
+						<option value="<%= CachedAirportBean.MIN_SIZE_MED %>"<%= (matchId == 2 ? " selected " : "") %>>Small Airport</option>
+						<option value="<%= CachedAirportBean.MIN_SIZE_BIG %>"<%= (matchId == 3 ? " selected " : "") %>>Large Airport</option>
 		            </select>
 				</td>
 				<td>
 <%
 	matchSize = facility.getMatchMaxSize();
-	if (matchSize < AirportBean.MIN_SIZE_MED)
+	if (matchSize < CachedAirportBean.MIN_SIZE_MED)
 		matchId = 1;
-	else if (matchSize < AirportBean.MIN_SIZE_BIG) 
+	else if (matchSize < CachedAirportBean.MIN_SIZE_BIG)
 		matchId = 2;
 	else
 		matchId = 3;
 %>
 					<select class="formselect" name="pd_matchMaxSize">
-						<option value="<%= AirportBean.MIN_SIZE_MED - 1 %>"<%= (matchId == 1 ? " selected " : "") %>>Airstrip</option>
-						<option value="<%= AirportBean.MIN_SIZE_BIG - 1 %>"<%= (matchId == 2 ? " selected " : "") %>>Small Airport</option>
+						<option value="<%= CachedAirportBean.MIN_SIZE_MED - 1 %>"<%= (matchId == 1 ? " selected " : "") %>>Airstrip</option>
+						<option value="<%= CachedAirportBean.MIN_SIZE_BIG - 1 %>"<%= (matchId == 2 ? " selected " : "") %>>Small Airport</option>
 						<option value="99999"<%= (matchId == 3 ? " selected " : "") %>>Large Airport</option>
 		            </select>
 				</td>

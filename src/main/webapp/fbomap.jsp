@@ -4,9 +4,6 @@
 %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
-<jsp:useBean id="airport" class="net.fseconomy.beans.AirportBean">
-    <jsp:setProperty name="airport" property="icao"/>
-</jsp:useBean>
 
 <%
 	if(!user.isLoggedIn())

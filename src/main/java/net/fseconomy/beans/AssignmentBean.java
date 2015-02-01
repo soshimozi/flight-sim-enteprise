@@ -42,7 +42,7 @@ public class AssignmentBean implements Serializable
 	boolean createdByUser, ptAssignment;
 	int commodityId;
 	int owner;
-	AirportBean destinationAirport, locationAirport, fromAirport;
+	CachedAirportBean destinationAirport, locationAirport, fromAirport;
 	int actualDistance, actualBearing;	
 	int fromTemplate, fromFboTemplate, mptTax;
 	int daysClaimedActive;
@@ -225,15 +225,15 @@ public class AssignmentBean implements Serializable
 		this.from = from.toUpperCase();
 	}
 	
-	public AirportBean getFromAirport()
+	public CachedAirportBean getFromAirport()
 	{
 		if (fromAirport == null)
-			setFromAirport(Airports.getAirport(from));
+			setFromAirport(Airports.cachedAirports.get(from));
 
 		return fromAirport;
 	}
 
-	public void setFromAirport(AirportBean bean)
+	public void setFromAirport(CachedAirportBean bean)
 	{
 		fromAirport = bean;
 	}
@@ -637,14 +637,14 @@ public class AssignmentBean implements Serializable
 		setUnits(AssignmentBean.unitsId(s));
 	}
 
-	public AirportBean getDestinationAirport()
+	public CachedAirportBean getDestinationAirport()
 	{
 		if (destinationAirport == null)
-			setDestinationAirport(Airports.getAirport(to));
+			setDestinationAirport(Airports.cachedAirports.get(to));
 		return destinationAirport;
 	}
 
-	public void setDestinationAirport(AirportBean bean)
+	public void setDestinationAirport(CachedAirportBean bean)
 	{
 		destinationAirport = bean;
 	}
@@ -664,15 +664,15 @@ public class AssignmentBean implements Serializable
 		location = string;
 	}
 
-	public AirportBean getLocationAirport()
+	public CachedAirportBean getLocationAirport()
 	{
 		if (locationAirport == null)
-			setLocationAirport(Airports.getAirport(location));
+			setLocationAirport(Airports.cachedAirports.get(location));
 
 		return locationAirport;
 	}
 
-	public void setLocationAirport(AirportBean bean)
+	public void setLocationAirport(CachedAirportBean bean)
 	{
 		locationAirport = bean;
 	}

@@ -36,7 +36,6 @@ import javax.servlet.http.HttpSession;
 
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
-import net.fseconomy.dto.AirportInfo;
 import net.fseconomy.util.Formatters;
 import net.fseconomy.util.GlobalLogger;
 import net.fseconomy.util.Helpers;
@@ -2178,8 +2177,8 @@ public class UserCtl extends HttpServlet
 		if (account != user.getId() && user.groupMemberLevel(account) < UserBean.GROUP_STAFF)
 			throw new DataError("Permission denied");
 		
-        AirportInfo airportInfo = Airports.cachedAPs.get(location);
-		List<GoodsBean> goods = Goods.getGoodsAtAirport(airportInfo.icao, airportInfo.size, 0, 0);
+        CachedAirportBean airportInfo = Airports.cachedAirports.get(location);
+		List<GoodsBean> goods = Goods.getGoodsAtAirport(airportInfo.getIcao(), airportInfo.getSize(), 0, 0);
 		
 		int checkid = isBuy ? from : to;
         boolean found = false;

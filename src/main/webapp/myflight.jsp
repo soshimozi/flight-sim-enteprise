@@ -2,7 +2,6 @@
         contentType="text/html; charset=ISO-8859-1"
     	import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*, java.util.*"
 %>
-<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -459,9 +458,9 @@
            		
            		assignmentsHoldPay += bean.calcPay();
            		
-           		AirportBean destination = bean.getDestinationAirport();
-           		AirportBean from = bean.getFromAirport();
-           		AirportBean location = bean.getLocationAirport();
+           		CachedAirportBean destination = bean.getDestinationAirport();
+           		CachedAirportBean from = bean.getFromAirport();
+           		CachedAirportBean location = bean.getLocationAirport();
 %>
 		     	<tr>
 		     	<td>
@@ -470,7 +469,7 @@
 		        <td class="numeric"><%=Formatters.currency.format(bean.calcPay()) %></td>
 		        <td>
 		        	<img class="mapassignment" data-depart="<%= bean.getLocation()%>" data-dest="<%= bean.getTo()%>"
-						 src="<%=location.getDescriptiveImage(Fbos.getFboByLocation(bean.getLocation()))%>"
+						 src="<%=Airports.getDescriptiveImage(location, Fbos.getAirportFboSlotsInUse(bean.getLocation()) > 0)%>"
 						 style="border-style: none; vertical-align:middle;" />
 					<a class="normal" title="<%=location.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao="+ bean.getLocation()) %>">
 		        	<%= bean.getLocation() %>
@@ -483,7 +482,7 @@
 		        </td>
 		        <td>
 	        		<img class="mapassignment" data-depart="<%= bean.getLocation()%>" data-dest="<%= bean.getTo()%>"
-						 src="<%=destination.getDescriptiveImage(Fbos.getFboByLocation(bean.getTo()))%>" style="border-style: none; vertical-align:middle;" />
+						 src="<%=Airports.getDescriptiveImage(destination, Fbos.getAirportFboSlotsInUse(bean.getTo()) > 0)%>" style="border-style: none; vertical-align:middle;" />
 		        	<a class="normal" title="<%=destination.getTitle() %>" href="<%=response.encodeURL("airport.jsp?icao=" + bean.getTo()) %>">
 		        		<%=bean.getTo() %>
 		        	</a>
@@ -660,18 +659,18 @@
            		}
            		assignmentsTotalPay += assignment.calcPay();
 
-           		AirportBean destination = assignment.getDestinationAirport();
-           		AirportBean from = assignment.getFromAirport();
-           		AirportBean location = assignment.getLocationAirport();
+           		CachedAirportBean destination = assignment.getDestinationAirport();
+           		CachedAirportBean from = assignment.getFromAirport();
+           		CachedAirportBean location = assignment.getLocationAirport();
 
 				String icao = location.getIcao();
 				String destIcao = destination.getIcao();
-				AirportInfo airportInfo = Airports.cachedAPs.get(icao);
-				double lat1 = airportInfo.latlon.lat;
-				double lon1 = airportInfo.latlon.lon;
-				airportInfo = Airports.cachedAPs.get(destIcao);
-				double destLatl = airportInfo.latlon.lat;
-				double destLonl = airportInfo.latlon.lon;
+				CachedAirportBean airportInfo = Airports.cachedAirports.get(icao);
+				double lat1 = airportInfo.getLatLon().lat;
+				double lon1 = airportInfo.getLatLon().lon;
+				airportInfo = Airports.cachedAirports.get(destIcao);
+				double destLatl = airportInfo.getLatLon().lat;
+				double destLonl = airportInfo.getLatLon().lon;
 %>
 	<script type="text/javascript">
 		if (typeof loc['<%=icao%>'] != 'undefined') {
@@ -703,7 +702,7 @@
 		        	<td class="numeric"><%=Formatters.currency.format(assignment.calcPay()) %></td>
 		       	 	<td>
 	        			<img  class="mapassignment" data-depart="<%= assignment.getLocation()%>" data-dest="<%= assignment.getTo()%>"
-							 src="<%=location.getDescriptiveImage(Fbos.getFboByLocation(assignment.getLocation()))%>"
+							 src="<%=Airports.getDescriptiveImage(location, Fbos.getAirportFboSlotsInUse(assignment.getLocation()) > 0)%>"
 							 style="border-style: none; vertical-align:middle;"/>
 						<a title="<%=location.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao="+ assignment.getLocation()) %>">
 		        			<%= assignment.getLocation() %>
@@ -716,7 +715,7 @@
 					</td>
 		        	<td>
 						<img  class="mapassignment" data-depart="<%= assignment.getLocation()%>" data-dest="<%= assignment.getTo()%>"
-							 src="<%=destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo()))%>"
+							 src="<%=Airports.getDescriptiveImage(destination, Fbos.getAirportFboSlotsInUse(assignment.getTo()) > 0)%>"
 							 style="border-style: none; vertical-align:middle;" />
 		        		<a title="<%=destination.getTitle() %>" href="<%=response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>">
 		        			<%=assignment.getTo() %>
@@ -876,9 +875,9 @@
 		if (!departed) 
 		{
 			String icao = aircraft.getSLocation();
-			AirportInfo airportInfo = Airports.cachedAPs.get(icao);
-			double lat1 = airportInfo.latlon.lat;
-			double lon1 = airportInfo.latlon.lon;
+			CachedAirportBean airportInfo = Airports.cachedAirports.get(icao);
+			double lat1 = airportInfo.getLatLon().lat;
+			double lon1 = airportInfo.getLatLon().lon;
 %>
 		<script type="text/javascript">
 			loc['plane'] = [];

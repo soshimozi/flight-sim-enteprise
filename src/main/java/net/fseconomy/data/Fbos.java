@@ -1,9 +1,9 @@
 package net.fseconomy.data;
 
 import net.fseconomy.beans.*;
-import net.fseconomy.dto.AirportInfo;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.Helpers;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -28,7 +28,7 @@ public class Fbos implements Serializable
             conn = DALHelper.getInstance().getConnection();
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
-            if(Airports.cachedAPs.get(icao) == null)
+            if(!Airports.isValidIcao(icao))
                 throw new DataError("Invalid ICAO.");
 
             int mergeWithId = 0;
@@ -256,7 +256,7 @@ public class Fbos implements Serializable
             String qry = "UPDATE fbo SET services = services | ? WHERE owner = ? AND location = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, FboBean.FBO_PASSENGERTERMINAL, fbo.getOwner(), fbo.getLocation());
 
-            int fboSlots = Airports.getFboSlots(fbo.getLocation());
+            int fboSlots = Airports.getTotalFboSlots(fbo.getLocation());
 
             qry = "INSERT INTO fbofacilities (location, fboId, occupant, reservedSpace, size, rent, name, units, commodity, maxDistance, matchMaxSize, publicByDefault) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
 
@@ -410,10 +410,10 @@ public class Fbos implements Serializable
                 order = "id";
         }
         
-        AirportInfo airportInfo = Airports.cachedAPs.get(icao);
+        CachedAirportBean cab = Airports.cachedAirports.get(icao);
         List<FboBean> returnValue = getFboSql("SELECT * from fbo WHERE active = 1 AND (services & " + FboBean.FBO_REPAIRSHOP + ") > 0 AND location='" + icao + "' ORDER BY " + order);
 
-        if (airportInfo.size >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE)
+        if (cab.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE)
         {
             FboBean fb = FboBean.getInstance();
             fb.setLocation(icao);
@@ -523,11 +523,6 @@ public class Fbos implements Serializable
         return getFboFacilitiesSql("SELECT * FROM fbofacilities WHERE reservedSpace >= 0 AND location ='" + icao + "' order by id");
     }
 
-    public static List<FboFacilityBean> getFboFacilitiesForAirport(AirportBean airport)
-    {
-        return getFboFacilitiesForAirport(airport.getIcao());
-    }
-
     public static List<FboFacilityBean> getFboFacilitiesForAirport(String icao)
     {
         return getFboFacilitiesSql("select t.* from fbofacilities t, fbo f where t.fboId = f.id and f.active = 1 and f.location = '" + icao + "' order by id");
@@ -578,8 +573,9 @@ public class Fbos implements Serializable
     public static int calcFboFacilitySpaceAvailable(FboFacilityBean facility, FboBean fbo)
     {
         int spaceInUse = getFboFacilityBlocksInUse(fbo.getId());
-        int fboSlots = Airports.getFboSlots(fbo.getLocation());
+        int fboSlots = Airports.getTotalFboSlots(fbo.getLocation());
         int totalSpace = fbo.getFboSize() * fboSlots;
+
         return Math.max(0, totalSpace - spaceInUse - facility.getReservedSpace());
     }
 
@@ -620,7 +616,7 @@ public class Fbos implements Serializable
             }
 
             int inUse = getFboFacilityBlocksInUse(fbo.getId());
-            int newSpace = (fbo.getFboSize() - 1) * Airports.getFboSlots(fbo.getLocation());
+            int newSpace = (fbo.getFboSize() - 1) * Airports.getTotalFboSlots(fbo.getLocation());
             if (inUse > newSpace)
             {
                 throw new DataError("An FBO with tennants can not be torn down.");
@@ -854,7 +850,7 @@ public class Fbos implements Serializable
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
 
             String icaos = facility.getIcaoSet();
-            if (icaos != null && !"".equals(icaos.trim()))
+            if (!Helpers.isNullOrBlank(icaos))
             {
                 String items[] = icaos.toUpperCase().trim().split(", *");
                 icaos = "";
@@ -863,28 +859,26 @@ public class Fbos implements Serializable
                     throw new DataError("ICAO set returned zero items.");  // should not happen
                 }
 
-                String item;
                 for (String item1 : items)
                 {
-                    item = item1.trim();
-                    AirportInfo lls = Airports.cachedAPs.get(item);
-                    if (lls == null)
+                    String icao = item1.trim();
+                    if (Airports.isValidIcao(icao))
                     {
-                        throw new DataError("ICAO '" + item + "' not found.");
+                        throw new DataError("ICAO '" + icao + "' not found.");
                     }
 
-                    if (Airports.getDistance(facility.getLocation(), item) > FboFacilityBean.MAX_ASSIGNMENT_DISTANCE)
+                    if (Airports.getDistance(facility.getLocation(), icao) > FboFacilityBean.MAX_ASSIGNMENT_DISTANCE)
                     {
-                        throw new DataError("ICAO '" + item + "' is too far. " + FboFacilityBean.MAX_ASSIGNMENT_DISTANCE + " NM limit in place.");
+                        throw new DataError("ICAO '" + icao + "' is too far. " + FboFacilityBean.MAX_ASSIGNMENT_DISTANCE + " NM limit in place.");
                     }
 
                     if (icaos.length() == 0)
                     {
-                        icaos = item;
+                        icaos = icao;
                     }
                     else
                     {
-                        icaos = icaos + ", " + item;
+                        icaos = icaos + ", " + icao;
                     }
                 }
 

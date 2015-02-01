@@ -13,8 +13,6 @@ import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 import net.fseconomy.util.GlobalLogger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 public class MaintenanceCycle implements Runnable
@@ -172,7 +170,7 @@ public class MaintenanceCycle implements Runnable
 		processBulkFuelOrders();
 		
 		//TODO: comment out for test server for faster cycle times
-		processFboAssigments(); //green assignments
+		processFboAssignments(); //green assignments
 		processTemplateAssignments(); //template assignments
 		
 		//TODO examine to see if we need to randomize release times on this a bit more
@@ -197,7 +195,7 @@ public class MaintenanceCycle implements Runnable
 		
 		updateStatus("Maintenance cycle finished");							
 	}
-	
+
 	void logSignatureStats()
 	{
 		long defaultCount = Stats.defaultCount;
@@ -543,7 +541,7 @@ public class MaintenanceCycle implements Runnable
 		} 
 	}
 	
-	Set<String> parseIcaoSet(String icaos, boolean allowMacros)
+	Set<String> parseIcaoSet(String icaos, boolean allowMacros, int templateId)
 	{
 		if (icaos == null)
 			return null;
@@ -564,16 +562,21 @@ public class MaintenanceCycle implements Runnable
             if (allowMacros && item.startsWith("$"))
                 M.add(item);
             else
-                airports.add(item);
+			{
+				if(Airports.isValidIcao(item))
+					airports.add(item);
+				else
+					GlobalLogger.logApplicationLog("Bad ICAO in template " + templateId + ": " + item, MaintenanceCycle.class);
+			}
         }
 		
 		if (!M.isEmpty())
 		{
-			String macros[] = M.toArray(new String[M.size()]);
+			//String macros[] = M.toArray(new String[M.size()]);
 			try
 			{
 				String sql;
-                for (String macro : macros)
+                for (String macro : M)
                 {
                     sql = null;
                     switch (macro)
@@ -636,7 +639,7 @@ public class MaintenanceCycle implements Runnable
 			//for each template that uses them
 			
 			//Get the $FBO ICAOs and save them
-			Set<String> icaosetFBO = parseIcaoSet("$FBO", true);
+			Set<String> icaosetFBO = parseIcaoSet("$FBO", true, 0);
 			StringBuffer whereSetFBO = new StringBuffer();
 			if (icaosetFBO != null)
 			{
@@ -651,7 +654,7 @@ public class MaintenanceCycle implements Runnable
 			}
 
 			//get the $MILITARY ICAOs and save them
-			Set<String> icaosetMilitary = parseIcaoSet("$MILITARY", true);
+			Set<String> icaosetMilitary = parseIcaoSet("$MILITARY", true, 0);
 			StringBuffer whereSetMILITARY = new StringBuffer();
 			if (icaosetMilitary != null)
 			{
@@ -669,9 +672,9 @@ public class MaintenanceCycle implements Runnable
 			ResultSet rsTemplate = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rsTemplate.next())
 			{
-				int id = rsTemplate.getInt("id");
+				int templateId = rsTemplate.getInt("id");
 
-				updateStatus("Working on assignments for template " + id);
+				updateStatus("Working on assignments for template " + templateId);
 
 				double frequency = rsTemplate.getDouble("frequency");
 				int maxDistance = rsTemplate.getInt("targetDistance");
@@ -778,7 +781,7 @@ public class MaintenanceCycle implements Runnable
                             frequency = frequency * icaoSet1.size();
                             break;
                         default:
-                            icaoSet1 = parseIcaoSet(icaos1, true);
+                            icaoSet1 = parseIcaoSet(icaos1, true, templateId);
 
                             if (icaoSet1 != null)
                             {
@@ -812,7 +815,7 @@ public class MaintenanceCycle implements Runnable
                             icaoSet2 = icaosetMilitary;
                             break;
                         default:
-                            icaoSet2 = parseIcaoSet(icaos2, true);
+                            icaoSet2 = parseIcaoSet(icaos2, true, templateId);
                             break;
                     }
                 }
@@ -838,7 +841,7 @@ public class MaintenanceCycle implements Runnable
 					needed = frequency + " * sqrt(sum(size)/6000) as needed";
 					query = "SELECT bucket, min(longestRwy) AS smallest, max(longestRwy) AS largest, " + needed +
 						 ", count(assignments.id) AS got, avg(lat), surfaceType FROM airports LEFT join assignments ON assignments.fromicao = airports.icao AND fromtemplate = " +
-						 id + " GROUP by bucket HAVING " + having;
+						 templateId + " GROUP by bucket HAVING " + having;
 				} 
 				else
 				{			
@@ -852,7 +855,7 @@ public class MaintenanceCycle implements Runnable
 					else
 						needed = frequency + " as needed";
 
-					query = "SELECT 0, 0, 0, " + needed + ", count(assignments.id) AS got, avg(lat) FROM airports LEFT JOIN assignments ON assignments.fromicao = airports.icao AND fromtemplate = " + id + " " + whereString ;						
+					query = "SELECT 0, 0, 0, " + needed + ", count(assignments.id) AS got, avg(lat) FROM airports LEFT JOIN assignments ON assignments.fromicao = airports.icao AND fromtemplate = " + templateId + " " + whereString ;
 				}
 
 				ResultSet bucketRs = DALHelper.getInstance().ExecuteReadOnlyQuery(query);
@@ -988,7 +991,7 @@ public class MaintenanceCycle implements Runnable
 						values.append(", '").append(toIcao).append("'");
 						values.append(", ").append(distance);
 						values.append(", ").append((float) pay);
-						values.append(", ").append(id);
+						values.append(", ").append(templateId);
 
 						if (isAllIn)
 						{
@@ -1082,7 +1085,7 @@ public class MaintenanceCycle implements Runnable
 		}
 	}
 	
-	void processFboAssigments()
+	void processFboAssignments()
 	{
 		try
 		{
@@ -1175,7 +1178,7 @@ public class MaintenanceCycle implements Runnable
 					if (unitsAllowed == 0) //owner reserved or none rented
 					{
 						// small - 1*3, medium - 2*3, large - 3*3
-						unitsAllowed = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
+						unitsAllowed = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
 						
 						//see if any gates are rented (reservedspace == -1)
 						qry = "select sum(size) from fbofacilities where reservedSpace < 0 and fboId = ?";
@@ -1228,7 +1231,7 @@ public class MaintenanceCycle implements Runnable
 					if (icaos != null && "".equals(icaos))
 						icaos = null;
 					
-					Set<String> icaoSet2 = parseIcaoSet(icaos, false);
+					Set<String> icaoSet2 = parseIcaoSet(icaos, false, 0);
 					if (icaoSet2 != null && !icaoSet2.isEmpty())
 					{
 						minDistance = 0;

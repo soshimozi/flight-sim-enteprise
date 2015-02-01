@@ -1283,10 +1283,10 @@ public class Datafeed extends HttpServlet
                     numfbos = fbos.size();
                 }
 
-                AirportBean airport = Airports.getAirport(icao);
+                CachedAirportBean airport = Airports.cachedAirports.get(icao);
 
                 //Check if system resources available
-                if (airport != null && (airport.isAvgas() || airport.isJetA() || airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE))
+                if (airport != null && (airport.has100ll() || airport.hasJetA() || airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE))
                 {
                     if (csvformat)
                         AddCSVSystemFboItem(csvoutput, airport);
@@ -2680,7 +2680,7 @@ public class Datafeed extends HttpServlet
             {
                 loc = aircraft.getLocation();
 
-                locname = Airports.cachedAPs.get(loc).title;
+                locname = Airports.cachedAirports.get(loc).getTitle();
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
@@ -2737,7 +2737,7 @@ public class Datafeed extends HttpServlet
             else
             {
                 loc = aircraft.getLocation();
-                locname = Airports.cachedAPs.get(loc).title;
+                locname = Airports.cachedAirports.get(loc).getTitle();
             }
 
             //get the aircraft owner, stolen from AircraftLog.jsp
@@ -2779,7 +2779,7 @@ public class Datafeed extends HttpServlet
         }
 	}	
 	
-	private void AddCSVSystemFboItem(Converters.csvBuffer buffer, AirportBean airport)
+	private void AddCSVSystemFboItem(Converters.csvBuffer buffer, CachedAirportBean airport)
 	{
 		if(buffer.isHeaderEmpty())
 		{			
@@ -2807,13 +2807,13 @@ public class Datafeed extends HttpServlet
 		buffer.append("System");			
 		buffer.append("System");			
 		buffer.append(airport.getIcao());
-		buffer.append(airport.getCity() + ", " + airport.getCountry());
+		buffer.append(airport.getTitle());
 		buffer.append("N/A");
 		buffer.append(airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE ? "Yes" : "No");
 		buffer.append("N/A");
 		buffer.append("N/A");
-		buffer.append(airport.isAvgas() ? "Unlimited" : "Not Avail");
-		buffer.append(airport.isJetA() ? "Unlimited" : "Not Avail");
+		buffer.append(airport.has100ll() ? "Unlimited" : "Not Avail");
+		buffer.append(airport.hasJetA() ? "Unlimited" : "Not Avail");
 		buffer.append(airport.getSize() >= AirportBean.MIN_SIZE_BIG ? "Unlimited" : "0");
 		buffer.append(airport.getSize() >= AirportBean.MIN_SIZE_BIG ? "Unlimited" : "0");
 		buffer.append("N/A");
@@ -2822,7 +2822,7 @@ public class Datafeed extends HttpServlet
 		buffer.newrow(); 
 	}
 	
-	private void AddXMLSystemFboItem(Converters.xmlBuffer buffer, AirportBean airport)
+	private void AddXMLSystemFboItem(Converters.xmlBuffer buffer, CachedAirportBean airport)
 	{
 		buffer.append("<FBO>\n");
 		buffer.append("Status", "Active");	
@@ -2830,13 +2830,13 @@ public class Datafeed extends HttpServlet
 		buffer.append("Name", "System");			
 		buffer.append("Owner", "System");			
 		buffer.append("Icao", airport.getIcao());
-		buffer.append("Location", airport.getCity() + ", " + airport.getCountry());
+		buffer.append("Location", airport.getTitle());
 		buffer.append("Lots", "N/A");
 		buffer.append("RepairShop", airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE ? "Yes" : "No");
 		buffer.append("Gates", "N/A");
 		buffer.append("GatesRented", "N/A");
-		buffer.append("Fuel100LL", airport.isAvgas() ? "Unlimited" : "Not Avail");
-		buffer.append("FuelJetA", airport.isJetA() ? "Unlimited" : "Not Avail");
+		buffer.append("Fuel100LL", airport.has100ll() ? "Unlimited" : "Not Avail");
+		buffer.append("FuelJetA", airport.hasJetA() ? "Unlimited" : "Not Avail");
 		buffer.append("BuildingMaterials", airport.getSize() >= AirportBean.MIN_SIZE_BIG ? "Unlimited" : "0");
 		buffer.append("Supplies", airport.getSize() >= AirportBean.MIN_SIZE_BIG ? "Unlimited" : "0");
 		buffer.append("SuppliesPerDay", "N/A");
@@ -2864,14 +2864,14 @@ public class Datafeed extends HttpServlet
         for (FboFacilityBean fac : facs)
         {
             FboBean fbo = Fbos.getFbo(fac.getFboId());
-            AirportBean airport = Airports.getAirport(fac.getLocation());
+            CachedAirportBean airport = Airports.cachedAirports.get(fac.getLocation());
 
             buffer.append(fac.getLocation());
             buffer.append(airport.getName());
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(fac.getName()));
             buffer.append(fac.getCommodity() != null ? fac.getCommodity().trim() : "");
 
-            int totalgates = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
+            int totalgates = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
             int rentedgates;
             if (fac.getReservedSpace() >= 0)
             {
@@ -2908,7 +2908,7 @@ public class Datafeed extends HttpServlet
         for (FboFacilityBean fac : facs)
         {
             FboBean fbo = Fbos.getFbo(fac.getFboId());
-            AirportBean airport = Airports.getAirport(fac.getLocation());
+            CachedAirportBean airport = Airports.cachedAirports.get(fac.getLocation());
 
             buffer.append("<Facility>\n");
             buffer.append("Icao", fac.getLocation());
@@ -2916,7 +2916,7 @@ public class Datafeed extends HttpServlet
             buffer.append("Carrier", Converters.XMLHelper.protectSpecialCharacters(fac.getName()));
             buffer.append("CommodityNames", fac.getCommodity() != null ? fac.getCommodity().trim() : "");
 
-            int totalgates = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
+            int totalgates = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
             int rentedgates;
             if (fac.getReservedSpace() >= 0)
             {
@@ -2974,7 +2974,7 @@ public class Datafeed extends HttpServlet
 
         for (FboBean fbo : fbos)
         {
-            AirportBean airport = Airports.getAirport(fbo.getLocation());
+            CachedAirportBean airport = Airports.cachedAirports.get(fbo.getLocation());
 
 //            UserBean fboOwner = Accounts.getAccountById(fbo.getOwner());
 //			if(fboOwner.isGroup())
@@ -2987,7 +2987,7 @@ public class Datafeed extends HttpServlet
 			if(Accounts.isGroup(fbo.getOwner()))
 				fboGroupOwnerName = Accounts.getGroupOwnerName(fbo.getOwner());
 
-			int totalSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
+			int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
             int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
@@ -2997,7 +2997,7 @@ public class Datafeed extends HttpServlet
             buffer.append(fbo.getName());
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(fboOwnerName) + (fboGroupOwnerName != null ? "(" + Converters.XMLHelper.protectSpecialCharacters(fboGroupOwnerName) + ")" : ""));
             buffer.append(fbo.getLocation());
-            buffer.append(airport.getCity() + ", " + airport.getCountry());
+            buffer.append(airport.getTitle());
             buffer.append(fbo.getFboSize());
             buffer.append(((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No"));
             buffer.append(((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + totalSpace : "No Passenger Terminal"));
@@ -3015,11 +3015,11 @@ public class Datafeed extends HttpServlet
                 buffer.append("0");
             }
 
-            buffer.append(fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())));
+            buffer.append(fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation())));
 
             if (showsupplies)
             {
-                buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())));
+                buffer.append(Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation())));
             }
             else
             {
@@ -3038,14 +3038,14 @@ public class Datafeed extends HttpServlet
 
         for (FboBean fbo : fbos)
         {
-            AirportBean airport = Airports.getAirport(fbo.getLocation());
+            CachedAirportBean airport = Airports.cachedAirports.get(fbo.getLocation());
 			String fboOwnerName = Accounts.getAccountNameById(fbo.getOwner());
 
 			String fboGroupOwnerName = null;
 			if(Accounts.isGroup(fbo.getOwner()))
 				fboGroupOwnerName = Accounts.getGroupOwnerName(fbo.getOwner());
 
-			int totalSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
+			int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
             int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
@@ -3056,7 +3056,7 @@ public class Datafeed extends HttpServlet
             buffer.append("Name", Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));
             buffer.append("Owner", Converters.XMLHelper.protectSpecialCharacters(fboOwnerName) + (fboGroupOwnerName != null ? "(" + Converters.XMLHelper.protectSpecialCharacters(fboGroupOwnerName) + ")" : ""));
             buffer.append("Icao", fbo.getLocation());
-            buffer.append("Location", airport.getCity() + ", " + airport.getCountry());
+            buffer.append("Location", airport.getTitle());
             buffer.append("Lots", fbo.getFboSize());
             buffer.append("RepairShop", ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No"));
             buffer.append("Gates", ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0 ? "" + totalSpace : "No Passenger Terminal"));
@@ -3074,11 +3074,11 @@ public class Datafeed extends HttpServlet
                 buffer.append("Supplies", 0);
             }
 
-            buffer.append("SuppliesPerDay", fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())));
+            buffer.append("SuppliesPerDay", fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation())));
 
             if (showsupplies)
             {
-                buffer.append("SuppliedDays", Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation())));
+                buffer.append("SuppliedDays", Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation())));
             }
             else
             {

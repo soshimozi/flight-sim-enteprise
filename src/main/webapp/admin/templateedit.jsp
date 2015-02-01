@@ -178,7 +178,6 @@
 						<option class="formselect" value="1" <%= template.getUnits() == AssignmentBean.UNIT_PASSENGERS ? "selected" : "" %>>Passengers</option>
 						<option class="formselect" value="2" <%= template.getUnits() == AssignmentBean.UNIT_KG ? "selected" : "" %>>KGs</option>						
 					</select>
-					
 					</td>
 				</tr>	
 				<tr>
@@ -203,7 +202,7 @@
 					<td>Runway Surface Type</td>
 					<td>
 						<div style="border: 1px solid #000000">
-							<div><small>Note: if none are selected it will default to ALL</small><div>
+							<div><small>Note: if none are selected it will default to ALL</small></div>
 							<hr>
 							<div style="text-align: center;"><span id="selectAll" style="font-size: small;">Select All</span> <span id="deselectAll" style="font-size: small;">Deselect All</span><br></div>
 							<label><input type="checkbox" name="surfType" value="1" <%=surfList.contains(1) ? "checked" : ""%>> Asphalt</label><br>

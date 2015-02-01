@@ -2,7 +2,6 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*, net.fseconomy.dto.DistanceBearing"
 %>
-<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -44,8 +43,8 @@
     int distance = (int)(distanceBearing.distance + .5);
     int bearing = (int)(distanceBearing.bearing + .5);
 
-    AirportInfo apDepart = Airports.cachedAPs.get(depart);
-    AirportInfo apDest = Airports.cachedAPs.get(dest);
+    CachedAirportBean apDepart = Airports.cachedAirports.get(depart);
+    CachedAirportBean apDest = Airports.cachedAirports.get(dest);
 %>
 
 <!DOCTYPE html>
@@ -89,23 +88,23 @@
 <%
 StringBuilder sb = new StringBuilder();
 
-	double latDepart = apDepart.latlon.lat;
-	double lonDepart = apDepart.latlon.lon;
+	double latDepart = apDepart.getLatLon().lat;
+	double lonDepart = apDepart.getLatLon().lon;
 	
 	sb.append("<div class=\"infowindow-content\">");
     sb.append("<a href=\"airport.jsp?icao=" + depart + "\">");
-	sb.append(Converters.escapeJavaScript(apDepart.title));
+	sb.append(Converters.escapeJavaScript(apDepart.getTitle()));
 	sb.append("</a>");
 	sb.append("</div>");
 	String departInfo = sb.toString();
 	
-	double latDest = apDest.latlon.lat;
-	double lonDest = apDest.latlon.lon;
+	double latDest = apDest.getLatLon().lat;
+	double lonDest = apDest.getLatLon().lon;
 	
 	sb = new StringBuilder();
 	sb.append("<div class=\"infowindow-content\">");
     sb.append("<a href=\"airport.jsp?icao="+ dest + "\">");
-	sb.append(Converters.escapeJavaScript(apDest.title));
+	sb.append(Converters.escapeJavaScript(apDest.getTitle()));
 	sb.append("</a>");
 	sb.append("</div>");
 

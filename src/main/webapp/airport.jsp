@@ -14,7 +14,7 @@
 		return;
 	}
 
-    AirportBean airport = new AirportBean();
+    CachedAirportBean airport = null;
 
 	//setup return page if action used
     String returnPage = null;
@@ -23,21 +23,22 @@
     //setup return page if action used
     if(selectedIcao != null)
     {
+		selectedIcao = selectedIcao.toUpperCase();
         returnPage = request.getRequestURI() + "?icao=" + selectedIcao;
-        airport.setIcao(selectedIcao);
+        airport = Airports.cachedAirports.get(selectedIcao);
         session.setAttribute("icao", selectedIcao);
     }
     else
     {
         selectedIcao = (String)session.getAttribute("icao");
-        if( selectedIcao != null)
+        if(!Helpers.isNullOrBlank(selectedIcao))
         {
             returnPage = request.getRequestURI() + "?icao=" + selectedIcao;
-            airport.setIcao(selectedIcao);
+			airport = Airports.cachedAirports.get(selectedIcao);
         }
     }
-	response.addHeader("referer", request.getRequestURI());
 
+	response.addHeader("referer", request.getRequestURI());
 
 	//This has to be here to allow the op chart json data to load
 	boolean isSearch = request.getParameter("submit") != null;
@@ -122,13 +123,10 @@
 		AircraftBean ac = Aircraft.getAircraftById(Aircraft.getAircraftIdByRegistration(registration));
         if (ac != null && ac.getLocation() != null)
 		{
-			airport.setIcao(ac.getLocation());
 			selectedIcao = ac.getLocation();
+			airport = Airports.cachedAirports.get(selectedIcao);
 		}
 	}
-
-    if (!Helpers.isNullOrBlank(airport.getIcao()) && Airports.cachedAPs.containsKey(airport.getIcao().toUpperCase()))
-        Airports.fillAirport(airport);
 
 	HashSet<String> assignmentAircraftList = new HashSet<>();
 %>
@@ -185,7 +183,7 @@
 		
 		    // Manipulate returned value to be JavaScript friendly
 		    //data
-		    data = <%=Airports.getAirportOperationDataJSON(airport.getIcao()) %>;
+		    data = <%=Airports.getAirportOperationDataJSON(airport != null ? airport.getIcao() : "") %>;
 		    
 		    //sample data
 		    //var data = [{"year":2011,"month":8,"icao":"NSTU","ops":0},{"year":2011,"month":7,"icao":"NSTU","ops":0},{"year":2011,"month":6,"icao":"NSTU","ops":0},{"year":2011,"month":5,"icao":"NSTU","ops":0},{"year":2011,"month":4,"icao":"NSTU","ops":14},{"year":2011,"month":3,"icao":"NSTU","ops":13},{"year":2011,"month":2,"icao":"NSTU","ops":12},{"year":2011,"month":1,"icao":"NSTU","ops":10},{"year":2010,"month":12,"icao":"NSTU","ops":0},{"year":2010,"month":11,"icao":"NSTU","ops":0},{"year":2010,"month":10,"icao":"NSTU","ops":0},{"year":2010,"month":9,"icao":"NSTU","ops":0},{"year":2010,"month":8,"icao":"NSTU","ops":0},{"year":2010,"month":7,"icao":"NSTU","ops":0},{"year":2010,"month":6,"icao":"NSTU","ops":0},{"year":2010,"month":5,"icao":"NSTU","ops":0},{"year":2010,"month":4,"icao":"NSTU","ops":0},{"year":2010,"month":3,"icao":"NSTU","ops":0},{"year":2010,"month":2,"icao":"NSTU","ops":0},{"year":2010,"month":1,"icao":"NSTU","ops":0},{"year":2010,"month":12,"icao":"NSTU","ops":0},{"year":2010,"month":11,"icao":"NSTU","ops":0},{"year":2010,"month":10,"icao":"NSTU","ops":0},{"year":2010,"month":9,"icao":"NSTU","ops":0},{"year":2010,"month":8,"icao":"NSTU","ops":0}]
@@ -252,7 +250,7 @@
 		                    }
 		            },
 		            series: [{
-		                    name: '<%= airport.getIcao() %>',
+		                    name: '<%= airport != null ? airport.getIcao() : "" %>',
 		                    data: dataToDisplay}],
 		            title: {
 		                    text: 'Aircraft Operations for last 12 months'
@@ -376,33 +374,33 @@
 <div id="wrapper">
 <div class="content">
 <%
-    if (airport.available)
-    {
+	if(airport != null)
+	{
         session.setAttribute("requestedAirport", airport.getIcao());
 
         boolean aircraftArea = "1".equals(request.getParameter("aircraftArea"));
         boolean airportArea = "1".equals(request.getParameter("airportArea"));
-        double fuelPrice = airport.getFuelPrice();
-        double jetaPrice = airport.getJetAPrice();
+        double fuelPrice = airport.getPrice100ll();
+        double jetaPrice = airport.getPriceJetA();
         Groups.groupMemberData[] staffGroups = user.getStaffGroups();
 
         //make the lat and long human readable.
         //ABS() negative values and append the correct quadrant information.
-        if (airport.getLat() >= 0)
+        if (airport.getLatLon().lat >= 0)
         {
-            latNS = airport.getLat() + "N";
+            latNS = airport.getLatLon().lat + "N";
         }
         else
         {
-            latNS = airport.getLat()*-1 + "S";
+            latNS = airport.getLatLon().lat*-1 + "S";
         }
-        if (airport.getLon() >= 0)
+        if (airport.getLatLon().lon >= 0)
         {
-            lonEW = airport.getLon() + "E";
+			lonEW = airport.getLatLon().lon + "E";
         }
         else
         {
-            lonEW = airport.getLon()*-1 + "W";
+            lonEW = airport.getLatLon().lon*-1 + "W";
         }
 
         int elev = airport.getElev();
@@ -418,9 +416,10 @@
             </thead>
             <tbody>
 <%
-		if(airport.closestAirports != null)
+		List<CloseAirport> closestAirports = Airports.fillCloseAirports(airport.getIcao(), 0, 50);
+		if(closestAirports.size() > 0)
 		{
-			for (CloseAirport ca : airport.closestAirports)
+			for (CloseAirport ca : closestAirports)
 			{		
 				String icao = ca.icao;
 				int value = (int)Math.round(ca.distance);
@@ -446,10 +445,10 @@
 		//int centery = imagey/2-5;
 		//double lat = airport.getLat();
 		//double lon = airport.getLon();
-		double lat1 = airport.getLat() - bound;
-		double lat2 = airport.getLat() + bound;
-		double lon1 = airport.getLon() - bound;
-		double lon2 = airport.getLon() + bound;
+		double lat1 = airport.getLatLon().lat - bound;
+		double lat2 = airport.getLatLon().lat + bound;
+		double lon1 = airport.getLatLon().lon - bound;
+		double lon2 = airport.getLatLon().lon + bound;
 		String box = lon1 + "," + lat1 + "," + lon2 + "," + lat2;
 		List<FboBean> fbos = Fbos.getFboByLocation(airport.getIcao());
 		List<FboBean> fboinactive = Fbos.getInactiveFboByLocation(airport.getIcao());
@@ -465,7 +464,7 @@
                         </td>
                         <td>
                             <a href="#" onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= airport.getIcao() %>');gmap.showPopup('gmap');return false;" id="gmap">
-                                <img style="border-style: none;" title="<%= AirportBean.getTypeDescription(airport.getType(), airport.getSize()) %>" src="<%= airport.getDescriptiveImage(fbos) %>">
+                                <img style="border-style: none;" title="<%= AirportBean.getTypeDescription(airport.getType(), airport.getSize()) %>" src="<%= Airports.getDescriptiveImage(airport, fbos.size() > 0) %>">
                             </a>
                         </td>
                         <td>
@@ -502,17 +501,17 @@
 		String jeta = Formatters.currency.format(jetaPrice);
 		
 		boolean hasRepairShop = airport.getSize() >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE;
-		if (airport.isAvgas() || fbos.size() > 0 || hasRepairShop || fboinactive.size() > 0) 
+		if (airport.has100ll() || fbos.size() > 0 || hasRepairShop || fboinactive.size() > 0)
 		{
-			if (airport.isAvgas() || hasRepairShop)
+			if (airport.has100ll() || hasRepairShop)
 			{ 
 %>
                         <tr>
                             <td>Local market</td>
-                            <td><%= airport.isAvgas() ? fuel : "&nbsp;" %></td>
-                            <td><%= airport.isAvgas() ? "unlimited" : "&nbsp;" %></td>
-                            <td><%= airport.isJetA() ? jeta : "&nbsp;" %></td>
-                            <td><%= airport.isJetA() ? "unlimited" : "&nbsp;" %></td>
+                            <td><%= airport.has100ll() ? fuel : "&nbsp;" %></td>
+                            <td><%= airport.has100ll() ? "unlimited" : "&nbsp;" %></td>
+                            <td><%= airport.hasJetA() ? jeta : "&nbsp;" %></td>
+                            <td><%= airport.hasJetA() ? "unlimited" : "&nbsp;" %></td>
                             <td><%= hasRepairShop ? "20% / 50%" : "" %></td>
                         </tr>
 <%
@@ -543,7 +542,7 @@
                 if (UserIsFBOStaff)
                 {
                     GoodsBean suppliesleft = Goods.getGoods(airport.getIcao(), aFbo.getOwner(), GoodsBean.GOODS_SUPPLIES);
-                    int DaysSupplied = suppliesleft != null ? suppliesleft.getAmount() / aFbo.getSuppliesPerDay(Airports.getFboSlots(aFbo.getLocation())) : 0;
+                    int DaysSupplied = suppliesleft != null ? suppliesleft.getAmount() / aFbo.getSuppliesPerDay(Airports.getTotalFboSlots(aFbo.getLocation())) : 0;
 
                     if (DaysSupplied > 14)
                         fboname = fboname + "<br><span class=\"small\">" + DaysSupplied + " days supplies</span>";
@@ -644,11 +643,11 @@
                     <!-- <img src="http://www2.demis.nl/wms/wms.asp?wms=WorldMap&amp;Version=1.1.0&amp;Format=image/gif&amp;Request=GetMap&amp;BBox=<%= box %>&amp;SRS=EPSG:4326&amp;Width=<%= imagex %>&amp;Height=<%= imagey %>&amp;Layers=Bathymetry,Countries,Topography,Hillshading,Builtup+areas,Coastlines,Waterbodies,Rivers,Railroads,Highways,Roads,Borders" /> -->
 
                     <!-- New Google Maps API Code by greggerm -->
-                    <img src="https://maps.googleapis.com/maps/api/staticmap?&zoom=6&size=230x150&maptype=terrain&markers=size:small|color:blue|<%= airport.getLat() %>,<%= airport.getLon() %>|&sensor=false" /><br/>
+                    <img src="https://maps.googleapis.com/maps/api/staticmap?&zoom=6&size=230x150&maptype=terrain&markers=size:small|color:blue|<%= airport.getLatLon().lat %>,<%= airport.getLatLon().lon %>|&sensor=false" /><br/>
                 </div>
                 <!-- END MAP SECTION -->
 <%
-		List<FboFacilityBean> carriers = Fbos.getFboFacilitiesForAirport(airport);
+		List<FboFacilityBean> carriers = Fbos.getFboFacilitiesForAirport(airport.getIcao());
 		if (carriers.size() > 0)
 		{
 			String airline;
@@ -765,7 +764,7 @@
 			assignments = Assignments.getAssignments(airport.getIcao(), minPax, maxPax, minKG, maxKG);
 
 		if (aircraftArea)
-            aircraftList = Aircraft.getAircraftInArea(airport.getIcao(), airport.closestAirports);
+            aircraftList = Aircraft.getAircraftInArea(airport.getIcao(), closestAirports);
 		else
             aircraftList = Aircraft.getAircraft(airport.getIcao());
 
@@ -826,8 +825,8 @@
                     assignmentAircraftList.add(aircraftReg);
 
 				String image = "img/set2_" + assignment.getActualBearingImage() + ".gif";
-				AirportBean destination = assignment.getDestinationAirport();
-				AirportBean location = assignment.getLocationAirport();
+				CachedAirportBean destination = assignment.getDestinationAirport();
+				CachedAirportBean location = assignment.getLocationAirport();
 				
 				String ap = airport.getIcao();
 				String locap = location.getIcao();
@@ -853,7 +852,7 @@
 		  			{
 %>					<td class="nowrap">
 						<a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + location.getIcao()+"&icaod="+ airport.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
-							<img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(location.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
+							<img src="<%= Airports.getDescriptiveImage(location, Fbos.getAirportFboSlotsInUse(location.getIcao()) > 0) %>" style="border-style: none; vertical-align:middle;" />
 						</a>
 						<a title="<%= location.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getLocation()) %>">
 							<%= assignment.getLocation() %>
@@ -864,7 +863,7 @@
 		  			{ 
 %>					<td class="nowrap">
 						<a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + location.getIcao()+"&icaod="+ destination.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
-							<img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(location.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
+							<img src="<%= Airports.getDescriptiveImage(location, Fbos.getAirportFboSlotsInUse(location.getIcao()) > 0) %>" style="border-style: none; vertical-align:middle;" />
 						</a>
 						<a title="<%= location.getTitle() %>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getLocation()) %>">
 							<%= assignment.getLocation() %>
@@ -886,7 +885,7 @@
 	 			{
 %>					<td class="nowrap">
 						<a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + location.getIcao()+"&icaod="+ destination.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
-							<img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(destination.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
+							<img src="<%= Airports.getDescriptiveImage(destination, Fbos.getAirportFboSlotsInUse(destination.getIcao()) > 0) %>" style="border-style: none; vertical-align:middle;" />
 						</a>
 						<a class="normal" title="<%= destination.getTitle() %>" href="<%= response.encodeURL("airport.jsp?icao=" + assignment.getTo()) %>">
 							<%= assignment.getTo() %>
@@ -1229,7 +1228,8 @@
 		{
 %>
                 <td>All-In Reserved</td>
-<%		}
+<%
+		}
 	}
 %>
     		</tr>
@@ -1333,7 +1333,7 @@
 }
 else
 {
-    if (airport.getIcao() != null)
+    if (airport != null)
     {
 %>
     <div class="message">No information available</div>
@@ -1347,7 +1347,7 @@ else
         if (distanceParam != null && !distanceParam.equals(""))
             distance = Integer.parseInt(distanceParam);
 
-        List<AirportBean> airports = null;
+        List<CachedAirportBean> airports = null;
         try
         {
             if (hasAssignments || hasFuel || hasJeta || hasRepair || hasFbo || hasAcForSale || ferry || modelId != -1 || commodity > 0 || (nameParam != null && !nameParam.equals("")) || (fromParam != null && !fromParam.equals("")))
@@ -1362,9 +1362,12 @@ else
 
         if (airports != null)
         {
-            AirportBean fromAirport = null;
-            if (fromParam != null)
-                fromAirport = Airports.getAirport(fromParam);
+            CachedAirportBean fromAirport = null;
+            if (!Helpers.isNullOrBlank(fromParam))
+			{
+				String icao = fromParam.toUpperCase();
+				fromAirport = Airports.cachedAirports.get(icao);
+			}
 %>
     <div class="dataTable">
         <table class="goodssearchTable tablesorter-default tablesorter">
@@ -1373,7 +1376,7 @@ else
                 <tr>
                     <th>ICAO</th>
 <%
-            if (fromParam != null)
+            if (fromAirport != null)
             {
 %>
                     <th class="numeric">NM</th>
@@ -1382,23 +1385,21 @@ else
             }
 %>
                     <th>Name</th>
-                    <th>City</th>
-                    <th>Country</th>
                 </tr>
             </thead>
             <tbody>
 <%
-            for (AirportBean ap : airports)
+            for (CachedAirportBean ap : airports)
             {
 %>
                 <tr>
 <%
-                if (fromParam == null || fromAirport.getIcao().equals(ap.getIcao()))
+                if (fromAirport == null || fromAirport.getIcao().equals(ap.getIcao()))
                 {
 %>
                     <td>
                         <a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + ap.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
-                            <img src="<%= ap.getDescriptiveImage(Fbos.getFboByLocation(ap.getIcao())) %>" style="border-style: none; vertical-align:middle;" /></a><a href="<%= response.encodeURL("airport.jsp?icao=" + ap.getIcao()) %>"><%= ap.getIcao() %>
+                            <img src="<%= Airports.getDescriptiveImage(ap, Fbos.getAirportFboSlotsInUse(ap.getIcao()) > 0) %>" style="border-style: none; vertical-align:middle;" /></a><a href="<%= response.encodeURL("airport.jsp?icao=" + ap.getIcao()) %>"><%= ap.getIcao() %>
                         </a>
                     </td>
 <%
@@ -1408,7 +1409,7 @@ else
 %>
                     <td>
                         <a href="#" onclick="gmap.setSize(620,530);gmap.setUrl('<%= response.encodeURL("gmap.jsp?icao=" + fromAirport.getIcao()+"&icaod="+ ap.getIcao()) %>');gmap.showPopup('gmap');return false;" id="gmap">
-                            <img src="<%= ap.getDescriptiveImage(Fbos.getFboByLocation(ap.getIcao())) %>" style="border-style: none; vertical-align:middle;" />
+                            <img src="<%= Airports.getDescriptiveImage(ap, Fbos.getAirportFboSlotsInUse(ap.getIcao()) > 0) %>" style="border-style: none; vertical-align:middle;" />
                         </a>
                         <a href="<%= response.encodeURL("airport.jsp?icao=" + ap.getIcao()) %>">
                             <%= ap.getIcao() %>
@@ -1416,9 +1417,9 @@ else
 <%
                 }
 
-                if (fromParam != null)
+                if (fromAirport != null)
                 {
-                    DistanceBearing distanceBearing = Airports.getDistanceBearing(fromAirport, ap);
+                    DistanceBearing distanceBearing = Airports.getDistanceBearing(fromAirport.getIcao(), ap.getIcao());
                     int toDistance = (int)Math.round(distanceBearing.distance);
                     int toBearing = (int)Math.round(distanceBearing.bearing);
                     String image = Airports.getBearingImageURL(toBearing);
@@ -1428,9 +1429,7 @@ else
 <%
                 }
 %>
-                    <td><%= ap.getName() %></td>
-                    <td><%= ap.getCity() %></td>
-                    <td><%= ap.getCountry() %></td>
+                    <td><%= ap.getTitle() %></td>
 					</tr>
 <%
             }

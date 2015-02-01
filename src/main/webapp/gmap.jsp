@@ -20,16 +20,15 @@
     double lond=0;
 
     String icao = request.getParameter("icao");
-    AirportBean airportd = Airports.getAirport(icao);
-    AirportBean airportl = Airports.getAirport(icao);
+    CachedAirportBean airportd = Airports.cachedAirports.get(icao);
+    CachedAirportBean airportl = Airports.cachedAirports.get(icao);
     List<AssignmentBean> assignments;
     List<FboBean> fboList;
     AssignmentBean assignment;
-    AirportBean destination;
     GoodsBean fuelleft;
 
-    double latl = airportl.getLat();
-    double lonl = airportl.getLon();
+    double latl = airportl.getLatLon().lat;
+    double lonl = airportl.getLatLon().lon;
 
     String icaod = request.getParameter("icaod");
     String type;
@@ -40,10 +39,9 @@
 
     if(icaod != null)
     {
-        airportd = Airports.getAirport(icaod);
-        latd = airportd.getLat();
-        lond = airportd.getLon();
-        Airports.fillAirport(airportd);
+        airportd = Airports.cachedAirports.get(icaod);
+        latd = airportd.getLatLon().lat;
+        lond = airportd.getLatLon().lon;
         isDest = true;
     }
 %>
@@ -190,7 +188,7 @@ function load()
 	GEvent.addListener(markerloc, "click", 
 		function() 
 		{
-  			markerloc.openInfoWindowHtml("<font face='Verdana' size='1'><%=airportl.getIcao()%><br><%=airportl.getName()%><br><%=airportl.getCity()%>, <%=airportl.getCountry()%></font>");
+  			markerloc.openInfoWindowHtml("<font face='Verdana' size='1'><%=airportl.getIcao()%><br><%=airportl.getTitle()%></font>");
 		}
 	);
 	
@@ -199,8 +197,10 @@ function load()
 	if(<%=isDest%>)
 	{
 		var pointdest = new GLatLng(<%=latd%>,<%=lond%>);
-		ap = "<font face='Verdana' size='1'><%=airportd.getIcao()%><br><%=airportd.getName()%><br><%=airportd.getCity()%>, <%=airportd.getCountry()%></font>";
-<%		assignments = Assignments.getAssignments(icaod, -1, -1, -1, -1);
+		ap = "<font face='Verdana' size='1'><%=airportd.getIcao()%><br><%=airportd.getTitle()%></font>";
+<%
+		assignments = Assignments.getAssignments(icaod, -1, -1, -1, -1);
+	    CachedAirportBean destination;
 		
 		if (assignments.size() != 0)
 		{
@@ -222,7 +222,7 @@ function load()
 		}
 			
 		fboList = Fbos.getFboByLocation(icaod);
-		fuelprice = airportd.getFuelPrice();
+		fuelprice = airportd.getPrice100ll();
 		String fuel = Formatters.currency.format(fuelprice);
 		isFBO = false;
 		
@@ -245,7 +245,7 @@ function load()
 <%			}
 		}
 		
-		if (airportd.isAvgas()) 
+		if (airportd.has100ll())
 		{
 			isFBO = true;
 %>			fbostring+="Local | <%=fuel%> | unlimited |";

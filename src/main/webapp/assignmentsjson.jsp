@@ -7,6 +7,7 @@
 <%@ page import="net.fseconomy.dto.*" %>
 <%@ page import="net.fseconomy.data.*" %>
 <%@ page import="net.fseconomy.util.GlobalLogger" %>
+<%@ page import="net.fseconomy.beans.CachedAirportBean" %>
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" %>
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 <%
@@ -40,8 +41,8 @@
                 AircraftBean acbean = Aircraft.getAircraftForUser(user.getId());
                 if (acbean != null && acbean.getLocation() != null)
                 {
-                    AirportInfo airport = Airports.cachedAPs.get(acbean.getLocation());
-                    aircraftInfo = new MapAircraftInfo(acbean.getLocation(), airport.latlon, acbean.getRegistration(), acbean.getMakeModel(), acbean.getSEquipment(), (int) (acbean.getTotalFuel() + .5) + " of " + acbean.getTotalCapacity() + " Gals", "", "");
+                    CachedAirportBean airport = Airports.cachedAirports.get(acbean.getLocation());
+                    aircraftInfo = new MapAircraftInfo(acbean.getLocation(), airport.getLatLon(), acbean.getRegistration(), acbean.getMakeModel(), acbean.getSEquipment(), (int) (acbean.getTotalFuel() + .5) + " of " + acbean.getTotalCapacity() + " Gals", "", "");
                 }
                 break;
             case "transfer":
@@ -77,8 +78,8 @@
         String lastDestination = "";
         boolean locChanged = false;
         boolean destChanged = false;
-        AirportInfo depart = null;
-        AirportInfo dest = null;
+        CachedAirportBean depart = null;
+        CachedAirportBean dest = null;
 
         for (AssignmentBean assignment : assignments)
         {
@@ -90,7 +91,7 @@
             {
                 locChanged = true;
                 lastLocation = assignment.getLocation();
-                depart = Airports.cachedAPs.get(lastLocation);
+                depart = Airports.cachedAirports.get(lastLocation);
             }
 
             //has destination changed
@@ -98,10 +99,10 @@
             {
                 destChanged = true;
                 lastDestination = assignment.getTo();
-                dest = Airports.cachedAPs.get(lastDestination);
+                dest = Airports.cachedAirports.get(lastDestination);
             }
 
-            String distance = Integer.toString(Airports.findDistance(lastLocation, lastDestination)) + " NM";
+            String distance = (int)Math.round(Airports.getDistance(lastLocation, lastDestination)) + " NM";
             MapAssignment mapAssignment = new MapAssignment(lastDestination, assignment.getSCargo(), Formatters.currency.format(assignment.getRealPay()), distance);
 
             if(locChanged)
@@ -109,11 +110,11 @@
                 if(mapAssignments != null)
                     mapData.mapAssignments.add(mapAssignments);
 
-                mapAssignments = new MapAssignments(depart);
+                mapAssignments = new MapAssignments(new AirportInfo(depart));
             }
 
             if(destChanged)
-                mapAssignments.destinations.add(dest);
+                mapAssignments.destinations.add(new AirportInfo(dest));
 
             mapAssignments.assignments.add(mapAssignment);
 

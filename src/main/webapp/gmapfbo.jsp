@@ -120,7 +120,7 @@
         double lat = airport.getLat();
         double lon = airport.getLon();
 
-        String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
+        String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport.getIcao(), response));
 
         boolean hasServices = airport.hasServices();
         boolean hasGoodsForSale = airport.hasGoodsForSale();

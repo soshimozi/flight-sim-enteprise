@@ -21,11 +21,10 @@
 	String location = request.getParameter("icao");
 	String owner = request.getParameter("owner");
 	String sType = request.getParameter("type");
-	AirportBean airport = Airports.getAirport(location);
-	Airports.fillAirport(airport);
-	
+	CachedAirportBean airport = Airports.cachedAirports.get(location);
+
 	int type = Integer.parseInt(sType);
-	List<GoodsBean> salesPoints = Goods.getGoodsAtAirportToSell(location, type, airport.getSize(), airport.getFuelPrice(), airport.getJetAPrice());
+	List<GoodsBean> salesPoints = Goods.getGoodsAtAirportToSell(location, type, airport.getSize(), airport.getPrice100ll(), airport.getPriceJetA());
 	
 	if (owner != null)
 	{

@@ -1,14 +1,10 @@
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" %>
-<%@ page import="net.fseconomy.beans.AirportBean" %>
-<%@ page import="net.fseconomy.beans.FboBean" %>
-<%@ page import="net.fseconomy.beans.GoodsBean" %>
-<%@ page import="net.fseconomy.beans.UserBean" %>
 <%@ page import="net.fseconomy.data.Accounts" %>
 <%@ page import="net.fseconomy.data.Airports" %>
 <%@ page import="net.fseconomy.data.Fbos" %>
 <%@ page import="net.fseconomy.data.Goods" %>
 <%@ page import="net.fseconomy.util.Formatters" %>
-<%@ page import="net.fseconomy.dto.AirportInfo" %>
+<%@ page import="net.fseconomy.beans.*" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
@@ -27,10 +23,10 @@
     int groupOwnerid = Accounts.accountUltimateGroupOwner(owner);
 
     String icao = fbo.getLocation();
-    AirportInfo airportInfo = Airports.cachedAPs.get(icao);
+    CachedAirportBean airportInfo = Airports.cachedAirports.get(icao);
     UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
     int lots = fbo.getFboSize();
-    int totalSpace = fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation());
+    int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
     int rented = Fbos.getFboFacilityBlocksInUse(fboId);
 
     String price = Formatters.currency.format(fbo.getPrice());
@@ -42,7 +38,7 @@
     else
         fboname = fbo.getName();
 
-    String location = airportInfo.title;
+    String location = airportInfo.getTitle();
     String goodsincluded = "";
 
     if (fbo.getPriceIncludesGoods())
@@ -63,13 +59,13 @@
         goodsincluded = goodsincluded + "Building Materials: " + Formatters.oneDigit.format(bms) + " KG<br>";
     }
 
-    AirportBean airport = Airports.getAirport(icao);
+    CachedAirportBean airport = Airports.cachedAirports.get(icao);
 %>
 
 <div class="row clearfix">
     <div class="col-sm-12 column">
         <div class="panel panel-primary">
-            <h3 class="text-center"><%=Airports.airportLink(airport, airport, response)%></h3>
+            <h3 class="text-center"><%=Airports.airportLink(airport.getIcao(), airport.getIcao(), response)%></h3>
             <h3 class="text-center"><%=price%></h3>
             <h4 class="text-center"><%= location %></h4>
             <div class="row clearfix">

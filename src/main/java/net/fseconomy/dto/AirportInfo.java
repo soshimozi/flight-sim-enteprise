@@ -1,5 +1,7 @@
 package net.fseconomy.dto;
 
+import net.fseconomy.beans.CachedAirportBean;
+
 public class AirportInfo
 {
     public String icao;
@@ -19,5 +21,16 @@ public class AirportInfo
         longestRwy = longestrwy;
         type = pType;
         surface = surf;
+    }
+
+    public AirportInfo(CachedAirportBean cab)
+    {
+        icao = cab.getIcao();
+        title = cab.getTitle();
+        latlon = cab.getLatLon();
+        size = cab.getSize();
+        longestRwy = cab.getLongestRunway();
+        type = cab.getType();
+        surface = cab.getSurfaceType();
     }
 }

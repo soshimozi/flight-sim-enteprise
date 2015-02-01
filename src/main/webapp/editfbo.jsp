@@ -25,7 +25,7 @@
 	id = Integer.parseInt(sId);
 	fbo = Fbos.getFbo(id);
 	
-	AirportBean airport = null;
+	CachedAirportBean airport = null;
 	FboFacilityBean defaultPass = null;
 	GoodsBean[] goodsList = null;
 	
@@ -75,8 +75,7 @@
                 goodsList[thegood.getType()] = thegood;
         }
 
-		airport = Airports.getAirport(fbo.getLocation());
-		Airports.fillAirport(airport);
+		airport = Airports.cachedAirports.get(fbo.getLocation());
 
 		for (int c=0; c < goodsList.length; c++)
 		{
@@ -87,7 +86,7 @@
 				
 			if (goodsList[c] == null)
 			{
-				goodsList[c] = new GoodsBean(Goods.commodities[c], airport.getIcao(), airport.getSize(), airport.getFuelPrice(), 0, airport.getJetAPrice());
+				goodsList[c] = new GoodsBean(Goods.commodities[c], airport.getIcao(), airport.getSize(), airport.getPrice100ll(), 0, airport.getPriceJetA());
 				goodsList[c].setBuy(false);
 				goodsList[c].setSell(false);
 			}
@@ -213,7 +212,7 @@
 <% 	if ((fbo.getServices() & FboBean.FBO_PASSENGERTERMINAL) > 0) 
 	{
 %>
- 			You own <%= fbo.getFboSize() * Airports.getFboSlots(fbo.getLocation()) %> Terminal Gates<br />
+ 			You own <%= fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation()) %> Terminal Gates<br />
 			<%= defaultPass.getReservedSpace() %> gates are reserved for your own use (the rest can be rented out)
 			<br />
 			Monthly rent $<%= defaultPass.getRent() %>.00 per gate

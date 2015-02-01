@@ -2,7 +2,6 @@
         contentType="text/html; charset=ISO-8859-1"
         import="java.util.List, net.fseconomy.beans.*, net.fseconomy.data.*, net.fseconomy.util.*"
 %>
-<%@ page import="net.fseconomy.dto.AirportInfo" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -72,12 +71,12 @@
         if(aircraft.getLocation() == null)
             continue;
 
-        AirportInfo airportInfo = Airports.cachedAPs.get(aircraft.getLocation());
-        double lat = airportInfo.latlon.lat;
-        double lon = airportInfo.latlon.lon;
+        CachedAirportBean airportInfo = Airports.cachedAirports.get(aircraft.getLocation());
+        double lat = airportInfo.getLatLon().lat;
+        double lon = airportInfo.getLatLon().lon;
 
-        AirportBean airport = Airports.getAirport(aircraft.getLocation());
-        String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport, response));
+        CachedAirportBean airport = Airports.cachedAirports.get(aircraft.getLocation());
+        String airportLink = Converters.escapeJavaScript(Airports.airportLink(airport.getIcao(), response));
         sb.append("<div class=\"infowindow-content\">");
         sb.append(airportLink);
         sb.append("<br>");

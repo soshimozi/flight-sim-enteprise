@@ -1,5 +1,4 @@
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" %>
-<%@ page import="net.fseconomy.beans.AirportBean" %>
 <%@ page import="net.fseconomy.beans.AssignmentBean" %>
 <%@ page import="net.fseconomy.beans.UserBean" %>
 <%@ page import="net.fseconomy.data.Accounts" %>
@@ -8,7 +7,7 @@
 <%@ page import="net.fseconomy.data.Fbos" %>
 <%@ page import="net.fseconomy.util.Formatters" %>
 <%@ page import="java.util.List" %>
-<%@ page import="net.fseconomy.dto.AirportInfo" %>
+<%@ page import="net.fseconomy.beans.CachedAirportBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
@@ -72,8 +71,8 @@
     {
         String image = "img/set2_" + assignment.getActualBearingImage() + ".gif";
 
-        AirportBean destination = assignment.getDestinationAirport();
-        AirportBean location = assignment.getLocationAirport();
+        CachedAirportBean destination = assignment.getDestinationAirport();
+        CachedAirportBean location = assignment.getLocationAirport();
 
         String lockedBy = null;
         if (assignment.getUserlock() != 0)
@@ -88,13 +87,13 @@
         String icao = location.getIcao();
         String destIcao = destination.getIcao();
 
-        AirportInfo airportInfo = Airports.cachedAPs.get(icao);
-        double latl = airportInfo.latlon.lat;
-        double lonl = airportInfo.latlon.lon;
+        CachedAirportBean airportInfo = Airports.cachedAirports.get(icao);
+        double latl = airportInfo.getLatLon().lat;
+        double lonl = airportInfo.getLatLon().lon;
 
-        airportInfo = Airports.cachedAPs.get(destIcao);
-        double destLatl = airportInfo.latlon.lat;
-        double destLonl = airportInfo.latlon.lon;
+        airportInfo = Airports.cachedAirports.get(destIcao);
+        double destLatl = airportInfo.getLatLon().lat;
+        double destLonl = airportInfo.getLatLon().lon;
 
         assignmentsTotalPay += assignment.calcPay();
 %>
@@ -166,7 +165,7 @@
                     <a href="#"
                        onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;"
                        id="gmap">
-                        <img src="<%= location.getDescriptiveImage(Fbos.getFboByLocation(assignment.getLocation())) %>"
+                        <img src="<%= Airports.getDescriptiveImage(location, Fbos.getAirportFboSlotsInUse(assignment.getLocation()) > 0) %>"
                              style="border-style: none; vertical-align:middle;"/>
                     </a>
                     <a title="<%= location.getTitle() %>"
@@ -189,7 +188,7 @@
                     <a href="#"
                        onclick="gmap.setSize(620,520);gmap.setUrl('gmap.jsp?icao=<%= location.getIcao() %>&icaod=<%= destination.getIcao() %>');gmap.showPopup('gmap');return false;"
                        id="gmap1">
-                        <img src="<%= destination.getDescriptiveImage(Fbos.getFboByLocation(assignment.getTo())) %>"
+                        <img src="<%= Airports.getDescriptiveImage(destination, Fbos.getAirportFboSlotsInUse(assignment.getTo()) > 0) %>"
                              style="border-style: none; vertical-align:middle;"/>
                     </a>
                     <a title="<%= destination.getTitle() %>"

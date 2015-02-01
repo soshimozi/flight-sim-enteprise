@@ -79,7 +79,7 @@
     {
         if (sAmount != null && sAmount.matches("[0-9]+") && !assignment.isFerry() && assignment.isCreatedByUser())
         {
-            distance = Airports.findDistance(from, to);
+            distance = (int)Math.round(Airports.getDistance(from, to));
 
             if (distance < 1)
                 distance = 1;

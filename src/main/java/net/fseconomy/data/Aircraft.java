@@ -3,8 +3,8 @@ package net.fseconomy.data;
 import net.fseconomy.beans.*;
 import net.fseconomy.dto.*;
 import net.fseconomy.util.Constants;
-import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.Helpers;
 
 import java.io.Serializable;
 import java.sql.*;
@@ -387,7 +387,7 @@ public class Aircraft implements Serializable
             StringBuilder tables = new StringBuilder("aircraft");
             StringBuilder where = new StringBuilder(" WHERE aircraft.model = models.id AND sellPrice is not null ");
             StringBuilder query = new StringBuilder("SELECT * FROM ");
-            StringBuilder query2 = new StringBuilder("SELECT DISTINCT location, lat, lon FROM aircraft, models, airports ");
+            StringBuilder query2 = new StringBuilder("SELECT DISTINCT location FROM aircraft, models, airports ");
 
             tables.append(", models");
 
@@ -529,35 +529,14 @@ public class Aircraft implements Serializable
             query2.append(where);
             query2.append(" AND icao = location");
 
-            double lat = 0, lon = 0;
-
-            if (fromParam != null)
-            {
-                //String qry = "SELECT lat, lon FROM airports WHERE icao = ?";
-                //ResultSet rsAp = dalHelper.ExecuteReadOnlyQuery(qry, fromParam);
-                //if (!rsAp.next())
-                //	throw new DataError("Airport " + fromParam + " not found.");
-                AirportInfo lls = Airports.cachedAPs.get(fromParam.toUpperCase());
-                if (lls == null)
-                {
-                    throw new DataError("Airport " + fromParam.toUpperCase() + " not found.");
-                }
-
-                lat = lls.latlon.lat;
-                lon = lls.latlon.lon;
-            }
+            if (!Helpers.isNullOrBlank(fromParam) && !Airports.isValidIcao(fromParam))
+                throw new DataError("Airport " + fromParam.toUpperCase() + " not found.");
 
             Map<String, Double> distanceMap = new HashMap<>();
-            double lat1, lon1;
 
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(query2.toString());
             while (rs.next())
-            {
-                lat1 = rs.getDouble(2);
-                lon1 = rs.getDouble(3);
-
-                distanceMap.put(rs.getString(1), Airports.getDistance(lat1, lon1, lat, lon));
-            }
+                distanceMap.put(rs.getString(1), Airports.getDistance(rs.getString(1), fromParam));
 
             rs = DALHelper.getInstance().ExecuteReadOnlyQuery(query.toString());
             while (rs.next())
@@ -1447,7 +1426,7 @@ public class Aircraft implements Serializable
      * @param alternativeAircraft A list that will be filled with the aircraft found at the specified location
      * @return The name of the model, Null if aircraft title is unknown.
      */
-    public static String probeAircraft(String aircraft, CloseAirport airport, List<CloseAirport> airportList, List<AirportBean> currentAirport, List<AircraftBean> alternativeAircraft)
+    public static String probeAircraft(String aircraft, CloseAirport airport, List<CloseAirport> airportList, List<CachedAirportBean> currentAirport, List<AircraftBean> alternativeAircraft)
     {
         String aircraftModelName = null;
         int modelId = -1;
@@ -1462,8 +1441,7 @@ public class Aircraft implements Serializable
                 aircraftModelName = rs.getString(2) + " " + rs.getString(3);
             }
 
-            AirportBean thisAirport = Airports.getAirport(airport.icao);
-            thisAirport.setFuelPrice(Goods.getFuelPrice(thisAirport.getIcao()));
+            CachedAirportBean thisAirport = Airports.cachedAirports.get(airport.icao);
             currentAirport.add(thisAirport);
             if (modelId != -1)
             {

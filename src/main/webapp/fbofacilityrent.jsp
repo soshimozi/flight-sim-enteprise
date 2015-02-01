@@ -26,8 +26,7 @@
     boolean madeBlocksSelection = false;
 
     FboBean fbo = null;
-    AirportBean airport = Airports.getAirport(icao);
-    Airports.fillAirport(airport);
+    CachedAirportBean airport = Airports.cachedAirports.get(icao);
     List<FboFacilityBean> facilities = Fbos.getFboDefaultFacilitiesForAirport(icao);
     FboFacilityBean facility = null;
 
@@ -44,7 +43,7 @@
         }
 
         fbo = Fbos.getFbo(facility.getFboId());
-        suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation()));
+        suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation()));
         madeBlocksSelection = request.getParameter("selectBlocks") != null;
 
         if (madeBlocksSelection)

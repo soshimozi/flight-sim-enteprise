@@ -169,7 +169,7 @@ public class FSagentFSX extends HttpServlet
 		    String icao = "None";
 		    if(req.getParameter("lat") != null)
 		    {
-		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon")), 0).icao;
+		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon"))).icao;
 		    }
 
 		    String client = isXPlane ? "XP" : "FSX";
@@ -232,16 +232,16 @@ public class FSagentFSX extends HttpServlet
 			return null;
 		double dLat = Double.parseDouble(lat);
 		double dLon = Double.parseDouble(lon);
-		return Airports.closestAirport(dLat, dLon, 0);
+		return Airports.closestAirport(dLat, dLon);
 	}
 	
-	private StringBuffer airportToXml(AirportBean airport)
+	private StringBuffer airportToXml(CachedAirportBean airport)
 	{
 		StringBuffer output = new StringBuffer();
 		output.append("<airport>\n");
 		output.append(xmlNode("icao", airport.getIcao()));
 		output.append(xmlNodeCDATA("name", airport.getName()));
-		output.append("<fuelPrice>").append(airport.getFuelPrice()).append("</fuelPrice>\n");
+		output.append("<fuelPrice>").append(airport.getPrice100ll()).append("</fuelPrice>\n");
 		output.append("</airport>\n");
 		return output;
 	}
@@ -311,7 +311,7 @@ public class FSagentFSX extends HttpServlet
 		CloseAirport airport = closestAirport(req);
 		
 		List<CloseAirport> airportList = new ArrayList<>();
-		List<AirportBean> currentAirport = new ArrayList<>();
+		List<CachedAirportBean> currentAirport = new ArrayList<>();
 		List<AircraftBean> alternativeAircraft = new ArrayList<>();
 		String modelName = Aircraft.probeAircraft(aircraftTitle, airport, airportList, currentAirport, alternativeAircraft);
 

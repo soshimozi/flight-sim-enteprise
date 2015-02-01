@@ -132,22 +132,22 @@
 	for (FboFacilityBean facility : facilities)
 	{
 		FboBean fbo = Fbos.getFbo(facility.getFboId());
-		AirportBean ap = Airports.getAirport(facility.getLocation());
+		CachedAirportBean ap = Airports.cachedAirports.get(facility.getLocation());
 		
 		String sizedesc;
 		if (facility.getIsDefault())
 		{
-			int totalSpace = fbo.getFboSize() * Airports.getFboSlots(facility.getLocation());
+			int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(facility.getLocation());
 			int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
 			sizedesc = totalSpace + " gates (" + rented + " rented)";
 		} else {
 			sizedesc = facility.getSize() + " gates";
 		}
-		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getFboSlots(fbo.getLocation()));
+		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation()));
 		int availJobs = Fbos.getFacilityJobCount(facility.getOccupant(), facility.getLocation());
 %>
 				<tr>
-					<td style="width: 80px;"><%= Airports.airportLink(ap, ap, response) %></td>
+					<td style="width: 80px;"><%= Airports.airportLink(ap.getIcao(), ap.getIcao(), response) %></td>
 					<td><%= facility.getName() %><br/><span style="font-size:9px; font-weight: bold;"><%= fbo.getName() %></span></td>
 					<td>
 <%

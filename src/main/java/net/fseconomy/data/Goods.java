@@ -1,7 +1,6 @@
 package net.fseconomy.data;
 
 import net.fseconomy.beans.*;
-import net.fseconomy.dto.AirportInfo;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -274,7 +273,7 @@ public class Goods implements Serializable
     {
         try
         {
-            if (Airports.cachedAPs.get(location.toUpperCase()) == null)
+            if (!Airports.isValidIcao(location.toUpperCase()))
             {
                 throw new Exception("Unknown airport.");
             }
@@ -284,7 +283,7 @@ public class Goods implements Serializable
             if (src == 0)
             {
                 int overstock = 0;
-                int airportSize = Airports.cachedAPs.get(location.toUpperCase()).size;
+                int airportSize = Airports.cachedAirports.get(location.toUpperCase()).getSize();
                 double fuelPrice = getFuelPrice(location);
                 double mult = getJetaMultiplier();
                 double JetAPrice = fuelPrice * mult;
@@ -328,7 +327,7 @@ public class Goods implements Serializable
         {
             int overstock = 0;
             double fuelPrice = getFuelPrice(location);
-            int airportSize = Airports.cachedAPs.get(location.toUpperCase()).size;
+            int airportSize = Airports.cachedAirports.get(location.toUpperCase()).getSize();
             double mult = getJetaMultiplier();
             double JetAPrice = fuelPrice * mult;
 
@@ -353,7 +352,7 @@ public class Goods implements Serializable
         {
             throw new DataError("Not enough goods available.");
         }
-        if(Airports.cachedAPs.get(location) == null)
+        if(!Airports.isValidIcao(location))
             throw new DataError("Invalid ICAO.");
 
         try
@@ -428,17 +427,12 @@ public class Goods implements Serializable
                     rs.close();
                 }
 
-                AirportInfo lls = Airports.cachedAPs.get(location);
-                if (lls == null)
-                {
-                    throw new DataError("Unknown airport.");
-                }
-
-                int airportSize = lls.size;
-
+                CachedAirportBean cab = Airports.cachedAirports.get(location);
+                int airportSize = cab.getSize();
                 double fuelPrice = getFuelPrice(location);
                 double mult = getJetaMultiplier();
                 double JetAPrice = fuelPrice * mult;
+
                 if (from == 0)
                 {
                     kgPrice = commodities[type].getKgSalePrice(amount, airportSize, fuelPrice, overstock, JetAPrice);

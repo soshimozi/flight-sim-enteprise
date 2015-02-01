@@ -89,7 +89,7 @@ public class FSagent extends HttpServlet
 		    String icao = "None";
 		    if(req.getParameter("lat") != null)
 		    {
-		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon")), 0).icao;
+		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon"))).icao;
 		    }
 			SimClientRequests.addClientRequestEntry(ipAddress, userBean.getId(), userBean.getName(), "FS", action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
 		}		
@@ -167,7 +167,7 @@ public class FSagent extends HttpServlet
 			return null;
 		double dLat = Double.parseDouble(lat);
 		double dLon = Double.parseDouble(lon);
-		return Airports.closestAirport(dLat, dLon, 0);
+		return Airports.closestAirport(dLat, dLon);
 	}
 	
 	String doStart(HttpServletRequest req, UserBean user) throws DataError

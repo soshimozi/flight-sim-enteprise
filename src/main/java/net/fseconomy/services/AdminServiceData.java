@@ -2,9 +2,9 @@ package net.fseconomy.services;
 
 import static net.fseconomy.services.common.*;
 
+import net.fseconomy.beans.CachedAirportBean;
 import net.fseconomy.data.*;
 import net.fseconomy.dto.LatLonCount;
-import net.fseconomy.dto.AirportInfo;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
@@ -27,9 +27,9 @@ public class AdminServiceData
 
             while(rs.next())
             {
-                AirportInfo lls = Airports.cachedAPs.get(rs.getString("fromicao"));
+                CachedAirportBean cab = Airports.cachedAirports.get(rs.getString("fromicao"));
 
-                LatLonCount llc = new LatLonCount(lls.latlon.lat, lls.latlon.lon, rs.getInt("count"));
+                LatLonCount llc = new LatLonCount(cab.getLatLon().lat, cab.getLatLon().lon, rs.getInt("count"));
                 toList.add(llc);
             }
 

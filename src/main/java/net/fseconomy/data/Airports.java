@@ -19,7 +19,7 @@ public class Airports implements Serializable
      * Used to hold an ICAO and lat/lon instance in Hashtable
      * This is initialized in the Data() constructor on startup 
      */
-    public static HashMap<String, AirportInfo> cachedAPs = new HashMap<>();
+    public static HashMap<String, CachedAirportBean> cachedAirports = new HashMap<>();
 
     static
     {
@@ -29,52 +29,43 @@ public class Airports implements Serializable
     }
 
     //Moved this here, not even sure it needs to be done at all.
-//    static void updateBuckets()
-//    {
-//        try
-//        {
-//            String qry = "SELECT * FROM airports WHERE bucket is null";
-//            ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
-//            while (rs.next())
-//            {
-//                int newbucket = AirportBean.bucket(rs.getDouble("lat"), rs.getDouble("lon"));
-//                qry = "UPDATE airports set bucket = ? WHERE icao = ?";
-//                dalHelper.ExecuteUpdate(qry, newbucket, rs.getString("icao"));
-//            }
-//        }
-//        catch (SQLException e)
-//        {
-//            e.printStackTrace();
-//        }
-//    }
+    //    static void updateBuckets()
+    //    {
+    //        try
+    //        {
+    //            String qry = "SELECT * FROM airports WHERE bucket is null";
+    //            ResultSet rs = dalHelper.ExecuteReadOnlyQuery(qry);
+    //            while (rs.next())
+    //            {
+    //                int newbucket = AirportBean.bucket(rs.getDouble("lat"), rs.getDouble("lon"));
+    //                qry = "UPDATE airports set bucket = ? WHERE icao = ?";
+    //                dalHelper.ExecuteUpdate(qry, newbucket, rs.getString("icao"));
+    //            }
+    //        }
+    //        catch (SQLException e)
+    //        {
+    //            e.printStackTrace();
+    //        }
+    //    }
 
     public static void initializeAirportCache()
     {
-        if (cachedAPs.size() == 0)
+        if (cachedAirports.size() == 0)
         {
             //pull the airports
             try
             {
-                String qry = "SELECT icao, name, city, state, country, lat, lon, size, longestRwy, type, surfaceType FROM airports";
+                String qry = "SELECT * FROM airports";
                 ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
                 while (rs.next())
                 {
-                    int itype;
+                    CachedAirportBean cab = new CachedAirportBean(rs);
 
-                    String icao = rs.getString(1);
-                    String type = rs.getString(10);
+                    double price100ll = Goods.getFuelPrice(cab.getIcao());
+                    double priceJetA = price100ll * Goods.getJetaMultiplier();
+                    cab.setFuelPrice(price100ll, priceJetA);
 
-                    itype = AirportBean.getTypeFromString(type);
-
-                    String state = rs.getString(4);
-                    if(!Helpers.isNullOrBlank(state))
-                        state = ", " + state;
-                    else
-                        state = "";
-
-                    String title = rs.getString(2) + ", " + rs.getString(3) + state + ", " + rs.getString(5);
-                    AirportInfo lls = new AirportInfo(icao, title, rs.getDouble(6), rs.getDouble(7), rs.getInt(8), rs.getInt(9), itype, rs.getInt(11));
-                    cachedAPs.put(icao, lls);
+                    cachedAirports.put(cab.getIcao(), cab);
                 }
             }
             catch (SQLException e)
@@ -86,65 +77,32 @@ public class Airports implements Serializable
 
     public static boolean isValidIcao(String icao)
     {
-        if(cachedAPs.containsKey(icao))
-            return true;
-
-        return false;
-    }
-
-    public static int findDistance(String from, String to)
-    {
-        int result = 0;
-
-        if (from != null && to != null)
-        {
-            DistanceBearing distanceBearing = getDistanceBearing(from, to);
-            result = (int)Math.round(distanceBearing.distance);
-        }
-
-        return result;
-    }
-
-    public static double getDistance(double lat1, double lon1, double lat2, double lon2)
-    {
-        LatLon lls1 = new LatLon(lat1, lon1);
-        LatLon lls2 = new LatLon(lat2, lon2);
-
-        DistanceBearing result = getDistanceBearing(lls1, lls2, true, false);
-
-        return result.distance;
-    }
-
-    public static DistanceBearing getDistanceBearing(AirportBean from, AirportBean to)
-    {
-        return getDistanceBearing(from.getIcao(), to.getIcao());
+        return cachedAirports.containsKey(icao);
     }
 
     public static double getDistance(String from, String to)
     {
-        AirportInfo lls1 = cachedAPs.get(from.toUpperCase()); //Added .toUpperCase to make sure comparison will work
-        AirportInfo lls2 = cachedAPs.get(to.toUpperCase());
+        LatLonRadians llTo = cachedAirports.get(from.toUpperCase()).getLatLonRadians();
+        LatLonRadians llFrom = cachedAirports.get(to.toUpperCase()).getLatLonRadians();
 
-        if (lls1 == null || lls2 == null)
-        {
-            return 0;
-        }
+        DistanceBearing result = getDistanceBearing(llTo, llFrom, true, false);
 
-        DistanceBearing result = getDistanceBearing(lls1.latlon, lls2.latlon, true, false);
+        return result.distance;
+    }
 
-        return result.distance; //distance only
+    public static double getDistance(LatLon llFrom, LatLon llTo)
+    {
+        DistanceBearing result = getDistanceBearing(llFrom, llTo, true, false);
+
+        return result.distance;
     }
 
     public static DistanceBearing getDistanceBearing(String from, String to)
     {
-        AirportInfo lls1 = cachedAPs.get(from.toUpperCase()); //Added .toUpperCase to make sure comparison will work
-        AirportInfo lls2 = cachedAPs.get(to.toUpperCase());
+        LatLonRadians llrTo = cachedAirports.get(from.toUpperCase()).getLatLonRadians();
+        LatLonRadians llrFrom = cachedAirports.get(to.toUpperCase()).getLatLonRadians();
 
-        if (lls1 == null || lls2 == null)
-        {
-            return null;
-        }
-        return getDistanceBearing(lls1.latlon, lls2.latlon);
+        return getDistanceBearing(llrTo, llrFrom, true, true);
     }
 
     public static DistanceBearing getDistanceBearing(LatLon from, LatLon to)
@@ -152,13 +110,18 @@ public class Airports implements Serializable
         return getDistanceBearing(from, to, true, true);
     }
 
+    public static DistanceBearing getDistanceBearing(LatLonRadians from, LatLonRadians to)
+    {
+        return getDistanceBearing(from, to, true, true);
+    }
+
     /**
      * This returns the computed distance for the passed in from/to latlons
      *
-     * @param from LatLonSize
-     * @param to LatLonSize
+     * @param from LatLon
+     * @param to LatLon
      * @param returnDistance - return distance if true, or 0 if false
-     * @param returnBearing  - return beaing if true, or 0 if false
+     * @param returnBearing  - return bearing if true, or 0 if false
      * @return double[] - 0 = distance, 1 = bearing
      */
     public static DistanceBearing getDistanceBearing(LatLon from, LatLon to, boolean returnDistance, boolean returnBearing)
@@ -201,6 +164,41 @@ public class Airports implements Serializable
         return new DistanceBearing(distance, bearing);
     }
 
+    public static DistanceBearing getDistanceBearing(LatLonRadians from, LatLonRadians to, boolean returnDistance, boolean returnBearing)
+    {
+        if ((!returnDistance && !returnBearing) || (from.rlat == to.rlat && from.rlon == to.rlon))
+        {
+            return new DistanceBearing(0, 0);
+        }
+
+        double sinLat1 = Math.sin(from.rlat);
+        double sinLat2 = Math.sin(to.rlat);
+        double cosLat1 = Math.cos(from.rlat);
+        double cosLat2 = Math.cos(to.rlat);
+
+        double distanceRadians = Math.acos(sinLat1 * sinLat2 + cosLat1 * cosLat2 * Math.cos(to.rlon - from.rlon));
+
+        double distance = 0;
+        if (returnDistance)
+        {
+            distance = 3443.9 * distanceRadians;
+        }
+
+        double bearing = 0;
+        if (returnBearing)
+        {
+            bearing = Math.acos((sinLat2 - sinLat1 * Math.cos(distanceRadians)) / (cosLat1 * Math.sin(distanceRadians)));
+            bearing = Math.toDegrees(bearing);
+
+            if (Math.sin(to.rlon - from.rlon) < 0.0)
+            {
+                bearing = 360 - bearing;
+            }
+        }
+
+        return new DistanceBearing(distance, bearing);
+    }
+
     /**
      * This returns a hashtable of airports found with the passed in parameters
      *
@@ -213,18 +211,12 @@ public class Airports implements Serializable
      * @param waterOk - airport types to include in the search
      * @param militaryOk - airport types to include in the search
      */
-    public static Hashtable<String, AirportInfo> getAirportsInRange(String icao, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk, int surfType)
+    public static Hashtable<String, CachedAirportBean> getAirportsInRange(String icao, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk, int surfType)
     {
         //Get the lat/lon to pass in
-        AirportInfo lls = cachedAPs.get(icao.toUpperCase());
+        CachedAirportBean cab = cachedAirports.get(icao.toUpperCase());
 
-        if (lls == null)
-        {
-            //System.err.println("-->getAirportsInRange Error, bad ICAO: " + icao);
-            return null;
-        }
-
-        Hashtable<String, AirportInfo> results = getAirportsInRange(lls.latlon.lat, lls.latlon.lon, clipLat, clipLon, minSize, maxSize, civilOk, waterOk, militaryOk, surfType);
+        Hashtable<String, CachedAirportBean> results = getAirportsInRange(cab.getLatLon(), clipLat, clipLon, minSize, maxSize, civilOk, waterOk, militaryOk, surfType);
 
         //removed center airport
         if (results.size() > 0)
@@ -238,8 +230,7 @@ public class Airports implements Serializable
     /**
      * This returns a hashtable of airports found with the passed in parameters
      *
-     * @param lat - Center Lat
-     * @param lon - Center Lon
+     * @param latlon - Center LatLon
      * @param clipLat - window in degrees latitude to search
      * @param clipLon - window in degrees longitude to search adjusted for latitude
      * @param minSize - minimum airport size to search for
@@ -247,44 +238,50 @@ public class Airports implements Serializable
      * @param civilOk - airport types to include in the search
      * @param waterOk - airport types to include in the search
      * @param militaryOk - airport types to include in the search
+     * @param surfType - surface types to include in the search
      */
-    public static Hashtable<String, AirportInfo> getAirportsInRange(double lat, double lon, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk, int surfType)
+    public static Hashtable<String, CachedAirportBean> getAirportsInRange(LatLon latlon, double clipLat, double clipLon, int minSize, int maxSize, boolean civilOk, boolean waterOk, boolean militaryOk, int surfType)
     {
-        Hashtable<String, AirportInfo> results = new Hashtable<>();
-        AirportInfo lls;
+        Hashtable<String, CachedAirportBean> results = new Hashtable<>();
+        CachedAirportBean cab;
         BitSet bitSet = BitSet.valueOf(new long[]{(long) surfType});
 
-        for (Map.Entry<String, AirportInfo> entry : cachedAPs.entrySet())
+        for (Map.Entry<String, CachedAirportBean> entry : cachedAirports.entrySet())
         {
             //get our current loop key and value
-            lls = entry.getValue();
+            cab = entry.getValue();
 
-            double clat = Math.abs(lls.latlon.lat - lat);
-            double clon = Math.abs(lls.latlon.lon - lon);
+            double clat = Math.abs(cab.getLatLon().lat - latlon.lat);
+            double clon = Math.abs(cab.getLatLon().lon - latlon.lon);
 
             if(clat > clipLat || clon > clipLon)
                 continue;
 
-            if(minSize != 0 && lls.longestRwy < minSize)
+            if(minSize != 0 && cab.getLongestRunway() < minSize)
                 continue;
 
-            if(maxSize != 0 && lls.longestRwy > maxSize)
+            if(maxSize != 0 && cab.getLongestRunway() > maxSize)
                 continue;
 
             if(surfType != 0)
-                if(!bitSet.get(lls.surface))
+                if(!bitSet.get(cab.getSurfaceType()))
                     continue;
 
             //compare against current size and radius
-            if ((civilOk && lls.type == 1) ||
-                (waterOk && lls.type == 2) ||
-                (militaryOk && lls.type == 3))
+            if ((civilOk && cab.getType() == 1) ||
+                    (waterOk && cab.getType() == 2) ||
+                    (militaryOk && cab.getType() == 3))
             {
-                results.put(entry.getKey(), lls);
+                results.put(entry.getKey(), cab);
             }
         }
 
         return results;
+    }
+
+    public static CloseAirport closestAirport(double lat, double lon)
+    {
+        return closestAirport(lat, lon, 0, true);
     }
 
     /**
@@ -293,19 +290,15 @@ public class Airports implements Serializable
      * @param lat     - window in degrees latitude to search
      * @param lon     - window in degrees longitude to search adjusted for latitude
      * @param minSize - minimum airport size to search for
+     * @param waterOk - water airports allowed
      */
-    public static CloseAirport closestAirport(double lat, double lon, int minSize)
-    {
-        return closestAirport(lat, lon, minSize, true);
-    }
-
     public static CloseAirport closestAirport(double lat, double lon, int minSize, boolean waterOk)
     {
         String bestIcao = null;
         double bestDistance = 0;
 
         String key;
-        AirportInfo value;
+        CachedAirportBean cab;
 
         boolean found = false;
         double degrees = 0.2;
@@ -319,7 +312,7 @@ public class Airports implements Serializable
             double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(lat)));
 
             //get the airports in range
-            Hashtable<String, AirportInfo> results = getAirportsInRange(lat, lon, degreeClipLat, degreeClipLon, minSize, 0, true, waterOk, true, 0);
+            Hashtable<String, CachedAirportBean> results = getAirportsInRange(new LatLon(lat, lon), degreeClipLat, degreeClipLon, minSize, 0, true, waterOk, true, 0);
 
             //loop through the results to see if any are closest
             Enumeration<String> keys = results.keys();
@@ -327,10 +320,10 @@ public class Airports implements Serializable
             {
                 //get our current loop key and value
                 key = keys.nextElement();
-                value = results.get(key);
+                cab = results.get(key);
 
                 //get the distance
-                double distance = getDistance(lat, lon, value.latlon.lat, value.latlon.lon);
+                double distance = getDistance(new LatLon(lat, lon), cab.getLatLon());
 
                 //check if we found a new match that is better then the previous
                 if (bestIcao == null || distance < bestDistance)
@@ -353,7 +346,7 @@ public class Airports implements Serializable
     /**
      * This returns a randomly selected airport found with the passed in parameters
      *
-     * @param id          - airport to center on
+     * @param icao          - airport to center on
      * @param minDistance - minimum distance to search for
      * @param maxDistance - maximum distance to search for
      * @param minsize     - minimum airport size to search for
@@ -362,7 +355,7 @@ public class Airports implements Serializable
      * @param icaoSet     - preselected icaos to search through
      * @param waterOk     - ok, to include water airports
      */
-    public static CloseAirport getRandomCloseAirport(String id, double minDistance, double maxDistance, int minsize, int maxsize, double lat, Set<String> icaoSet, boolean waterOk, int surfType)
+    public static CloseAirport getRandomCloseAirport(String icao, double minDistance, double maxDistance, int minsize, int maxsize, double lat, Set<String> icaoSet, boolean waterOk, int surfType)
     {
         CloseAirport returnValue = null;
 
@@ -373,24 +366,24 @@ public class Airports implements Serializable
 
             //new code that filters the list of airports down to the ones that meet
             //the min/max distance criteria
-            Set<String> inrange = new HashSet<>();
+            Set<String> inRange = new HashSet<>();
             for (String airport : airports)
             {
-                DistanceBearing distanceBearing = getDistanceBearing(id, airport);
+                DistanceBearing distanceBearing = getDistanceBearing(icao, airport);
                 if (distanceBearing != null &&
                         distanceBearing.distance != 0 &&
                         (distanceBearing.distance >= minDistance && distanceBearing.distance <= maxDistance))
                 {
-                    inrange.add(airport);
+                    inRange.add(airport);
                 }
             }
 
             //if 1 or more airports met the criteria, randomly select one and return
-            if (inrange.size() > 0)
+            if (inRange.size() > 0)
             {
-                String aps[] = inrange.toArray(new String[inrange.size()]);
+                String aps[] = inRange.toArray(new String[inRange.size()]);
                 int index = (int) (aps.length * Math.random());
-                DistanceBearing distanceBearing = getDistanceBearing(id, aps[index]);
+                DistanceBearing distanceBearing = getDistanceBearing(icao, aps[index]);
 
                 return new CloseAirport(aps[index], distanceBearing.distance, distanceBearing.bearing);
             }
@@ -405,14 +398,14 @@ public class Airports implements Serializable
         double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(lat)));
 
         //get the airports that met the criteria passed
-        Hashtable<String, AirportInfo> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, minsize, maxsize, true, waterOk, true, surfType);
+        CachedAirportBean cab = Airports.cachedAirports.get(icao);
+        Hashtable<String, CachedAirportBean> results = getAirportsInRange(cab.getLatLon(), degreeClipLat, degreeClipLon, minsize, maxsize, true, waterOk, true, surfType);
 
         //Don't bother if none found
         if (results != null && results.size() != 0)
         {
-            AirportInfo icao = cachedAPs.get(id);
             String key;
-            AirportInfo value;
+            CachedAirportBean value;
             DistanceBearing distbearing;
 
             //Iterate through the returned set
@@ -423,10 +416,12 @@ public class Airports implements Serializable
                 key = keys.nextElement();
                 value = results.get(key);
 
-                distbearing = getDistanceBearing(icao.latlon, value.latlon);
+                distbearing = getDistanceBearing(icao, value.getIcao());
 
                 //filter out the ones that don't meet the minimum distance, or is the center airport
-                if (id.contains(key) || distbearing.distance < minDistance || distbearing.distance > maxDistance)
+                if (icao.contains(key)
+                    || distbearing.distance < minDistance
+                    || distbearing.distance > maxDistance)
                 {
                     results.remove(key);
                 }
@@ -444,7 +439,7 @@ public class Airports implements Serializable
                     key = keys.nextElement();
                     value = results.get(key);
 
-                    distbearing = getDistanceBearing(icao.latlon, value.latlon);
+                    distbearing = getDistanceBearing(icao, value.getIcao());
                     returnValue = new CloseAirport(key, distbearing.distance, distbearing.bearing);
                 }
                 else
@@ -457,7 +452,7 @@ public class Airports implements Serializable
                     }
 
                     value = results.get(key);
-                    distbearing = getDistanceBearing(icao.latlon, value.latlon);
+                    distbearing = getDistanceBearing(icao, value.getIcao());
                     returnValue = new CloseAirport(key, distbearing.distance, distbearing.bearing);
                 }
             }
@@ -490,12 +485,7 @@ public class Airports implements Serializable
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, id);
             while (rs.next())
             {
-                AirportInfo lls1 = cachedAPs.get(rs.getString(1));
-                AirportInfo lls2 = cachedAPs.get(rs.getString(2));
-
-                LatLon ll1 = new LatLon(lls1.latlon.lat, lls1.latlon.lon);
-                LatLon ll2 = new LatLon(lls2.latlon.lat, lls2.latlon.lon);
-                DistanceBearing distanceBearing = getDistanceBearing(ll1, ll2);
+                DistanceBearing distanceBearing = getDistanceBearing(rs.getString(1), rs.getString(2));
 
                 if (distanceBearing.distance >= minDistance && distanceBearing.distance < maxDistance)
                 {
@@ -520,38 +510,29 @@ public class Airports implements Serializable
     /**
      * This returns an array of closeAirport found with the passed in parameters
      *
-     * @param id          - airport to center on
+     * @param icao          - airport to center on
      * @param minDistance - minimum distance to search for
      * @param maxDistance - maximum distance to search for
-     *                    Airboss 5/30/11
      */
-    public static List<CloseAirport> fillCloseAirports(String id, double minDistance, double maxDistance)
+    public static List<CloseAirport> fillCloseAirports(String icao, double minDistance, double maxDistance)
     {
-        if (id == null)
-        {
+        String key;
+        CachedAirportBean value;
+
+        if (icao == null)
             return null;
-        }
 
         List<CloseAirport> result = new ArrayList<>();
 
-        String key;
-        AirportInfo value;
-        AirportInfo icao;
-
-        icao = cachedAPs.get(id);
-
-        if (icao == null)
-        {
-            return null;
-        }
+        CachedAirportBean cab = cachedAirports.get(icao);
 
         //convert the distance to degrees (60nm at the equator = 1 degree)
         double degreeClipLat = Math.abs(maxDistance / 60.0);
 
         //adjust for compression toward poles
-        double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(icao.latlon.lat)));
+        double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(cab.getLatLon().lat)));
 
-        Hashtable<String, AirportInfo> results = getAirportsInRange(id, degreeClipLat, degreeClipLon, 0, 0, true, true, true, 0);
+        Hashtable<String, CachedAirportBean> results = getAirportsInRange(cab.getLatLon(), degreeClipLat, degreeClipLon, 0, 0, true, true, true, 0);
 
         //loop through the results to see if any are closest
         Enumeration<String> keys = results.keys();
@@ -562,9 +543,9 @@ public class Airports implements Serializable
             value = results.get(key);
 
             //get the distance / bearing
-           DistanceBearing distanceBearing = getDistanceBearing(icao.latlon, value.latlon);
+            DistanceBearing distanceBearing = getDistanceBearing(icao, value.getIcao());
 
-            boolean skipself = id.contains(key);
+            boolean skipself = icao.contains(key);
 
             //check if minimum distance met, we already know it meets the max distance (2 degrees or 120nm)
             if (!skipself && distanceBearing.distance >= minDistance)
@@ -573,7 +554,7 @@ public class Airports implements Serializable
             }
         }
 
-        //limit to return the closest 15 only
+        //limit to return the closest 12 only
         Collections.sort(result);
 
         if (result.size() > 12)
@@ -584,6 +565,7 @@ public class Airports implements Serializable
         return result;
     }
 
+    //TODO this needs to change to return a list of ICAOs that then get the cached airport
     public static List<AirportBean> getAirportsForFboConstruction(int owner)
     {
         return getAirportSQL("SELECT a.* FROM airports a, goods g" +
@@ -605,50 +587,12 @@ public class Airports implements Serializable
                 "      group by airports.icao) > 0");
     }
 
-//    public static List<AirportBean> getAirportsByBucket(String icao)
-//    {
-//        return getAirportSQL("SELECT * FROM airports WHERE bucket = (SELECT bucket from airports WHERE icao = '" + icao + "') order by name");
-//    }
-
-    public static AirportBean getAirport(String icao)
+    public static HashMap<String, CachedAirportBean> getAirportsFromFboList(List<FboBean> fbos)
     {
-        AirportBean result = null;
-        try
-        {
-            String qry = "SELECT * FROM airports WHERE icao = ?";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, icao);
-            if(rs.next())
-                result = new AirportBean(rs);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+        HashMap<String, CachedAirportBean> result = new HashMap<>();
 
-        return result;
-    }
-
-    public static HashMap<String, AirportBean> getAirportsFromFboList(List<FboBean> fbos)
-    {
-        HashMap<String, AirportBean> result = new HashMap<>();
-        try
-        {
-            StringBuilder sb = new StringBuilder();
-            for(FboBean fbo: fbos)
-                sb.append("'").append(fbo.getLocation()).append("'").append(",");
-            String icaos = sb.toString().substring(0, sb.length()-1);
-
-            String qry = "SELECT * FROM airports WHERE icao in (" + icaos + ")";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
-            while (rs.next())
-            {
-                result.put(rs.getString("icao"), new AirportBean(rs));
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+        for(FboBean fbo: fbos)
+            result.put(fbo.getLocation(), Airports.cachedAirports.get(fbo.getLocation()));
 
         return result;
     }
@@ -714,7 +658,7 @@ public class Airports implements Serializable
     public static String getAirportOperationDataJSON(String icao)
     {
         List<FlightOp> ops = new ArrayList<>();
-        if (icao != null && cachedAPs.get(icao.toUpperCase()) != null)
+        if (isValidIcao(icao))
         {
             ops = getAirportOperationData(icao);
         }
@@ -733,10 +677,8 @@ public class Airports implements Serializable
         ArrayList<FlightOp> results = new ArrayList<>();
 
         //exit if icao does not exist
-        if (!cachedAPs.containsKey(icao.toUpperCase()))
-        {
+        if (!isValidIcao(icao))
             return results;
-        }
 
         //get the current year and month
         Calendar cal = Calendar.getInstance();
@@ -859,35 +801,9 @@ public class Airports implements Serializable
         return result;
     }
 
-    public static void fillAirport(AirportBean input)
+    public static List<CachedAirportBean> findAirports(boolean assignments, int modelId, String name, int distance, String from, boolean ferry, boolean buy, int commodity, int minAmount, boolean fuel, boolean jeta, boolean repair, boolean acForSale, boolean fbo, boolean isRentable) throws DataError
     {
-        try
-        {
-            String qry = "SELECT * FROM airports WHERE icao = ?";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, input.getIcao());
-            if (rs.next())
-            {
-                input.fill(rs);
-                input.setLandingFee(0);
-                input.setFuelPrice(Goods.getFuelPrice(input.getIcao()));
-                input.setJetaPrice(Goods.getJetaMultiplier());
-            }
-            else
-            {
-                input.available = false;
-            }
-
-            input.closestAirports = fillCloseAirports(input.getIcao(), 0, 50);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public static List<AirportBean> findAirports(boolean assignments, int modelId, String name, int distance, String from, boolean ferry, boolean buy, int commodity, int minAmount, boolean fuel, boolean jeta, boolean repair, boolean acForSale, boolean fbo, boolean isRentable) throws DataError
-    {
-        ArrayList<AirportBean> result = new ArrayList<>();
+        ArrayList<CachedAirportBean> result = new ArrayList<>();
         String qry;
         try
         {
@@ -985,17 +901,12 @@ public class Airports implements Serializable
             }
 
             double lat = 0, lon = 0;
-            if (from != null)
+            if (isValidIcao(from))
             {
-                qry = "SELECT lat, lon FROM airports WHERE icao = ?";
-                ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, from);
-                if (!rs.next())
-                {
-                    throw new DataError("Airport " + from + " not found.");
-                }
+                CachedAirportBean cab = Airports.cachedAirports.get(from);
 
-                lat = rs.getDouble(1);
-                lon = rs.getDouble(2);
+                lat = cab.getLatLon().lat;
+                lon = cab.getLatLon().lon;
                 double degreeClipLat = distance / 60.0;
                 double degreeClipLon = Math.abs(degreeClipLat / Math.cos(Math.toRadians(lat)));
 
@@ -1005,12 +916,12 @@ public class Airports implements Serializable
 
             query.append(" ORDER BY icao LIMIT 100");
 
-            qry = "SELECT DISTINCT airports.* FROM " + tables.toString() + query.toString();
+            qry = "SELECT DISTINCT airports.icao FROM " + tables.toString() + query.toString();
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
             while (rs.next())
             {
-                AirportBean airport = new AirportBean(rs);
-                if (from != null && getDistance(airport.getLat(), airport.getLon(), lat, lon) > distance)
+                CachedAirportBean airport = Airports.cachedAirports.get(rs.getString("icao"));
+                if (!Helpers.isNullOrBlank(from) && getDistance(rs.getString("icao"), from) > distance)
                 {
                     continue;
                 }
@@ -1139,43 +1050,43 @@ public class Airports implements Serializable
 	 * </head>	  
 	 */
 
-    public static String airportLink(AirportBean airport, HttpServletResponse response)
+    public static String airportLink(String icao, HttpServletResponse response)
     {
-        return airportLink(airport, null, null, null, response);
+        return airportLink(icao, null, null, null, response);
     }
 
-    public static String airportLink(AirportBean airport, AirportBean gmapAirport, HttpServletResponse response)
+    public static String airportLink(String icao, String gmapIcao, HttpServletResponse response)
     {
-        return airportLink(airport, null, gmapAirport.getIcao(), null, response);
+        return airportLink(icao, null, gmapIcao, null, response);
     }
 
-    public static String airportLink(AirportBean airport, AirportBean gmapAirport, AirportBean gmapAirportTo, HttpServletResponse response)
+    public static String airportLink(String icao, String gmapIcao, String gmapIcaoTo, HttpServletResponse response)
     {
-        return airportLink(airport, null, gmapAirport.getIcao(), gmapAirportTo.getIcao(), response);
+        return airportLink(icao, null, gmapIcao, gmapIcaoTo, response);
     }
 
-    public static String airportLink(AirportBean airport, String bulletCodeLocation, String gmapAirport, String gmapAirportTo, HttpServletResponse response)
+    public static String airportLink(String icao, String bulletCodeLocation, String gmapIcao, String gmapIcaoTo, HttpServletResponse response)
     {
-        if (airport == null)
-        {
+        if(!isValidIcao(icao) || (!Helpers.isNullOrBlank(gmapIcao) && !isValidIcao(gmapIcao)) || (!Helpers.isNullOrBlank(gmapIcaoTo) && !isValidIcao(gmapIcaoTo)))
             return "";
-        }
 
+        CachedAirportBean cabIcao = Airports.cachedAirports.get(icao);
         String image = "";
-        if (gmapAirport != null)
+        if (!Helpers.isNullOrBlank(gmapIcao))
         {
+            CachedAirportBean cabGMapIcao = Airports.cachedAirports.get(gmapIcao);
             String icaodPart = "";
-            if ((gmapAirportTo != null) && !gmapAirportTo.equals(gmapAirport))
+            if (!Helpers.isNullOrBlank(gmapIcaoTo) && !gmapIcaoTo.equals(gmapIcao))
             {
-                icaodPart = "&icaod=" + gmapAirportTo;
+                icaodPart = "&icaod=" + gmapIcaoTo;
             }
 
             image = "<A HREF=\"#\" onClick=\"gmap.setSize(620,530);gmap.setUrl('gmap.jsp?icao=" +
-                    gmapAirport +
+                    gmapIcao +
                     icaodPart +
                     "');gmap.showPopup('gmap');return false;\" NAME=\"gmap\" ID=\"gmap\">" +
                     "<img src=\"" +
-                    airport.getDescriptiveImage(Fbos.getFboByLocation(airport.getIcao())) +
+                    getDescriptiveImage(cabGMapIcao, Fbos.getAirportFboSlotsInUse(icao) > 0) +
                     "\" align=\"absmiddle\" border=\"0\" /></a>";
         }
 
@@ -1185,11 +1096,11 @@ public class Airports implements Serializable
             bulletPart = bulletCodeLocation + " onMouseOut=\"hideBullet()\" ";
         }
 
-        String href = response.encodeRedirectURL("/airport.jsp?icao=" + airport.getIcao());
-        String textLink = "<a title=\"" + airport.getTitle() + "\" " +
+        String href = response.encodeRedirectURL("/airport.jsp?icao=" + icao);
+        String textLink = "<a title=\"" + cabIcao.getTitle() + "\" " +
                 bulletPart +
                 " class=\"normal\" href=\"" + href + "\">" +
-                airport.getIcao() +
+                icao +
                 "</a>";
 
         return image + textLink;
@@ -1199,23 +1110,6 @@ public class Airports implements Serializable
     {
         int id = (int) Math.round(bearing / 45.0) % 8;
         return "img/set2_" + id + ".gif";
-    }
-
-    public static String getAirportName(String icao)
-    {
-        String result = null;
-
-        try
-        {
-            String qry = "SELECT name FROM airports WHERE icao = ?;";
-            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), icao);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return result;
     }
 
     public static String getSearchRegionSQL(String region)
@@ -1305,9 +1199,9 @@ public class Airports implements Serializable
         return result;
     }
 
-    public static int getFboSlots(String icao)
+    public static int getTotalFboSlots(String icao)
     {
-        int size = cachedAPs.get(icao).size;
+        int size = cachedAirports.get(icao).getSize();
 
         if (size < AirportBean.MIN_SIZE_MED)
             return 1;
@@ -1315,6 +1209,56 @@ public class Airports implements Serializable
             return 2;
 
         return 3;
+    }
+
+    public boolean hasSystemGoodsForSale(int size)
+    {
+        if(size > CachedAirportBean.MIN_SIZE_BIG)
+            return true;
+
+        for (int c = 0; c < Goods.commodities.length; c++)
+        {
+            if (Goods.commodities[c] != null && size > Goods.commodities[c].getMinAirportSize())
+                return true;
+        }
+
+        return false;
+    }
+
+    public static String getDescriptiveImage(CachedAirportBean cab, boolean hasFbo)
+    {
+        String base;
+        String ext="";
+        boolean hasFuel = cab.has100ll() || cab.hasJetA();
+
+        switch (cab.getType())
+        {
+            case CachedAirportBean.TYPE_WATER:
+                base = "seaplane";
+                break;
+            case CachedAirportBean.TYPE_MILITARY:
+                base = "military";
+                break;
+            default:
+                if (cab.getSize() < CachedAirportBean.MIN_SIZE_MED)
+                    base = "airstrip";
+                else if (cab.getSize() < CachedAirportBean.MIN_SIZE_BIG)
+                    base = "small-airport";
+                else
+                    base = "large-airport";
+        }
+
+        if (hasFbo)
+            ext = "-fbo";
+        else if (hasFuel)
+            ext = "-fuel";
+
+        return "/img/" + base + ext + ".gif";
+    }
+
+    public static boolean hasSystemRepairShop(int size)
+    {
+        return size >= AircraftMaintenanceBean.REPAIR_AVAILABLE_AIRPORT_SIZE;
     }
 
 }

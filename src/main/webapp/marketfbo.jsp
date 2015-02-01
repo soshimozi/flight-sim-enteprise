@@ -107,7 +107,7 @@
 						<th>Name</th>
 						<th>ICAO</th>
 						<th>Location</th>
-						<th>Country</th>
+						<th></th>
 						<th>Price</th>
 					</tr>
 					</thead>
@@ -116,18 +116,17 @@
 	List<FboBean> fbos = Fbos.getFboForSale();
 
 	//Get hashmap of airports in list
-	HashMap<String, AirportBean> aps = Airports.getAirportsFromFboList(fbos);
+	HashMap<String, CachedAirportBean> aps = Airports.getAirportsFromFboList(fbos);
 	for (FboBean fbo : fbos)
 	{
 		String fboname = fbo.getName();
 		String price = Formatters.currency.format(fbo.getPrice());
-		AirportBean airport = aps.get(fbo.getLocation());
+		CachedAirportBean airport = aps.get(fbo.getLocation());
 %>
 					<tr>
 						<td onclick="selectFbo(<%=fbo.getId()%>)"><%= fboname %></td>
-						<td><%= Airports.airportLink(airport, airport, response) %></td>
-						<td><%= airport.getCity() %></td>
-						<td><%= airport.getCountry() %></td>
+						<td><%= Airports.airportLink(airport.getIcao(), airport.getIcao(), response) %></td>
+						<td colspan="2"><%= airport.getTitle() %></td>
 						<td style="text-align: right;"><%= price %></td>
 					</tr>
 <%
