@@ -38,6 +38,7 @@ import net.fseconomy.dto.AircraftConfigs;
 import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.Helpers;
 
 public class Datafeed extends HttpServlet
 {
@@ -834,6 +835,7 @@ public class Datafeed extends HttpServlet
 
                 String readAccessKey;
                 String reg = null;
+				int serialNumber = 0;
                 int id;
                 UserBean account = null;
 
@@ -860,6 +862,16 @@ public class Datafeed extends HttpServlet
                     //See if there is a specific aircraft the information is desired for
                     reg = req.getParameter("aircraftreg");
                 }
+				else if (req.getParameter("serialnumber") != null)
+				{
+					CheckParameters(req, DFPS.serialnumber);
+
+					if (!Helpers.isInteger(req.getParameter("serialnumber")))
+						throw new DataError("serialnumber can only be a positive integer.");
+
+					//See if there is a specific aircraft the information is desired for
+					serialNumber = Integer.parseInt(req.getParameter("serialnumber"));
+				}
                 else
                 {
                     throw new DataError("Invalid search parameter!");
@@ -870,11 +882,15 @@ public class Datafeed extends HttpServlet
                 fromid = Integer.parseInt(sfromid);
 
                 List<LogBean> log;
-                if (reg != null && !reg.isEmpty())
+                if (!Helpers.isNullOrBlank(reg))
                 {
                     int aircraftId = Aircraft.getAircraftIdByRegistration(reg);
                     log = Logging.getLogForAircraftFromId(aircraftId, fromid);
                 }
+				else if (serialNumber > 0)
+				{
+					log = Logging.getLogForAircraftFromId(serialNumber, fromid);
+				}
                 else if (req.getParameter("type") != null && req.getParameter("type").toLowerCase().contains("groupaircraft"))
                 {
                     List<AircraftBean> aircraftList = Aircraft.getAircraftOwnedByUser(account.getId());
@@ -925,6 +941,7 @@ public class Datafeed extends HttpServlet
                 String readAccessKey;
                 String reg = null;
                 int id;
+				int serialNumber = 0;
                 UserBean account = null;
 
                 //is key or reg?
@@ -949,6 +966,16 @@ public class Datafeed extends HttpServlet
                     //See if there is a specific aircraft the information is desired for
                     reg = req.getParameter("aircraftreg");
                 }
+				else if (req.getParameter("serialnumber") != null)
+				{
+					CheckParameters(req, DFPS.serialnumber);
+
+					if (!Helpers.isInteger(req.getParameter("serialnumber")))
+						throw new DataError("serialnumber can only be a positive integer.");
+
+					//See if there is a specific aircraft the information is desired for
+					serialNumber = Integer.parseInt(req.getParameter("serialnumber"));
+				}
                 else
                 {
                     throw new DataError("Invalid search parameter!");
@@ -959,8 +986,10 @@ public class Datafeed extends HttpServlet
                 int year = ValidateYear(req.getParameter("year"), month);
 
                 List<LogBean> log;
-                if (reg != null && !reg.isEmpty())
+                if (!Helpers.isNullOrBlank(reg))
                     log = Logging.getLogForAircraftByMonth(Aircraft.getAircraftIdByRegistration(reg), month, year);
+				else if (serialNumber > 0)
+					log = Logging.getLogForAircraftByMonth(serialNumber, month, year);
                 else if (account.isGroup())
                     log = Logging.getLogForGroupByMonth(account.getId(), month, year);
                 else
@@ -1665,6 +1694,7 @@ public class Datafeed extends HttpServlet
 	{
 		aircraft,
 		aircraftreg,
+		serialnumber,
 		aliases,
 		configs,
 		icao,
@@ -2387,6 +2417,7 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("Time");
 			buffer.appendHeaderItem("Distance");
 			buffer.appendHeaderItem("Pilot");
+			buffer.appendHeaderItem("SerialNumber");
 			buffer.appendHeaderItem("Aircraft");
 			buffer.appendHeaderItem("MakeModel");
 			buffer.appendHeaderItem("From");
@@ -2447,6 +2478,7 @@ public class Datafeed extends HttpServlet
             buffer.append(Formatters.dateDataFeed.format(log.getTime()));
             buffer.append(log.getDistance());
             buffer.append(username == null ? "" : username);
+			buffer.append(aircraft.getId());
             buffer.append(aircraft.getRegistration());
             buffer.append(aircraft.getMakeModel());
             buffer.append(log.getFrom() == null ? "" : log.getFrom());
@@ -2512,6 +2544,7 @@ public class Datafeed extends HttpServlet
             buffer.append("Time", Formatters.dateDataFeed.format(log.getTime()));
             buffer.append("Distance", log.getDistance());
             buffer.append("Pilot", username);
+			buffer.append("SerialNumber", aircraft.getId());
             buffer.append("Aircraft", aircraft.getRegistration());
             buffer.append("MakeModel", makemodel == null ? "None" : makemodel);
             buffer.append("From", log.getFrom() == null ? "" : log.getFrom());

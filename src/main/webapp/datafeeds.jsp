@@ -494,7 +494,7 @@
 		<td>Aircraft By Registration</td>
 		<td><a href="<%= link %>"><%= link %></a></td>
 	</tr>
-<% 
+<%
 	link = base + "query=aircraft&search=key&readaccesskey=" + accessKey; 
 %>
 	<tr>
@@ -557,7 +557,14 @@
 		<td>Flight Logs By Reg Month Year</td> 
 		<td><a href="<%= link %>"><%= link %></a></td>
 	</tr>
-<% 
+<%
+	link = base + "query=flightlogs&search=monthyear&serialnumber=32019&month=1&year=2010";
+%>
+<tr>
+	<td>Flight Logs By serialnumber Month Year</td>
+	<td><a href="<%= link %>"><%= link %></a></td>
+</tr>
+<%
 	link = base + "query=flightlogs&search=id&readaccesskey=" + accessKey + "&fromid=2178373";  
 %>
 	<tr>
@@ -578,7 +585,14 @@
 		<td>Flight Logs By Reg From Id (Limit 500)</td> 
 		<td><a href="<%= link %>"><%= link %></a></td>
 	</tr>
-<% 
+<%
+	link = base + "query=flightlogs&search=id&serialnumber=32019&fromid=2178373";
+%>
+<tr>
+	<td>Flight Logs By serialnumber From Id (Limit 500)</td>
+	<td><a href="<%= link %>"><%= link %></a></td>
+</tr>
+<%
 	link = base + "query=group&search=members&readaccesskey=" + accessKey;  
 %>
 	<tr>

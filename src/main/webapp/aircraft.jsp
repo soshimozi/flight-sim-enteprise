@@ -192,7 +192,7 @@
 %>
 	<tr>
 
-	<td><a href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><%= aircraft.getRegistration() %></a>
+	<td><a href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><span title="Serial #: <%= aircraft.getId() %>"><%= aircraft.getRegistration() %></span></a>
         <% if (aircraft.isBroken())
               {%>              
               <img src='img/repair.gif' style="border-style: none; vertical-align:middle;" />
