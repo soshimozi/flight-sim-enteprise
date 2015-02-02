@@ -1385,6 +1385,7 @@ else
             }
 %>
                     <th>Name</th>
+					<th>Country</th>
                 </tr>
             </thead>
             <tbody>
@@ -1430,6 +1431,7 @@ else
                 }
 %>
                     <td><%= ap.getTitle() %></td>
+					<td><%= ap.getCountry() %></td>
 					</tr>
 <%
             }
