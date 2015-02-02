@@ -34,12 +34,6 @@ import java.util.TimeZone;
 import net.fseconomy.data.Groups;
 import net.fseconomy.util.Converters;
 
-// Airboss 11/27/2011
-// DB Change for new xmlfeed access
-// ALTER TABLE accounts ADD readAccessKey CHAR(10) AFTER xmlkey;
-// ALTER TABLE accounts ADD writeAccessKey CHAR(10) AFTER readAccessKey;
-// Airboss 7/21/2013
-// alter table accounts change `level` `level` enum('moderator','admin','active','csr','aca') DEFAULT 'active'
 public class UserBean implements Serializable
 {
 	private static final long serialVersionUID = 2L;
@@ -82,8 +76,8 @@ public class UserBean implements Serializable
 	String banList;
     double earnedInterest;
 	
-	String readAccessKey; //Added by Airboss 11/28/2011
-	String writeAccessKey; //Added by Airboss 11/28/2011
+	String readAccessKey;
+	String writeAccessKey;
 	
 	/**
 	 * Constructor for UserBean.
@@ -116,8 +110,8 @@ public class UserBean implements Serializable
 		setBanList(rs.getString("banList"));
         setEarnedInterest(rs.getDouble("interest"));
 
-		setReadAccessKey(rs.getString("readAccessKey")); //Added by Airboss 11/28/2011
-		setWriteAccessKey(rs.getString("writeAccessKey")); //Added by Airboss 11/28/2011
+		setReadAccessKey(rs.getString("readAccessKey"));
+		setWriteAccessKey(rs.getString("writeAccessKey"));
 }
 	
 	public void writeBean(ResultSet rs) throws SQLException
@@ -125,10 +119,10 @@ public class UserBean implements Serializable
 		//rs.updateInt("exposure", getExposure());
 		rs.updateString("email", email);
 		rs.updateInt("dateformat", dateformat);
-		rs.updateBoolean("showPaymentsToSelf", showPaymentsToSelf); //Added by Airboss 11/28/2011
+		rs.updateBoolean("showPaymentsToSelf", showPaymentsToSelf);
 		rs.updateString("banlist", banList);
-		rs.updateString("readAccessKey", readAccessKey); //Added by Airboss 11/28/2011
-		rs.updateString("writeAccessKey", writeAccessKey); //Added by Airboss 11/28/2011
+		rs.updateString("readAccessKey", readAccessKey);
+		rs.updateString("writeAccessKey", writeAccessKey);
 	}
 
     private void setEarnedInterest(double interest)
