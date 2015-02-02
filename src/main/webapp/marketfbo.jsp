@@ -107,7 +107,7 @@
 						<th>Name</th>
 						<th>ICAO</th>
 						<th>Location</th>
-						<th></th>
+						<th>Country</th>
 						<th>Price</th>
 					</tr>
 					</thead>
@@ -126,7 +126,8 @@
 					<tr>
 						<td onclick="selectFbo(<%=fbo.getId()%>)"><%= fboname %></td>
 						<td><%= Airports.airportLink(airport.getIcao(), airport.getIcao(), response) %></td>
-						<td colspan="2"><%= airport.getTitle() %></td>
+						<td><%= airport.getTitle() %></td>
+						<td><%= airport.getCountry() %></td>
 						<td style="text-align: right;"><%= price %></td>
 					</tr>
 <%

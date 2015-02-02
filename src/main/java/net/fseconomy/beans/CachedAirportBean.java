@@ -36,7 +36,7 @@ public class CachedAirportBean
     String icao;
     LatLon latlon;
     LatLonRadians latLonRadians;
-    String name, title; //name, city, state, country;
+    String name, country, title; //name, city, state, country;
     int elev, type, size, longestRwy, surfaceType;
     double price100ll, priceJetA;
     boolean fuel100ll, fuelJetA;
@@ -73,7 +73,7 @@ public class CachedAirportBean
         this.icao = icao;
     }
 
-    public void setTitle(String pname, String city, String state, String country)
+    public void setTitle(String pname, String city, String state, String pcountry)
     {
         if(!Helpers.isNullOrBlank(state))
             state = ", " + state;
@@ -81,7 +81,8 @@ public class CachedAirportBean
             state = "";
 
         name = pname;
-        title = pname + ", " + city + state + ", " + country;
+        country = pcountry;
+        title = name + ", " + city + state + ", " + country;
     }
 
     public void setLatLon(double lat, double lon)
@@ -138,6 +139,11 @@ public class CachedAirportBean
     public String getIcao()
     {
         return icao;
+    }
+
+    public String getCountry()
+    {
+        return country;
     }
 
     public String getName()
