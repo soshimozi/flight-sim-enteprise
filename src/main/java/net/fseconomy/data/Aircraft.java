@@ -529,16 +529,21 @@ public class Aircraft implements Serializable
             query2.append(where);
             query2.append(" AND icao = location");
 
-            if (!Helpers.isNullOrBlank(fromParam) && !Airports.isValidIcao(fromParam))
+            if (!Helpers.isNullOrBlank(fromParam) && !Airports.isValidIcao(fromParam.toUpperCase()))
                 throw new DataError("Airport " + fromParam.toUpperCase() + " not found.");
 
             Map<String, Double> distanceMap = new HashMap<>();
 
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(query2.toString());
-            while (rs.next())
-                distanceMap.put(rs.getString(1), Airports.getDistance(rs.getString(1), fromParam));
+            if(fromParam != null)
+            {
+                fromParam = fromParam.toUpperCase();
 
-            rs = DALHelper.getInstance().ExecuteReadOnlyQuery(query.toString());
+                ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(query2.toString());
+                while (rs.next())
+                    distanceMap.put(rs.getString(1), Airports.getDistance(rs.getString(1), fromParam));
+            }
+
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(query.toString());
             while (rs.next())
             {
                 AircraftBean aircraft = new AircraftBean(rs);
