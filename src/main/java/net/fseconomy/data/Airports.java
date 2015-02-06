@@ -893,7 +893,7 @@ public class Airports implements Serializable
                 and = " AND ";
             }
 
-            if (name != null)
+            if (!Helpers.isNullOrBlank(name))
             {
                 query.append(and);
                 query.append("(airports.name LIKE '%").append(Converters.escapeSQL(name)).append("%' OR city LIKE '%").append(Converters.escapeSQL(name)).append("%')");
@@ -901,9 +901,9 @@ public class Airports implements Serializable
             }
 
             double lat = 0, lon = 0;
-            if (isValidIcao(from))
+            if (!Helpers.isNullOrBlank(from) && isValidIcao(from.toUpperCase()))
             {
-                CachedAirportBean cab = Airports.cachedAirports.get(from);
+                CachedAirportBean cab = Airports.cachedAirports.get(from.toUpperCase());
 
                 lat = cab.getLatLon().lat;
                 lon = cab.getLatLon().lon;
