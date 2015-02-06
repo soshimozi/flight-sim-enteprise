@@ -2440,8 +2440,19 @@ public class Datafeed extends HttpServlet
 
         for (LogBean log : logs)
         {
-            AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
-            String username = Accounts.getAccountNameById(log.getUserId());
+			int serialNumber = -1;
+			String reg = "[missing]";
+			String makemodel = "[missing]";
+
+			if(log.getAircraftId() > 0)
+			{
+				AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
+				serialNumber = aircraft.getId();
+				reg = aircraft.getRegistration();
+				makemodel = aircraft.getMakeModel();
+			}
+
+			String username = Accounts.getAccountNameById(log.getUserId());
 
             String groupName = "";
             if (log.getGroupId() > 0)
@@ -2478,9 +2489,9 @@ public class Datafeed extends HttpServlet
             buffer.append(Formatters.dateDataFeed.format(log.getTime()));
             buffer.append(log.getDistance());
             buffer.append(username == null ? "" : username);
-			buffer.append(aircraft.getId());
-            buffer.append(aircraft.getRegistration());
-            buffer.append(aircraft.getMakeModel());
+			buffer.append(serialNumber);
+            buffer.append(reg);
+            buffer.append(makemodel);
             buffer.append(log.getFrom() == null ? "" : log.getFrom());
             buffer.append(log.getTo() == null ? "" : log.getTo());
             buffer.append(totalenginetime);
@@ -2505,9 +2516,19 @@ public class Datafeed extends HttpServlet
 	{
         for (LogBean log : logs)
         {
-            AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
-            String username = Accounts.getAccountNameById(log.getUserId());
+			int serialNumber = -1;
+			String reg = "[missing]";
+			String makemodel = "[missing]";
 
+			if(log.getAircraftId() > 0)
+			{
+				AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
+				serialNumber = aircraft.getId();
+				reg = aircraft.getRegistration();
+				makemodel = aircraft.getMakeModel();
+			}
+
+			String username = Accounts.getAccountNameById(log.getUserId());
             String groupName = "";
             if (log.getGroupId() > 0)
             {
@@ -2537,15 +2558,14 @@ public class Datafeed extends HttpServlet
 
             String totalenginetime = TimeToHrsMins(log.getTotalEngineTime());
             String totalflighttime = TimeToHrsMins(log.getFlightEngineTime());
-            String makemodel = aircraft.getMakeModel();
             buffer.append("<FlightLog>\n");
             buffer.append("Id", log.getId());
             buffer.append("Type", log.getType());
             buffer.append("Time", Formatters.dateDataFeed.format(log.getTime()));
             buffer.append("Distance", log.getDistance());
             buffer.append("Pilot", username);
-			buffer.append("SerialNumber", aircraft.getId());
-            buffer.append("Aircraft", aircraft.getRegistration());
+			buffer.append("SerialNumber", serialNumber);
+            buffer.append("Aircraft", reg);
             buffer.append("MakeModel", makemodel == null ? "None" : makemodel);
             buffer.append("From", log.getFrom() == null ? "" : log.getFrom());
             buffer.append("To", log.getFrom() == null ? "" : log.getTo());
