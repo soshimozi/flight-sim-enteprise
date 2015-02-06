@@ -1350,7 +1350,7 @@ else
         List<CachedAirportBean> airports = null;
         try
         {
-            if (hasAssignments || hasFuel || hasJeta || hasRepair || hasFbo || hasAcForSale || ferry || modelId != -1 || commodity > 0 || (nameParam != null && !nameParam.equals("")) || (fromParam != null && !fromParam.equals("")))
+            if (hasAssignments || hasFuel || hasJeta || hasRepair || hasFbo || hasAcForSale || ferry || modelId != -1 || commodity > 0 || !Helpers.isNullOrBlank(nameParam) || !Helpers.isNullOrBlank(fromParam))
                 airports = Airports.findAirports(hasAssignments, modelId, nameParam, distance, fromParam, ferry, goodsMode, commodity, minAmount, hasFuel, hasJeta, hasRepair, hasAcForSale, hasFbo, isRentable);
         }
         catch (DataError e)
