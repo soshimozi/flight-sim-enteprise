@@ -229,14 +229,14 @@
 			<td><input name="leftMain" type="text" class="textarea" value="<%= model.getCap(1) %>" size="4"/></td>
 			<td><input name="leftAux" type="text" class="textarea" value="<%= model.getCap(2) %>" size="4"/></td>						
 			<td><input name="leftTip" type="text" class="textarea" value="<%= model.getCap(3) %>" size="4"/></td>
-			<td><input name="leftExt1" type="text" class="textarea" value="<%= model.getCap(9) %>" size="4"/></td>
+			<td><input name="ext1" type="text" class="textarea" value="<%= model.getCap(9) %>" size="4"/></td>
 			<td><input name="center" type="text" class="textarea" value="<%= model.getCap(0) %>" size="4"/></td>
 			<td><input name="center2" type="text" class="textarea" value="<%= model.getCap(7) %>" size="4"/></td>
 			<td><input name="center3" type="text" class="textarea" value="<%= model.getCap(8) %>" size="4"/></td>					
 			<td><input name="rightMain" type="text" class="textarea" value="<%= model.getCap(4) %>" size="4"/></td>
 			<td><input name="rightAux" type="text" class="textarea" value="<%= model.getCap(5) %>" size="4"/></td>
 			<td><input name="rightTip" type="text" class="textarea" value="<%= model.getCap(6) %>" size="4"/></td>											
-			<td><input name="rightExt2" type="text" class="textarea" value="<%= model.getCap(10) %>" size="4"/></td>				
+			<td><input name="ext2" type="text" class="textarea" value="<%= model.getCap(10) %>" size="4"/></td>
 		</tr>
 		</tbody>
 		</table>
