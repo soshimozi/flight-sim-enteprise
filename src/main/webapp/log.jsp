@@ -30,7 +30,7 @@
     if (sFrom != null)
         from = Integer.parseInt(sFrom);
 
-    if (from < 0) // airboss 8/22/13 - prevent negative numbers
+    if (from < 0) // prevent negative numbers
         from = 0;
 
     if (!groupPage)
@@ -252,7 +252,15 @@
 
             double total = (log.getIncome()) - log.getRentalCost() - log.getFuelCost() - log.getLandingCost() - log.getCrewCost() - log.getFboAssignmentFee() + log.getBonus() - log.getmptTax();
 
-            AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
+            int id  = -1;
+            String reg = "[missing]";
+            String makemodel = "[missing]";
+            if(log.getAircraftId() != 0)
+            {
+                AircraftBean aircraft = Aircraft.getAircraftById(log.getAircraftId());
+                reg = aircraft.getRegistration();
+                makemodel = aircraft.getMakeModel();
+            }
             String username = Accounts.getAccountNameById(log.getUserId());
 %>
                 <tr>
@@ -272,9 +280,22 @@
                         <a class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + log.getTo()) %>"><%= log.getTo() %></a>
                     </td>
                     <td>
-                        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><%= aircraft.getRegistration() %></a>
+<%
+            if(id > 0)
+            {
+%>
+                        <a class="normal" href="<%= response.encodeURL("aircraftlog.jsp?id=" + id) %>"><%= reg %></a>
+<%
+            }
+            else
+            {
+%>
+                        <%= reg %>
+<%
+            }
+%>
                     </td>
-                    <td><%= aircraft.getMakeModel() %></td>
+                    <td><%= makemodel %></td>
                     <td><%= flightTime %></td>
                     <td><%= log.getDistance() %></td>
                     <td><%= Formatters.currency.format(total) %></td>
