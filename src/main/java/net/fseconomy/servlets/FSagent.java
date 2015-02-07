@@ -39,7 +39,9 @@ import net.fseconomy.beans.UserBean;
 import net.fseconomy.data.*;
 import net.fseconomy.dto.CloseAirport;
 import net.fseconomy.dto.DepartFlight;
+import net.fseconomy.util.Crypto;
 import net.fseconomy.util.GlobalLogger;
+import net.fseconomy.util.Helpers;
 
 public class FSagent extends HttpServlet
 {	
@@ -54,10 +56,34 @@ public class FSagent extends HttpServlet
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 		throws ServletException, IOException
 	{
-		String user = req.getParameter("user");
-		String password = req.getParameter("pass");
 		UserBean userBean;
-		
+		String user;
+		String password;
+		String mac;
+
+		String up = req.getParameter("up");
+		if(!Helpers.isNullOrBlank(up))
+		{
+			up = up.replace(" ", "+");
+			String upString = Crypto.decrypt(up);
+			String[] s = upString.split("\\|\\^\\|");
+			if (s.length != 3)
+			{
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
+				return;
+			}
+			user = s[0];
+			password = s[1];
+			mac = s[2];
+		}
+		else
+		{
+			user = req.getParameter("user");
+			password = req.getParameter("pass");
+			mac = "000000000000";
+		}
+
+
 		if (user == null || password == null || (userBean=Accounts.userExists(user, password)) == null)
 		{
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid account information");
@@ -91,7 +117,7 @@ public class FSagent extends HttpServlet
 		    {
 		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon"))).icao;
 		    }
-			SimClientRequests.addClientRequestEntry(ipAddress, userBean.getId(), userBean.getName(), "FS", action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
+			SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), "FS", action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
 		}		
 
 		try

@@ -32,12 +32,12 @@ public class SimClientRequests
         return version;
     }
 
-    public static void addClientRequestEntry(String ipAddress, int id, String name, String client, String state, String aircraft, String params)
+    public static void addClientRequestEntry(String ipAddress, String mac, int id, String name, String client, String state, String aircraft, String params)
     {
         try
         {
-            String qry = "INSERT INTO clientrequests ( ip, pilotid, pilot, client, state, aircraft, params) VALUES(?,?,?,?,?,?,?)";
-            DALHelper.getInstance().ExecuteUpdate(qry, ipAddress, id, name, client, state, aircraft, params);
+            String qry = "INSERT INTO clientrequests ( ip, mac, pilotid, pilot, client, state, aircraft, params) VALUES(?,?,?,?,?,?,?,?)";
+            DALHelper.getInstance().ExecuteUpdate(qry, ipAddress, mac, id, name, client, state, aircraft, params);
         }
         catch (SQLException e)
         {

@@ -38,7 +38,9 @@ import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
 import net.fseconomy.dto.CloseAirport;
 import net.fseconomy.dto.DepartFlight;
+import net.fseconomy.util.Crypto;
 import net.fseconomy.util.GlobalLogger;
+import net.fseconomy.util.Helpers;
 
 public class FSagentFSX extends HttpServlet
 {	
@@ -98,9 +100,33 @@ public class FSagentFSX extends HttpServlet
 				return;
 			}
 		}
-		
-		String user = req.getParameter("user");
-		String password = req.getParameter("pass");
+
+		String user = null;
+		String password = null;
+		String mac = null;
+
+		String up = req.getParameter("up");
+		if(!Helpers.isNullOrBlank(up))
+		{
+			up = up.replace(" ", "+");
+			String upString = Crypto.decrypt(up);
+			String[] s = upString.split("\\|\\^\\|");
+			if (s.length != 3)
+			{
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid account information");
+				return;
+			}
+			user = s[0];
+			password = s[1];
+			mac = s[2];
+		}
+		else
+		{
+			user = req.getParameter("user");
+			password = req.getParameter("pass");
+			mac = "000000000000";
+		}
+
 		UserBean userBean;
 		
 		if (user == null || password == null || (userBean=Accounts.userExists(user, password)) == null)
@@ -173,9 +199,8 @@ public class FSagentFSX extends HttpServlet
 		    }
 
 		    String client = isXPlane ? "XP" : "FSX";
-			SimClientRequests.addClientRequestEntry(ipAddress, userBean.getId(), userBean.getName(), client, action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
-		}		
-
+			SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), client, action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
+		}
 		
 		String content = "";
 		try
