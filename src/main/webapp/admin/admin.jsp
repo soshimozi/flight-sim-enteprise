@@ -79,6 +79,8 @@
             <li><a href="/admin/checkfuelexploit.jsp?numitems=100&pricepoint=10">Check for Fuel Exploit</a></li>
             <li><a href="/admin/checkclientip.jsp">Client IP Checks</a></li>
             <li><a href="/admin/checkclientipduplicates.jsp">Client IPs used by multiple users</a></li>
+            <li><a href="/admin/checkclientflights.jsp">Pilot logged Flight Stats</a></li>
+            <li><a href="/admin/checkcurrentflights.jsp">Current logged Flight Stats</a></li>
         </ul>
 
         <ul><b>Other Utilities</b>

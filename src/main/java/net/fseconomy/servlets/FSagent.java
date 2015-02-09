@@ -57,40 +57,20 @@ public class FSagent extends HttpServlet
 		throws ServletException, IOException
 	{
 		UserBean userBean;
-		String user;
-		String password;
-		String mac;
 
-		String up = req.getParameter("up");
-		if(!Helpers.isNullOrBlank(up))
-		{
-			up = up.replace(" ", "+");
-			String upString = Crypto.decrypt(up);
-			String[] s = upString.split("\\|\\^\\|");
-			if (s.length != 3)
-			{
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
-				return;
-			}
-			user = s[0];
-			password = s[1];
-			mac = s[2];
-		}
-		else
-		{
-			user = req.getParameter("user");
-			password = req.getParameter("pass");
-			mac = "000000000000";
-		}
-
+        String user = req.getParameter("user");
+        String password = req.getParameter("pass");
+        String hashmac = req.getParameter("up");
 
 		if (user == null || password == null || (userBean=Accounts.userExists(user, password)) == null)
 		{
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid account information");
 			return;
 		}
+
 		req.setAttribute("user", userBean);
 		String action = req.getParameter("action");
+
 		if (action == null)
 		{
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No action specified");
@@ -99,26 +79,56 @@ public class FSagent extends HttpServlet
 		
 		//Log entry in clientrequest table
 		//Ignore aircraftProbe, accountCheck, addModel
-		if("startflight cancel arrive".contains(action.toLowerCase()))
+		if("start cancel arrive".contains(action.toLowerCase()))
 		{
 			String reg;
+            int aircraftId = -1;
 			String ipAddress = req.getHeader("X-FORWARDED-FOR");
 		    if (ipAddress == null) 
 		    	ipAddress = req.getRemoteAddr();
 		    
 		    AircraftBean aircraft = Aircraft.getAircraftForUser(userBean.getId());
 		    if(aircraft != null)
-		    	reg = aircraft.getRegistration();
+            {
+                reg = aircraft.getRegistration();
+                aircraftId = aircraft.getId();
+            }
 		    else
-		    	reg="-";
+		    	reg = null;
 		    
-		    String icao = "None";
+		    String icao = null;
 		    if(req.getParameter("lat") != null)
 		    {
 		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon"))).icao;
 		    }
-			SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), "FS", action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
-		}		
+
+            String mac;
+
+            if(!Helpers.isNullOrBlank(hashmac))
+            {
+                if(hashmac.length() < 32+12)
+                {
+                    //FSX error return
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid information");
+                    return;
+                }
+
+                long lmac = Long.decode("#" + hashmac.substring(32));
+                mac = String.format("%x", ( lmac ^ 0xAAAAAAAAAAAAL)).toUpperCase();
+
+                String chkMD5 = Crypto.getMD5(mac);
+                if(!chkMD5.equals(hashmac.substring(0,32)))
+                {
+                    //FSX error return
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid information");
+                    return;
+                }
+            }
+            else
+                mac = "000000000000";
+
+            SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), "FS", action, reg, aircraftId, req.getParameter("lat"), req.getParameter("lon"), icao, "");
+		}
 
 		try
 		{	

@@ -101,31 +101,9 @@ public class FSagentFSX extends HttpServlet
 			}
 		}
 
-		String user = null;
-		String password = null;
-		String mac = null;
-
-		String up = req.getParameter("up");
-		if(!Helpers.isNullOrBlank(up))
-		{
-			up = up.replace(" ", "+");
-			String upString = Crypto.decrypt(up);
-			String[] s = upString.split("\\|\\^\\|");
-			if (s.length != 3)
-			{
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid account information");
-				return;
-			}
-			user = s[0];
-			password = s[1];
-			mac = s[2];
-		}
-		else
-		{
-			user = req.getParameter("user");
-			password = req.getParameter("pass");
-			mac = "000000000000";
-		}
+        String user = req.getParameter("user");
+        String password = req.getParameter("pass");
+        String hashmac = req.getParameter("up");
 
 		UserBean userBean;
 		
@@ -182,24 +160,48 @@ public class FSagentFSX extends HttpServlet
 		if("startflight cancel arrive".contains(action.toLowerCase()))
 		{
 			String reg;
+            int aircraftId = -1;
+
 			String ipAddress = req.getHeader("X-FORWARDED-FOR");
 		    if (ipAddress == null) 
 		    	ipAddress = req.getRemoteAddr();
 		    
 		    AircraftBean aircraft = Aircraft.getAircraftForUser(userBean.getId());
 		    if(aircraft!= null)
-		    	reg = aircraft.getRegistration();
+            {
+                reg = aircraft.getRegistration();
+                aircraftId = aircraft.getId();
+            }
 		    else
-		    	reg="-";
+		    	reg = null;
 		    
-		    String icao = "None";
+		    String icao = null;
 		    if(req.getParameter("lat") != null)
 		    {
 		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon"))).icao;
 		    }
 
 		    String client = isXPlane ? "XP" : "FSX";
-			SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), client, action, reg, "lat=" + req.getParameter("lat") + ", lon=" + req.getParameter("lon") + ", icao=" + icao);
+
+            String mac;
+
+            if(!Helpers.isNullOrBlank(hashmac))
+            {
+                long lmac = Long.decode("#" + hashmac.substring(32));
+                mac = String.format("%x", ( lmac ^ 0xAAAAAAAAAAAAL)).toUpperCase();
+
+                String chkMD5 = Crypto.getMD5(mac);
+                if(!chkMD5.equals(hashmac.substring(0,32)))
+                {
+                    //FSX error return
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid information");
+                    return;
+                }
+            }
+            else
+                mac = "000000000000";
+
+			SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), client, action, reg, aircraftId, req.getParameter("lat"), req.getParameter("lon"), icao, "");
 		}
 		
 		String content = "";

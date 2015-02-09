@@ -7,6 +7,8 @@ package net.fseconomy.util;
 import org.bouncycastle.util.encoders.Base64;
 
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -63,5 +65,30 @@ public class Crypto
             System.out.println("[Exception]:"+e.getMessage());
         }
         return null;
+    }
+
+    public static String getMD5(String toHash)
+    {
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(toHash.getBytes());
+
+            byte byteData[] = md.digest();
+
+            //convert the byte to hex format method 1
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < byteData.length; i++)
+            {
+                sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+            }
+
+            return sb.toString().toUpperCase();
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

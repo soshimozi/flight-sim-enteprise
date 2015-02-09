@@ -1,13 +1,15 @@
 package net.fseconomy.data;
 
-import net.fseconomy.dto.ClientIP;
-import net.fseconomy.dto.ClientRequest;
+import net.fseconomy.beans.AircraftBean;
+import net.fseconomy.beans.CachedAirportBean;
+import net.fseconomy.beans.ModelBean;
+import net.fseconomy.dto.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class SimClientRequests
 {
@@ -32,12 +34,12 @@ public class SimClientRequests
         return version;
     }
 
-    public static void addClientRequestEntry(String ipAddress, String mac, int id, String name, String client, String state, String aircraft, String params)
+    public static void addClientRequestEntry(String ipAddress, String mac, int id, String name, String client, String state, String aircraft, int aircraftId, String lat, String lon, String icao, String params)
     {
         try
         {
-            String qry = "INSERT INTO clientrequests ( ip, mac, pilotid, pilot, client, state, aircraft, params) VALUES(?,?,?,?,?,?,?,?)";
-            DALHelper.getInstance().ExecuteUpdate(qry, ipAddress, mac, id, name, client, state, aircraft, params);
+            String qry = "INSERT INTO clientrequests ( ip, mac, pilotid, pilot, client, state, aircraft, aircraftId, lat, lon, icao, params) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+            DALHelper.getInstance().ExecuteUpdate(qry, ipAddress, mac, id, name, client, state, aircraft, aircraftId, lat, lon, icao, params);
         }
         catch (SQLException e)
         {
@@ -188,6 +190,199 @@ public class SimClientRequests
             e.printStackTrace();
             throw new DataError("getClientRequestIps: SQL Error");
         }
+
+        return list;
+    }
+
+    public static List<ClientFlightStats> getClientFlightStats(int pilotId) throws DataError
+    {
+        List<ClientFlightStats> list = new ArrayList<>();
+
+        try
+        {
+            String qry = "select min(id) from (SELECT id FROM clientrequests WHERE state like 'start%' and pilotid = ? order by id desc limit 200 ) t";
+            int startId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), pilotId);
+
+            qry = "SELECT * FROM clientrequests where pilotid=? and id >= ? order by id";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, pilotId, startId);
+
+            boolean start = false;
+            Timestamp stime = new Timestamp(0);
+            String sclient = "";
+            String sicao = "";
+            float slat = 0;
+            float slon = 0;
+
+            while(rs.next())
+            {
+                String state = rs.getString("state");
+                if(state.equals("cancel"))
+                    continue;
+
+                if(state.contains("start"))
+                {
+                    sicao = rs.getString("icao");
+
+                    if(sicao == null)
+                        continue;
+
+                    stime = rs.getTimestamp("time");
+                    sclient = rs.getString("client");
+                    slat = rs.getFloat("lat");
+                    slon = rs.getFloat("lon");
+                    start = true;
+                }
+                if(state.contains("arrive"))
+                {
+                    if(start)
+                    {
+                        start = false;
+
+                        Timestamp etime = rs.getTimestamp("time");
+                        String eclient = rs.getString("client");
+                        String eicao = rs.getString("icao");
+                        float elat = rs.getFloat("lat");
+                        float elon = rs.getFloat("lon");
+                        int aircraftId = rs.getInt("aircraftid");
+
+                        int realTime = (int)((etime.getTime() - stime.getTime()) / 1000);
+
+                        double dist = Airports.getDistance(sicao, eicao);
+                        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+                        int fltTime = -1;
+                        int tc = -1;
+                        String makeModel = "[missing]";
+                        if(aircraft != null)
+                        {
+                            ModelBean model = Models.getModelById(aircraft.getModelId());
+                            makeModel = model.getMakeModel();
+                            fltTime = (int) (3600 * (dist / model.getCruise()));
+                            if(realTime != 0)
+                                tc = fltTime / realTime;
+                        }
+
+                        CachedAirportBean eap = Airports.cachedAirports.get(eicao);
+                        LatLon ll = new LatLon(elat, elon);
+                        double stopdist = Airports.getDistance(eap.getLatLon(), ll);
+
+                        ClientFlightStats cfs = new ClientFlightStats(pilotId, sclient+"/"+eclient, stime, etime, sicao, eicao, makeModel, dist, stopdist, fltTime, realTime, tc );
+                        list.add(cfs);
+                    }
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+            throw new DataError("getClientRequestIps: SQL Error");
+        }
+
+        Collections.reverse(list);
+
+        return list;
+    }
+
+    public static List<ClientFlightStats> getCurrentFlightStats() throws DataError
+    {
+        List<ClientFlightStats> list = new ArrayList<>();
+
+        try
+        {
+            String qry = "select min(id) from (SELECT id FROM clientrequests WHERE state like 'start%' order by id desc limit 200 ) t";
+            int startId = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer());
+
+            qry = "SELECT * FROM clientrequests where id >= ? group by pilotid, id";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, startId);
+
+
+            boolean first = true;
+            boolean start = false;
+            Timestamp stime = new Timestamp(0);
+            String sclient = "";
+            String sicao = "";
+            float slat = 0;
+            float slon = 0;
+            int currPilotId = 0;
+            int lastPilotId = 0;
+
+            while(rs.next())
+            {
+                currPilotId = rs.getInt("pilotid");
+                if(first)
+                {
+                    first = false;
+                    lastPilotId=currPilotId;
+                }
+
+                if(currPilotId != lastPilotId)
+                    start = false;
+
+                String state = rs.getString("state");
+                if(state.equals("cancel"))
+                    continue;
+
+                if(state.contains("start"))
+                {
+                    sicao = rs.getString("icao");
+
+                    if(sicao == null)
+                        continue;
+
+                    stime = rs.getTimestamp("time");
+                    sclient = rs.getString("client");
+                    slat = rs.getFloat("lat");
+                    slon = rs.getFloat("lon");
+                    start = true;
+                }
+                if(state.contains("arrive"))
+                {
+                    if(start)
+                    {
+                        start = false;
+
+                        int pilotId = rs.getInt("pilotid");
+                        Timestamp etime = rs.getTimestamp("time");
+                        String eclient = rs.getString("client");
+                        String eicao = rs.getString("icao");
+                        float elat = rs.getFloat("lat");
+                        float elon = rs.getFloat("lon");
+                        int aircraftId = rs.getInt("aircraftid");
+
+                        int realTime = (int)((etime.getTime() - stime.getTime()) / 1000);
+
+                        double dist = Airports.getDistance(sicao, eicao);
+                        AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+                        int fltTime = -1;
+                        int tc = -1;
+                        String makeModel = "[missing]";
+                        if(aircraft != null)
+                        {
+                            ModelBean model = Models.getModelById(aircraft.getModelId());
+                            makeModel = model.getMakeModel();
+                            fltTime = (int) (3600 * (dist / model.getCruise()));
+                            if(realTime != 0)
+                                tc = fltTime / realTime;
+                        }
+
+                        CachedAirportBean eap = Airports.cachedAirports.get(eicao);
+                        LatLon ll = new LatLon(elat, elon);
+                        double stopdist = Airports.getDistance(eap.getLatLon(), ll);
+
+                        ClientFlightStats cfs = new ClientFlightStats(pilotId, sclient+"/"+eclient, stime, etime, sicao, eicao, makeModel, dist, stopdist, fltTime, realTime, tc );
+                        list.add(cfs);
+                    }
+                }
+
+                lastPilotId = currPilotId;
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+            throw new DataError("getClientRequestIps: SQL Error");
+        }
+
+        Collections.reverse(list);
 
         return list;
     }
