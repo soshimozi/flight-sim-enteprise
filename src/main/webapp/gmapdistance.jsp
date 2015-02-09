@@ -31,12 +31,14 @@
     {
         request.getSession().setAttribute("message", "Invalid departure ICAO.");
         request.getRequestDispatcher("error.jsp").forward(request, response);
+        return;
     }
 
     if(!Airports.isValidIcao(dest))
     {
         request.getSession().setAttribute("message", "Invalid destination ICAO.");
         request.getRequestDispatcher("error.jsp").forward(request, response);
+        return;
     }
 
     DistanceBearing distanceBearing = Airports.getDistanceBearing(depart, dest);
