@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.data.*, java.util.List"
 %>
+<%@ page import="net.fseconomy.util.Helpers" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="goods" class="net.fseconomy.beans.GoodsBean" scope="session" />
@@ -15,58 +16,75 @@
 		return;
 	}
 
+    String sOwner = request.getParameter("owner");
+    String groupParam = sOwner != null ? "?groupid=" + sOwner : "";
+    String returnPage = "goods.jsp" + groupParam;
+
+    String error = null;
+    int owner = -1;
+    int commodityId = -1;
+    GoodsBean gb = null;
+    UserBean ownerAccount = null;
+
 	String fromICAO = request.getParameter("fromICAO");
-	int owner = Integer.parseInt(request.getParameter("owner"));
-	int commodityId = Integer.parseInt(request.getParameter("commodityId"));
+    String sCommodityId = request.getParameter("commodityId");
 
-	String error = null;
+    if(!Helpers.isNullOrBlank(fromICAO) && !Helpers.isNullOrBlank(sOwner) && !Helpers.isNullOrBlank(sCommodityId))
+    {
+        owner = Integer.parseInt(sOwner);
+        commodityId = Integer.parseInt(sCommodityId);
 
-	UserBean owneraccount;
-	owneraccount = Accounts.getAccountById(owner);
-	
-	List<GoodsBean> goodslist = Goods.getGoodsForAccountAvailable(owner);
-	
-	GoodsBean gb = null;
-	for(GoodsBean good : goodslist)
+        ownerAccount = Accounts.getAccountById(owner);
+
+        List<GoodsBean> goodslist = Goods.getGoodsForAccountAvailable(owner);
+
+        for(GoodsBean good : goodslist)
+        {
+            if(good.getType() == commodityId && good.getLocation().equals(fromICAO))
+                gb = good;
+        }
+    }
+    else
+    {
+        error = "Missing parameters";
+    }
+
+	if(error == null && "true".equals(request.getParameter("submit")))
 	{
-		if(good.getType() == commodityId && good.getLocation().equals(fromICAO))
-			gb = good;
-	}		
-	
-	String buyer = request.getParameter("buyer");
-	String amount = request.getParameter("amount");
-	
-	if( amount == null && "true".equals(request.getParameter("submit")) )
-		error = "You must select an account to transfer too.";
-	else if( amount != null && !amount.matches("[0-9]+"))
-		error = "Amount to transfer Invalid";		
-	else if( amount != null && (Integer.parseInt(amount) > gb.getAmount()))
-		error = "Amount entered > amount available";
-	else if( buyer == null && "true".equals(request.getParameter("submit")) )
-		error = "You must select an account to transfer too.";
-		
-	if( "true".equals(request.getParameter("submit")) && error == null)
-	{					
+        String buyer = request.getParameter("buyer");
+        String sAmount = request.getParameter("amount");
 
-		if( !gb.changeAllowed(owneraccount) )
-		{
-			error = "Permission denied";
-		}
-		else 
-		{
-			try
-			{
-				Fbos.transferFBOGoods(Integer.parseInt(buyer), owner, request.getParameter("fromICAO"), commodityId, Integer.parseInt(request.getParameter("amount")));
-%>
-				<jsp:forward page="goods.jsp" />
-<%
-				return;
-			} 
-			catch (DataError e)
-			{
-				error = e.getMessage();
-			}	
-		}	
+        if (Helpers.isNullOrBlank(sAmount))
+            error = "Amount to transfer Invalid";
+        else if( !sAmount.matches("[0-9]+"))
+            error = "Amount to transfer Invalid";
+        else if( Integer.parseInt(sAmount) > gb.getAmount())
+            error = "Amount entered > amount available";
+        else if(Helpers.isNullOrBlank(buyer))
+            error = "You must select an account to transfer too.";
+
+        if(error == null)
+        {
+            int amount = Integer.parseInt(request.getParameter("amount"));
+
+            if( !gb.changeAllowed(ownerAccount) )
+            {
+                error = "Permission denied";
+            }
+            else
+            {
+                try
+                {
+                    Fbos.transferFBOGoods(Integer.parseInt(buyer), owner, request.getParameter("fromICAO"), commodityId, amount);
+                    response.sendRedirect(returnPage);
+                    return;
+                }
+                catch (DataError e)
+                {
+                    error = e.getMessage();
+                }
+            }
+        }
 	}
 %>
 
@@ -109,7 +127,9 @@
 %>
 		<div class="error"><%= error %></div>
 <%
-	}	
+	}
+    else
+    {
 %>
 		<div class="form" style="width: 600px">
 		<h2>Transfer Goods </h2>
@@ -119,7 +139,7 @@
 				<input type="hidden" name="owner" value="<%=owner%>"/>
 			  	<input type="hidden" name="commodityId" value="<%=commodityId%>"/>
 			  	<input type="hidden" name="fromICAO" value="<%=fromICAO%>"/>
-			
+
 				<strong>Goods Type:</strong> <%=gb.getCommodity() %>
 			  	<br />
 			  	<br />
@@ -140,6 +160,9 @@
 		</form>
 		</div>
 	</div>
+<%
+    }
+%>
 </div>
 </body>
 </html>
