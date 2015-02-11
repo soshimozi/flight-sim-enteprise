@@ -1460,6 +1460,33 @@ public class Datafeed extends HttpServlet
 
 			queryname = "AircraftByRegistration";
 		}
+        else if(searchParam.toLowerCase().equals("serialnumber"))
+        {
+            CheckParameters(req, DFPS.serialnumber);
+
+            //Get our name parameter for the make/model we want to retrieve
+            String sSerialNumber = req.getParameter("serialnumber");
+
+            //escape single quotes contained in the string
+            int serialNumber;
+            try
+            {
+                serialNumber = Integer.parseInt(sSerialNumber);
+            }
+            catch(NumberFormatException e)
+            {
+                throw new DataError("Bad Aircraft SerialNumber.");
+            }
+
+            //get selected aircraft
+            aircraft = Aircraft.getAircraftById(serialNumber);
+            aircraftList = new ArrayList<>();
+
+            if(aircraft != null)
+                aircraftList.add(aircraft);
+
+            queryname = "AircraftBySerialNumber";
+        }
 		else if(searchParam.toLowerCase().equals("status"))
 		{
 			CheckParameters(req, DFPS.aircraftreg);
