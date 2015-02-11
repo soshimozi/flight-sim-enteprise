@@ -109,7 +109,7 @@
         {
 %>
                 <tr>
-                    <td><%= Accounts.getAccountNameById(item.userId) %></td>
+                    <td><a href="checkclientflights.jsp?id=<%= item.userId %>"><%= Accounts.getAccountNameById(item.userId) %></a></td>
                     <td><%= item.client %></td>
                     <td><%=Formatters.dateyyyymmddhhmmss.format(item.startTime) %></td>
                     <td><%=Formatters.dateyyyymmddhhmmss.format(item.endTime) %></td>
