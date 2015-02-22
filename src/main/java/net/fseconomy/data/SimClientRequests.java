@@ -56,7 +56,7 @@ public class SimClientRequests
 
     public static List<String> getClientRequestCountsByIp(String ip)
     {
-        String qry = "select pilot, count(pilot) from (select pilot from clientrequests where ip=?) a group by pilot";
+        String qry = "select name, count(pilotid) from (select pilotid from clientrequests where ip=?) t, accounts a where t.pilotid=a.id group by pilotid";
 
         return getClientRequestCounts(qry, 0, ip);
     }
@@ -86,14 +86,14 @@ public class SimClientRequests
 
     public static List<ClientRequest> getClientRequestsByAccountId(int id) throws DataError
     {
-        String qry = "Select * from clientrequests where pilotid = ? order by id desc limit 100";
+        String qry = "Select c.*, a.name from clientrequests c, accounts a where c.pilotid=a.id AND c.pilotid = ? order by id desc limit 100";
 
         return getClientRequests(qry, id, "");
     }
 
     public static List<ClientRequest> getClientRequestsByIp(String ip) throws DataError
     {
-        String qry = "Select * from clientrequests where ip = ? order by id desc limit 100";
+        String qry = "Select c.*, a.name from clientrequests c, accounts a where c.pilotid=a.id AND ip = ? order by id desc limit 100";
 
         return getClientRequests(qry, 0, ip);
     }
@@ -117,7 +117,7 @@ public class SimClientRequests
                 c.time = rs.getTimestamp("time");
                 c.ip = rs.getString("ip");
                 c.userid = rs.getInt("pilotid");
-                c.name = rs.getString("pilot");
+                c.name = rs.getString("name");
                 c.client = rs.getString("client");
                 c.state = rs.getString("state");
                 c.aircraft = rs.getString("aircraft");
@@ -139,11 +139,11 @@ public class SimClientRequests
         List<String> list = new ArrayList<>();
         try
         {
-            String qry = "Select DISTINCT ip, pilotid, pilot from clientrequests where ip like CONCAT(?, '%') order by ip";
+            String qry = "Select DISTINCT c.ip, c.pilotid, a.name from clientrequests c, accounts a where c.pilotid=a.id AND ip like CONCAT(?, '%') order by ip";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, query);
 
             while(rs.next())
-                list.add(rs.getString("ip") + "|" + rs.getString("pilotid") + "|" + rs.getString("pilot"));
+                list.add(rs.getString("ip") + "|" + rs.getString("pilotid") + "|" + rs.getString("name"));
         }
         catch (SQLException e)
         {
@@ -159,7 +159,7 @@ public class SimClientRequests
         List<String> list = new ArrayList<>();
         try
         {
-            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT pilot) AS users, COUNT(DISTINCT pilot) as count FROM clientrequests GROUP BY ip HAVING COUNT(DISTINCT pilot) > 1 ORDER BY COUNT(DISTINCT pilot) DESC";
+            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT name) AS users, COUNT(DISTINCT pilotid) as count FROM clientrequests c, accounts a WHERE c.pilotid=a.id GROUP BY ip HAVING COUNT(DISTINCT pilotid) > 1 ORDER BY COUNT(DISTINCT pilotid) DESC";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 
             while(rs.next())
@@ -179,7 +179,7 @@ public class SimClientRequests
         HashMap<String,ClientIP> list = new HashMap<>();
         try
         {
-            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT pilot) AS users, COUNT(DISTINCT pilot) as count FROM clientrequests GROUP BY ip HAVING COUNT(DISTINCT pilot) > 1 ORDER BY COUNT(DISTINCT pilot) DESC";
+            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT pilotid) AS users, COUNT(DISTINCT pilotid) as count FROM clientrequests GROUP BY ip HAVING COUNT(DISTINCT pilotid) > 1 ORDER BY COUNT(DISTINCT pilotid) DESC";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 
             while(rs.next())

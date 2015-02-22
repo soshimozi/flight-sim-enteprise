@@ -11,7 +11,7 @@
 
     String query = request.getParameter("startsWith");
     if(query == null)
-        query = "air";
+        query = "127";
 
     try
     {
@@ -28,7 +28,7 @@
                 else
                     firstLoop = false;
 
-                output += "{\"label\":\"" + array[0] + " [" + array[2] + "]\", \"value\": \"" + array[1] + "\"}\n";
+                output += "{\"label\":\"" + array[0] + " [" + array[2] + "]\", \"value\": \"" + array[0] + "\"}\n";
             }
             output += "]}";
 
