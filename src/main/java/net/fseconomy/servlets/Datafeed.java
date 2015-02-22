@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
 import net.fseconomy.dto.AircraftAlias;
-import net.fseconomy.dto.AircraftConfigs;
+import net.fseconomy.dto.AircraftConfig;
 import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
@@ -1617,7 +1617,7 @@ public class Datafeed extends HttpServlet
 			xmloutput = new Converters.xmlBuffer();
 
 		//get list of configs
-		List<AircraftConfigs> aircraftConfigs = Aircraft.getAircraftConfigs();
+		List<AircraftConfig> aircraftConfigs = Aircraft.getAircraftConfigs();
 		
 		//dump out our HashMap data
 		if(csvformat)
@@ -1647,7 +1647,7 @@ public class Datafeed extends HttpServlet
 		}
 		
 		//create an aircraft tag section for each config
-        for (AircraftConfigs anAircraft : aircraftConfigs)
+        for (AircraftConfig anAircraft : aircraftConfigs)
         {
             if (csvformat)
             {

@@ -2,6 +2,9 @@ package net.fseconomy.servlets;
 
 import net.fseconomy.services.AdminServiceData;
 import net.fseconomy.services.Authenticator;
+import net.fseconomy.services.ClientServices;
+import net.fseconomy.util.Crypto;
+import net.fseconomy.util.Helpers;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.PermitAll;
@@ -13,12 +16,34 @@ import static net.fseconomy.services.common.ResponseAccessDenied;
 import static net.fseconomy.services.common.createErrorResponse;
 import static net.fseconomy.services.common.createSuccessResponse;
 
+//Status codes: http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
+
 @DeclareRoles({"admin", "moderator", "csr", "aca"})
 
 @Path("/fse/api")
 @Produces({ "application/json;charset=UTF-8" })
 public class FSERestServlet
 {
+    @PermitAll
+    @GET
+    @Path("/accountcheck/{account}")
+    public Response accountCheck(@PathParam("account") final String encrypted)
+    {
+        String params = Crypto.decrypt(encrypted);
+        if(Helpers.isNullOrBlank(params))
+            return createErrorResponse(400, "Bad Request", "Invalid username and password.");
+
+        String[] sp = params.trim().split("\\|\\^\\|");
+        if(sp.length != 2)
+            return createErrorResponse(400, "Bad Request", "Invalid username and password.");
+
+        String token = Authenticator.getInstance().login(sp[0], sp[1]);
+        if(token == null)
+            return createErrorResponse(400, "Bad Request", "Invalid credentials.");
+        else
+            return createSuccessResponse(200, null, null, token);
+    }
+
     @PermitAll
     @POST
     @Path("/login")
@@ -41,21 +66,21 @@ public class FSERestServlet
             return createErrorResponse(400, "Bad Request", "Invalid username and authtoken.");
     }
 
-    @POST
-    @Path("/pilotinfo")
-    public Response pilotInfo(@HeaderParam("authtoken") String authToken)
-    {
-//        if (Authenticator.getInstance().isAuthTokenValid(authToken))
-//            return FSEServiceData.getPilotInfo();
-//        else
-            return ResponseAccessDenied();
-    }
-
     @RolesAllowed({"admin", "moderator"})
     @GET
     @Path("/templateitems/{id}")
     public Response getPilotStatus(@PathParam("id") final int id)
     {
         return AdminServiceData.getTemplateLatLonCountById(id);
+    }
+
+    @GET
+    @Path("/rentalaircraftconfig")
+    public Response getRentedAircraftConfig(@HeaderParam("authtoken") String authToken)
+    {
+        int userId = Authenticator.getInstance().getUserIdFromToken(authToken);
+        Response response = ClientServices.getRentedAircraftConfig(userId);
+
+        return response;
     }
 }

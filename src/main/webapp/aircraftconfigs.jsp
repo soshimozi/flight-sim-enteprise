@@ -6,7 +6,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    List<AircraftConfigs> aircraftList = Aircraft.getAircraftConfigs();
+    List<AircraftConfig> aircraftList = Aircraft.getAircraftConfigs();
 
     String sview = request.getParameter("view");
     int view = 0;
@@ -83,7 +83,7 @@
 	</thead>
 	<tbody>
 <%
-        for (AircraftConfigs aircraft : aircraftList)
+        for (AircraftConfig aircraft : aircraftList)
         {
         String price = Formatters.currency.format(aircraft.price);
         int totalFuel = aircraft.fcapExt1 + aircraft.fcapLeftTip + aircraft.fcapLeftAux + aircraft.fcapLeftMain +
@@ -150,7 +150,7 @@
 	</thead>
 	<tbody>
 <%
-        for (AircraftConfigs aircraft : aircraftList)
+        for (AircraftConfig aircraft : aircraftList)
         {
             String price = Formatters.currency.format(aircraft.price);
             double fType = aircraft.fueltype;

@@ -36,6 +36,7 @@ import javax.servlet.http.HttpSession;
 
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
+import net.fseconomy.util.CacheContainer;
 import net.fseconomy.util.Formatters;
 import net.fseconomy.util.GlobalLogger;
 import net.fseconomy.util.Helpers;
@@ -47,9 +48,8 @@ public class UserCtl extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 	private static ScheduledFuture<?> future = null;
-	public static MaintenanceCycle maintenanceObject = null;	
-
     public static EmbeddedCacheManager cacheManager;
+    public static MaintenanceCycle maintenanceObject = null;
 
     public void init()
 	{
@@ -57,11 +57,9 @@ public class UserCtl extends HttpServlet
 
 		FullFilter.updateFilter(DALHelper.getInstance());
 
-        createCache();
-
         //do this section last as this kicks off the timer
 		maintenanceObject = new MaintenanceCycle();
-		
+
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
 		if(Boolean.getBoolean("Debug"))
@@ -88,15 +86,14 @@ public class UserCtl extends HttpServlet
 		}
 	}
 
-    private void createCache()
+    private void createCached()
     {
-        cacheManager = new DefaultCacheManager();
-        cacheManager.defineConfiguration("ServiceKey-cache", new ConfigurationBuilder()
-                .eviction().expiration().lifespan(5, TimeUnit.MINUTES)
-                .build());
+        cacheManager = CacheContainer.getCacheContainer();
+        cacheManager.defineConfiguration("token-cache", new ConfigurationBuilder().eviction().expiration().lifespan(1, TimeUnit.HOURS).maxIdle(1, TimeUnit.HOURS).build());
+        cacheManager.defineConfiguration("ServiceKey-cache", new ConfigurationBuilder().eviction().expiration().lifespan(5, TimeUnit.MINUTES).build());
     }
 
-	private static long minutesToNextHalfHour() 
+    private static long minutesToNextHalfHour()
 	{
 		Calendar calendar = Calendar.getInstance();
 		
@@ -115,8 +112,8 @@ public class UserCtl extends HttpServlet
 	{
         GlobalLogger.logApplicationLog("UserCtl destroy() called", UserCtl.class);
 
-        cacheManager.stop();
 		future.cancel(false);
+        cacheManager.stop();
 	}
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)

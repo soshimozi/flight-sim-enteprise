@@ -20,10 +20,7 @@
 package net.fseconomy.servlets;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -39,6 +36,7 @@ import net.fseconomy.beans.UserBean;
 import net.fseconomy.data.*;
 import net.fseconomy.dto.CloseAirport;
 import net.fseconomy.dto.DepartFlight;
+import net.fseconomy.dto.LatLon;
 import net.fseconomy.util.Crypto;
 import net.fseconomy.util.GlobalLogger;
 import net.fseconomy.util.Helpers;
@@ -58,9 +56,19 @@ public class FSagent extends HttpServlet
 	{
 		UserBean userBean;
 
-        String user = req.getParameter("user");
-        String password = req.getParameter("pass");
-        String hashmac = req.getParameter("up");
+        String mp = req.getParameter("mp");
+        if(Helpers.isNullOrBlank(mp))
+        {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
+            return;
+        }
+
+        String paramString = Crypto.decrypt(mp);
+
+        HashMap<String, String> hashMap = parseAgentString(paramString.trim());
+
+        String user = hashMap.get("user");
+        String password = hashMap.get("pass");
 
 		if (user == null || password == null || (userBean=Accounts.userExists(user, password)) == null)
 		{
@@ -69,7 +77,7 @@ public class FSagent extends HttpServlet
 		}
 
 		req.setAttribute("user", userBean);
-		String action = req.getParameter("action");
+		String action = hashMap.get("action");
 
 		if (action == null)
 		{
@@ -97,37 +105,38 @@ public class FSagent extends HttpServlet
 		    	reg = null;
 		    
 		    String icao = null;
-		    if(req.getParameter("lat") != null)
+		    if(hashMap.get("lat") != null)
 		    {
-		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon"))).icao;
+		    	icao = Airports.closestAirport(Double.parseDouble(hashMap.get("lat")), Double.parseDouble(hashMap.get("lon"))).icao;
 		    }
 
-            String mac;
+//            String mac;
+//
+//            if(!Helpers.isNullOrBlank(hashmac))
+//            {
+//                if(hashmac.length() < 32+12)
+//                {
+//                    //FSX error return
+//                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid information");
+//                    return;
+//                }
+//
+//                long lmac = Long.decode("#" + hashmac.substring(32));
+//                mac = String.format("%x", ( lmac ^ 0xAAAAAAAAAAAAL)).toUpperCase();
+//
+//                String chkMD5 = Crypto.getMD5(mac);
+//                if(!chkMD5.equals(hashmac.substring(0,32)))
+//                {
+//                    //FSX error return
+//                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid information");
+//                    return;
+//                }
+//            }
+//            else
 
-            if(!Helpers.isNullOrBlank(hashmac))
-            {
-                if(hashmac.length() < 32+12)
-                {
-                    //FSX error return
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid information");
-                    return;
-                }
+            String mac = "000000000000";
 
-                long lmac = Long.decode("#" + hashmac.substring(32));
-                mac = String.format("%x", ( lmac ^ 0xAAAAAAAAAAAAL)).toUpperCase();
-
-                String chkMD5 = Crypto.getMD5(mac);
-                if(!chkMD5.equals(hashmac.substring(0,32)))
-                {
-                    //FSX error return
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid information");
-                    return;
-                }
-            }
-            else
-                mac = "000000000000";
-
-            SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), "FS", action, reg, aircraftId, req.getParameter("lat"), req.getParameter("lon"), icao, "");
+            SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), "FS", action, reg, aircraftId, hashMap.get("lat"), hashMap.get("lon"), icao, "");
 		}
 
 		try
@@ -138,22 +147,22 @@ public class FSagent extends HttpServlet
             switch (action)
             {
                 case "addAircraft":
-                    output = addModel(req);
+                    output = addModel(hashMap);
                     if (output == null)
                         output = "mess=Your aircraft is not known, but a request is added to the database.";
                     else
                         output = "mess=Your aircraft is known as " + output;
                     break;
                 case "start":
-                    output = doStart(req, userBean);
+                    output = doStart(hashMap.get("aircraft"), new LatLon(hashMap.get("lat"), hashMap.get("lon")), userBean);
                     break;
                 case "test":
-                    String version = req.getParameter("version");
+                    String version = hashMap.get("version");
                     if (!SimClientRequests.GetFSUIPCClientVersion().equals(version))
                         throw new DataError("A new version of this program is available.");
                     break;
                 case "arrive":
-                    output = doArrive(req, userBean);
+                    output = doArrive(hashMap, userBean);
                     break;
                 case "cancel":
                     output = doCancel(userBean);
@@ -169,47 +178,59 @@ public class FSagent extends HttpServlet
 			resp.getWriter().println("mess=" + e.getMessage());
 		}
 	}
-	
-	String addModel(HttpServletRequest req) throws DataError
+
+    HashMap<String, String> parseAgentString(String query)
+    {
+        String[] params = query.split("&");
+        HashMap<String, String> map = new HashMap<>();
+        for (String param : params)
+        {
+            String name = param.split("=")[0];
+            String value = param.split("=")[1];
+            map.put(name, value);
+        }
+
+        return map;
+    }
+
+	String addModel(HashMap<String, String> hashMap) throws DataError
 	{
-		String aircraft = req.getParameter("aircraft");
-		String fcapCenter = req.getParameter("c");
-		String fcapLeftMain = req.getParameter("lm");
-		String fcapLeftAux = req.getParameter("la");
-		String fcapLeftTip = req.getParameter("lt");
-		String fcapRightMain = req.getParameter("rm");
-		String fcapRightAux = req.getParameter("ra");
-		String fcapRightTip = req.getParameter("rt");
-		String fcapCenter2 = req.getParameter("c2");
-		String fcapCenter3 = req.getParameter("c3");
-		String fcapExt1 = req.getParameter("x1");
-		String fcapExt2 = req.getParameter("x2");
+		String aircraft = hashMap.get("aircraft");
+		String fcapCenter = hashMap.get("c");
+		String fcapLeftMain = hashMap.get("lm");
+		String fcapLeftAux = hashMap.get("la");
+		String fcapLeftTip = hashMap.get("lt");
+        String fcapRightMain = hashMap.get("rm");
+		String fcapRightAux = hashMap.get("ra");
+		String fcapRightTip = hashMap.get("rt");
+		String fcapCenter2 = hashMap.get("c2");
+		String fcapCenter3 = hashMap.get("c3");
+		String fcapExt1 = hashMap.get("x1");
+		String fcapExt2 = hashMap.get("x2");
 		if (fcapCenter == null || fcapLeftMain == null || fcapLeftAux == null ||
 			fcapLeftTip == null || fcapRightMain == null || fcapRightAux == null|| fcapRightTip == null ||
 			fcapCenter2 == null || fcapCenter3 == null || fcapExt1 == null || fcapExt2 == null)
 				throw new DataError("Not enough information recieved.");
+
 		int[] fuelCapacities = new int[] { Integer.parseInt(fcapCenter), Integer.parseInt(fcapLeftMain),
 			Integer.parseInt(fcapLeftAux),Integer.parseInt(fcapLeftTip), Integer.parseInt(fcapRightMain), 
 			Integer.parseInt(fcapRightAux),Integer.parseInt(fcapRightTip), Integer.parseInt(fcapCenter2),
 			Integer.parseInt(fcapCenter3), Integer.parseInt(fcapExt1), Integer.parseInt(fcapExt2) };
+
 		return Models.addModel(aircraft, fuelCapacities);
 	}
 
-	CloseAirport closestAirport(HttpServletRequest req)
+	CloseAirport closestAirport(LatLon latlon)
 	{
-		String lat = req.getParameter("lat");
-		String lon = req.getParameter("lon");
-		if (lat == null || lon == null )
-			return null;
-		double dLat = Double.parseDouble(lat);
-		double dLon = Double.parseDouble(lon);
+		double dLat = latlon.lat;
+		double dLon = latlon.lon;
+
 		return Airports.closestAirport(dLat, dLon);
 	}
 	
-	String doStart(HttpServletRequest req, UserBean user) throws DataError
+	String doStart(String FSAircraft, LatLon latlon, UserBean user) throws DataError
 	{
-		String FSAircraft = req.getParameter("aircraft");
-		CloseAirport closest= closestAirport(req);
+		CloseAirport closest= closestAirport(latlon);
 		if (FSAircraft == null || closest == null)
 		{
 			return "";
@@ -298,24 +319,24 @@ public class FSagent extends HttpServlet
 		return "";
 	}
 	
-	private List getEngineDamage(HttpServletRequest req, String parameter, int paramValue)
+	private List getEngineDamage(HashMap<String, String> hashMap, String parameter, int paramValue)
 	{
 		List returnValue = new ArrayList();
 		for (int c=1; c <= 4; c++)
 		{
 			String param = parameter + c;
-			String value = req.getParameter(param);
+			String value = hashMap.get(param);
 			if (value == null)
 				break;
 			returnValue.add(new int[] {c, paramValue, Integer.parseInt(value)});
 		}
 		return returnValue;
 	}
-	private int[][] getDamage(HttpServletRequest req)
+	private int[][] getDamage(HashMap<String, String> hashMap)
 	{
 		List returnValue = new ArrayList();
-		returnValue.addAll(getEngineDamage(req, "heat", AircraftMaintenanceBean.DAMAGE_HEATING));
-		returnValue.addAll(getEngineDamage(req, "mixture", AircraftMaintenanceBean.DAMAGE_MIXTURE));
+		returnValue.addAll(getEngineDamage(hashMap, "heat", AircraftMaintenanceBean.DAMAGE_HEATING));
+		returnValue.addAll(getEngineDamage(hashMap, "mixture", AircraftMaintenanceBean.DAMAGE_MIXTURE));
 		return (int[][]) returnValue.toArray(new int[0][0]);
 	}
 	
@@ -356,7 +377,7 @@ public class FSagent extends HttpServlet
 		}
 	}	
 	
-	String doArrive(HttpServletRequest req, UserBean user) throws DataError
+	String doArrive(HashMap<String, String> hashMap, UserBean user) throws DataError
 	{		
 		//First things first, we need to check if we are already processing a flight for this user
 		// Add lock on userid, if already locked we are already processing so kick SENDERROR
@@ -369,19 +390,19 @@ public class FSagent extends HttpServlet
 			//System.err.println(new Timestamp(System.currentTimeMillis()) + " - Processing FS9 flight data UserID = " + user.getId());
 
 			String message;
-			String engineTime = req.getParameter("time");
-			String engineTicks = req.getParameter("ticks");
-			String fCenter = req.getParameter("c");
-			String fLeftMain = req.getParameter("lm");
-			String fLeftAux = req.getParameter("la");
-			String fLeftTip = req.getParameter("let");
-			String fRightMain = req.getParameter("rm");
-			String fRightAux = req.getParameter("ra");
-			String fRightTip = req.getParameter("rt");
-			String fCenter2 = req.getParameter("c2");
-			String fCenter3 = req.getParameter("c3");
-			String fExt1 = req.getParameter("x1");
-			String fExt2 = req.getParameter("x2");
+			String engineTime = hashMap.get("time");
+			String engineTicks = hashMap.get("ticks");
+			String fCenter = hashMap.get("c");
+			String fLeftMain = hashMap.get("lm");
+			String fLeftAux = hashMap.get("la");
+			String fLeftTip = hashMap.get("let");
+			String fRightMain = hashMap.get("rm");
+			String fRightAux = hashMap.get("ra");
+			String fRightTip = hashMap.get("rt");
+			String fCenter2 = hashMap.get("c2");
+			String fCenter3 = hashMap.get("c3");
+			String fExt1 = hashMap.get("x1");
+			String fExt2 = hashMap.get("x2");
 			
 			if (engineTime == null || engineTicks == null || fCenter == null || fLeftMain == null || fLeftAux == null ||
 				fLeftTip == null || fRightMain == null || fRightAux == null|| fRightTip == null ||
@@ -391,8 +412,8 @@ public class FSagent extends HttpServlet
 				throw new DataError("Flight data missing parameters, flight aborted.");
 			}
 			
-			String sNight = req.getParameter("night");
-			String sEnv = req.getParameter("env");
+			String sNight = hashMap.get("night");
+			String sEnv = hashMap.get("env");
 			
 			int night = 0, assignmentsLeft;
 			
@@ -407,14 +428,20 @@ public class FSagent extends HttpServlet
 				Float.parseFloat(fLeftAux),Float.parseFloat(fLeftTip), Float.parseFloat(fRightMain), 
 				Float.parseFloat(fRightAux),Float.parseFloat(fRightTip), Float.parseFloat(fCenter2), Float.parseFloat(fCenter3),
 				Float.parseFloat(fExt1), Float.parseFloat(fExt2) };
-			
-			CloseAirport closest = closestAirport(req);
+
+            if(hashMap.get("lat") == null && hashMap.get("lon") == null)
+            {
+                GlobalLogger.logFlightLog("Flight data missing parameters: lat/lon", FSagent.class);
+                throw new DataError("Flight data missing parameters, flight aborted.");
+            }
+
+			CloseAirport closest = closestAirport(new LatLon(hashMap.get("lat"), hashMap.get("lon")));
 			if (closest == null)
 			{
 				throw new DataError("Invalid lat/lon, flight aborted.");
 			}
 					
-			int[][] damage = getDamage(req);
+			int[][] damage = getDamage(hashMap);
 			
 			//assignmentsLeft = data.freeAircraft(user, closest, Integer.parseInt(engineTime), Integer.parseInt(engineTicks), fuel, night, envFactor, damage, false);
 			assignmentsLeft = Flights.processFlight(user, closest, Integer.parseInt(engineTime), Integer.parseInt(engineTicks), fuel, night, envFactor, damage, SimClientRequests.SimType.FSUIPC);

@@ -5,6 +5,7 @@ package net.fseconomy.util;
 // Reference from http://stackoverflow.com/questions/6669181/why-does-my-aes-encryption-throws-an-invalidkeyexception/6669812#6669812
 
 import org.bouncycastle.util.encoders.Base64;
+import org.jboss.resteasy.util.Hex;
 
 import java.security.Key;
 import java.security.MessageDigest;
@@ -16,25 +17,25 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class Crypto
 {
-    public static String key = "0123456789abcdef";
-    public static byte[] key_Array = null;
+    public static byte[] key_Array = "ZonkersScoobyDoo".getBytes();
+    static byte[] iv = "0123456789abcdef".getBytes();
 
     public static String encrypt(String strToEncrypt)
     {
         try
         {
-            Cipher _Cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            Cipher _Cipher = Cipher.getInstance("AES/CBC/NOPADDING");
 
             // Initialization vector.
             // It could be any value or generated using a random number generator
             // and attached to the start or end of the encrypted message
-            byte[] iv = { 1, 3, 2, 4, 5, 6, 6, 5, 4, 3, 2, 1, 7, 5, 5, 3 };
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
-            Key SecretKey = new SecretKeySpec(key.getBytes(), "AES");
+            Key SecretKey = new SecretKeySpec(key_Array, "AES");
             _Cipher.init(Cipher.ENCRYPT_MODE, SecretKey, ivspec);
+            byte[] ba = _Cipher.doFinal(strToEncrypt.getBytes());
 
-            return Base64.toBase64String(_Cipher.doFinal(strToEncrypt.getBytes()));
+            return Hex.encodeHex(ba);
         }
         catch (Exception e)
         {
@@ -47,18 +48,18 @@ public class Crypto
     {
         try
         {
-            Cipher _Cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            Cipher _Cipher = Cipher.getInstance("AES/CBC/NOPADDING");
 
             // Initialization vector.
             // It could be any value or generated using a random number generator
             // and attached to the start or end of the encrypted message
-            byte[] iv = { 1, 3, 2, 4, 5, 6, 6, 5, 4, 3, 2, 1, 7, 5, 5, 3 };
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
-            Key SecretKey = new SecretKeySpec(key.getBytes(), "AES");
+            Key SecretKey = new SecretKeySpec(key_Array, "AES");
             _Cipher.init(Cipher.DECRYPT_MODE, SecretKey, ivspec);
 
-            return new String(_Cipher.doFinal(Base64.decode(EncryptedMessage)));
+            byte[] bytes = Hex.decodeHex(EncryptedMessage);
+            return new String(_Cipher.doFinal(bytes));
         }
         catch (Exception e)
         {

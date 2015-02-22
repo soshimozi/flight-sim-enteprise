@@ -61,46 +61,6 @@ public class FSagentFSX extends HttpServlet
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 		throws ServletException, IOException
 	{
-		//used by doArrive()
-		simType = SimClientRequests.SimType.FSX;
-
-		//See if this is an XPlane user
-		String md5sum = req.getParameter("md5sum");
-		boolean isXPlane = md5sum != null;
-		
-		if(isXPlane)
-		{
-			simType = SimClientRequests.SimType.XP;
-			
-			//Setup for doing an MD5 CRC check on the script calling us from the python plugin
-			try 
-			{
-				String qry = "SELECT svalue FROM sysvariables WHERE variablename='XPlaneScriptMD5'";
-				String currXP10MD5 = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
-	
-				qry = "SELECT svalue FROM sysvariables WHERE variablename='XPlane9ScriptMD5'";
-				String currXP9MD5 = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
-	
-				if (!currXP10MD5.equals(md5sum) && !currXP9MD5.equals(md5sum)) 
-				{
-					StringBuffer xml = new StringBuffer();
-					xml.append("<?xml version=\"1.0\"?>");
-					xml.append("<response>");
-					xml.append("<error>");
-					xml.append("Invalid Python script detected for X-Plane - please redownload from FSE site");
-					xml.append("</error>");
-					xml.append("</response>");
-					resp.getWriter().println(xml);
-					return;
-				}
-			} 
-			catch(SQLException e)
-			{
-				e.printStackTrace();
-				return;
-			}
-		}
-
         String user = req.getParameter("user");
         String password = req.getParameter("pass");
         String hashmac = req.getParameter("up");
@@ -109,50 +69,18 @@ public class FSagentFSX extends HttpServlet
 		
 		if (user == null || password == null || (userBean=Accounts.userExists(user, password)) == null)
 		{
-			//XPlane error return
-			if(isXPlane)
-			{
-				StringBuffer xml = new StringBuffer();
-				xml.append("<?xml version=\"1.0\"?>");
-				xml.append("<response>");
-				xml.append("<error>");
-				xml.append("Invalid user information provided");
-				xml.append("</error>");
-				xml.append("</response>");
-				resp.getWriter().println(xml);
-				return;
-			}
-			else
-			{
-				//FSX error return
-				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid account information");
-				return;
-			}
+            //FSX error return
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid account information");
+            return;
 		}
 		
 		req.setAttribute("user", userBean);
 		String action = req.getParameter("action");
 		if (action == null)
 		{
-			//XPlane error return
-			if(isXPlane)
-			{
-				StringBuffer xml = new StringBuffer();
-				xml.append("<?xml version=\"1.0\"?>");
-				xml.append("<response>");
-				xml.append("<error>");
-				xml.append("No action specified");
-				xml.append("</error>");
-				xml.append("</response>");
-				resp.getWriter().println(xml);
-				return;
-			}
-			else
-			{
-				//FSX error return
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No action specified");
-				return;
-			}
+            //FSX error return
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "No action specified");
+            return;
 		}
 		
 		//Log entry in clientrequest table
@@ -181,27 +109,9 @@ public class FSagentFSX extends HttpServlet
 		    	icao = Airports.closestAirport(Double.parseDouble(req.getParameter("lat")), Double.parseDouble(req.getParameter("lon"))).icao;
 		    }
 
-		    String client = isXPlane ? "XP" : "FSX";
+            String mac = "000000000000";
 
-            String mac;
-
-            if(!Helpers.isNullOrBlank(hashmac))
-            {
-                long lmac = Long.decode("#" + hashmac.substring(32));
-                mac = String.format("%x", ( lmac ^ 0xAAAAAAAAAAAAL)).toUpperCase();
-
-                String chkMD5 = Crypto.getMD5(mac);
-                if(!chkMD5.equals(hashmac.substring(0,32)))
-                {
-                    //FSX error return
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid information");
-                    return;
-                }
-            }
-            else
-                mac = "000000000000";
-
-			SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), client, action, reg, aircraftId, req.getParameter("lat"), req.getParameter("lon"), icao, "");
+			SimClientRequests.addClientRequestEntry(ipAddress, mac, userBean.getId(), userBean.getName(), simType.name(), action, reg, aircraftId, req.getParameter("lat"), req.getParameter("lon"), icao, "");
 		}
 		
 		String content = "";

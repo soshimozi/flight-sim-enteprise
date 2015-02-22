@@ -17,7 +17,7 @@
 	}
 
 	int id = Integer.parseInt(sId);
-	AircraftConfigs acconfig = Aircraft.getAircraftConfigs(id);
+	AircraftConfig acconfig = Aircraft.getAircraftConfigs(id);
 	
 	double endurHr = (double)Math.round(((double)acconfig.fcaptotal/(double)acconfig.gph)*10.0)/10.0;
 	double endurNm = (double)Math.round((endurHr * acconfig.cruisespeed)*10.0)/10.0;
