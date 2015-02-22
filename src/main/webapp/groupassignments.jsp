@@ -297,6 +297,7 @@
 <div id="wrapper">
     <div class="content">
 
+        <form method="post" action="userctl" id="assignmentForm">
         <jsp:include flush="true" page="assignmentsgroupdata.jsp">
             <jsp:param name="groupid" value="<%=groupId%>"/>
             <jsp:param name="isStaff" value="<%=isStaff%>"/>
@@ -319,7 +320,6 @@
 %>
             <div class="panel panel-primary alert-info" style="background: lightsteelblue; padding: 15px">
                 <h3>Owner and Staff Only</h3>
-                <form class="form-horizontal" id="assignmentForm">
                 <div class="well">
                     <h4>Assignment Actions</h4>
                     <input class="btn btn-warning" type="button" name="unlock_Selected" value="Unlock Selected" onclick="unlockAssignments()"/>
@@ -366,12 +366,12 @@
                             <input class="btn btn-primary" type="button" id="transferButton" name="transferButton" value="Transfer"/>
                         </div>
                 </div>
-                </form>
             </div>
         </div>
 <%
     }
 %>
+        </form>
     </div>
 </div>
 

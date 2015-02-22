@@ -26,7 +26,6 @@
 
 %>
 
-<form method="post" action="userctl" id="assignmentForm">
     <div>
         <input type="hidden" name="event" value="Assignment"/>
         <input type="hidden" name="type" value="add"/>
@@ -197,10 +196,9 @@
         counter++;
     }
 %>
-
             </tbody>
         </table>
         Total Pay for Assignments: <strong><%= Formatters.currency.format(assignmentsTotalPay) %></strong>
         <br>
     </div>
-</form>
+
