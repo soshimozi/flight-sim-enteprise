@@ -27,13 +27,6 @@
 %>
 
     <div>
-        <input type="hidden" name="event" value="Assignment"/>
-        <input type="hidden" name="type" value="add"/>
-        <input type="hidden" name="id"/>
-        <input type="hidden" name="groupid" value="<%= groupid %>"/>
-        <input type="hidden" name="comment"/>
-        <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
-
         <table class="assignmentTable tablesorter-default tablesorter">
             <caption><%= caption %></caption>
             <thead>
