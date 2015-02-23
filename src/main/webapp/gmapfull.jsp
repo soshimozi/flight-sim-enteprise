@@ -222,7 +222,7 @@
                 map: map,
                 icon: iconTakeoff,
                 position: new google.maps.LatLng(depart.latlon.lat, depart.latlon.lon),
-                title: depart.icao + " - " + depart.name
+                title: depart.icao + " - " + depart.title
             });
 
             var assignmentTable = makeAssignmentTable(depart.icao, entry.assignments);
@@ -240,7 +240,7 @@
                     map: map,
                     icon: iconLanding,
                     position: new google.maps.LatLng(dest.latlon.lat, dest.latlon.lon),
-                    title: dest.icao + " - " + dest.name
+                    title: dest.icao + " - " + dest.title
                 });
 
                 markers.push(markerDest);
