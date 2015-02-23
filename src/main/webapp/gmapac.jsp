@@ -80,7 +80,7 @@
         sb.append("<div class=\"infowindow-content\">");
         sb.append(airportLink);
         sb.append("<br>");
-        sb.append(Accounts.getAccountNameById(aircraft.getOwner()));
+        sb.append(Converters.escapeJavaScript(Accounts.getAccountNameById(aircraft.getOwner())));
         sb.append("<br>");
         sb.append(aircraft.getRegistration());
         sb.append("<br>");
@@ -109,7 +109,7 @@
         sb.append(" Buyback Price");
         sb.append("</div>");
 %>
-			[<%=lat%>, <%=lon%>, 0, '<%=sb.toString()%>'], 
+			[<%=lat%>, <%=lon%>, 0, '<%=sb.toString()%>'],
 <%
         sb.setLength(0);
     }
