@@ -298,6 +298,13 @@
     <div class="content">
 
         <form method="post" action="userctl" id="assignmentForm">
+            <div>
+                <input type="hidden" name="event" value="Assignment"/>
+                <input type="hidden" name="type" value="add"/>
+                <input type="hidden" name="id"/>
+                <input type="hidden" name="groupid" value="<%= groupId %>"/>
+                <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+            </div>
         <jsp:include flush="true" page="assignmentsgroupdata.jsp">
             <jsp:param name="groupid" value="<%=groupId%>"/>
             <jsp:param name="isStaff" value="<%=isStaff%>"/>
