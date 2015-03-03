@@ -179,7 +179,7 @@ public class SimClientRequests
         HashMap<String,ClientIP> list = new HashMap<>();
         try
         {
-            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT pilotid) AS users, COUNT(DISTINCT pilotid) as count FROM clientrequests GROUP BY ip HAVING COUNT(DISTINCT pilotid) > 1 ORDER BY COUNT(DISTINCT pilotid) DESC";
+            String qry = "SELECT ip, GROUP_CONCAT(DISTINCT name) AS users, COUNT(DISTINCT pilotid) as count FROM clientrequests c, accounts a where a.id=c.pilotid GROUP BY ip HAVING COUNT(DISTINCT pilotid) > 1 ORDER BY COUNT(DISTINCT pilotid) DESC";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 
             while(rs.next())
