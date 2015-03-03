@@ -41,16 +41,16 @@ public class ServiceData
         {
             balance = getBalanceAmount(type, account);
 
-            return createSuccessResponse(200, null, null, Formatters.twoDecimals.format(balance));
+            return createSuccessResponse(200, 200, null, null, Formatters.twoDecimals.format(balance));
         }
         catch(BadRequestException e)
         {
-            return createErrorResponse(200, "Bad Request", "No records found.");
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error",  "An error has occurred.");
+            return createErrorResponse(500, 500, "System Error",  "An error has occurred.");
         }
     }
 
@@ -63,21 +63,21 @@ public class ServiceData
 
             //if not, return error
             if(balance < amount)
-                return createErrorResponse(200, "Bad Request", "Exceeds available funds.");
+                return createErrorResponse(200, 200, "Bad Request", "Exceeds available funds.");
 
             String qry = "UPDATE accounts set bank = bank - ?, money = money + ? WHERE id = ?;";
             DALHelper.getInstance().ExecuteNonQuery(qry, amount, amount, account);
 
-            return createSuccessResponse(200, null, null, "Successful.");
+            return createSuccessResponse(200, 200, null, null, "Successful.");
         }
         catch(BadRequestException e)
         {
-            return createErrorResponse(200, "Bad Request", "No records found.");
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error", "An error has occurred.");
+            return createErrorResponse(500, 500, "System Error", "An error has occurred.");
         }
     }
 
@@ -90,21 +90,21 @@ public class ServiceData
 
             //if not, return error
             if(balance < amount)
-                return createErrorResponse(200, "Bad Request", "Exceeds available funds.");
+                return createErrorResponse(200, 200, "Bad Request", "Exceeds available funds.");
 
             String qry = "UPDATE accounts set bank = bank + ?, money = money - ? WHERE id = ?;";
             DALHelper.getInstance().ExecuteNonQuery(qry, amount, amount, account);
 
-            return createSuccessResponse(200, null, null, "Successful.");
+            return createSuccessResponse(200, 200, null, null, "Successful.");
         }
         catch(BadRequestException e)
         {
-            return createErrorResponse(200, "Bad Request", "No records found.");
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error", "An error has occurred.");
+            return createErrorResponse(500, 500, "System Error", "An error has occurred.");
         }
     }
 
@@ -117,11 +117,11 @@ public class ServiceData
 
             //if not, return error
             if(balance < amount)
-                return createErrorResponse(200, "Bad Request", "Exceeds available funds.");
+                return createErrorResponse(200, 200, "Bad Request", "Exceeds available funds.");
 
             //check that transferTo exists
             if(!checkAccountExists(transferTo))
-                return createErrorResponse(200, "Bad Request", "TransferTo account does not exist.");
+                return createErrorResponse(200, 200, "Bad Request", "TransferTo account does not exist.");
 
             int serviceid = getServiceId(serviceKey);
 
@@ -129,18 +129,18 @@ public class ServiceData
             boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, account, amount, transferTo, "Service(" + serviceid + "): " + note);
 
             if(success)
-                return createSuccessResponse(200, null, null, "Successful.");
+                return createSuccessResponse(200, 200, null, null, "Successful.");
             else
-                return createErrorResponse(200, "System Error",  "Unable to process.");
+                return createErrorResponse(200, 200, "System Error",  "Unable to process.");
         }
         catch(BadRequestException e)
         {
-            return createErrorResponse(200, "Bad Request", "No records found.");
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error", "An error has occurred.");
+            return createErrorResponse(500, 500, "System Error", "An error has occurred.");
         }
     }
 
@@ -152,13 +152,13 @@ public class ServiceData
 
             //if not, return error
             if(aircraft == null)
-                return createErrorResponse(200, "Bad Request", "Registration not found.");
+                return createErrorResponse(200, 200, "Bad Request", "Registration not found.");
 
             if(!aircraft.isForSale())
-                return createErrorResponse(200, "Bad Request", "Aircraft not for sale.");
+                return createErrorResponse(200, 200, "Bad Request", "Aircraft not for sale.");
 
             if (!hasFundsRequired(account, aircraft.getSellPrice()))
-                return createErrorResponse(200, "Bad Request", "Exceeds available funds.");
+                return createErrorResponse(200, 200, "Bad Request", "Exceeds available funds.");
 
             int serviceid = getServiceId(serviceKey);
 
@@ -166,18 +166,18 @@ public class ServiceData
             boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, serialNumber, account, "Service(" + serviceid + "): " + note);
 
             if(success)
-                return createSuccessResponse(200, null, null, "Aircraft purchase successful.");
+                return createSuccessResponse(200, 200, null, null, "Aircraft purchase successful.");
             else
-                return createErrorResponse(200, "System Error",  "Unable to process.");
+                return createErrorResponse(200, 200, "System Error",  "Unable to process.");
         }
         catch(BadRequestException e)
         {
-            return createErrorResponse(200, "Bad Request", "No records found.");
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error",  "An error has occurred.");
+            return createErrorResponse(500, 500, "System Error",  "An error has occurred.");
         }
     }
 
@@ -189,13 +189,13 @@ public class ServiceData
 
             //if not, return error
             if(aircraft == null)
-                return createErrorResponse(200, "Bad Request", "SerialNumber not found.");
+                return createErrorResponse(200, 200, "Bad Request", "SerialNumber not found.");
 
             if(aircraft.getOwner() != account)
-                return createErrorResponse(200, "Bad Request", "Not the owner.");
+                return createErrorResponse(200, 200, "Bad Request", "Not the owner.");
 
             if(isAircraftLeased(aircraft.getId()))
-                return createErrorResponse(200, "Bad Request", "Aircraft is leased.");
+                return createErrorResponse(200, 200, "Bad Request", "Aircraft is leased.");
 
             int serviceid = getServiceId(serviceKey);
 
@@ -203,18 +203,18 @@ public class ServiceData
             boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, serialNumber, transferTo, "Service(" + serviceid + "): " + note);
 
             if (success)
-                return createSuccessResponse(200, null, null, "Aircraft transfer successful.");
+                return createSuccessResponse(200, 200, null, null, "Aircraft transfer successful.");
             else
-                return createErrorResponse(200, "System Error", "Unable to process.");
+                return createErrorResponse(200, 200, "System Error", "Unable to process.");
         }
         catch(BadRequestException e)
         {
-            return createErrorResponse(200, "Bad Request", "No records found.");
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error",  "An error has occurred.");
+            return createErrorResponse(500, 500, "System Error",  "An error has occurred.");
         }
     }
 
@@ -229,7 +229,7 @@ public class ServiceData
 
             //if not, return error
             if(aircraft == null)
-                return createErrorResponse(200, "Bad Request", "Registration not found.");
+                return createErrorResponse(200, 200, "Bad Request", "Registration not found.");
 
             int serviceid = getServiceId(serviceKey);
 
@@ -246,21 +246,21 @@ public class ServiceData
                 success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, serialNumber, "Service(" + serviceid + "): " + note);
             }
             else
-                return createErrorResponse(200, "Bad Request", "Account not lessor.");
+                return createErrorResponse(200, 200, "Bad Request", "Account not lessor.");
 
             if (success)
-                return createSuccessResponse(200, null, null, "Aircraft " + mode + " successful.");
+                return createSuccessResponse(200, 200, null, null, "Aircraft " + mode + " successful.");
             else
-                return createErrorResponse(500, "System Error", "Unable to process");
+                return createErrorResponse(500, 500, "System Error", "Unable to process");
         }
         catch(BadRequestException e)
         {
-            return createErrorResponse(200, "Bad Request", "No records found.");
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error",  "An error has occurred.");
+            return createErrorResponse(500, 200, "System Error",  "An error has occurred.");
         }
     }
 
@@ -272,14 +272,14 @@ public class ServiceData
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, name);
 
             if(rs.next())
-                return createSuccessResponse(200, null, null, rs.getInt("id"));
+                return createSuccessResponse(200, 200, null, null, rs.getInt("id"));
             else
-                return createErrorResponse(200, "Bad Request", "No records found.");
+                return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error", "An error has occurred.");
+            return createErrorResponse(500, 500, "System Error", "An error has occurred.");
         }
     }
 
@@ -291,14 +291,14 @@ public class ServiceData
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, id);
 
             if(rs.next())
-                return createSuccessResponse(200, null, null, rs.getString("name"));
+                return createSuccessResponse(200, 200, null, null, rs.getString("name"));
             else
-                return createErrorResponse(200, "Bad Request", "No records found.");
+                return createErrorResponse(200, 200, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error",  "An error has occurred.");
+            return createErrorResponse(500, 500, "System Error",  "An error has occurred.");
         }
     }
 }

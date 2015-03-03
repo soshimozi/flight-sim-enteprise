@@ -31,17 +31,17 @@ public class FSERestServlet
     {
         String params = Crypto.decrypt(encrypted);
         if(Helpers.isNullOrBlank(params))
-            return createErrorResponse(400, "Bad Request", "Invalid username and password.");
+            return createErrorResponse(400, 400, "Bad Request", "Invalid username and password.");
 
         String[] sp = params.trim().split("\\|\\^\\|");
         if(sp.length != 2)
-            return createErrorResponse(400, "Bad Request", "Invalid username and password.");
+            return createErrorResponse(400, 400, "Bad Request", "Invalid username and password.");
 
         String token = Authenticator.getInstance().login(sp[0], sp[1]);
         if(token == null)
-            return createErrorResponse(400, "Bad Request", "Invalid credentials.");
+            return createErrorResponse(400, 400, "Bad Request", "Invalid credentials.");
         else
-            return createSuccessResponse(200, null, null, token);
+            return createSuccessResponse(200, 200, null, null, token);
     }
 
     @PermitAll
@@ -51,9 +51,9 @@ public class FSERestServlet
     {
         String token = Authenticator.getInstance().login(username, password);
         if(token == null)
-            return createErrorResponse(400, "Bad Request", "Invalid username and password.");
+            return createErrorResponse(400, 400, "Bad Request", "Invalid username and password.");
         else
-            return createSuccessResponse(200, null, null, token);
+            return createSuccessResponse(200, 200, null, null, token);
     }
 
     @POST
@@ -61,9 +61,9 @@ public class FSERestServlet
     public Response logout(@HeaderParam("authtoken") String authToken, @FormParam("username") final String username)
     {
         if (Authenticator.getInstance().logout(authToken))
-            return createSuccessResponse(200, null, null, "Logged out.");
+            return createSuccessResponse(200, 200, null, null, "Logged out.");
         else
-            return createErrorResponse(400, "Bad Request", "Invalid username and authtoken.");
+            return createErrorResponse(400, 400, "Bad Request", "Invalid username and authtoken.");
     }
 
     @RolesAllowed({"admin", "moderator"})
@@ -80,6 +80,25 @@ public class FSERestServlet
     {
         int userId = Authenticator.getInstance().getUserIdFromToken(authToken);
         Response response = ClientServices.getRentedAircraftConfig(userId);
+
+        return response;
+    }
+
+    @POST
+    @Path("/checkalias")
+    public Response checkAlias(@HeaderParam("authtoken") String authToken, @FormParam("alias") final String alias, @FormParam("fuel") final int[] tanks)
+    {
+        int userId = Authenticator.getInstance().getUserIdFromToken(authToken);
+        Response response = ClientServices.checkAlias(userId, alias, tanks);
+
+        return response;
+    }
+    @POST
+    @Path("/addaircraft")
+    public Response addAlias(@HeaderParam("authtoken") String authToken, @FormParam("alias") final String alias, @FormParam("fuel") final int[] tanks)
+    {
+        int userId = Authenticator.getInstance().getUserIdFromToken(authToken);
+        Response response = ClientServices.addAlias(userId, alias, tanks);
 
         return response;
     }

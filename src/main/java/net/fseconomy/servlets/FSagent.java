@@ -210,7 +210,7 @@ public class FSagent extends HttpServlet
 		if (fcapCenter == null || fcapLeftMain == null || fcapLeftAux == null ||
 			fcapLeftTip == null || fcapRightMain == null || fcapRightAux == null|| fcapRightTip == null ||
 			fcapCenter2 == null || fcapCenter3 == null || fcapExt1 == null || fcapExt2 == null)
-				throw new DataError("Not enough information recieved.");
+				throw new DataError("Not enough information received.");
 
 		int[] fuelCapacities = new int[] { Integer.parseInt(fcapCenter), Integer.parseInt(fcapLeftMain),
 			Integer.parseInt(fcapLeftAux),Integer.parseInt(fcapLeftTip), Integer.parseInt(fcapRightMain), 

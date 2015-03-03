@@ -33,16 +33,16 @@ public class AdminServiceData
                 toList.add(llc);
             }
 
-            return createSuccessResponse(200, null, null, toList);
+            return createSuccessResponse(200, 200, null, null, toList);
         }
         catch(BadRequestException e)
         {
-            return createErrorResponse(400, "Bad Request", "No records found.");
+            return createErrorResponse(400, 400, "Bad Request", "No records found.");
         }
         catch(SQLException e)
         {
             e.printStackTrace();
-            return createErrorResponse(500, "System Error",  "Unable to fulfill the request.");
+            return createErrorResponse(500, 500, "System Error",  "Unable to fulfill the request.");
         }
     }
 }

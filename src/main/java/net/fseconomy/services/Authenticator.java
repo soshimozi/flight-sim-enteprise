@@ -11,7 +11,9 @@ import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 
+import javax.servlet.ServletContext;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -21,14 +23,11 @@ public final class Authenticator
     private static Authenticator authenticator = null;
 
     // An authentication token storage which stores <authtoken, authinfo>.
-    private static Cache<String, AuthInfo> tokenCache;
-    private static Cache<String, String> serviceKeyCache;
+    private static HashMap<String, AuthInfo> tokenCache = new HashMap<>();
+    private static HashMap<String, String> serviceKeyCache = new HashMap<>();
 
-    private Authenticator()
+    public Authenticator()
     {
-        EmbeddedCacheManager cacheManager = CacheContainer.getCacheContainer();
-        tokenCache = cacheManager.getCache("token-cache");
-        serviceKeyCache = cacheManager.getCache("ServiceKey-cache");
     }
 
     public static Authenticator getInstance()

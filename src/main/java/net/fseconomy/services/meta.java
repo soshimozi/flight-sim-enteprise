@@ -5,16 +5,16 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class meta
 {
-    String code = null;
+    int code = 0;
     String error = null;
     String info = null;
 
-    public String getCode()
+    public int getCode()
     {
         return code;
     }
 
-    public void setCode(String code)
+    public void setCode(int code)
     {
         this.code = code;
     }

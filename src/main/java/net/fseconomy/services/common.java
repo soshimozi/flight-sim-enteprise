@@ -88,7 +88,7 @@ public class common
         }
     }
 
-    public static ResponseContainer createResponse(String status, String error, String info, Object data)
+    public static ResponseContainer createResponse(int status, String error, String info, Object data)
     {
         ResponseContainer rc = new ResponseContainer();
         rc.getMeta().setCode(status);
@@ -99,31 +99,31 @@ public class common
         return rc;
     }
 
-    public static Response createErrorResponse(int code, String error, String message)
+    public static Response createErrorResponse(int code, int status, String error, String message)
     {
         CacheControl NoCache = new CacheControl();
         NoCache.setNoCache(true);
 
         return Response.status(code)
                 .cacheControl(NoCache)
-                .entity(createResponse(""+code, error, message, null))
+                .entity(createResponse(status, error, message, null))
                 .build();
     }
 
-    public static Response createSuccessResponse(int code, String error, String message, Object object)
+    public static Response createSuccessResponse(int code, int status, String error, String message, Object object)
     {
         CacheControl NoCache = new CacheControl();
         NoCache.setNoCache(true);
 
         return Response.status(code)
                 .cacheControl(NoCache)
-                .entity(createResponse("" + code, error, message, object))
+                .entity(createResponse(status, error, message, object))
                 .build();
     }
 
     public static Response ResponseAccessDenied()
     {
-        return createErrorResponse(200, "AccessDenied", "You do not have permission");
+        return createErrorResponse(200, 401, "AccessDenied", "You do not have permission");
     }
 
     static double getBalanceAmount(PermissionCategory type, int account) throws SQLException

@@ -28,6 +28,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -86,11 +89,11 @@ public class UserCtl extends HttpServlet
 		}
 	}
 
-    private void createCached()
+    public void destroy()
     {
-        cacheManager = CacheContainer.getCacheContainer();
-        cacheManager.defineConfiguration("token-cache", new ConfigurationBuilder().eviction().expiration().lifespan(1, TimeUnit.HOURS).maxIdle(1, TimeUnit.HOURS).build());
-        cacheManager.defineConfiguration("ServiceKey-cache", new ConfigurationBuilder().eviction().expiration().lifespan(5, TimeUnit.MINUTES).build());
+        GlobalLogger.logApplicationLog("UserCtl destroy() called", UserCtl.class);
+
+        future.cancel(false);
     }
 
     private static long minutesToNextHalfHour()
@@ -106,14 +109,6 @@ public class UserCtl extends HttpServlet
 	    	total -= 30;
 	    
 	    return total;
-	}
-	
-	public void destroy()
-	{
-        GlobalLogger.logApplicationLog("UserCtl destroy() called", UserCtl.class);
-
-		future.cancel(false);
-        cacheManager.stop();
 	}
 	
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)

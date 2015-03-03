@@ -33,7 +33,7 @@ public class SecurityInterceptor implements ContainerRequestFilter
         PostMatchContainerRequestContext pmContext = (PostMatchContainerRequestContext) ctx;
 
         if(ctx.getLength() > MAXCONTENTLENGTH)
-            ctx.abortWith(createErrorResponse(200, "Bad Request", "Invalid content-length (max=" + MAXCONTENTLENGTH + ")"));
+            ctx.abortWith(createErrorResponse(200, 200, "Bad Request", "Invalid content-length (max=" + MAXCONTENTLENGTH + ")"));
 
         // When HttpMethod comes as OPTIONS, just acknowledge that it accepts...
         if ( ctx.getRequest().getMethod().equals( "OPTIONS" ) )

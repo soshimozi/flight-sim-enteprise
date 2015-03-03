@@ -305,6 +305,22 @@ public class Aircraft implements Serializable
         return result;
     }
 
+    public static int getAircraftModelIdForUser(int userId)
+    {
+        int result = 0;
+        try
+        {
+            String qry = "SELECT models.id FROM aircraft, models WHERE aircraft.model = models.id AND userlock = ?";
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), userId);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public static List<AircraftBean> getAircraftOwnedByUser(int userId)
     {
         List<AircraftBean> result = new ArrayList<>();
@@ -742,7 +758,7 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static boolean aircraftMappingFound(int modelId, String aircraft)
+    public static boolean aircraftMappingFound(int modelId, String alias)
     {
         boolean result = false;
         try
@@ -750,7 +766,7 @@ public class Aircraft implements Serializable
             Timestamp now = new Timestamp(GregorianCalendar.getInstance().getTime().getTime());
 
             String qry = "UPDATE fsmappings SET lastused = ? WHERE fsaircraft=? AND model = ?";
-            int numrecs = DALHelper.getInstance().ExecuteUpdate(qry, now, aircraft, modelId);
+            int numrecs = DALHelper.getInstance().ExecuteUpdate(qry, now, alias, modelId);
 
             if (numrecs == 1)
             {
@@ -1960,7 +1976,25 @@ public class Aircraft implements Serializable
 
     public static List<FSMappingBean> getMappingByFSAircraft(String target)
     {
-        return getMappingSQL("SELECT * FROM fsmappings WHERE fsaircraft LIKE '%" + target + "%' order by fsaircraft");
+        ArrayList<FSMappingBean> result = new ArrayList<>();
+
+        try
+        {
+            String tgt = "%"+target.trim()+"%";
+            String qry = "SELECT * FROM fsmappings WHERE fsaircraft LIKE ? order by fsaircraft";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, tgt);
+            while (rs.next())
+            {
+                FSMappingBean mapping = new FSMappingBean(rs);
+                result.add(mapping);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     public static List<FSMappingBean> getMappingSQL(String qry)

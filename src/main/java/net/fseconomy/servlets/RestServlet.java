@@ -118,7 +118,7 @@ public class RestServlet
             return ResponseAccessDenied();
 
         if(transferto == 0) //no transfers to bank
-            return createErrorResponse(200, "Bad Request", "No transfer account specified.");
+            return createErrorResponse(200, 200, "Bad Request", "No transfer account specified.");
 
         return ServiceData.TransferAircraft(servicekey, serialNumber, account, transferto, note);
     }
@@ -164,7 +164,7 @@ public class RestServlet
         //The PilotStat class uses single character labels to reduce traffic.
         List<PilotStatus> list = Data.getPilotStatus();
 
-        return createSuccessResponse(200, null, null, list);
+        return createSuccessResponse(200, 200, null, null, list);
     }
 
     @PermitAll
@@ -176,7 +176,7 @@ public class RestServlet
         //The PilotStat class uses single character labels to reduce traffic.
         List<LatLonCount> list = Stats.FlightSummaryList;
 
-        return createSuccessResponse(200, null, null, list);
+        return createSuccessResponse(200, 200, null, null, list);
     }
 
     @PermitAll
@@ -188,7 +188,7 @@ public class RestServlet
     {
         String price = Formatters.currency.format(Goods.quoteFuel(icao, fueltype, amount));
 
-        return createSuccessResponse(200, null, null, price);
+        return createSuccessResponse(200, 200, null, null, price);
     }
 
     @PermitAll
@@ -203,6 +203,6 @@ public class RestServlet
 
         String price = Formatters.currency.format(Goods.quoteGoods(icao, goodstype, amount, src, BUY));
 
-        return createSuccessResponse(200, null, null, price);
+        return createSuccessResponse(200, 200, null, null, price);
     }
 }

@@ -242,7 +242,12 @@ public class ModelBean implements Serializable
 	{
 		return capacity[id];
 	}	
-	
+
+    public boolean compareFuelTanks(int[] fuel)
+    {
+        return false;
+    }
+
 	/**
 	 * Returns the id.
 	 * @return int
