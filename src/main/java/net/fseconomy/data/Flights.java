@@ -18,36 +18,27 @@ public class Flights
     public static DepartFlight departAircraft(AircraftBean bean, int user, String location) throws DataError
     {
         ArrayList<AssignmentBean> result = new ArrayList<>();
-        int totalWeight = 0;
-        double fuelWeight = 0;
+        DepartFlight depart = new DepartFlight();
+
         boolean rentedDry = false;
-        ModelBean model = Models.getModelById(bean.getModelId());
         boolean allInFlight = false;
 
         try
         {
-            int seats=bean.getSeats()-1;
-            int crewWeight = bean.getCrew();
+            ModelBean model = Models.getModelById(bean.getModelId());
 
-            // subtract first officer seat
-            if (bean.getCrew() > 0)
-                seats -=1;
+            int seats = bean.getAvailableSeats();
+            int crewWeight = bean.getCrewWeight();
 
-            // * seats subtracts weight of pilot (77) + any addt'l crew members
-            totalWeight = 77 + (77 * crewWeight);
+            // initialize our current payload weight
+            int totalWeight = crewWeight;
+            double weightLeft = bean.maxPayloadWeightWithFuel() - crewWeight;
 
-            //Get our avaliable payload
-            double weightLeft = bean.getMaxWeight() - bean.getEmptyWeight();
-
-            // Add total fuel weight
-            fuelWeight  += bean.getTotalFuel() * Constants.GALLONS_TO_KG;
-
-            //This should be added to total weight!!
-            weightLeft -= totalWeight + fuelWeight;
-
+            //set rental timer start
             Timestamp now = new Timestamp(GregorianCalendar.getInstance().getTime().getTime());
             bean.setLockedSince(now);
 
+            //Check that we have an aircraft at the departing airport
             String qry = "SELECT * FROM aircraft WHERE id = ? AND location = ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, bean.getId(), location);
             if (!rs.next())
@@ -62,15 +53,18 @@ public class Flights
             if (bean.getCanFlyAssignments(model))
             {
                 int onBoard = 0;
+
                 qry = "SELECT * FROM assignments WHERE (active = 1 OR (location = ? AND active <> 2)) AND userlock = ? ORDER BY active DESC";
                 rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, location, user);
                 while (rs.next())
                 {
-                    int passengers, weight;
+                    int passengers;
+                    int weight;
+
                     if (rs.getString("units").equals("passengers"))
                     {
                         passengers = rs.getInt("amount");
-                        weight = passengers * 77;
+                        weight = passengers * Constants.PASSENGER_WT_KG;
                     }
                     else
                     {
@@ -80,7 +74,8 @@ public class Flights
 
                     if (passengers <= seats && weight <= weightLeft)
                     {
-                        seats-=passengers;
+                        seats -= passengers;
+
                         weightLeft -= weight;
                         totalWeight += weight;
 
@@ -97,19 +92,21 @@ public class Flights
                 if(allInFlight && onBoard != 1)
                     throw new DataError("All-In assignment not loaded. Cannot start the flight.");
             }
+
+            // Update aircraft status to departed
             qry = "UPDATE aircraft SET departedFrom = ?, lockedSince = ?, location = null where id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, location, now, bean.getId());
+
+            //update our departing data
+            depart.payloadWeight = Math.round(totalWeight);
+            depart.totalWeight = Math.round(totalWeight + bean.maxPayloadWeightWithFuel());
+            depart.assignments = result;
+            depart.rentedDry = rentedDry;
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-
-        DepartFlight depart = new DepartFlight();
-        depart.payloadWeight = Math.round(totalWeight);
-        depart.totalWeight = (int)Math.round(totalWeight + fuelWeight + bean.getEmptyWeight());
-        depart.assignments = result;
-        depart.rentedDry = rentedDry;
 
         return depart;
     }
@@ -807,16 +804,17 @@ public class Flights
         String location = bean.getLocation();
         try
         {
-            int seats=bean.getSeats()-1;
-            int crewWeight = bean.getCrew();
-            if (bean.getCrew() > 0)  					// subtract first officer seat
-                seats -=1;
-
-            int totalWeight = 77 + (77 * crewWeight);  	// * seats subtracts weight of pilot (77) + any addt'l crew members
-            double weightLeft = bean.maxPayloadWeight();
+            int groupId = -1;
             ModelBean model = Models.getModelById(bean.getModelId());
-            int group = -1;
+
             int passengerCount = 0;
+
+            int seats = bean.getAvailableSeats();
+            int crewWeight = bean.getCrewWeight();
+
+            // initialize our current payload weight
+            int totalWeight = crewWeight;
+            double weightLeft = bean.maxPayloadWeightWithFuel() - crewWeight;
 
             if (bean.getCanFlyAssignments(model))
             {
@@ -824,12 +822,16 @@ public class Flights
                 ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, user, location);
                 while (rs.next())
                 {
-                    int passengers, weight, active;
+                    int passengers;
+                    int weight;
+                    int active;
+
                     active = rs.getInt("active");
+
                     if (rs.getString("units").equals("passengers") && active < 2)
                     { // system or pt passenger assignment
                         passengers = rs.getInt("amount");
-                        weight = passengers * 77;
+                        weight = passengers * Constants.PASSENGER_WT_KG;
                     }
                     else
                     { // cargo assignment
@@ -839,15 +841,17 @@ public class Flights
 
                     if (passengers <= seats && weight <= weightLeft && active < 2)
                     {
-                        seats-=passengers;
+                        seats -= passengers;
+                        passengerCount += passengers;
+
                         weightLeft -= weight;
                         totalWeight += weight;
-                        passengerCount += passengers;
+
                         result.put((new Integer(rs.getInt("id"))).toString(), null);
                         result.put("hasAssignment", null);
 
-                        if (rs.getString("groupId") != null && group == -1)
-                            group = rs.getInt("groupId");
+                        if (rs.getString("groupId") != null && groupId == -1)
+                            groupId = rs.getInt("groupId");
                     }
                 }
             }
@@ -855,8 +859,8 @@ public class Flights
             result.put("weight", totalWeight);
             result.put("passengers", passengerCount);
 
-            if (group != -1)
-                result.put("group", group);
+            if (groupId != -1)
+                result.put("group", groupId);
         }
         catch (SQLException e)
         {

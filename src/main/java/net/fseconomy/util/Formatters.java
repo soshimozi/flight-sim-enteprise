@@ -85,7 +85,18 @@ public class Formatters
 
 		return negative ? "-" + hhmm : hhmm;
 	}
-	
+
+    public static String getHourMinSec(int seconds)
+    {
+        boolean negative = seconds < 0;
+        int minutes = Math.abs(seconds)/60;
+        int secs = seconds % 60;
+
+        String hhmmss = Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60) + ":" + Formatters.twoDigits.format(secs);
+
+        return negative ? "-" + hhmmss : hhmmss;
+    }
+
 	public static String getElapsedYearMonthDay(Timestamp ts)
 	{
 		Calendar start = Calendar.getInstance();

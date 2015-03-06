@@ -536,29 +536,48 @@ public class AircraftBean implements Serializable
         return who != null && (who.getId() == owner || who.groupMemberLevel(owner) >= UserBean.GROUP_MEMBER);
     }
 	
-	public int maxPayloadWeight()
+	public int maxPayloadWeightWithFuel()
 	{
-		return (int) Math.round(maxWeight - emptyWeight - (getTotalFuel() * Constants.GALLONS_TO_KG) - 77);
+		return (int) Math.round(maxWeight - emptyWeight - (getTotalFuel() * Constants.GALLONS_TO_KG));
 	}
-	
+
+    public int getAvailableSeats()
+    {
+        int seats = getSeats() - 1;
+
+        // subtract first officer seat
+        if (getCrew() > 0)
+            seats -= 1;
+
+        return seats;
+    }
+
+    public int getCrewWeight()
+    {
+        return Constants.PASSENGER_WT_KG + (getCrew() * Constants.PASSENGER_WT_KG);
+    }
+
 	public boolean fitsAboard(AssignmentBean assignment)
 	{
-		int weight;
-		int crewSeats = 1;
-		if (crew > 0)  // Additional Crew
-			crewSeats = 2;
-		
+        int seats = getAvailableSeats();
+        int crewWeight = getCrewWeight();
+
+        // initialize our current payload weight
+        int totalWeight = crewWeight;
+
 		if (assignment.getUnits() == AssignmentBean.UNIT_PASSENGERS)
 		{
-			if (assignment.getAmount() > seats-crewSeats)  // Pilot plus additional crew
+			if (assignment.getAmount() > seats)
 				return false;
-			
-			weight = 77 * assignment.getAmount();
+
+            totalWeight += Constants.PASSENGER_WT_KG * assignment.getAmount();
 		} 
-		else 
-			weight = assignment.getAmount();
-		
-		return maxPayloadWeight() >= weight;
+		else
+        {
+            totalWeight += assignment.getAmount();
+        }
+
+		return maxPayloadWeightWithFuel() >= totalWeight;
 	}
 	
 	public double getHoursSinceLastCheck()
