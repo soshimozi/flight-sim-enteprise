@@ -13,4 +13,6 @@ public class Constants
     public static long MILLISECS_PER_HOUR = (60*60*1000);
 
     public static final double GALLONS_TO_KG = 2.68735;
+
+    public static final int PASSENGER_WT_KG = 77;
 }
