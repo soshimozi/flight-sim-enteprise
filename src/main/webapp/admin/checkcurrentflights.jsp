@@ -119,7 +119,7 @@
                     <td><%=Formatters.twoDecimals.format(item.distance) %></td>
                     <td><%=Formatters.twoDecimals.format(item.stopDistance) %></td>
                     <td><%=Formatters.getHourMin(item.flightTimeSeconds) %></td>
-                    <td><%=Formatters.getHourMin(item.realTimeSeconds) %></td>
+                    <td><%=Formatters.getHourMinSec(item.realTimeSeconds) %></td>
                     <td><%= item.estimatedTC %></td>
                 </tr>
 <%
