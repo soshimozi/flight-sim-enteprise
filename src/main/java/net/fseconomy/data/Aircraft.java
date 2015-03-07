@@ -1381,10 +1381,9 @@ public class Aircraft implements Serializable
         return result;
     }
 
-    public static AircraftConfig2 getAircraftConfigs2(int modelid)
+    public static void fillModelData(RentedAircraftConfig rac, int modelid)
     {
         ResultSet rs;
-        AircraftConfig2 aircraft = null;
         try
         {
             String qry = "SELECT make, model, crew, fueltype, seats, cruisespeed, " +
@@ -1397,16 +1396,14 @@ public class Aircraft implements Serializable
             rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, modelid);
             if (rs.next())
             {
-                aircraft = new AircraftConfig2(rs.getString(1) + " " + rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9), rs.getInt(10), rs.getInt(11), rs.getInt(12), rs.getInt(13), rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17), rs.getInt(18), rs.getInt(19), rs.getInt(20), rs.getInt(21), rs.getInt(22), (int) rs.getDouble(23));
-                aircraft.updateCalculatedFields(Goods.currFuelPrice, Goods.currFuelPrice*Goods.currJetAMultiplier);
+                rac.updateRentedAircraftConfig(rs.getString(1) + " " + rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9), rs.getInt(10), rs.getInt(11), rs.getInt(12), rs.getInt(13), rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17), rs.getInt(18), rs.getInt(19), rs.getInt(20), rs.getInt(21), rs.getInt(22), (int) rs.getDouble(23));
+                rac.updateCalculatedFields(Goods.currFuelPrice, Goods.currFuelPrice * Goods.currJetAMultiplier);
             }
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
-
-        return aircraft;
     }
 
     public static AircraftConfig getAircraftConfigs(int modelid)

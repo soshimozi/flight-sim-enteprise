@@ -1,7 +1,9 @@
 package net.fseconomy.dto;
 
-public class AircraftConfig2
+public class RentedAircraftConfig
 {
+    public int Id;
+    public String Registration;
     public String MakeModel;
     public int AddtlCrew;
     public int Seats;
@@ -41,12 +43,18 @@ public class AircraftConfig2
         EstCostPerNM = EstCostPerHr / Cruise;
     }
 
-    public AircraftConfig2(String makemodel, int crew, int fueltype, int seats, int cruisespeed, int fcapExt1, int fcapLeftTip, int fcapLeftAux, int fcapLeftMain, int fcapCenter, int fcapCenter2, int fcapCenter3, int fcapRightMain, int fcapRightAux, int fcapRightTip, int fcapExt2, int gph, int maxWeight, int emptyWeight, int price, int engines, int fcaptotal)
+    public RentedAircraftConfig(int id, String registration)
+    {
+        Id = id;
+        Registration = registration;
+    }
+
+    public void updateRentedAircraftConfig(String makemodel, int crew, int fueltype, int seats, int cruisespeed, int fcapExt1, int fcapLeftTip, int fcapLeftAux, int fcapLeftMain, int fcapCenter, int fcapCenter2, int fcapCenter3, int fcapRightMain, int fcapRightAux, int fcapRightTip, int fcapExt2, int gph, int maxWeight, int emptyWeight, int price, int engines, int fcaptotal)
     {
         MakeModel = makemodel;
         Seats = seats;
         AddtlCrew = crew;
-        FuelType = fueltype == 1 ? "100LL" : "JetA";
+        FuelType = fueltype == 0 ? "100LL" : "JetA";
         Cruise = cruisespeed;
         Ext1 = fcapExt1;
         LTip = fcapLeftTip;
