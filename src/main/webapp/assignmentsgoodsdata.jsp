@@ -25,18 +25,6 @@
 
 %>
 
-<form method="post" action="userctl" id="assignmentForm">
-    <div>
-        <input type="hidden" name="event" value="Assignment"/>
-        <input type="hidden" name="type" value="add"/>
-        <input type="hidden" name="id"/>
-        <input type="hidden" name="assignmentid"/>
-        <input type="hidden" name="comment"/>
-        <input type="hidden" name="transferid" value="<%= transferId %>"/>
-        <input type="hidden" name="groupid" value="<%= transferId %>"/>
-        <input type="hidden" name="ownerid" value=""/>
-        <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
-
         <table class="assignmentTable tablesorter-default tablesorter">
             <caption><%= caption %>
             </caption>
@@ -206,11 +194,10 @@
         counter++;
     }
 %>
-
             </tbody>
         </table>
         Total Pay for Assignments: <strong><%= Formatters.currency.format(assignmentsTotalPay) %>
     </strong>
         <br>
     </div>
-</form>
+

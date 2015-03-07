@@ -273,6 +273,18 @@
 
 <div id="wrapper">
     <div class="content">
+        <form method="post" action="userctl" id="assignmentForm">
+            <div>
+                <input type="hidden" name="event" value="Assignment"/>
+                <input type="hidden" name="type" value="add"/>
+                <input type="hidden" name="id"/>
+                <input type="hidden" name="assignmentid"/>
+                <input type="hidden" name="transferid" value="<%= transferId %>"/>
+                <input type="hidden" name="groupid" value="<%= transferId %>"/>
+                <input type="hidden" name="ownerid" value=""/>
+                <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+
+
         <jsp:include flush="true" page="assignmentsgoodsdata.jsp">
             <jsp:param name="transferid" value="<%=transferId%>"/>
             <jsp:param name="returnPage" value="<%=returnPage%>"/>
@@ -305,7 +317,7 @@
                     <strong>Warning:</strong> This will overwrite any existing comment for the selected assignments!<br/>
                     <label>
                         You must click the "Add comment" button!<br/>
-                        <input class="form-control" id="assignmentComment" type="text" size="65" maxlength="250">
+                        <input class="form-control" id="comment" name="comment" type="text" size="65" maxlength="250">
                     </label>
                     <input class="btn btn-primary" type="button" value="Add Comment" onclick="addComment()"/><br/>
                 </div>
@@ -349,6 +361,7 @@
 <%
     }
 %>
+    </form>
     </div>
 </div>
 
