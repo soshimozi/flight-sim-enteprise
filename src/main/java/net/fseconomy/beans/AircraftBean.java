@@ -1663,7 +1663,12 @@ public class AircraftBean implements Serializable
 	{
 		return fueltotal;
 	}
-	
+
+    public double getFuelWeight()
+    {
+        return fueltotal * Constants.GALLONS_TO_KG;
+    }
+
 	public void setFuelTotal(float i)
 	{
 		fueltotal = i;

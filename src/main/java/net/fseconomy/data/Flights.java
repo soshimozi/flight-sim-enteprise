@@ -99,7 +99,7 @@ public class Flights
 
             //update our departing data
             depart.payloadWeight = Math.round(totalWeight);
-            depart.totalWeight = Math.round(totalWeight + bean.maxPayloadWeightWithFuel());
+            depart.totalWeight = Math.round(totalWeight + (float)bean.getFuelWeight() + bean.getEmptyWeight());
             depart.assignments = result;
             depart.rentedDry = rentedDry;
         }

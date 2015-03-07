@@ -222,7 +222,18 @@
 
             $("#transferButton").click(
                     function () {
-                        if (window.confirm("Are you sure you want to transfer selected assignments to " + $("#transfername").val() + "?")) {
+                        var name;
+
+                        if(displayGroupsOnly)
+                            name = $("#groupSelect").find("option:selected").text();
+                        else
+                            name = $("#selectedGroupName").val();
+
+                        var sgId = $("#selectedGroupId").val();
+                        if( sgId === null || sgId === '')
+                            return;
+
+                        if (window.confirm("Are you sure you want to transfer selected assignments to " + name + "?")) {
                             if(displayGroupsOnly)
                                 transferAssignment($("input[name='select']:checked"), $("#selectedGroupId").val());
                             else

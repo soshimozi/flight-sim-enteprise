@@ -226,7 +226,22 @@
 	if (haveAircraft && aircraft.getLocation() == null)
 	{
 %>
-		<h2>Status: Flight in progress<%= groupFlight ? " for\"" + theGroup.getName() + "\"" : "" %></h2>
+		<h2>Status: Flight in progress</h2>
+<%
+        if(groupFlight)
+        {
+%>
+        <h2 style="color: green;">This flight is being flown for <span style="color: green; font-size: larger;">"<%=theGroup.getName() %>".</span></h2>
+<%
+        }
+        else
+        {
+%>
+        <h2 style="color: navy;">This flight is being flown for <span style="color: navy; font-size: larger;">"<%=user.getName() %>".</span></h2>
+<%
+        }
+%>
+        <br>
 		There is a flight in progress. If you cannot complete this flight you can cancel it.
 		<form method="post" action="userctl">
 			<input type="hidden" name="event" value="Cancel"/>
@@ -239,13 +254,12 @@
 	{
 	    List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
 %>
-		<h2>Status: Ready for departure</h2>
-
-		You can depart from 
-			<a href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getLocation()) %>">
-				<%= aircraft.getLocation() %>
-			</a> 
-			now.<br/>
+		<h2>Status: Ready for departure from
+            <a href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getLocation()) %>">
+                <%= aircraft.getLocation() %>
+            </a>
+        </h2>
+    <br>
 <%
 		if (groups.size() > 0)
 		{
@@ -264,7 +278,7 @@
 			if (thisGroup == null)
 	    	{
 %>
-	                 This will not be a group flight.
+                <h2 style="color: navy;">This flight will be flown for <span style="font-size: larger;">"<%=user.getName() %>".</span></h2>
 <%
 				if (!info.containsKey("hasAssignment"))
      			{
@@ -309,7 +323,7 @@
     		else
     		{
 %>
-                This flight will be flown for the group "<%=thisGroup.getName() %>".
+                <h2 style="color: green;">This flight will be flown for <span style="font-size: larger;">"<%=thisGroup.getName() %>".</span></h2>
 <%
             }
 		}
