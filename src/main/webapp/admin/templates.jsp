@@ -78,6 +78,7 @@
 				<th>Pay Info</th>
 				<th>Distance</th>
 				<th># Active</th>
+                <th># Grp Locked</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -88,7 +89,7 @@
 	{		
 		type = template.getSUnits().toLowerCase().equals("kg") ? "Kg" : "Pax";
 
-        Integer[] statArray = new Integer[4];
+        Integer[] statArray = new Integer[5];
 		if (MaintenanceCycle.assignmentsPerTemplate != null)
 		{
 			Integer[] tmpArray = MaintenanceCycle.assignmentsPerTemplate.get(template.getId());
@@ -115,6 +116,7 @@
 					<span style="color: gray; font-size: 12px;">(<%= template.getDistanceDev() %>%)</span>
 				</td>
 				<td><span title="Max=<%= statArray[MaintenanceCycle.ASSGN_MAX] %>, Min=<%= statArray[MaintenanceCycle.ASSGN_MIN] %>, Avg=<%= statArray[MaintenanceCycle.ASSGN_AVG] %>"><%= statArray[MaintenanceCycle.ASSGN_COUNT] %></span></td>
+                <td><%= statArray[MaintenanceCycle.ASSGN_GLOCKED] %></td>
 			</tr>
 <%
 	}
