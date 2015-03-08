@@ -25,9 +25,10 @@ public class MaintenanceCycle implements Runnable
 	public static final int CycleTypeDaily = 1;
 
 	public static final int ASSGN_COUNT = 0;
-	public static final int ASSGN_MAX = 1;
-	public static final int ASSGN_MIN = 2;
-	public static final int ASSGN_AVG = 3;
+    public static final int ASSGN_GLOCKED = 1;
+	public static final int ASSGN_MAX = 2;
+	public static final int ASSGN_MIN = 3;
+	public static final int ASSGN_AVG = 4;
 	
 	int lastDailyRun;
 	double interestPositive;
@@ -1007,15 +1008,16 @@ public class MaintenanceCycle implements Runnable
 
 			assignmentsPerTemplate = new HashMap<>();
 
-			qry = "SELECT fromtemplate, count(*) as count, max(pay * amount * (distance / 100.0)) as pmax, min(pay * amount * (distance / 100.0)) as pmin, avg(pay * amount * (distance / 100.0)) as pmean from assignments group by fromtemplate";
+			qry = "SELECT fromtemplate, count(*) as count, count(assignments.groupId) as grouplock, max(pay * amount * (distance / 100.0)) as pmax, min(pay * amount * (distance / 100.0)) as pmin, avg(pay * amount * (distance / 100.0)) as pmean from assignments group by fromtemplate";
 			ResultSet rsTemplatesFound = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rsTemplatesFound.next())
 			{
-				Integer[] ia = new Integer[4];
+				Integer[] ia = new Integer[5];
 				ia[ASSGN_COUNT] = rsTemplatesFound.getInt(2);
-				ia[ASSGN_MAX] = (int) (rsTemplatesFound.getDouble(3) + .5);
-				ia[ASSGN_MIN] = (int) (rsTemplatesFound.getDouble(4) + .5);
-				ia[ASSGN_AVG] = (int) (rsTemplatesFound.getDouble(5) + .5);
+                ia[ASSGN_GLOCKED] = rsTemplatesFound.getInt(3);
+				ia[ASSGN_MAX] = (int) (rsTemplatesFound.getDouble(4) + .5);
+				ia[ASSGN_MIN] = (int) (rsTemplatesFound.getDouble(5) + .5);
+				ia[ASSGN_AVG] = (int) (rsTemplatesFound.getDouble(6) + .5);
 				
 				assignmentsPerTemplate.put(rsTemplatesFound.getInt(1), ia );
 			}
