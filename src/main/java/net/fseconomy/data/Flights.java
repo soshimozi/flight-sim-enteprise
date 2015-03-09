@@ -170,7 +170,7 @@ public class Flights
                 // Average Speed of flight should be less than 2.5 the models cruise speed, this is very generous
                 int flightDistance = (int)Math.round(getDistance(location.icao, aircraft.getDepartedFrom()));
                 Float flightMPH = (float) (flightDistance/(engineTime/3600.0));
-                if (flightMPH > (m.getCruise()*2.5))
+                if (flightMPH > (m.getCruise()*1.5))
                 {
                     cancelFlight(user);
                     //Added more debugging variables to the system message, this happens rarely but we have no idea why
