@@ -72,7 +72,7 @@ public class FSagentXP extends HttpServlet
             qry = "SELECT svalue FROM sysvariables WHERE variablename='XPlane9ScriptMD5'";
             String currXP9MD5 = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer());
 
-            if (!currXP10MD5.equals(md5sum) && !currXP9MD5.equals(md5sum))
+            if(!currXP10MD5.equals(md5sum) && !currXP9MD5.equals(md5sum))
             {
                 StringBuffer xml = new StringBuffer();
                 xml.append("<?xml version=\"1.0\"?>");

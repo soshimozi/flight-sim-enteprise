@@ -19,7 +19,7 @@ import java.util.List;
 
 public class Models implements Serializable
 {
-    static final int MAX_MODEL_TITLE_LENGTH = 128;
+    public static final int MAX_MODEL_TITLE_LENGTH = 128;
 
     public static String addModel(String aircraft, int[] fuelCapacities)
     {

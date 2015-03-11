@@ -2046,6 +2046,26 @@ public class Aircraft implements Serializable
         }
     }
 
+    public static boolean addAlias(int modelId, String alias, int[] fuelCapacities)
+    {
+        boolean result = true;
+
+        try
+        {
+            String title = alias.length() > Models.MAX_MODEL_TITLE_LENGTH ? alias.substring(0, Models.MAX_MODEL_TITLE_LENGTH - 1) : alias;
+
+            String qry = "INSERT INTO fsmappings (model, fsaircraft, fcapCenter, fcapLeftMain, fcapLeftAux, fcapLeftTip, fcapRightMain, fcapRightAux, fcapRightTip, fcapCenter2, fcapCenter3, fcapExt1, fcapExt2) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            DALHelper.getInstance().ExecuteUpdate(qry, modelId, title, fuelCapacities[ModelBean.fuelTank.Center], fuelCapacities[ModelBean.fuelTank.LeftMain], fuelCapacities[ModelBean.fuelTank.LeftAux], fuelCapacities[ModelBean.fuelTank.LeftTip], fuelCapacities[ModelBean.fuelTank.RightMain], fuelCapacities[ModelBean.fuelTank.RightAux], fuelCapacities[ModelBean.fuelTank.RightTip], fuelCapacities[ModelBean.fuelTank.Center2], fuelCapacities[ModelBean.fuelTank.Center3], fuelCapacities[ModelBean.fuelTank.Ext1], fuelCapacities[ModelBean.fuelTank.Ext2]);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+            result = false;
+        }
+
+        return result;
+    }
+
     //	/*
     //	 * Gets the aircraft shipping size from the shipping config table using the aircraft empty weight
     //	 * param emptyweight

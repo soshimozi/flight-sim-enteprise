@@ -245,6 +245,21 @@ public class ModelBean implements Serializable
 
     public boolean compareFuelTanks(int[] fuel)
     {
+        //FSE fuel is whole gallons, passed in fuel tank values have been rounded to ints
+        //legacy tank ordering
+        if(    fuel[fuelTank.Center3] == getCap(fuelTank.Center3)
+            && fuel[fuelTank.LeftMain] == getCap(fuelTank.LeftMain)
+            && fuel[fuelTank.LeftAux] == getCap(fuelTank.LeftAux)
+            && fuel[fuelTank.LeftTip] == getCap(fuelTank.LeftTip)
+            && fuel[fuelTank.RightMain] == getCap(fuelTank.RightMain)
+            && fuel[fuelTank.RightAux] == getCap(fuelTank.RightAux)
+            && fuel[fuelTank.RightTip] == getCap(fuelTank.RightTip)
+            && fuel[fuelTank.Center2] == getCap(fuelTank.Center2)
+            && fuel[fuelTank.Center3] == getCap(fuelTank.Center3)
+            && fuel[fuelTank.Ext1] == getCap(fuelTank.Ext1)
+            && fuel[fuelTank.Ext2] == getCap(fuelTank.Ext2))
+            return true;
+
         return false;
     }
 
