@@ -343,6 +343,11 @@
 	<div class="message">
 	<p>FSEconomy is managed by an appointed Board of Directors and all members of our community agree to abide by the FSEconomy <a href="http://www.fseconomy.net/tos" onclick="this.target='_blank'">Etiquette and Rules of Fair Play</a> whenever they log on to the server.</p>
 	<p>&copy; Copyright 2005-2015, <a href="#" onclick="team.setWindowProperties('toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,alwaysRaised,dependent,titlebar=no');team.setSize(400,325);team.setUrl('<%= response.encodeURL("team.htm")%>');team.showPopup('team');return false;" id="team">FSE Development Team</a>. You can redistribute and/or modify this source code under the terms of the <a href="gnu.jsp">GNU General Public License</a> as published by the Free Software Foundation; either version 2 of the License, or any later version.&nbsp; FSEconomy and its authors must be publicly credited on any site that uses this source code or work derived from this source code. </p>
+    <p>FSEconomy development is supported by Open Source Licenses for their products by
+        <a href="https://www.atlassian.com/"><img src="img/atlassian-rgb-navy-xsmall.png"></a>
+        and
+        <a href="https://www.jetbrains.com/"><img src="img/logo_jetbrains.png"></a>
+    </p>
 	</div>
 	</div>
 	</div>
