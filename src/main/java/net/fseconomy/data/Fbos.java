@@ -418,7 +418,7 @@ public class Fbos implements Serializable
             FboBean fb = FboBean.getInstance();
             fb.setLocation(icao);
 
-            returnValue.add(fb);
+            returnValue.add(0, fb);
         }
 
         return returnValue;
