@@ -264,6 +264,44 @@ public class ServiceData
         }
     }
 
+    public static Response ReturnLeaseAircraft(String serviceKey, int account, int serialNumber, String note)
+    {
+        boolean success;
+
+        try
+        {
+            AircraftBean aircraft = Aircraft.getAircraftById(serialNumber);
+
+            //if not, return error
+            if(aircraft == null)
+                return createErrorResponse(200, 200, "Bad Request", "Registration not found.");
+
+            int serviceid = getServiceId(serviceKey);
+
+            if(aircraft.getLessor() == account) //return lease
+            {
+                String qry = "{call AircraftUnlease(?,?,?)}";
+                success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, serialNumber, "Service(" + serviceid + "): " + note);
+            }
+            else
+                return createErrorResponse(200, 200, "Bad Request", "Account not lessor.");
+
+            if (success)
+                return createSuccessResponse(200, 200, null, null, "Aircraft return lease successful.");
+            else
+                return createErrorResponse(500, 500, "System Error", "Unable to process");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            return createErrorResponse(500, 200, "System Error",  "An error has occurred.");
+        }
+    }
+
     public static Response getAccountId(String name)
     {
         try

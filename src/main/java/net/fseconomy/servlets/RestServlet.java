@@ -140,6 +140,21 @@ public class RestServlet
     }
 
     @POST
+    @Path("/aircraft/returnlease/{account}")
+    public Response ReturnLeaseAircraft(@HeaderParam("servicekey") String servicekey,
+                                  @PathParam("account") final int account,
+                                  @FormParam("serialnumber")int serialNumber,
+                                  @FormParam("note") final String note)
+    {
+        PermissionCategory category = PermissionCategory.AIRCRAFT;
+
+        if(!hasPermission(servicekey, account, category, PermissionSet.LEASE))
+            return ResponseAccessDenied();
+
+        return ServiceData.ReturnLeaseAircraft(servicekey, account, serialNumber, note);
+    }
+
+    @POST
     @Path("/account/search/name")
     public Response getAccountId(@HeaderParam("servicekey") String servicekey,
                                  @FormParam("accountname")String name)
