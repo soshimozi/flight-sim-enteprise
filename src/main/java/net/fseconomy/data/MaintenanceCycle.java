@@ -29,6 +29,9 @@ public class MaintenanceCycle implements Runnable
 	public static final int ASSGN_MAX = 2;
 	public static final int ASSGN_MIN = 3;
 	public static final int ASSGN_AVG = 4;
+
+    public static final int ASSGN_EXT_DAYS = 21;
+
 	
 	int lastDailyRun;
 	double interestPositive;
@@ -628,11 +631,11 @@ public class MaintenanceCycle implements Runnable
                             + "select creation, expires, fromtemplate, fromicao, toicao, 0, 0 FROM assignments "
                             + "WHERE (fromFboTemplate is null and active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
                             + "OR  (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-                            + "OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL 45 DAY) > expires); "
+                            + "OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires); "
                     + " DELETE FROM assignments WHERE "
                             + "    (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
                             + "	OR (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-                            + "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL 45 DAY) > expires)";
+                            + "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires)";
             DALHelper.getInstance().ExecuteBatchUpdate(qry);
 
 			//We are caching here several of the bigger ICAO lists created by the template

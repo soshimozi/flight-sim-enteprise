@@ -1,6 +1,7 @@
 package net.fseconomy.beans;
 
 import net.fseconomy.data.Airports;
+import net.fseconomy.data.MaintenanceCycle;
 import net.fseconomy.dto.DistanceBearing;
 import net.fseconomy.util.Converters;
 
@@ -363,8 +364,8 @@ public class AssignmentBean implements Serializable
 			if(moved)
 			{
 				//return the expired date time + 45 * 24 hours
-				long addms = 45l * 86400000l;
-				cal.setTimeInMillis(expires.getTime() + addms);// + (45 * 86400000));
+				long addms = MaintenanceCycle.ASSGN_EXT_DAYS * 86400000l;
+				cal.setTimeInMillis(expires.getTime() + addms);
 			}
 			else if(locked)
 			{
@@ -406,7 +407,7 @@ public class AssignmentBean implements Serializable
 		{
 			long extratime = 0;
 			if (moved)
-				extratime = 45; // days
+				extratime = MaintenanceCycle.ASSGN_EXT_DAYS; // days
 			else if (locked) {
 				extratime = 1;  // days
 			}
