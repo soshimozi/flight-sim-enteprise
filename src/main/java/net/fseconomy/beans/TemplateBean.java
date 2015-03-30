@@ -19,8 +19,6 @@
 
 package net.fseconomy.beans;
 
-import org.apache.commons.lang3.BitField;
-
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -54,6 +52,7 @@ public class TemplateBean implements Serializable
 	String icaoSet1, icaoSet2;
 	int units;
 	int surfaceTypes;
+    boolean direct; //flight cannot have any stops between start and finish
 	
 	//All-In template changes
 	int speedFrom, speedTo;
@@ -83,6 +82,7 @@ public class TemplateBean implements Serializable
 		setIcaoSet2(rs.getString("icaoset2"));
 		setUnits(rs.getString("units"));
 		setAllowedSurfaceTypes(rs.getInt("allowedSurfaceTypes"));
+        setDirect(rs.getBoolean("direct"));
 
 		//All-In changes
 		setSeatsFrom(rs.getInt("seatsFrom"));
@@ -90,6 +90,7 @@ public class TemplateBean implements Serializable
 		setSpeedFrom(rs.getInt("speedFrom"));
 		setSpeedTo(rs.getInt("speedTo"));
 	}
+
 	public void writeBean(ResultSet rs) throws SQLException
 	{
 		rs.updateFloat("frequency", getFrequency());
@@ -104,22 +105,28 @@ public class TemplateBean implements Serializable
 		rs.updateString("typeOfPay", getSTypeOfPay());
 		rs.updateString("units", getSUnits());
 		rs.updateInt("allowedSurfaceTypes", surfaceTypes);
+        rs.updateBoolean("direct", direct);
+
 		if (getMatchMaxSize() == 0)
 			rs.updateNull("matchMaxSize");
 		else
 			rs.updateInt("matchMaxSize", getMatchMaxSize());
+
 		if (getMatchMinSize() == 0)
 			rs.updateNull("matchMinSize");
 		else
 			rs.updateInt("matchMinSize", getMatchMinSize());
+
 		rs.updateString("comment", getComment());
 		
 		icaoSet1 = icaoSet1 == null ? "" : icaoSet1.trim();
 		icaoSet2 = icaoSet2 == null ? "" : icaoSet2.trim();
+
 		if (icaoSet1.equals(""))
 			rs.updateNull("icaoSet1");
 		else
 			rs.updateString("icaoSet1", icaoSet1);
+
 		if (icaoSet2.equals(""))
 			rs.updateNull("icaoSet2");
 		else
@@ -324,6 +331,14 @@ public class TemplateBean implements Serializable
 
 		return list;
 	}
+
+    public boolean getDirect() {
+        return direct;
+    }
+
+    public void setDirect(boolean b) {
+        direct = b;
+    }
 
 	public int getSeatsFrom() {
 		return seatsFrom;

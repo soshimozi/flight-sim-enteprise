@@ -741,7 +741,18 @@
 		        		<img src="<%= image %>">
 		        	</td>
 		        	<td><%= assignment.getSCargo() %></td>
-		        	<td class="assignmentType"><%= assignment.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>
+<%
+    String type = "";
+    if(assignment.getType() == AssignmentBean.TYPE_ALLIN )
+    {
+        type = "A";
+        if (assignment.isDirect())
+            type += "&rarr;";
+    }
+    else
+        type = "T";
+%>
+                    <td class="assignmentType"><%= type %></td>
 		        	<td><%= aircraftReg == null ? "[N/A]" : aircraftReg%></td>
 		        	<td><%= assignment.getSExpires() %></td>
 		        	<td><%= status %></td>

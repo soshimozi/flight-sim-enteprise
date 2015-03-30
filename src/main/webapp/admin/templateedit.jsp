@@ -246,6 +246,15 @@
 					</select>
 					</td>
 				</tr>
+                <tr>
+                    <td>All-In Direct Flight</td>
+                    <td>
+                        <select name="direct" class="formgroup">
+                            <option class="formselect" value="false" <%= !template.getDirect() ? "selected" : "" %>>Non-Direct</option>
+                            <option class="formselect" value="true" <%= template.getDirect() ? "selected" : "" %>>Direct</option>
+                        </select>
+                    </td>
+                </tr>
 				<tr>
 				<!-- All-In changes begin here -->
 				<td colspan="2" style="border:1px solid #000;">
