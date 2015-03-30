@@ -47,6 +47,7 @@ public class AssignmentBean implements Serializable
 	int actualDistance, actualBearing;	
 	int fromTemplate, fromFboTemplate, mptTax;
 	int daysClaimedActive;
+    boolean direct;
 	
 	public AssignmentBean(ResultSet rs) throws SQLException
 	{
@@ -70,6 +71,7 @@ public class AssignmentBean implements Serializable
 		setGroupId(rs.getInt("groupId"));
 		setPilotFee(rs.getInt("pilotFee"));
 		setUnits(rs.getString("units"));
+        setDirect(rs.getBoolean("direct"));
 		comment = rs.getString("comment");
 		commodityId = rs.getInt("commodityId");
 		owner = rs.getInt("owner");
@@ -813,5 +815,15 @@ public class AssignmentBean implements Serializable
 	{
 		createdByUser = b;
 	}
+
+    public void setDirect(boolean b)
+    {
+        direct = b;
+    }
+
+    public boolean isDirect()
+    {
+        return direct;
+    }
 }
 

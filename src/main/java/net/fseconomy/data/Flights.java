@@ -257,6 +257,22 @@ public class Flights
                         cancelFlight(user);
                         throw new DataError(errmsg);
                     }
+
+                    //Get AllIn assignments that are enroute using the reported aircraft
+                    qry = "SELECT * FROM assignments WHERE active = 1 AND aircraftid = ?";
+                    ResultSet results = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraft.getId());
+
+                    results.next();
+
+                    if(!results.getString("toIcao").equals(location.icao))
+                    {
+                        GlobalLogger.logFlightLog("  Flight kicked: AllIn direct flight, not at destination", Flights.class);
+                        String errmsg = "VALIDATIONERROR: AllIn direct flights be flown directly to the destination -- flight aborted!";
+
+                        cancelFlight(user);
+                        throw new DataError(errmsg);
+                    }
+
                     qry = "SELECT toicao FROM assignments WHERE active = 1 AND aircraftid = ?";
                     allInAssignmentToIcao = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.StringResultTransformer(), aircraft.getId());
                 }

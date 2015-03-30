@@ -699,6 +699,7 @@ public class MaintenanceCycle implements Runnable
 				int surfType = rsTemplate.getInt("allowedSurfaceTypes");
 
 				boolean isAllIn = rsTemplate.getString("typeOfPay").equals("allin");
+                boolean direct = rsTemplate.getBoolean("direct");
 				boolean waterOk = !isAllIn;
 
 				String commodity = rsTemplate.getString("commodity");
@@ -1000,7 +1001,9 @@ public class MaintenanceCycle implements Runnable
 						if (isAllIn)
 						{
 							fields.append(", aircraftid");
+                            fields.append(", direct");
 							values.append(", '").append(aircraftId).append("'");
+                            values.append(", '").append(direct ? "1" : "0").append("'");
 						}
 						
 						qry = "INSERT INTO assignments (" + fields.toString() + ") VALUES(" + values.toString() + ")";
