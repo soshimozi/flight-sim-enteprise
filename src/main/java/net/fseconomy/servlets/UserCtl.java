@@ -28,9 +28,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,19 +36,16 @@ import javax.servlet.http.HttpSession;
 
 import net.fseconomy.beans.*;
 import net.fseconomy.data.*;
-import net.fseconomy.util.CacheContainer;
+
 import net.fseconomy.util.Formatters;
 import net.fseconomy.util.GlobalLogger;
 import net.fseconomy.util.Helpers;
-import org.infinispan.configuration.cache.ConfigurationBuilder;
-import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.manager.EmbeddedCacheManager;
+
 
 public class UserCtl extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
 	private static ScheduledFuture<?> future = null;
-    public static EmbeddedCacheManager cacheManager;
     public static MaintenanceCycle maintenanceObject = null;
 
     public void init()
