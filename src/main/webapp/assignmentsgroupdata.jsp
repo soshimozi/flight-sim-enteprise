@@ -182,7 +182,11 @@
                 </td>
                 <td><%= assignment.getComment() %>
                 </td>
-                <td><%= assignment.getSExpires() %>
+                <td class="nowrap">
+                    <%=assignment.isNoExt() ?"<i class=\"fa fa-bolt\" style=\"font-size: 14px;color: red\"></i>" : "" %>
+                    <%=assignment.isExtended() ?"<i class=\"fa fa-clock-o\" style=\"font-size: 14px;\"></i>" : "" %>
+                    <%= assignment.getSExpires() %>
+                </td>
                 </td>
             </tr>
 <%

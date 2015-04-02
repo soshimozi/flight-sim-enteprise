@@ -59,6 +59,7 @@
 
 	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
 	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css'>
+	<link rel='stylesheet prefetch' href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css"/>
 	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css"/>
 	<link rel="stylesheet" type="text/css" href="css/Master.css"/>
@@ -754,7 +755,11 @@
 %>
                     <td class="assignmentType"><%= type %></td>
 		        	<td><%= aircraftReg == null ? "[N/A]" : aircraftReg%></td>
-		        	<td><%= assignment.getSExpires() %></td>
+					<td class="nowrap">
+						<%=assignment.isNoExt() ?"<i class=\"fa fa-bolt\" style=\"font-size: 14px;color: red\"></i>" : "" %>
+						<%=assignment.isExtended() ?"<i class=\"fa fa-clock-o\" style=\"font-size: 14px;\"></i>" : "" %>
+						<%= assignment.getSExpires() %>
+					</td>
 		        	<td><%= status %></td>
 		        	<td><%= assignment.getComment() %></td>
 				</tr>

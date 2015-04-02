@@ -48,6 +48,7 @@ public class AssignmentBean implements Serializable
 	int fromTemplate, fromFboTemplate, mptTax;
 	int daysClaimedActive;
     boolean direct;
+	boolean noExt;
 	
 	public AssignmentBean(ResultSet rs) throws SQLException
 	{
@@ -72,6 +73,7 @@ public class AssignmentBean implements Serializable
 		setPilotFee(rs.getInt("pilotFee"));
 		setUnits(rs.getString("units"));
         setDirect(rs.getBoolean("direct"));
+		setNoExt(rs.getBoolean("noext"));
 		comment = rs.getString("comment");
 		commodityId = rs.getInt("commodityId");
 		owner = rs.getInt("owner");
@@ -125,7 +127,7 @@ public class AssignmentBean implements Serializable
 	{
 		DistanceBearing distanceBearing = Airports.getDistanceBearing(getFrom(), getTo());
 
-		setDistance((int)Math.round(distanceBearing.distance));
+		setDistance((int) Math.round(distanceBearing.distance));
 		setBearing((int)Math.round(distanceBearing.bearing));
 	}
 	
@@ -137,6 +139,7 @@ public class AssignmentBean implements Serializable
 		super();
 		id = -1;
 	}
+
 	/**
 	 * Returns the aircraft.
 	 * @return String
@@ -395,7 +398,15 @@ public class AssignmentBean implements Serializable
 
 		return result;
 	}
-	
+
+	public boolean isExtended()
+	{
+		if (expires == null || fromFboTemplate != 0)
+			return false;
+
+		return !from.equals(location) && !isNoExt();
+	}
+
 	public String getSExpires()
 	{
 		if (expires == null)
@@ -450,11 +461,11 @@ public class AssignmentBean implements Serializable
 		String Duration;
 
 		if (days > 0)
-			Duration = days + " days";	
+			Duration = days + " days";
 		else if (hours > 0)
-			Duration = hours + " hours";
+			Duration = hours + " hrs";
 		else
-			Duration = minutes + " minutes";
+			Duration = minutes + " mins";
 
 		if (expired)
 			return "expired (" + Duration + ")";
@@ -817,13 +828,23 @@ public class AssignmentBean implements Serializable
 	}
 
     public void setDirect(boolean b)
-    {
-        direct = b;
-    }
+	{
+		direct = b;
+	}
 
     public boolean isDirect()
     {
         return direct;
     }
+
+	public void setNoExt(boolean b)
+	{
+		noExt = b;
+	}
+
+	public boolean isNoExt()
+	{
+		return noExt;
+	}
 }
 
