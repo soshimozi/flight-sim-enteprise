@@ -631,11 +631,13 @@ public class MaintenanceCycle implements Runnable
                             + "select creation, expires, fromtemplate, fromicao, toicao, 0, 0 FROM assignments "
                             + "WHERE (fromFboTemplate is null and active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
                             + "OR  (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-                            + "OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires); "
+							+ "OR  (fromFboTemplate is null and active <> 1 AND location = fromicao AND noext=1 AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
+                            + "OR (fromFboTemplate is null and active <> 1 AND expires is not null AND noext=0 AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires); "
                     + " DELETE FROM assignments WHERE "
                             + "    (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
                             + "	OR (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-                            + "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires)";
+							+ "	OR (fromFboTemplate is null and active <> 1 AND location = fromicao AND noext=1 AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
+                            + "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND noext=0 AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires)";
             DALHelper.getInstance().ExecuteBatchUpdate(qry);
 
 			//We are caching here several of the bigger ICAO lists created by the template
@@ -693,6 +695,7 @@ public class MaintenanceCycle implements Runnable
 				double payDev = (double) rsTemplate.getInt("payDev") / 100.0;
 
 				int keepAlive = rsTemplate.getInt("targetKeepAlive");
+				boolean noExt = rsTemplate.getBoolean("noext");
 				int targetAmount = rsTemplate.getInt("targetAmount");
 				int maxSize = rsTemplate.getInt("matchMaxSize");
 				int minSize = rsTemplate.getInt("matchMinSize");
@@ -984,7 +987,7 @@ public class MaintenanceCycle implements Runnable
 						StringBuilder fields = new StringBuilder();
 						StringBuilder values = new StringBuilder();
 						
-						fields.append("bearing, creation, expires, commodity, units, amount, fromicao, location, toicao, distance, pay, fromTemplate");
+						fields.append("bearing, creation, expires, commodity, units, amount, fromicao, location, toicao, distance, pay, fromTemplate, noext");
 						values.append("").append(bearing);
 						values.append(", '").append(now).append("'");
 						values.append(", '").append(new Timestamp(expires.getTime().getTime())).append("'");
@@ -997,6 +1000,7 @@ public class MaintenanceCycle implements Runnable
 						values.append(", ").append(distance);
 						values.append(", ").append((float) pay);
 						values.append(", ").append(templateId);
+						values.append(", ").append(noExt);
 
 						if (isAllIn)
 						{

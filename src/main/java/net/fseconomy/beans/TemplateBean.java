@@ -53,6 +53,7 @@ public class TemplateBean implements Serializable
 	int units;
 	int surfaceTypes;
     boolean direct; //flight cannot have any stops between start and finish
+	boolean noExtension;
 	
 	//All-In template changes
 	int speedFrom, speedTo;
@@ -83,6 +84,7 @@ public class TemplateBean implements Serializable
 		setUnits(rs.getString("units"));
 		setAllowedSurfaceTypes(rs.getInt("allowedSurfaceTypes"));
         setDirect(rs.getBoolean("direct"));
+		setNoExt(rs.getBoolean("noext"));
 
 		//All-In changes
 		setSeatsFrom(rs.getInt("seatsFrom"));
@@ -106,6 +108,7 @@ public class TemplateBean implements Serializable
 		rs.updateString("units", getSUnits());
 		rs.updateInt("allowedSurfaceTypes", surfaceTypes);
         rs.updateBoolean("direct", direct);
+		rs.updateBoolean("noext", noExtension);
 
 		if (getMatchMaxSize() == 0)
 			rs.updateNull("matchMaxSize");
@@ -339,6 +342,16 @@ public class TemplateBean implements Serializable
     public void setDirect(boolean b) {
         direct = b;
     }
+
+	public boolean getNoExt() {
+		return noExtension;
+	}
+
+	public void setNoExt(boolean b) {
+		noExtension = b;
+	}
+
+
 
 	public int getSeatsFrom() {
 		return seatsFrom;

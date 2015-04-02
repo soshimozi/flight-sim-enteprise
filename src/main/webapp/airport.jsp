@@ -142,6 +142,7 @@
 	
 	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
 	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css'>
+	<link rel='stylesheet prefetch' href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css"/>
 	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css"/>
 	<link rel="stylesheet" type="text/css" href="css/Master.css"/>
@@ -754,14 +755,24 @@
 		if (airportArea) 
 		{
 			if (toAirport)
-				assignments = Assignments.getAssignmentsToArea(airport.getIcao(), Airports.closeAirportsWithAssignments(airport.getIcao(), false), minPax, maxPax, minKG, maxKG);
+			{
+				assignments = Assignments.getAssignmentsToArea(airport.getIcao(),
+							Airports.closeAirportsWithAssignments(airport.getIcao(), false), minPax, maxPax, minKG, maxKG);
+			}
 			else
-				assignments = Assignments.getAssignmentsInArea(airport.getIcao(), Airports.closeAirportsWithAssignments(airport.getIcao(), true), minPax, maxPax, minKG, maxKG);
+			{
+				assignments = Assignments.getAssignmentsInArea(airport.getIcao(),
+							Airports.closeAirportsWithAssignments(airport.getIcao(), true), minPax, maxPax, minKG, maxKG);
+			}
 		}
 		else if (toAirport)
+		{
 			assignments = Assignments.getAssignmentsToAirport(airport.getIcao(), minPax, maxPax, minKG, maxKG);
+		}
 		else
+		{
 			assignments = Assignments.getAssignments(airport.getIcao(), minPax, maxPax, minKG, maxKG);
+		}
 
 		if (aircraftArea)
             aircraftList = Aircraft.getAircraftInArea(airport.getIcao(), closestAirports);
@@ -910,7 +921,11 @@
 %>
                     <td id="assignmentType-<%= id %>"><%= type %></td>
                     <td class="nowrap"><%= aircraftReg == null ? "[N/A]" : aircraftReg %></td>
-                    <td class="nowrap"><%= assignment.getSExpires() %></td>
+                    <td class="nowrap">
+						<%=assignment.isNoExt() ?"<i class=\"fa fa-bolt\" style=\"font-size: 14px;color: red\"></i>" : "" %>
+						<%=assignment.isExtended() ?"<i class=\"fa fa-clock-o\" style=\"font-size: 14px;\"></i>" : "" %>
+						<%= assignment.getSExpires() %>
+					</td>
                     <td>
                         <a class="link" title="Show aircraft that can handle this assignment" href="<%= response.encodeURL(URL + sAirportArea + sToAirport + "&aircraftArea=1&capable=" + id) %>">Aircraft</a>
                     </td>

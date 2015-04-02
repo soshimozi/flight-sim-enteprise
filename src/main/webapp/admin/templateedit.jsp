@@ -164,8 +164,24 @@
 						<option class="formselect" value="2" <%=  keepAlive == 2 ? "selected" : "" %>>2 days</option>
 						<option class="formselect" value="3" <%=  keepAlive == 3 ? "selected" : "" %>>3 days</option>
 						<option class="formselect" value="4" <%=  keepAlive == 4 ? "selected" : "" %>>4 days</option>									
-						<option class="formselect" value="5" <%=  keepAlive == 5 ? "selected" : "" %>>5 days</option>												
+						<option class="formselect" value="5" <%=  keepAlive == 5 ? "selected" : "" %>>5 days</option>
+						<option class="formselect" value="5" <%=  keepAlive == 6 ? "selected" : "" %>>6 days</option>
+						<option class="formselect" value="5" <%=  keepAlive == 7 ? "selected" : "" %>>7 days</option>
+						<option class="formselect" value="5" <%=  keepAlive == 8 ? "selected" : "" %>>8 days</option>
+						<option class="formselect" value="5" <%=  keepAlive == 9 ? "selected" : "" %>>9 days</option>
+						<option class="formselect" value="5" <%=  keepAlive == 10 ? "selected" : "" %>>10 days</option>
+						<option class="formselect" value="5" <%=  keepAlive == 11 ? "selected" : "" %>>11 days</option>
+						<option class="formselect" value="5" <%=  keepAlive == 12 ? "selected" : "" %>>12 days</option>
 					</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Allow Time Extension</td>
+					<td>
+						<select name="noExt" class="formgroup">
+							<option class="formselect" value="false" <%= !template.getNoExt() ? "selected" : "" %>>Yes</option>
+							<option class="formselect" value="true" <%= template.getNoExt() ? "selected" : "" %>>No</option>
+						</select>
 					</td>
 				</tr>
 				<tr>
