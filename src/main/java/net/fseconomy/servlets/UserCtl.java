@@ -50,13 +50,11 @@ public class UserCtl extends HttpServlet
         GlobalLogger.logApplicationLog("UserCtl init() called", UserCtl.class);
 
 		FullFilter.updateFilter(DALHelper.getInstance());
-
         ScheduledTasks.getInstance().startScheduledTasks();
 	}
 	
 	public void destroy()
 	{
-
         GlobalLogger.logApplicationLog("UserCtl destroy() called", UserCtl.class);
 
         ScheduledTasks.getInstance().endScheduledTasks();
