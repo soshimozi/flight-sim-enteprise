@@ -4,19 +4,11 @@ import net.fseconomy.data.DALHelper;
 import net.fseconomy.data.Data;
 import net.fseconomy.dto.AuthInfo;
 import net.fseconomy.encryption.Encryption;
-import net.fseconomy.servlets.UserCtl;
-import net.fseconomy.util.CacheContainer;
-import org.infinispan.Cache;
-import org.infinispan.configuration.cache.ConfigurationBuilder;
-import org.infinispan.manager.DefaultCacheManager;
-import org.infinispan.manager.EmbeddedCacheManager;
 
-import javax.servlet.ServletContext;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public final class Authenticator
 {
