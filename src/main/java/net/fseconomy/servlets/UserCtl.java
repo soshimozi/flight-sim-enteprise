@@ -22,11 +22,9 @@ package net.fseconomy.servlets;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -45,66 +43,21 @@ import net.fseconomy.util.Helpers;
 public class UserCtl extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
-	private static ScheduledFuture<?> future = null;
-    public static MaintenanceCycle maintenanceObject = null;
-
     public void init()
 	{
         GlobalLogger.logApplicationLog("UserCtl init() called", UserCtl.class);
 
 		FullFilter.updateFilter(DALHelper.getInstance());
-
-        //do this section last as this kicks off the timer
-		maintenanceObject = new MaintenanceCycle();
-
-		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-		if(Boolean.getBoolean("Debug"))
-		{
-			//5 minute cycles if Debug set on command line
-			future = executor.scheduleWithFixedDelay(maintenanceObject, 0, 5, TimeUnit.MINUTES);
-		}
-		else
-		{
-			long delay = minutesToNextHalfHour();
-
-            GlobalLogger.logApplicationLog("Restart: Main cycle starts in (minutes): " + delay, UserCtl.class);
-
-			//if delay is 3 minutes or greater then run the cycle now to update stats
-			if(delay >= 3)
-			{
-				//Do it now, then setup the schedule runs
-				maintenanceObject.SetOneTimeStatsOnly(true);
-				executor.execute(maintenanceObject);
-			}			
-			
-			//Schedule it at the top and bottom of the hour
-			future = executor.scheduleAtFixedRate(maintenanceObject, delay, 30, TimeUnit.MINUTES);
-		}
+        ScheduledTasks.getInstance().startScheduledTasks();
 	}
 
     public void destroy()
     {
         GlobalLogger.logApplicationLog("UserCtl destroy() called", UserCtl.class);
 
-        future.cancel(false);
+        ScheduledTasks.getInstance().endScheduledTasks();
     }
 
-    private static long minutesToNextHalfHour()
-	{
-		Calendar calendar = Calendar.getInstance();
-		
-	    int minutes = calendar.get(Calendar.MINUTE);
-	    //int seconds = calendar.get(Calendar.SECOND);
-	    //int millis = calendar.get(Calendar.MILLISECOND);
-        int total = 60 - minutes;
-	    
-	    if(total > 30)
-	    	total -= 30;
-	    
-	    return total;
-	}
-	
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 		throws ServletException, IOException
 	{
