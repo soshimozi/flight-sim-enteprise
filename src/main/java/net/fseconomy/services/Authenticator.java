@@ -4,8 +4,6 @@ import net.fseconomy.data.DALHelper;
 import net.fseconomy.data.Data;
 import net.fseconomy.dto.AuthInfo;
 import net.fseconomy.encryption.Encryption;
-import net.fseconomy.servlets.UserCtl;
-import org.infinispan.Cache;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -14,13 +12,13 @@ import java.util.UUID;
 
 public final class Authenticator
 {
-
     private static Authenticator authenticator = null;
 
-    // An authentication token storage which stores <service_key, auth_token>.
-    private final Map<String, AuthInfo> authorizationTokensStorage = new HashMap<>();
+    // An authentication token storage which stores <authtoken, authinfo>.
+    private static HashMap<String, AuthInfo> tokenCache = new HashMap<>();
+    private static HashMap<String, String> serviceKeyCache = new HashMap<>();
 
-    private Authenticator()
+    public Authenticator()
     {
     }
 
@@ -34,18 +32,35 @@ public final class Authenticator
 
     public String login( String username, String password )
     {
-        AuthInfo authInfo = new AuthInfo();
-        authInfo.name = username;
-
-        if (isUsernamePasswordValid(username, password, authInfo))
+        int userId = getUserId(username, password);
+        if (userId != 0)
         {
+            //does token already exist?
+            String foundToken = getKeyByValue(tokenCache, userId);
+            if(foundToken != null)
+                return foundToken;
+
+            AuthInfo authInfo = new AuthInfo();
+            authInfo.name = username;
+            authInfo.userId = userId;
             authInfo.guid = UUID.randomUUID().toString();
+
             String authToken = Encryption.getInstance().encryptAuthInfo(authInfo);
-            authorizationTokensStorage.put( authToken, authInfo );
+            tokenCache.put(authToken, authInfo);
 
             return authToken;
         }
 
+        return null;
+    }
+
+    public static String getKeyByValue(Map<String, AuthInfo> map, int value)
+    {
+        for (Map.Entry<String, AuthInfo> entry : map.entrySet())
+        {
+            if (value == entry.getValue().userId)
+                return entry.getKey();
+        }
         return null;
     }
 
@@ -58,7 +73,7 @@ public final class Authenticator
      */
     public boolean isAuthTokenValid(String authToken)
     {
-        return authorizationTokensStorage.containsKey(authToken);
+        return tokenCache.containsKey(authToken);
     }
 
     public boolean logout(String authToken )
@@ -67,28 +82,24 @@ public final class Authenticator
             return false;
 
         AuthInfo tokenAuthInfo = Encryption.getInstance().decryptAuthInfo(authToken);
-        AuthInfo authInfo = authorizationTokensStorage.get(authToken);
+        AuthInfo authInfo = tokenCache.get(authToken);
         if(!authInfo.name.equals(tokenAuthInfo.name))
             return false;
 
-        authorizationTokensStorage.remove( authToken );
+        tokenCache.remove( authToken );
 
         return true;
     }
 
-    public boolean isUsernamePasswordValid(String userName, String password, AuthInfo authInfo)
+    // return of 0 indicates not found
+    public int getUserId(String userName, String password)
     {
-        boolean result = false;
+        int result = 0;
 
         try
         {
             String qry = "SELECT id FROM accounts a WHERE name = ? and password = PASSWORD(?)";
-            int id = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), userName, password);
-            if(id > 0)
-            {
-                authInfo.userId = id;
-                result = true;
-            }
+            result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), userName, password);
         }
         catch(SQLException e)
         {
@@ -98,16 +109,21 @@ public final class Authenticator
         return result;
     }
 
+    public int getUserIdFromToken(String authToken)
+    {
+        AuthInfo authInfo = tokenCache.get(authToken);
+        return authInfo.userId;
+    }
+
     public String getUsernameFromToken(String authToken)
     {
-        AuthInfo authInfo = authorizationTokensStorage.get(authToken);
+        AuthInfo authInfo = tokenCache.get(authToken);
         return authInfo.name;
     }
 
     public boolean isServiceKeyValid(String serviceKey)
     {
         boolean result = false;
-        Cache<String, String> serviceKeyCache = UserCtl.cacheManager.getCache("ServiceKey-cache");
 
         if(serviceKey.equals(Data.adminApiKey) || serviceKeyCache.get(serviceKey) != null)
         {
@@ -130,5 +146,4 @@ public final class Authenticator
 
         return result;
     }
-
 }
