@@ -51,7 +51,7 @@ public class ClientServices
         if(!tanksMatch)
         {
             //return fuel tank mismatch
-            return common.createSuccessResponse(200, 404, "Error", "Fuel tank mismatch.", null);
+            return common.createSuccessResponse(200, 207, "Warning", "Fuel tank mismatch.", mb.getMakeModel());
         }
 
         return common.createSuccessResponse(200, 200, null, null, mb.getMakeModel());

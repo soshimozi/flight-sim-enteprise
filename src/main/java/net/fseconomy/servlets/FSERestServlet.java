@@ -1,5 +1,6 @@
 package net.fseconomy.servlets;
 
+import com.google.gson.Gson;
 import net.fseconomy.services.AdminServiceData;
 import net.fseconomy.services.Authenticator;
 import net.fseconomy.services.ClientServices;
@@ -86,9 +87,11 @@ public class FSERestServlet
 
     @POST
     @Path("/checkalias")
-    public Response checkAlias(@HeaderParam("authtoken") String authToken, @FormParam("alias") final String alias, @FormParam("fuel") final int[] tanks)
+    public Response checkAlias(@HeaderParam("authtoken") String authToken, @FormParam("alias") final String alias, @FormParam("tanksJson") final String tanksJson)
     {
         int userId = Authenticator.getInstance().getUserIdFromToken(authToken);
+        int[] tanks = new Gson().fromJson(tanksJson, int[].class);
+
         Response response = ClientServices.checkAlias(userId, alias, tanks);
 
         return response;

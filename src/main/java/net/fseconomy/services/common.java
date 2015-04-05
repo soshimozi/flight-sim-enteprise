@@ -123,7 +123,7 @@ public class common
 
     public static Response ResponseAccessDenied()
     {
-        return createErrorResponse(200, 401, "AccessDenied", "You do not have permission");
+        return createErrorResponse(401, 401, "AccessDenied", "You do not have permission");
     }
 
     static double getBalanceAmount(PermissionCategory type, int account) throws SQLException
