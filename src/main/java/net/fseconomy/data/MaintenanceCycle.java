@@ -174,7 +174,7 @@ public class MaintenanceCycle implements Runnable
 		processBulkFuelOrders();
 		
 		//TODO: comment out for test server for faster cycle times
-		processFboAssignments(); //green assignments
+		//processFboAssignments(); //green assignments
 		processTemplateAssignments(); //template assignments
 		
 		//TODO examine to see if we need to randomize release times on this a bit more
@@ -1000,7 +1000,7 @@ public class MaintenanceCycle implements Runnable
 						values.append(", ").append(distance);
 						values.append(", ").append((float) pay);
 						values.append(", ").append(templateId);
-						values.append(", ").append(noExt);
+						values.append(", ").append(noExt ? "1" : "0");
 
 						if (isAllIn)
 						{
