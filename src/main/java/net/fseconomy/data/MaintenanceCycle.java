@@ -622,25 +622,7 @@ public class MaintenanceCycle implements Runnable
 	{
 		try
 		{
-            // Log assignments to be deleted then:
-            // Delete unmoved unlocked expired assignments
-            // Delete unmoved expired assignments after 1 day
-            // Delete moved expired assignments after 45 days
-			String qry =
-                    "INSERT INTO templatelog (created, expires, templateid, fromicao, toicao, pay, payee) "
-                            + "select creation, expires, fromtemplate, fromicao, toicao, 0, 0 FROM assignments "
-                            + "WHERE (fromFboTemplate is null and active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
-							+ " OR (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND noext=1 AND expires is not null AND now() > expires)"
-							+ " OR  (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-							//+ "OR  (fromFboTemplate is null and active <> 1 AND noext=1 AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-                            + "OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires); "
-                    + " DELETE FROM assignments WHERE "
-                            + "    (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
-							+ " OR (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND noext=1 AND expires is not null AND now() > expires)"
-                            + "	OR (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-							// + "	OR (fromFboTemplate is null and active <> 1 AND noext=1 AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-                            + "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires)";
-            DALHelper.getInstance().ExecuteBatchUpdate(qry);
+			deleteExpiredTemplateAssignments();
 
 			//We are caching here several of the bigger ICAO lists created by the template
 			//macros $FBO, and $MILITARY so that its called only once per cycle, instead of
@@ -676,7 +658,7 @@ public class MaintenanceCycle implements Runnable
                 }
 			}
 			
-			qry = "SELECT * from templates";
+			String qry = "SELECT * from templates";
 			ResultSet rsTemplate = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rsTemplate.next())
 			{
@@ -1039,7 +1021,29 @@ public class MaintenanceCycle implements Runnable
 			e.printStackTrace();
 		} 
 	}
-	
+
+	private void deleteExpiredTemplateAssignments() throws SQLException
+	{
+		// Log assignments to be deleted then:
+		// Delete unmoved unlocked expired assignments
+		// Delete unmoved expired assignments after 1 day
+		// Delete moved expired assignments after 45 days
+		String qry =
+			"INSERT INTO templatelog (created, expires, templateid, fromicao, toicao, pay, payee) "
+			+ "select creation, expires, fromtemplate, fromicao, toicao, 0, 0 FROM assignments "
+			+ "WHERE (fromFboTemplate is null and active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
+									+ " OR (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND noext=1 AND expires is not null AND now() > expires)"
+									+ " OR  (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
+			+ "OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires); "
+			+ " DELETE FROM assignments WHERE "
+			+ "    (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
+									+ " OR (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND noext=1 AND expires is not null AND now() > expires)"
+			+ "	OR (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
+			+ "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires)";
+
+		DALHelper.getInstance().ExecuteBatchUpdate(qry);
+	}
+
 	void processFboRenters()
 	{
 		try
@@ -1078,7 +1082,7 @@ public class MaintenanceCycle implements Runnable
 		}			
 	}
 	
-	void deleteExpiredAssignments()
+	void deleteExpiredFboAssignments()
 	{
 		// NOTE: Adjust the extratime values in AssignmentBean.getSExpires() if changing these queries.
 		
@@ -1103,7 +1107,7 @@ public class MaintenanceCycle implements Runnable
 	{
 		try
 		{
-			deleteExpiredAssignments();
+			deleteExpiredFboAssignments();
 			
 			int ChancesPerDay = 6;
 			boolean oneAssignmentPerLoop = true;
