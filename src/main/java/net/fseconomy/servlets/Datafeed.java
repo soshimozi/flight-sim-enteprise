@@ -3029,7 +3029,8 @@ public class Datafeed extends HttpServlet
 	private void AddCSVFboItems(Converters.csvBuffer buffer, List<FboBean> fbos, boolean showsupplies)
 	{
 		if(buffer.isHeaderEmpty())
-		{			
+		{
+			buffer.appendHeaderItem("FboId");
 			buffer.appendHeaderItem("Status");
 			buffer.appendHeaderItem("Airport");
 			buffer.appendHeaderItem("Name");
@@ -3072,6 +3073,7 @@ public class Datafeed extends HttpServlet
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
 
+			buffer.append(fbo.getId());
             buffer.append((fbo.isActive() ? "Active" : "Closed"));
             buffer.append(airport.getName());
             buffer.append(fbo.getName());
@@ -3131,6 +3133,7 @@ public class Datafeed extends HttpServlet
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
 
             buffer.append("<FBO>\n");
+			buffer.append("FboId", fbo.getId());
             buffer.append("Status", (fbo.isActive() ? "Active" : "Closed"));
             buffer.append("Airport", airport.getName());
             buffer.append("Name", Converters.XMLHelper.protectSpecialCharacters(fbo.getName()));

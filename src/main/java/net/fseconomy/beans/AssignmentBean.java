@@ -366,7 +366,7 @@ public class AssignmentBean implements Serializable
 		}
 		else if(fromFboTemplate == 0) //non-PAX
 		{
-			if(moved || !noExt)
+			if(moved && !noExt)
 			{
 				//return the expired date time + 45 * 24 hours
 				long addms = MaintenanceCycle.ASSGN_EXT_DAYS * 86400000l;

@@ -70,6 +70,7 @@
             <h4 class="text-center"><%= location %></h4>
             <div class="row clearfix">
                 <div class="col-xs-3 col-sm-3 col-md-3 column">
+                    <div class="text-right">Fbo ID</div>
                     <div class="text-right">Name</div>
                     <div class="text-right">Lots</div>
 <%
@@ -92,6 +93,7 @@
                     <div class="text-right">Goods</div>
                 </div>
                 <div class="col-xs-9 col-sm-9 col-md-9 column">
+                    <div class="text-left"><%=fboId%></div>
                     <div class="text-left" title="<%=fbo.getName()%>"><%=fboname%></div>
                     <div class="text-left"><%=lots%></div>
 <%
