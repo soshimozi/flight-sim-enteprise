@@ -24,14 +24,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Calendar;
 import java.util.List;
 
-/**
- * @author Marty
- *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
- */
 public class TemplateBean implements Serializable
 {
 	private static final long serialVersionUID = 1L;
@@ -383,5 +378,102 @@ public class TemplateBean implements Serializable
 
 	public void setSpeedTo(int i) {
 		speedTo = i;
+	}
+
+	private List<String> makeCommodityList(String commodity)
+	{
+		if (commodity == null || "".equals(commodity.trim()))
+			return null;
+
+		String items[] = commodity.trim().split(",\\ *");
+		String item;
+
+		List<String> dowMatchList = new ArrayList<>();
+		List<String> noDowMatchList = new ArrayList<>();
+
+		int wd = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+
+		wd -= 1;
+		if (wd == 0) // Mon..Sun instead of Sun..Sat
+			wd = 7;
+
+		String dow = Integer.toString(wd);
+
+		for (String item1 : items)
+		{
+			item = item1;
+			String[] params = item.trim().split("/");
+
+			// Name; weight; weekdays
+			String name = params[0].trim();
+			int weight = 1;
+			String weekdays = "1234567";
+
+			if (params.length > 1)
+			{
+				try
+				{
+					weight = Integer.parseInt(params[1].trim());
+
+					if (weight > 10)
+						weight = 10;
+					else if (weight < 1)
+						weight = 1;
+				}
+				catch (NumberFormatException ignored)
+				{
+				}
+			}
+
+			if (params.length > 2)
+			{
+				weekdays = params[2].trim();
+			}
+
+			boolean dowmatch = false;
+
+			if (weekdays.contains(dow))
+			{
+				dowmatch = true;
+			}
+
+			for (int i = 0; i < weight; i++)
+			{
+				if (dowmatch)
+					dowMatchList.add(name);
+
+				noDowMatchList.add(name);
+			}
+		}
+
+		if (dowMatchList.size() > 0)
+			return dowMatchList;
+		else
+			return noDowMatchList;
+	}
+
+	public String getRandomCommodity(int quantity)
+	{
+		String result = null;
+		List<String> commodities = makeCommodityList(commodity);
+		if (commodities != null && commodities.size() > 0)
+		{
+			int i = (int)(Math.random() * commodities.size());
+			if (i < commodities.size())
+				result = commodities.get(i);
+		}
+
+		if (result == null || "".equals(result.trim()))
+			result = FboFacilityBean.DEFAULT_COMMODITYNAME_PASSENGERS;
+
+		if (quantity == 1)
+			result = result.replaceAll("\\(s\\)", "");
+		else
+			result = result.replaceAll("\\(s\\)", "s");
+
+		if (result.length() > 45)
+			result = result.substring(0, 45).trim();
+
+		return result;
 	}
 }

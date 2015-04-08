@@ -662,6 +662,7 @@ public class MaintenanceCycle implements Runnable
 			ResultSet rsTemplate = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rsTemplate.next())
 			{
+				TemplateBean template = new TemplateBean(rsTemplate);
 				int templateId = rsTemplate.getInt("id");
 
 				updateStatus("Working on assignments for template " + templateId);
@@ -975,7 +976,7 @@ public class MaintenanceCycle implements Runnable
 						values.append("").append(bearing);
 						values.append(", '").append(now).append("'");
 						values.append(", '").append(new Timestamp(expires.getTime().getTime())).append("'");
-						values.append(", '").append(Converters.escapeSQL(commodity)).append("'");
+						values.append(", '").append(Converters.escapeSQL(template.getRandomCommodity(cargoAmount))).append("'");
 						values.append(", '").append(units).append("'");
 						values.append(", ").append(cargoAmount);
 						values.append(", '").append(fromIcao).append("'");
