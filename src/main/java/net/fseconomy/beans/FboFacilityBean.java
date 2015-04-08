@@ -254,15 +254,17 @@ public class FboFacilityBean implements Serializable
 		minUnitsPerTrip = Math.min(min, x);
 	}
 	
-	static String[] makeCommodityList(String commodity)
+	private List<String> makeCommodityList(String commodity)
 	{
 		if (commodity == null || "".equals(commodity.trim()))
 			return null;
 
         String items[] = commodity.trim().split(",\\ *");
 		String item;
-		List dowMatchList = new ArrayList();
-		List noDowMatchList = new ArrayList();
+
+		List<String> dowMatchList = new ArrayList<>();
+		List<String> noDowMatchList = new ArrayList<>();
+
 		int wd = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
 
         wd -= 1;
@@ -274,7 +276,7 @@ public class FboFacilityBean implements Serializable
         for (String item1 : items)
         {
             item = item1;
-            String[] params = item.trim().split("; *");
+            String[] params = item.trim().split("/");
 
             // Name; weight; weekdays
             String name = params[0].trim();
@@ -319,29 +321,33 @@ public class FboFacilityBean implements Serializable
         }
 
         if (dowMatchList.size() > 0)
-			return (String[]) dowMatchList.toArray(new String[dowMatchList.size()]);
+			return dowMatchList;
 		else
-			return (String[]) noDowMatchList.toArray(new String[noDowMatchList.size()]);
+			return noDowMatchList;
 	}
 
     public String getRandomCommodity(int quantity)
 	{
 		String result = null;
-		String[] commodities = FboFacilityBean.makeCommodityList(commodity);
-		if (commodities != null && commodities.length > 0)
+		List<String> commodities = makeCommodityList(commodity);
+		if (commodities != null && commodities.size() > 0)
 		{
-			int i = (int)(Math.random() * commodities.length);
-			if (i < commodities.length)
-				result = commodities[i];
+			int i = (int)(Math.random() * commodities.size());
+			if (i < commodities.size())
+				result = commodities.get(i);
 		}
+
 		if (result == null || "".equals(result.trim()))
 			result = FboFacilityBean.DEFAULT_COMMODITYNAME_PASSENGERS;
+
 		if (quantity == 1)
 			result = result.replaceAll("\\(s\\)", "");
 		else
 			result = result.replaceAll("\\(s\\)", "s");
+
 		if (result.length() > 45)
 			result = result.substring(0, 45).trim();
+
 		return result;
 	}
 

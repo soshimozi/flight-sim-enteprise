@@ -366,7 +366,7 @@ public class AssignmentBean implements Serializable
 		}
 		else if(fromFboTemplate == 0) //non-PAX
 		{
-			if(moved)
+			if(moved && !noExt)
 			{
 				//return the expired date time + 45 * 24 hours
 				long addms = MaintenanceCycle.ASSGN_EXT_DAYS * 86400000l;
@@ -382,8 +382,8 @@ public class AssignmentBean implements Serializable
 		{
 			if(locked)
 			{
-				//return the expired date time + 2*24 hours
-				cal.setTimeInMillis(expires.getTime() + 2l*86400000l);
+				//return the expired date time + 24 hours
+				cal.setTimeInMillis(expires.getTime() + 86400000l);
 			}
 			else
 			{
@@ -404,7 +404,7 @@ public class AssignmentBean implements Serializable
 		if (expires == null || fromFboTemplate != 0)
 			return false;
 
-		return !from.equals(location) && !isNoExt();
+		return !from.equals(location) && !noExt;
 	}
 
 	public String getSExpires()
@@ -419,7 +419,7 @@ public class AssignmentBean implements Serializable
 		if (fromFboTemplate == 0)
 		{
 			long extratime = 0;
-			if (moved)
+			if (moved && !noExt)
 				extratime = MaintenanceCycle.ASSGN_EXT_DAYS; // days
 			else if (locked) {
 				extratime = 1;  // days
@@ -435,7 +435,7 @@ public class AssignmentBean implements Serializable
 			long extratime = 0;
 			if (locked) 
 			{
-				extratime = 2 * 24;  //hard coded 2 days extra when locked
+				extratime = 24;  //hard coded 1 days extra when locked
 				
 			/* ADDED PRD hours: get new user input from database here
 			variable daysClaimedActive comes from fbofacilities template and is passed
