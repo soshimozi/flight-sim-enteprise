@@ -510,7 +510,11 @@
 		        <td><%= bean.getSCargo() %></td>
 		        <td><%= bean.getType() == AssignmentBean.TYPE_ALLIN ? "A" : "T" %></td>
 		        <td><%= aircraftReg == null ? "[N/A]" : aircraftReg%></td>
-		        <td><%= bean.getSExpires() %></td>
+				<td class="nowrap">
+					<%=bean.isNoExt() ?"<i class=\"fa fa-bolt\" style=\"font-size: 14px;color: red\"></i>" : "" %>
+					<%=bean.isExtended() ?"<i class=\"fa fa-clock-o\" style=\"font-size: 14px;\"></i>" : "" %>
+					<%= bean.getSExpires() %>
+				</td>
 		        <td><%= status %></td>
 		        <td><%= bean.getComment() %></td>
 		     </tr>
