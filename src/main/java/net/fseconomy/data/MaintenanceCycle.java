@@ -1032,15 +1032,18 @@ public class MaintenanceCycle implements Runnable
 		String qry =
 			"INSERT INTO templatelog (created, expires, templateid, fromicao, toicao, pay, payee) "
 			+ "select creation, expires, fromtemplate, fromicao, toicao, 0, 0 FROM assignments "
-			+ "WHERE (fromFboTemplate is null and active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
-									+ " OR (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND noext=1 AND expires is not null AND now() > expires)"
-									+ " OR  (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-			+ "OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires); "
+			+ "WHERE (fromFboTemplate is null and active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires)"
+			+ " OR (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND noext=1 AND expires is not null AND now() > expires)"
+			+ " OR  (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires)"
+			+ "	OR (fromFboTemplate is null and active <> 1 AND noext=1 AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires)"
+			+ " OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires);"
+
 			+ " DELETE FROM assignments WHERE "
-			+ "    (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires) "
-									+ " OR (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND noext=1 AND expires is not null AND now() > expires)"
-			+ "	OR (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires) "
-			+ "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires)";
+			+ "    (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires)"
+			+ " OR (fromFboTemplate is null AND active = 0 AND userlock is null AND groupId is null AND noext=1 AND expires is not null AND now() > expires)"
+			+ "	OR (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires)"
+			+ "	OR (fromFboTemplate is null and active <> 1 AND noext=1 AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires)"
+			+ "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires);";
 
 		DALHelper.getInstance().ExecuteBatchUpdate(qry);
 	}
