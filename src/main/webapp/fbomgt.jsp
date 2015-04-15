@@ -256,7 +256,7 @@
 		GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
 		GoodsBean buildingmaterials = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
 		CachedAirportBean ap = Airports.cachedAirports.get(fbo.getLocation());
-		int availJobs = Fbos.getFacilityJobCount(fbo.getOwner(), fbo.getLocation());
+		int availJobs = Fbos.getFboJobCount(fbo.getOwner(), fbo.getLocation());
 		int daysAvail = supplies.getAmount() / fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation()));
 %>
 	<tr>

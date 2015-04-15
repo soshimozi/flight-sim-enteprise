@@ -31,7 +31,7 @@
 	
 	if (fbo.updateAllowed(user))
 	{	
-		defaultPass = Fbos.getFboDefaultFacility(fbo);
+		defaultPass = Facilities.getDefaultFacility(fbo);
 	
 		goodsList = new GoodsBean[Goods.getMaxCommodityId()+1];
 		

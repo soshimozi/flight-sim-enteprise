@@ -4,6 +4,7 @@ import net.fseconomy.data.DALHelper;
 import net.fseconomy.data.Data;
 import net.fseconomy.dto.AuthInfo;
 import net.fseconomy.encryption.Encryption;
+import net.fseconomy.servlets.CacheServletListener;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -15,10 +16,10 @@ public final class Authenticator
     private static Authenticator authenticator = null;
 
     // An authentication token storage which stores <authtoken, authinfo>.
-    private static HashMap<String, AuthInfo> tokenCache = new HashMap<>();
-    private static HashMap<String, String> serviceKeyCache = new HashMap<>();
+    //private static HashMap<String, AuthInfo> tokenCache = new HashMap<>();
+    //private static HashMap<String, String> serviceKeyCache = new HashMap<>();
 
-    public Authenticator()
+    private Authenticator()
     {
     }
 
@@ -36,7 +37,7 @@ public final class Authenticator
         if (userId != 0)
         {
             //does token already exist?
-            String foundToken = getKeyByValue(tokenCache, userId);
+            String foundToken = getKeyByValue(CacheServletListener.getCache("tokenCache"), userId);
             if(foundToken != null)
                 return foundToken;
 
@@ -46,7 +47,7 @@ public final class Authenticator
             authInfo.guid = UUID.randomUUID().toString();
 
             String authToken = Encryption.getInstance().encryptAuthInfo(authInfo);
-            tokenCache.put(authToken, authInfo);
+            CacheServletListener.getCache("tokenCache").put(authToken, authInfo);
 
             return authToken;
         }
@@ -73,7 +74,7 @@ public final class Authenticator
      */
     public boolean isAuthTokenValid(String authToken)
     {
-        return tokenCache.containsKey(authToken);
+        return CacheServletListener.getCache("tokenCache").containsKey(authToken);
     }
 
     public boolean logout(String authToken )
@@ -82,11 +83,11 @@ public final class Authenticator
             return false;
 
         AuthInfo tokenAuthInfo = Encryption.getInstance().decryptAuthInfo(authToken);
-        AuthInfo authInfo = tokenCache.get(authToken);
+        AuthInfo authInfo = (AuthInfo) CacheServletListener.getCache("tokenCache").get(authToken);
         if(!authInfo.name.equals(tokenAuthInfo.name))
             return false;
 
-        tokenCache.remove( authToken );
+        CacheServletListener.getCache("tokenCache").remove( authToken );
 
         return true;
     }
@@ -111,13 +112,13 @@ public final class Authenticator
 
     public int getUserIdFromToken(String authToken)
     {
-        AuthInfo authInfo = tokenCache.get(authToken);
+        AuthInfo authInfo = (AuthInfo) CacheServletListener.getCache("tokenCache").get(authToken);
         return authInfo.userId;
     }
 
     public String getUsernameFromToken(String authToken)
     {
-        AuthInfo authInfo = tokenCache.get(authToken);
+        AuthInfo authInfo = (AuthInfo) CacheServletListener.getCache("tokenCache").get(authToken);
         return authInfo.name;
     }
 
@@ -125,7 +126,7 @@ public final class Authenticator
     {
         boolean result = false;
 
-        if(serviceKey.equals(Data.adminApiKey) || serviceKeyCache.get(serviceKey) != null)
+        if(serviceKey.equals(Data.adminApiKey) || CacheServletListener.getCache("serviceKey").get(serviceKey) != null)
         {
             return true;
         }
@@ -136,7 +137,7 @@ public final class Authenticator
                 String qry = "SELECT count(`key`) > 0 as found FROM serviceproviders sp WHERE sp.key = ?";
                 result = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), serviceKey);
                 if(result)
-                    serviceKeyCache.put(serviceKey, "");
+                    CacheServletListener.getCache("serviceKey").put(serviceKey, "");
             }
             catch(SQLException e)
             {

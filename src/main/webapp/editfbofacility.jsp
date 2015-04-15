@@ -20,7 +20,7 @@
 	String returnPage =  request.getHeader("referer");
 
 	int facilityId = Integer.parseInt(request.getParameter("facilityId"));		
-	FboFacilityBean facility = Fbos.getFboFacility(facilityId);
+	FboFacilityBean facility = Facilities.getFacility(facilityId);
 
 	String error = null;
 	List<FboFacilityBean> renters = null;
@@ -33,9 +33,9 @@
 		fbo = Fbos.getFbo(facility.getFboId());
 	
 		if (facility.getIsDefault())
-			renters = Fbos.getFboRenterFacilities(fbo);
+			renters = Facilities.getRenterFacilities(fbo);
 		else 
-			landlord = Fbos.getFboDefaultFacility(fbo);
+			landlord = Facilities.getDefaultFacility(fbo);
 		
 		if (session.getAttribute(facility.getLocation() + "Rent") == null)
 		{
@@ -100,7 +100,7 @@
 	if (facility.getIsDefault())
 	{
 		int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
-		int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
+		int rented = Facilities.getFacilityBlocksInUse(fbo.getId());
 		sizedesc = totalSpace + " gates (" + rented + " rented)";
 	} 
 	else 
@@ -117,7 +117,7 @@
 %>		
 			<tr>
 				<td>Space available</td>
-				<td colspan="2"><%= Fbos.calcFboFacilitySpaceAvailable(facility, fbo) %> gates</td>
+				<td colspan="2"><%= Facilities.calcFacilitySpaceAvailable(facility, fbo) %> gates</td>
 			</tr>
 			<tr>
 				<td>Reserve</td>
@@ -193,7 +193,7 @@
 	} 
 	else 
 	{
-		int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(landlord, fbo);
+		int spaceAvailable = Facilities.calcFacilitySpaceAvailable(landlord, fbo);
 %>		
 			<tr>
 				<td>Space available</td>

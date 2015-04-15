@@ -22,9 +22,7 @@ package net.fseconomy.servlets;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -767,7 +765,7 @@ public class UserCtl extends HttpServlet
 			
 		if (ptCreated)
 		{
-			int facilityId = Fbos.getFboDefaultFacility(fbo).getId();
+			int facilityId = Facilities.getDefaultFacility(fbo).getId();
 			returnToPage = "editfbofacility.jsp?facilityId=" + facilityId;
 		}
 		
@@ -792,7 +790,7 @@ public class UserCtl extends HttpServlet
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 
 		int facilityId = Integer.parseInt(req.getParameter("facilityId"));		
-		FboFacilityBean facility = Fbos.getFboFacility(facilityId);
+		FboFacilityBean facility = Facilities.getFacility(facilityId);
 		
 		if (!facility.updateAllowed(user))
 			throw new DataError("Permission denied.");
@@ -801,7 +799,7 @@ public class UserCtl extends HttpServlet
 		FboBean fbo = Fbos.getFbo(facility.getFboId());
 
 		if (facility.getIsDefault())
-			renters = Fbos.getFboRenterFacilities(fbo);
+			renters = Facilities.getRenterFacilities(fbo);
 
 		int iSessionRent=0;
 		
@@ -889,7 +887,7 @@ public class UserCtl extends HttpServlet
 				{	
 					try
 					{
-						List<String> renterEmails = Fbos.getEmailAddressForRenterIDs(rentersID);
+						List<String> renterEmails = Facilities.getEmailAddressForRenterIDs(rentersID);
 						Emailer emailer = Emailer.getInstance();
 						
 						String messageText = "Rent price change ALERT! \n\n The price of rent at airport ICAO: " + facility.getLocation() +
@@ -906,7 +904,7 @@ public class UserCtl extends HttpServlet
 			}
 		}
 
-		Fbos.updateFboFacility(facility, renters, user);
+        Facilities.updateFacility(facility, renters, user);
 
 		if (req.getParameter("doRent") != null)
 		{
@@ -2196,8 +2194,8 @@ public class UserCtl extends HttpServlet
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		int facilityId = Integer.parseInt(req.getParameter("facilityId"));
-		
-		Fbos.deleteFboFacility(user, facilityId);
+
+        Facilities.deleteFacility(user, facilityId);
 	}
 	
 	void doUpdateAircraft(HttpServletRequest req) throws DataError

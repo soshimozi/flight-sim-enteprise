@@ -1155,7 +1155,7 @@ public class Datafeed extends HttpServlet
 			throw new DataError("No User or Group found for provided ReadAccessKey.");
 		
 		//get the facilities by the requester
-		List<FboFacilityBean> facs = Fbos.getFboFacilitiesByOccupant(id);
+		List<FboFacilityBean> facs = Facilities.getFacilitiesByOccupant(id);
 		result = ProcessFacilities(req, facs, "Facilities");
 		
 		return result;
@@ -2956,7 +2956,7 @@ public class Datafeed extends HttpServlet
             if (fac.getReservedSpace() >= 0)
             {
                 //Owner facility record, see if there are any non-rented slots
-                List<FboFacilityBean> facrenters = Fbos.getFboRenterFacilities(fbo);
+                List<FboFacilityBean> facrenters = Facilities.getRenterFacilities(fbo);
                 int rentcount = 0;
 
                 for (FboFacilityBean facrenter : facrenters)
@@ -3001,7 +3001,7 @@ public class Datafeed extends HttpServlet
             if (fac.getReservedSpace() >= 0)
             {
                 //Owner facility record, see if there are any non-rented slots
-                List<FboFacilityBean> facrenters = Fbos.getFboRenterFacilities(fbo);
+                List<FboFacilityBean> facrenters = Facilities.getRenterFacilities(fbo);
                 int rentcount = 0;
                 for (FboFacilityBean facrenter : facrenters)
                 {
@@ -3069,7 +3069,7 @@ public class Datafeed extends HttpServlet
 				fboGroupOwnerName = Accounts.getGroupOwnerName(fbo.getOwner());
 
 			int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
-            int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
+            int rented = Facilities.getFacilityBlocksInUse(fbo.getId());
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
 
@@ -3128,7 +3128,7 @@ public class Datafeed extends HttpServlet
 				fboGroupOwnerName = Accounts.getGroupOwnerName(fbo.getOwner());
 
 			int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
-            int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
+            int rented = Facilities.getFacilityBlocksInUse(fbo.getId());
             GoodsBean fuel = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUEL100LL);
             GoodsBean jeta = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_FUELJETA);
 

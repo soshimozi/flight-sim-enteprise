@@ -36,7 +36,7 @@
 	if (account == null)
 		account = user;	
 	
-	List<FboFacilityBean> facilities = Fbos.getFboFacilitiesByOccupant(account.getId());
+	List<FboFacilityBean> facilities = Facilities.getFacilitiesByOccupant(account.getId());
 %>
 
 <!DOCTYPE html>
@@ -138,13 +138,13 @@
 		if (facility.getIsDefault())
 		{
 			int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(facility.getLocation());
-			int rented = Fbos.getFboFacilityBlocksInUse(fbo.getId());
+			int rented = Facilities.getFacilityBlocksInUse(fbo.getId());
 			sizedesc = totalSpace + " gates (" + rented + " rented)";
 		} else {
 			sizedesc = facility.getSize() + " gates";
 		}
 		int suppliedDays = Goods.getGoodsQty(fbo, GoodsBean.GOODS_SUPPLIES) / fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation()));
-		int availJobs = Fbos.getFacilityJobCount(facility.getOccupant(), facility.getLocation());
+		int availJobs = Facilities.getFacilityJobCount(facility.getId());
 %>
 				<tr>
 					<td style="width: 80px;"><%= Airports.airportLink(ap.getIcao(), ap.getIcao(), response) %></td>

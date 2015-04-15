@@ -648,7 +648,7 @@
                 </div>
                 <!-- END MAP SECTION -->
 <%
-		List<FboFacilityBean> carriers = Fbos.getFboFacilitiesForAirport(airport.getIcao());
+		List<FboFacilityBean> carriers = Facilities.getFacilitiesForAirport(airport.getIcao());
 		if (carriers.size() > 0)
 		{
 			String airline;
@@ -663,7 +663,7 @@
                 {
                     FboBean parentFbo = Fbos.getFbo(carrier.getFboId());
 
-                    if (Fbos.calcFboFacilitySpaceAvailable(carrier, parentFbo) > 0)
+                    if (Facilities.calcFacilitySpaceAvailable(carrier, parentFbo) > 0)
                         spaceAvailable = true;
                 }
             }

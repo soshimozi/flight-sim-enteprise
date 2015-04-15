@@ -1,10 +1,7 @@
 <%@page language="java" contentType="text/html; charset=ISO-8859-1" %>
-<%@ page import="net.fseconomy.data.Accounts" %>
-<%@ page import="net.fseconomy.data.Airports" %>
-<%@ page import="net.fseconomy.data.Fbos" %>
-<%@ page import="net.fseconomy.data.Goods" %>
 <%@ page import="net.fseconomy.util.Formatters" %>
 <%@ page import="net.fseconomy.beans.*" %>
+<%@ page import="net.fseconomy.data.*" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
@@ -27,7 +24,7 @@
     UserBean ultimateOwner = Accounts.getAccountById(groupOwnerid);
     int lots = fbo.getFboSize();
     int totalSpace = fbo.getFboSize() * Airports.getTotalFboSlots(fbo.getLocation());
-    int rented = Fbos.getFboFacilityBlocksInUse(fboId);
+    int rented = Facilities.getFacilityBlocksInUse(fboId);
 
     String price = Formatters.currency.format(fbo.getPrice());
     String fboRepairshop = ((fbo.getServices() & FboBean.FBO_REPAIRSHOP) > 0 ? "Yes" : "No");

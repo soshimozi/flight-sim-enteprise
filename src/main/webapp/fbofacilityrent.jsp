@@ -27,7 +27,7 @@
 
     FboBean fbo = null;
     CachedAirportBean airport = Airports.cachedAirports.get(icao);
-    List<FboFacilityBean> facilities = Fbos.getFboDefaultFacilitiesForAirport(icao);
+    List<FboFacilityBean> facilities = Facilities.getDefaultFacilitiesForAirport(icao);
     FboFacilityBean facility = null;
 
     if (madeFacilitySelection)
@@ -100,7 +100,7 @@
 			if (bean.getUnits() == AssignmentBean.UNIT_PASSENGERS)
 			{
 				fbo = Fbos.getFbo(bean.getFboId());
-				int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(bean, fbo);
+				int spaceAvailable = Facilities.calcFacilitySpaceAvailable(bean, fbo);
 				String rentURL = "fbofacilityrent.jsp?icao=" + airport.getIcao() + "&facilityId=" + bean.getId();
 				String rentLink = "<a href=\"" + rentURL + "\">Rent</a>";
 %>
@@ -121,7 +121,7 @@
 	else if (!madeBlocksSelection) 
 	{
         Groups.groupMemberData[] staffGroups = user.getStaffGroups();
-		int spaceAvailable = Fbos.calcFboFacilitySpaceAvailable(facility, fbo);
+		int spaceAvailable = Facilities.calcFacilitySpaceAvailable(facility, fbo);
 %>
 	<form method="post" action="fbofacilityrent.jsp" name="rentForm">
 	<input type="hidden" name="icao" value="<%= icao %>" />

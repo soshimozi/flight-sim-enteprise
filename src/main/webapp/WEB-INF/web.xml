@@ -62,6 +62,11 @@
         <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
     </listener>
 
+    <listener>
+        <listener-class>net.fseconomy.servlets.CacheServletListener</listener-class>
+    </listener>
+
+
     <servlet-mapping>
         <servlet-name>SigServer</servlet-name>
         <url-pattern>/sig/*</url-pattern>
