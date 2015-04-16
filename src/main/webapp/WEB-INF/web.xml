@@ -29,7 +29,7 @@
         <servlet-class>net.fseconomy.servlets.FSagentFSX</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>FSagentXP</servlet-name>
+        <servlet-name>FSagentXPlane</servlet-name>
         <servlet-class>net.fseconomy.servlets.FSagentXP</servlet-class>
     </servlet>
     <servlet>
@@ -43,10 +43,6 @@
     <servlet>
         <servlet-name>AutoLogon</servlet-name>
         <servlet-class>net.fseconomy.servlets.Autologon</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>FSagentXPlane</servlet-name>
-        <servlet-class>net.fseconomy.servlets.FSagentFSX</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>StickyCaptcha</servlet-name>
@@ -85,8 +81,8 @@
         <url-pattern>/fsagentFSX</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>FSagentXP</servlet-name>
-        <url-pattern>/fsagentXP</url-pattern>
+        <servlet-name>FSagentXPlane</servlet-name>
+        <url-pattern>/fsagentx</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Image</servlet-name>
@@ -99,10 +95,6 @@
     <servlet-mapping>
         <servlet-name>AutoLogon</servlet-name>
         <url-pattern>/autologon</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>FSagentXPlane</servlet-name>
-        <url-pattern>/fsagentx</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>StickyCaptcha</servlet-name>
