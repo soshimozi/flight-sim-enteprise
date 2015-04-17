@@ -2018,18 +2018,19 @@ public class Datafeed extends HttpServlet
 	
 	String GetXsdByQuery(String query)
 	{
+		String xsdUrl = DataFeedUrl + "/static/xsd";
 		if( query.equalsIgnoreCase("AircraftConfigs"))
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_aircraftconfigs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_aircraftconfigs.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("AircraftAliases"))
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_aircraftaliases.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_aircraftaliases.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("AircraftForSale") ||
@@ -2041,28 +2042,28 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_aircraft.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_aircraft.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Assignments"))
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_assignments.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_assignments.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("Commodities"))
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_commodities.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_commodities.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("Facilities")) 
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_facilities.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_facilities.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Fbos") ||
@@ -2071,14 +2072,14 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_fbos.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_fbos.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("FboMonthlySummary"))
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_fbomonthlysummary.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_fbomonthlysummary.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("FlightLogsByMonthYear") ||
@@ -2086,7 +2087,7 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_FlightLogs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_FlightLogs.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("IcaoJobsTo") ||
@@ -2094,14 +2095,14 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_jobs.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_jobs.xsd\"\n";
 		}
 			
 		if( query.equalsIgnoreCase("Members"))
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_members.xsd\"\n";
+			+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_members.xsd\"\n";
 		}
 		
 		if( query.equalsIgnoreCase("PaymentsByMonthYear") ||
@@ -2109,14 +2110,14 @@ public class Datafeed extends HttpServlet
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_payments.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_payments.xsd\"\n";
 		}
 
 		if( query.equalsIgnoreCase("Statistics"))
 		{
 			return "\nxmlns=\""+ DataFeedUrl + "\"\n"
 				+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-				+ "xmlns:schemaLocation=\"" + DataFeedUrl + "/static/datafeed_statistics.xsd\"\n";
+				+ "xmlns:schemaLocation=\"" + xsdUrl + "/datafeed_statistics.xsd\"\n";
 		}
 
 		return "";
