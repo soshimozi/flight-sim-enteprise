@@ -81,7 +81,7 @@ public class MaintenanceCycle implements Runnable
         long elapsed = endtime-starttime;
         long currTime = System.currentTimeMillis();
 
-		GlobalLogger.logApplicationLog(new Timestamp(System.currentTimeMillis()) + ": " + "Cycle Completed: type = " + cycletype + ", elapsed time = " + elapsed + "ms", MaintenanceCycle.class);
+		GlobalLogger.logApplicationLog("Cycle Completed: type = " + cycletype + ", elapsed time = " + elapsed + "ms", MaintenanceCycle.class);
 
 		if(cycleTimeHistory == null)
 			cycleTimeHistory = new CycleTimeData();
@@ -1091,11 +1091,9 @@ public class MaintenanceCycle implements Runnable
 		// NOTE: Adjust the extratime values in AssignmentBean.getSExpires() if changing these queries.
 		
 		// Delete unmoved unlocked expired assignments
-		String qry = "DELETE FROM assignments WHERE fromFboTemplate is not null and active = 0 AND userlock is null AND groupId is null AND location = fromicao AND expires is not null AND now() > expires;";
-		// Delete moved unlocked expired assignments after User Set # of Days
-		qry = qry + "DELETE FROM assignments WHERE fromFboTemplate is not null and active <> 1 AND userlock is null AND expires is not null AND now() > expires;";
-		// Delete locked expired assignments after User Set # of Days
-		qry = qry + "DELETE FROM assignments WHERE fromFboTemplate is not null and active <> 1 AND userlock is not null AND expires is not null AND DATE_SUB(now(), INTERVAL 24 HOUR) > expires;";
+		String qry = "DELETE FROM assignments WHERE fromFboTemplate is not null and active = 0 AND userlock is null AND groupId is null AND expires is not null AND now() > expires;";
+		// Delete locked expired assignments after 24hrs
+		qry = qry + "DELETE FROM assignments WHERE fromFboTemplate is not null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires;";
 
 		try
 		{
