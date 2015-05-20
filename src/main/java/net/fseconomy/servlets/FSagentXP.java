@@ -187,7 +187,7 @@ public class FSagentXP extends HttpServlet
             String msg = e.getMessage();
 
             if(!msg.contains("is not compatible") && !msg.contains("no rented aircraft"))
-                GlobalLogger.logFlightLog(new Timestamp(System.currentTimeMillis()) + " DataError: " + msg, FSagentFSX.class);
+                GlobalLogger.logFlightLog("DataError: " + msg, FSagentFSX.class);
 
             if( msg.contains("VALIDATIONERROR"))
                 content = "<result>" + msg + "</result>";

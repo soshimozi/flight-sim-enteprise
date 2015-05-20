@@ -143,15 +143,21 @@ public class FSagentFSX extends HttpServlet
 		catch (DataError e)
 		{
 			String msg = e.getMessage();
-			
+
 			if(!msg.contains("is not compatible") && !msg.contains("no rented aircraft"))
-				GlobalLogger.logFlightLog(new Timestamp(System.currentTimeMillis()) + " DataError: " + msg, FSagentFSX.class);
+			    GlobalLogger.logFlightLog("DataError: User=[" + user + "], " + msg, FSagentFSX.class);
 			
 			if( msg.contains("VALIDATIONERROR"))
 				content = "<result>" + msg + "</result>";
 			else
 				content = "<error>" + msg + "</error>";
 		}
+		catch(Exception e) //should never hit this, log error message if hit
+		{
+			String msg = e.getMessage();
+			GlobalLogger.logFlightLog("Exception: User=[" + user + "], " + msg, FSagentFSX.class);
+		}
+
 		StringBuffer xml = new StringBuffer();
 		xml.append("<?xml version=\"1.0\"?>");
 		xml.append("<response>");
