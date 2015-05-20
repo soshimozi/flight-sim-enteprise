@@ -151,14 +151,14 @@ public class Flights
                 //Is valid aircraft
                 if (aircraft == null)
                 {
-                    GlobalLogger.logFlightLog(new Timestamp(System.currentTimeMillis()) + " processFlight: No Aircraft lock.  SimType = " + simType.name() + ", User = " + user.getId(), Flights.class);
+                    GlobalLogger.logFlightLog("processFlight: No Aircraft lock.  SimType = " + simType.name() + ", User = " + user.getId(), Flights.class);
                     throw new DataError("VALIDATIONERROR: No aircraft in use, flight aborted.");
                 }
 
                 //Check flight in progress
                 if (aircraft.getDepartedFrom() == null)
                 {
-                    GlobalLogger.logFlightLog(new Timestamp(System.currentTimeMillis()) + " processFlight: No flight in progress.  SimType = " + simType.name() + ", User = " + user.getId(), Flights.class);
+                    GlobalLogger.logFlightLog("processFlight: No flight in progress.  SimType = " + simType.name() + ", User = " + user.getId(), Flights.class);
                     throw new DataError("VALIDATIONERROR: It appears that a duplicate flight was submitted and canceled. Please check your My Flight page for current flight status.");
                 }
 
