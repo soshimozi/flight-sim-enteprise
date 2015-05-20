@@ -232,7 +232,7 @@
         if(groupFlight)
         {
 %>
-        <h2 style="color: green;">This flight is being flown for <span style="color: green; font-size: larger;">"<%=theGroup.getName() %>".</span></h2>
+        <h2 style="color: green;">This flight is being flown for <span style="color: green; font-size: larger;"><a href="groupassignments.jsp?groupid=<%=theGroup.getId()%>"><%=theGroup.getName() %></a>.</span></h2>
 <%
         }
         else
@@ -324,7 +324,7 @@
     		else
     		{
 %>
-                <h2 style="color: green;">This flight will be flown for <span style="font-size: larger;">"<%=thisGroup.getName() %>".</span></h2>
+		<h2 style="color: green;">This flight is being flown for <span style="color: green; font-size: larger;"><a href="groupassignments.jsp?groupid=<%=theGroup.getId()%>"><%=theGroup.getName() %></a>.</span></h2>
 <%
             }
 		}
