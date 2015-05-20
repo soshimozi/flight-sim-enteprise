@@ -92,7 +92,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link href="../css/Master.css" rel="stylesheet" type="text/css" />
+    <link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
+    <link rel="stylesheet" type="text/css" href="../css/Master.css"/>
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
@@ -113,6 +114,37 @@
 
 			field.checked = false;  // needed in case of only one box
 		}
+
+        function CheckIcaos(setId)
+        {
+            var icaotext = $(setId).val();
+            $.ajax({
+                type: "POST",
+                url: "checkicaosvalid.jsp",
+                data: {"icaos": icaotext},
+                success:
+                    function(data, status)
+                    {
+                        var errorId = setId + "Errors"
+                        var passedId = setId + "Passed"
+                        var errorList = setId + "ErrorList"
+
+                        if(data.indexOf('<li>') >= 0)
+                        {
+                            $(errorList).html(data);
+                            $(errorId).show();
+                            $(passedId).hide();
+                        }
+                        else
+                        {
+                            $(passedId).show();
+                            $(errorId).hide();
+                        }
+                    }
+                }
+            );
+        }
+
 		$(function()
 		{
 			$('#selectAll').click(function () {
@@ -245,12 +277,30 @@
 					ft</td>
 				</tr>
 				<tr>
-					<td>From</td>
-					<td><textarea name="icaoSet1"><%= template.getIcaoSet1() == null ? "" : template.getIcaoSet1()  %></textarea></td>
+					<td style="vertical-align: middle">From</td>
+					<td>
+						<textarea rows="4" cols="50" name="icaoSet1" id="icaoSet1"><%= template.getIcaoSet1() == null ? "" : template.getIcaoSet1()  %></textarea><br>
+						<div class="btn btn-link" onclick="CheckIcaos('#icaoSet1');">Check</div><br>
+                        <div id="icaoSet1Passed" style="display: none">No Errors</div>
+						<div id="icaoSet1Errors" style="display: none">
+							Bad ICAO codes
+							<ul id="icaoSet1ErrorList">
+							</ul>
+						</div>
+					</td>
 				</tr>
 				<tr>
-					<td>To</td>
-					<td><textarea name="icaoSet2"><%= template.getIcaoSet2() == null ? "" : template.getIcaoSet2()  %></textarea></td>
+					<td style="vertical-align: middle">To</td>
+                    <td>
+						<textarea rows="4" cols="50"  name="icaoSet2" id="icaoSet2"><%= template.getIcaoSet2() == null ? "" : template.getIcaoSet2()  %></textarea><br>
+                        <div class="btn btn-link" onclick="CheckIcaos('#icaoSet2');">Check</div><br>
+                        <div id="icaoSet2Passed" style="display: none">No Errors</div>
+						<div id="icaoSet2Errors" style="display: none">
+							Bad ICAO codes
+							<ul id="icaoSet2ErrorList">
+							</ul>
+						</div>
+					</td>
 				</tr>	
 				
 				<tr>
