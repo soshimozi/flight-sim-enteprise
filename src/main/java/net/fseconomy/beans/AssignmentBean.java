@@ -3,6 +3,7 @@ package net.fseconomy.beans;
 import net.fseconomy.data.Airports;
 import net.fseconomy.data.MaintenanceCycle;
 import net.fseconomy.dto.DistanceBearing;
+import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
 
 import java.io.Serializable;
@@ -52,8 +53,6 @@ public class AssignmentBean implements Serializable
 	
 	public AssignmentBean(ResultSet rs) throws SQLException
 	{
-		String aircraft;
-		aircraft = rs.getString("aircraft");
 		setCreation(rs.getTimestamp("creation"));
 		setId(rs.getInt("id"));
 		setExpires(rs.getTimestamp("expires"));
@@ -86,7 +85,7 @@ public class AssignmentBean implements Serializable
 		daysClaimedActive = rs.getInt("daysClaimedActive");
 
 		//must be after pay, amount, distance
-		setRealPay(pay);
+		calculateRealPay();
 	}
 	
 	public void writeBean(ResultSet rs) throws SQLException
@@ -273,9 +272,8 @@ public class AssignmentBean implements Serializable
 
 	/**
 	 * Sets the real pay value.
-	 * @param pay The pay to set
-	 */
-	void setRealPay(double pay)
+     */
+	void calculateRealPay()
 	{
 		this.realpay = calcPay();
 	}
@@ -412,54 +410,51 @@ public class AssignmentBean implements Serializable
 		if (expires == null)
 			return "never";
 
+        long expiresIn = this.expires.getTime() - GregorianCalendar.getInstance().getTime().getTime();
 		boolean moved = !from.equals(location);
 		boolean locked = (userlock > 0) || (groupId > 0);
 		String note = "";
-		long expiry = expires.getTime() - GregorianCalendar.getInstance().getTime().getTime();
+
+        long extratime = 0;
+
 		if (fromFboTemplate == 0)
 		{
-			long extratime = 0;
+            //check to see what the extention interval is
 			if (moved && !noExt)
-				extratime = MaintenanceCycle.ASSGN_EXT_DAYS; // days
-			else if (locked) {
-				extratime = 1;  // days
-			}
-			extratime *= 86400000; // miliseconds per day
-			expiry += extratime;
+				extratime = MaintenanceCycle.ASSGN_EXT_DAYS * Constants.MILLISECS_PER_DAY; // days
+			else if (locked)
+				extratime = Constants.MILLISECS_PER_DAY;  // 1 day
 
-			if (!moved && locked && expiry <= extratime)
-				note = "*";
-		} 
-		else 
-		{
-			long extratime = 0;
-			if (locked) 
-			{
-				extratime = 24;  //hard coded 1 days extra when locked
-				
-			/* ADDED PRD hours: get new user input from database here
-			variable daysClaimedActive comes from fbofacilities template and is passed
-			to daysClaimedActive field in assignments table
-			extratime = daysClaimedActive * 24;  
-			deletes are hard coded so logic needs rewriting*/
-			}
-			
-			extratime *= 3600000; // miliseconds per hour
-			expiry += extratime;
+			expiresIn += extratime;
 
-			if (locked && expiry <= extratime)
+			if (!moved && locked && expiresIn <= extratime)
 				note = "*";
 		}
-		
-		boolean expired = expiry < 0;
-		if (expiry < 0)
-			expiry = -expiry;
+		else 
+		{
+			if (locked)
+            {
+                extratime = Constants.MILLISECS_PER_DAY;  //hard coded 1 days extra when locked
+                expiresIn += extratime;
+            }
 
-		int minutes = (int)(expiry/(60 * 1000));
-		int hours = (int)(expiry/(3600 * 1000));
+			if (locked && expiresIn <= extratime)
+				note = "*";
+		}
+
+
+        boolean expired = false;
+		if (expiresIn < 0)
+        {
+            expiresIn = -expiresIn;
+            expired = true;
+        }
+
+		int minutes = (int)(expiresIn/Constants.MILLISECS_PER_MIN);
+		int hours = (int)(expiresIn/Constants.MILLISECS_PER_HOUR);
 		int days = hours/24;
-		String Duration;
 
+		String Duration;
 		if (days > 0)
 			Duration = days + " days";
 		else if (hours > 0)
@@ -503,21 +498,14 @@ public class AssignmentBean implements Serializable
 	 * Sets the distance.
 	 * @param distance The distance to set
 	 */
+
 	public void setDistance(int distance)
 	{
 		if (distance < 1) distance =1;
 		//distance = checkDistance(distance);
 		this.distance = distance;
 	}
-	//ADDED PRD: Limit 1,2,3 pax to 300 mile payout	
-	public int checkDistance(int distance)
-	{
-		if(amount < 4 && distance > 300 && ptAssignment)
-			distance = 300;
 
-		return distance;
-	}
-	
 	public int calcPay()
 	{
 		//distance = checkDistance(distance);
@@ -746,16 +734,6 @@ public class AssignmentBean implements Serializable
 		return mptTax;
 	}
 
-	public int getDaysClaimedActive()
-	{
-		return daysClaimedActive;
-	}
-
-	public void setDaysClaimedActive(int i)
-	{
-		daysClaimedActive = i;
-	}
-	
 /*
  * Edit matrix:
  * 
