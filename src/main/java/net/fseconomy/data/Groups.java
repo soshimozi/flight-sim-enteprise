@@ -109,6 +109,9 @@ public class Groups implements Serializable
             {
                 qry = "INSERT INTO groupmembership (userId, groupId, level) VALUES (?, ?, ?)";
                 DALHelper.getInstance().ExecuteUpdate(qry, user.getId(), group, level);
+
+                String groupName = Accounts.getAccountNameById(group);
+                Accounts.addAccountNote(user.getId(), user.getId(), "Joined group: " + groupName + "[" + group + "]");
             }
         }
         catch (SQLException e)
@@ -194,6 +197,9 @@ public class Groups implements Serializable
         {
             String qry = "DELETE FROM groupmembership WHERE userId = ? AND groupId = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, user.getId(), group);
+
+            String groupName = Accounts.getAccountNameById(group);
+            Accounts.addAccountNote(user.getId(), user.getId(), "Left group: " + groupName + "[" + group + "]");
         }
         catch (SQLException e)
         {
