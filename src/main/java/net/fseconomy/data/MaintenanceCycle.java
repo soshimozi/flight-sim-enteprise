@@ -1315,29 +1315,57 @@ public class MaintenanceCycle implements Runnable
 						// KeepAlive is initialized to the user-set # of days
 						// daysClaimedActive is a data field in assignments that was created for locked jobs
 						// but is currently not being used.
-						Timestamp now = new Timestamp(System.currentTimeMillis());				
+						Timestamp now = new Timestamp(System.currentTimeMillis());
 						Calendar expires = GregorianCalendar.getInstance();
 						expires.add(GregorianCalendar.DAY_OF_MONTH, keepAlive);
 						int pay = (int) Math.round(template.getPay(distance, cargoAmount));
+//
+//						StringBuilder fields = new StringBuilder();
+//						StringBuilder values = new StringBuilder();
+//
+//						fields.append("bearing, creation, expires, commodity, units, amount, fromicao, location, toicao, distance, pay, fromFboTemplate, DaysClaimedActive");
+//						values.append("").append(bearing);
+//						values.append(", '").append(now).append("'");
+//						values.append(", '").append(new Timestamp(expires.getTime().getTime())).append("'");
+//						values.append(", '").append(Converters.escapeSQL(template.getRandomCommodity(cargoAmount))).append("'");
+//						values.append(", '").append(template.getSUnits()).append("'");
+//						values.append(", ").append(cargoAmount);
+//						values.append(", '").append(fromIcao).append("'");
+//						values.append(", '").append(fromIcao).append("'");
+//						values.append(", '").append(toIcao).append("'");
+//						values.append(", ").append(distance);
+//						values.append(", ").append((float) pay);
+//						values.append(", ").append(template.getId());
+//						values.append(", ").append(template.getDaysClaimedActive());
+//
+//						if (!template.getPublicByDefault())
+//						{
+//							UserBean account = Accounts.getAccountById(template.getOccupant());
+//							if (account != null)
+//							{
+//								if (account.isGroup())
+//								{
+//									float pilotFee = (float)(pay * cargoAmount * distance * 0.01 * account.getDefaultPilotFee() / 100);
+//									fields.append(", groupId");
+//									values.append(", ").append(account.getId());
+//
+//									fields.append(", pilotFee");
+//									values.append(", ").append(pilotFee);
+//								}
+//								else
+//								{
+//									fields.append(", userlock");
+//									values.append(", ").append(account.getId());
+//								}
+//							}
+//						}
+//
+//						qry = "INSERT INTO assignments (" + fields.toString() + ") VALUES(" + values.toString() + ")";
+//						DALHelper.getInstance().ExecuteUpdate(qry);
 
-						StringBuilder fields = new StringBuilder();
-						StringBuilder values = new StringBuilder();
-						
-						fields.append("bearing, creation, expires, commodity, units, amount, fromicao, location, toicao, distance, pay, fromFboTemplate, DaysClaimedActive");
-						values.append("").append(bearing);
-						values.append(", '").append(now).append("'");
-						values.append(", '").append(new Timestamp(expires.getTime().getTime())).append("'");
-						values.append(", '").append(Converters.escapeSQL(template.getRandomCommodity(cargoAmount))).append("'");
-						values.append(", '").append(template.getSUnits()).append("'");
-						values.append(", ").append(cargoAmount);
-						values.append(", '").append(fromIcao).append("'");
-						values.append(", '").append(fromIcao).append("'");
-						values.append(", '").append(toIcao).append("'");
-						values.append(", ").append(distance);
-						values.append(", ").append((float) pay);
-						values.append(", ").append(template.getId());
-						values.append(", ").append(template.getDaysClaimedActive());
-
+						Object groupId = null;
+						float pilotFee = 0;
+						Object userlock = null;
 						if (!template.getPublicByDefault())
 						{
 							UserBean account = Accounts.getAccountById(template.getOccupant());
@@ -1345,23 +1373,34 @@ public class MaintenanceCycle implements Runnable
 							{
 								if (account.isGroup())
 								{
-									float pilotFee = (float)(pay * cargoAmount * distance * 0.01 * account.getDefaultPilotFee() / 100);
-									fields.append(", groupId");
-									values.append(", ").append(account.getId());
-									
-									fields.append(", pilotFee");
-									values.append(", ").append(pilotFee);
-								} 
-								else 
+									pilotFee = (float)(pay * cargoAmount * distance * 0.01 * account.getDefaultPilotFee() / 100);
+									groupId = account.getId();
+								}
+								else
 								{
-									fields.append(", userlock");
-									values.append(", ").append(account.getId());
+									userlock = account.getId();
 								}
 							}
 						}
-						
-						qry = "INSERT INTO assignments (" + fields.toString() + ") VALUES(" + values.toString() + ")";
-						DALHelper.getInstance().ExecuteUpdate(qry);
+
+						qry = "{call AddFboAssignment(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}";
+						DALHelper.getInstance().ExecuteStoredProcedure(qry,
+								groupId,
+								pilotFee,
+								userlock,
+								bearing,
+								now,
+								new Timestamp(expires.getTime().getTime()),
+								template.getRandomCommodity(cargoAmount),
+								template.getSUnits(),
+								cargoAmount,
+								fromIcao,
+								fromIcao, //location
+								toIcao,
+								distance,
+								pay,
+								template.getId(),
+								template.getDaysClaimedActive());
 
 						if (oneAssignmentPerLoop)
 							break;

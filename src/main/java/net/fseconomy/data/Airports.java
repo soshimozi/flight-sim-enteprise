@@ -80,6 +80,19 @@ public class Airports implements Serializable
         return cachedAirports.containsKey(icao);
     }
 
+    public static List<String> CheckValidIcaos(List<String> icaos)
+    {
+        List<String> badIcaos = new ArrayList<>();
+
+        for(String icao: icaos)
+        {
+            if(!isValidIcao(icao))
+                badIcaos.add(icao);
+        }
+
+        return badIcaos;
+    }
+
     public static double getDistance(String from, String to)
     {
         LatLonRadians llTo = cachedAirports.get(from.toUpperCase()).getLatLonRadians();

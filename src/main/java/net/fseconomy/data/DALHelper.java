@@ -124,28 +124,46 @@ public class DALHelper
 //        return -1;
 //    }
 
-    public boolean ExecuteStoredProcedureWithStatus(String qry, Object... args) throws SQLException
-    {
-        Connection conn = null;
-        CallableStatement stmt = null;
-        try
-        {
-            conn = getConnection();
+	public void ExecuteStoredProcedure(String qry, Object... args) throws SQLException
+	{
+		Connection conn = null;
+		CallableStatement stmt = null;
+		try
+		{
+			conn = getConnection();
 
-            stmt = createCallableStatement(conn, qry, args);
-            stmt.registerOutParameter(args.length+1, Types.TINYINT);
-            stmt.execute();
+			stmt = createCallableStatement(conn, qry, args);
+			stmt.execute();
+		}
+		finally
+		{
+			tryClose(stmt);
+			tryClose(conn);
+		}
+	}
 
-            return stmt.getBoolean(args.length+1);
-        }
-        finally
-        {
-            tryClose(stmt);
-            tryClose(conn);
-        }
-    }
+	public boolean ExecuteStoredProcedureWithStatus(String qry, Object... args) throws SQLException
+	{
+		Connection conn = null;
+		CallableStatement stmt = null;
+		try
+		{
+			conn = getConnection();
 
-    public boolean ExecuteNonQuery(String qry, Object... args) throws SQLException
+			stmt = createCallableStatement(conn, qry, args);
+			stmt.registerOutParameter(args.length+1, Types.TINYINT);
+			stmt.execute();
+
+			return stmt.getBoolean(args.length+1);
+		}
+		finally
+		{
+			tryClose(stmt);
+			tryClose(conn);
+		}
+	}
+
+	public boolean ExecuteNonQuery(String qry, Object... args) throws SQLException
 	{
 		Connection conn = null;
 		PreparedStatement stmt = null;
