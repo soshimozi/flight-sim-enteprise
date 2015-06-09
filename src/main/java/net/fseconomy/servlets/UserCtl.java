@@ -552,7 +552,7 @@ public class UserCtl extends HttpServlet
             }
         }
 
-        String home = req.getParameter("home");
+        String home = req.getParameter("home").toUpperCase();
 		if (!Airports.isValidIcao(home))
 			throw new DataError("Aircraft Home airport not found.");
 
