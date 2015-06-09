@@ -15,6 +15,8 @@ public class Goods implements Serializable
     public static  CommodityBean[] commodities = null;
     static int maxCommodityId = 0;
 
+    public static final int GOODS_MINSIZE_SUPPLIES = 3000;
+    public static final int GOODS_MINSIZE_BMS = 5000;
 
     public static double currFuelPrice = 3.0;
     public static double currJetAMultiplier = 1.0;
@@ -168,7 +170,7 @@ public class Goods implements Serializable
 
             for (int c = 0; c < commodities.length; c++)
             {
-                if (commodities[c] != null && size > commodities[c].getMinAirportSize() && (type == 0 || c == type))
+                if (commodities[c] != null && size >= commodities[c].getMinAirportSize() && (type == 0 || c == type))
                 {
                     result.add(new GoodsBean(commodities[c], icao, size, fuelPrice, amount[commodities[c].getId()], JetAPrice));
                 }

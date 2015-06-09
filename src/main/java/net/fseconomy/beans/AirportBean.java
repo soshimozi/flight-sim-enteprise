@@ -84,12 +84,12 @@ public class AirportBean implements Serializable
 	
 	public boolean hasGoodsForSale()
 	{
-		if(size > MIN_SIZE_BIG)
+		if(size >= MIN_SIZE_BIG)
 			return true;
 		
 		for (int c = 0; c < Goods.commodities.length; c++)
         {
-            if (Goods.commodities[c] != null && size > Goods.commodities[c].getMinAirportSize())
+            if (Goods.commodities[c] != null && size >= Goods.commodities[c].getMinAirportSize())
                 return true;
         }
 
