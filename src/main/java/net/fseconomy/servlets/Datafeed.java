@@ -68,7 +68,6 @@ public class Datafeed extends HttpServlet
 	public void init()
 	{
         SetDatafeedUrls();
-
 	}
 
     public void SetDatafeedUrls()
@@ -386,7 +385,7 @@ public class Datafeed extends HttpServlet
 		if( fd == null)
 		{
 			FeedHitData nfd = new FeedHitData();
-			nfd.name = query;
+			nfd.name = query.toLowerCase();
 			userFeedProcessTimes.put(query, nfd);
 			fd = nfd;
 		}
@@ -2410,7 +2409,7 @@ public class Datafeed extends HttpServlet
 			//handles weird case where browser xml parsers blow up on this.
 			location = assignment.getLocation().equals("CGA") ? "&#67;&#71;&#65;" : assignment.getLocation();
 
-            String noHTMLAssignment = assignment.getSCargo().replaceAll("<.*?>", "");
+            String noHTMLAssignment = Converters.XMLHelper.protectSpecialCharacters(assignment.getSCargo().replaceAll("<.*?>", ""));
 
             String expires;
             expires = assignment.getExpires() == null ? "never" : assignment.getSExpires();
