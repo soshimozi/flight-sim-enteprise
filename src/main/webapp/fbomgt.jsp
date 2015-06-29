@@ -264,7 +264,7 @@
 	<td><%= supplies != null ? (daysAvail < 1) ? "<span style=\'color: red;\'><small>" + fbo.getName() + "</small></span>" : "<small>" + fbo.getName() + "</small>" : fbo.getName() %></td>
 
 	<td><%= availJobs %></td>		
-	<td><%= ap.getSize() >= Goods.GOODS_MINSIZE_SUPPLIES ? ((ap.getSize() >= Goods.GOODS_MINSIZE_BMS) ? "BdM/Sp" : "Supply") : "<span style=\'color: gray;\'><small>NONE</small></span>" %></td>
+	<td><%= Goods.sellsSupplies(ap.getSize()) ? (Goods.sellsBMs(ap.getSize()) ? "BdM/Sp" : "Supply") : "<span style=\'color: gray;\'><small>NONE</small></span>" %></td>
 	
 	<td class="numeric"><%= fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation())) %></td>
 	<td class="numeric"><%= supplies != null ? (daysAvail > 14) ? daysAvail : "<span style=\'color: red;\'>" + daysAvail + "</span>" : "" %></td>

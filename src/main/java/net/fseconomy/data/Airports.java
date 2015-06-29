@@ -902,7 +902,7 @@ public class Airports implements Serializable
                 tables.append(" LEFT JOIN goods ON goods.type = ").append(commodity).append(" AND goods.location = airports.icao AND ((goods.amount - cast(goods.retain as signed int) > ").append(minAmount).append(") AND (goods.saleFlag &").append(buy ? GoodsBean.SALEFLAG_BUY : GoodsBean.SALEFLAG_SELL).append(") > 0)");
 
                 query.append(and);
-                query.append(" (goods.type = ").append(commodity).append(" OR size >= ").append(Goods.commodities[commodity].getMinAirportSize()).append(")");
+                query.append(" (goods.type = ").append(commodity).append(" OR size > ").append(Goods.commodities[commodity].getMinAirportSize()).append(")");
                 and = " AND ";
             }
 

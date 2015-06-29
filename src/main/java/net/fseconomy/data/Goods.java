@@ -15,8 +15,10 @@ public class Goods implements Serializable
     public static  CommodityBean[] commodities = null;
     static int maxCommodityId = 0;
 
-    public static final int GOODS_MINSIZE_SUPPLIES = 3000;
-    public static final int GOODS_MINSIZE_BMS = 5000;
+    static final int GOODS_BMS = 1;
+    static final int GOODS_SUPPLIES = 2;
+    static final int GOODS_100LL = 3;
+    static final int GOODS_JETA = 3;
 
     public static double currFuelPrice = 3.0;
     public static double currJetAMultiplier = 1.0;
@@ -170,7 +172,7 @@ public class Goods implements Serializable
 
             for (int c = 0; c < commodities.length; c++)
             {
-                if (commodities[c] != null && size >= commodities[c].getMinAirportSize() && (type == 0 || c == type))
+                if (commodities[c] != null && size > commodities[c].getMinAirportSize() && (type == 0 || c == type))
                 {
                     result.add(new GoodsBean(commodities[c], icao, size, fuelPrice, amount[commodities[c].getId()], JetAPrice));
                 }
@@ -634,5 +636,34 @@ public class Goods implements Serializable
     public static void updateGoods4Admins(int owner, String icao, int type, int amount) throws DataError
     {
         changeGoodsRecord(icao, type, owner, amount, false);
+    }
+
+    public static boolean sellsBMs(int airportSize)
+    {
+        if( airportSize > commodities[GOODS_BMS].getMinAirportSize())
+            return true;
+
+        return false;
+    }
+    public static boolean sellsSupplies(int airportSize)
+    {
+        if( airportSize > commodities[GOODS_SUPPLIES].getMinAirportSize())
+            return true;
+
+        return false;
+    }
+    public static boolean sells100LL(int airportSize)
+    {
+        if( airportSize > commodities[GOODS_100LL].getMinAirportSize())
+            return true;
+
+        return false;
+    }
+    public static boolean sellsJetA(int airportSize)
+    {
+        if( airportSize > commodities[GOODS_JETA].getMinAirportSize())
+            return true;
+
+        return false;
     }
 }
