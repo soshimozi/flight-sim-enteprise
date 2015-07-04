@@ -34,7 +34,7 @@
     <script src="../scripts/jquery.tablesorter.widgets.js"></script>
     <script src='../scripts/parser-checkbox.js'></script>
     <script src='../scripts/parser-timeExpire.js'></script>
-    <script src="../scripts/AutoComplete.js"></script>
+    <script src="../scripts/AdminAutoComplete.js"></script>
 
     <script type="text/javascript">
 

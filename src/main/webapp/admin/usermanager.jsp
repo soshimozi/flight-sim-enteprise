@@ -34,7 +34,7 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-    <script src="../scripts/AutoComplete.js"></script>
+    <script src="../scripts/AdminAutoComplete.js"></script>
     <script src="../scripts/AutoCompleteEmail.js"></script>
     <script src="../scripts/AutoCompleteIP.js"></script>
 
