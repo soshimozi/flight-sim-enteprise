@@ -63,7 +63,7 @@ public class Groups implements Serializable
     {
         Accounts.mustBeLoggedIn(user);
 
-        if (group.getName().trim().length() < 4)
+        if (group.getName().length() < 4)
         {
             throw new DataError("Group name must be at least 4 characters.");
         }

@@ -23,6 +23,7 @@ import java.io.*;
 import java.sql.*;
 import java.util.*;
 
+import net.fseconomy.beans.AircraftBean;
 import net.fseconomy.dto.*;
 import net.fseconomy.util.GlobalLogger;
 
@@ -122,7 +123,7 @@ public class Data implements Serializable
 		try
 		{
 			qry = "select p.*, a1.name as userName, a1.Type as userNameType, a2.name as otherPartyName, a2.type as otherPartyNameType, a3.name as buyerName, a3.type buyerNameType from " +
-			"(select *, cast(substring(comment, locate('ID: ', comment)+4) as unsigned) as buyer,  cast(substring(comment, locate('Gal: ', comment)+5) as decimal(18,2)) as PerGal from payments   where (reason = 1 or reason = 22) and cast(substring(comment, locate('Gal: ', comment)+5) as decimal(18,2))  >= ?) p " +
+			"(select *, cast(substring(comment, locate('ID: ', comment)+4) as unsigned) as buyer,  cast(substring(comment, locate('Gal: $', comment)+6) as decimal(18,2)) as PerGal from payments   where (reason = 1 or reason = 22) and cast(substring(comment, locate('Gal: $', comment)+6) as decimal(18,2))  >= ?) p " +
 			"join accounts a1 on  a1.id=p.user " +
 			"join accounts a2 on  a2.id=p.otherParty " +
 			"join accounts a3 on  a3.id=p.buyer " +
@@ -133,7 +134,9 @@ public class Data implements Serializable
 			while(rs.next())
 			{
 				FuelExploitCheck fec = new FuelExploitCheck();
-				fec.Aircraft = rs.getString("aircraft");				
+				int acid = rs.getInt("aircraftid");
+				AircraftBean ac = Aircraft.getAircraftById(acid);
+				fec.Aircraft = ac.getRegistration() + " [" + acid + "]";
 				fec.Buyer = rs.getString("buyerName") + (rs.getString("buyerNameType").equals("group") ? " (group)" : "");				
 				fec.FuelType = rs.getInt("reason") == 1 ? "100LL": "JetA";				
 				fec.Location = rs.getString("location");				

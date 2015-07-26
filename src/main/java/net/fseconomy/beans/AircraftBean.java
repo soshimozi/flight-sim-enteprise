@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.*;
 import java.util.Date;
 
+import com.sun.corba.se.impl.orbutil.closure.Constant;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
@@ -538,7 +539,7 @@ public class AircraftBean implements Serializable
 	
 	public int maxPayloadWeightWithFuel()
 	{
-		return (int) Math.round(maxWeight - emptyWeight - (getTotalFuel() * Constants.GALLONS_TO_KG));
+		return (int) Math.round(maxWeight - emptyWeight - getFuelWeight());
 	}
 
     public int getAvailableSeats()
@@ -1666,7 +1667,12 @@ public class AircraftBean implements Serializable
 
     public double getFuelWeight()
     {
-        return fueltotal * Constants.GALLONS_TO_KG;
+		float result = 0;
+
+		for (int c=0; c < fuel.length; c++)
+			result += fuel[c] * capacity[c];
+
+		return result * Constants.GALLONS_TO_KG;
     }
 
 	public void setFuelTotal(float i)

@@ -306,7 +306,7 @@ public class ServiceData
     {
         try
         {
-            String qry = "SELECT id FROM accounts WHERE name = ?";
+            String qry = "SELECT id FROM accounts WHERE name = ? and exposure != 0";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, name);
 
             if(rs.next())

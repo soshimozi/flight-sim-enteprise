@@ -33,6 +33,7 @@ import java.util.TimeZone;
 
 import net.fseconomy.data.Groups;
 import net.fseconomy.util.Converters;
+import net.fseconomy.util.GlobalLogger;
 
 public class UserBean implements Serializable
 {
@@ -172,10 +173,7 @@ public class UserBean implements Serializable
 	
 	private String TruncateName(String name)
 	{
-		if(name == null)
-			return null;
-		
-		int MAXNAMESIZE = 45;	
+			int MAXNAMESIZE = 45;
 		int maxLength = (name.length() < MAXNAMESIZE) ? name.length() : MAXNAMESIZE;
 		return name.substring(0, maxLength);
 	}
@@ -335,10 +333,11 @@ public class UserBean implements Serializable
 	 */
 	public void setName(String name)
 	{
-		if(name != null) 
-			name = name.trim();
-		
-		this.name = TruncateName(Converters.clearHtml(name));
+		if(name == null)
+			GlobalLogger.logGroupAuditLog("Group name NULL", UserBean.class);
+
+        //Trim and clean up name!
+		this.name = TruncateName(Converters.clearHtml(name.trim()));
 	}
 
 	/**

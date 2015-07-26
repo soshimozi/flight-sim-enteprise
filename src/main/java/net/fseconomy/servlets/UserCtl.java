@@ -41,6 +41,9 @@ import net.fseconomy.util.Helpers;
 public class UserCtl extends HttpServlet
 {
 	private static final long serialVersionUID = 1L;
+
+    final int BANK_OF_FSE_ID = 4705;
+
     public void init()
 	{
         GlobalLogger.logApplicationLog("UserCtl init() called", UserCtl.class);
@@ -605,6 +608,12 @@ public class UserCtl extends HttpServlet
 		int lessee = Integer.parseInt(req.getParameter("lessee"));
 		int owner = Integer.parseInt(req.getParameter("owner"));
         int id = Integer.parseInt(req.getParameter("id"));
+
+        if(lessee == BANK_OF_FSE_ID)
+        {
+            GlobalLogger.logExploitAuditLog("Aircraft Lease to Bank of FSE  - User: [" + user.getName() + "] Aircraft: " + id, UserCtl.class);
+            return;
+        }
 
         AircraftBean aircraft = Aircraft.getAircraftById(id);
 
@@ -1878,7 +1887,7 @@ public class UserCtl extends HttpServlet
 		int intId = Integer.parseInt(id);
 		int intgroupId = Integer.parseInt(groupId);
 		
-		if (user.groupMemberLevel(intgroupId) < UserBean.GROUP_STAFF)
+		if (user.groupMemberLevel(intgroupId) != UserBean.GROUP_STAFF && user.groupMemberLevel(intgroupId) != UserBean.GROUP_OWNER)
 			throw new DataError("You must be staff level or above to delete members");
 		
 		UserBean member = Accounts.getAccountById(intId);
@@ -1955,8 +1964,9 @@ public class UserCtl extends HttpServlet
 		
 		if (invitation != null && !invitation.equals(""))
 		{
-			if (user.groupMemberLevel(groupId) < UserBean.GROUP_STAFF)
+			if (user.groupMemberLevel(groupId) != UserBean.GROUP_STAFF && user.groupMemberLevel(groupId) != UserBean.GROUP_OWNER)
 				throw new DataError("Permission denied.");
+
 			UserBean account = Accounts.getAccountByName(invitation);
 			if (account == null)
 				throw new DataError("Unknown user.");
@@ -2001,6 +2011,10 @@ public class UserCtl extends HttpServlet
 		if (!level.equals("staff") && !level.equals("member"))
 			throw new DataError("Invalid level.");
 
+        String name = Accounts.getAccountNameById(userId);
+        String groupName = Accounts.getAccountNameById(groupId);
+
+        GlobalLogger.logGroupAuditLog("doMemberLevel() for Group [" + groupName + "] User: " + user.getName() + " changed " + name + " to " + level, UserCtl.class);
         Groups.changeMembership(userId, groupId, level);
 	}
 	
