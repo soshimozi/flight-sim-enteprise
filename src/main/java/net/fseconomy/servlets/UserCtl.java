@@ -1531,7 +1531,7 @@ public class UserCtl extends HttpServlet
             linkedId = Integer.parseInt(linkedid);
 
         Accounts.updateAccount(suser, newuser, email, exposure, sLevel, password, linkedId, user.getId());
-        req.setAttribute("message", "Account (" + suser + ") updated successfully");
+        req.getSession().setAttribute("message", "Account (" + suser + ") updated successfully");
     }
 
 	//This is used for both new accounts and resetting passwords!
@@ -1554,7 +1554,7 @@ public class UserCtl extends HttpServlet
             Accounts.resetPassword(user, email);
 			
 			//Set the page message
-			req.setAttribute("message", "A new password has been sent to your email address.");
+			req.getSession().setAttribute("message", "A new password has been sent to your email address.");
 		}
 	}
 	
@@ -1573,7 +1573,7 @@ public class UserCtl extends HttpServlet
 			throw new DataError("New passwords don't match");
 
         Accounts.changePassword(user, password, newPassword);
-		req.setAttribute("message", "Your password was changed successfully. Please update the settings of the FSEconomy program to reflect your new password.");
+		req.getSession().setAttribute("message", "Your password was changed successfully. Please update the settings of the FSEconomy program to reflect your new password.");
 	}
 	
 	void lockAccount(HttpServletRequest req) throws DataError

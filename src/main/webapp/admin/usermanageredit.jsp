@@ -3,6 +3,7 @@
         import="net.fseconomy.data.*, net.fseconomy.util.Formatters, java.util.List, net.fseconomy.dto.*, net.fseconomy.beans.UserBean"
 %>
 <%@ page import="java.util.HashMap" %>
+<%@ page import="net.fseconomy.util.Helpers" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -69,6 +70,12 @@
 
     <script type="text/javascript">
 
+        function doSubmitResetPw()
+        {
+            var form = document.getElementById("formResetPw");
+            form.submit();
+        }
+
         $(function()
         {
             initAutoComplete("#username", "#userid", <%= Accounts.ACCT_TYPE_PERSON %>);
@@ -84,6 +91,15 @@
 
 <div id="wrapper">
     <div class="content">
+        <%
+            String message = Helpers.getSessionMessage(request);
+            if (message != null)
+            {
+        %>
+        <div class="error"><%= message %></div>
+        <%
+            }
+        %>
         <div class="container">
 
         <div class="row clearfix">
@@ -110,7 +126,10 @@
                     <table>
                         <tr>
                             <td>User: </td>
-                            <td><%=account.getName()%> </td>
+                            <td>
+                                <%=account.getName()%>
+                                <input type="button" onclick="doSubmitResetPw()" value="Reset Password"/>
+                            </td>
                         </tr>
                         <tr>
                             <td>Email: </td>
@@ -381,5 +400,11 @@
         </div>
     </div>
 </div>
+<form id="formResetPw" name="formResetPw" method="post" action="/userctl">
+    <input type="hidden" name="user" value="<%=user.getName()%>"/>
+    <input type="hidden" name="email" value="<%=user.getEmail()%>"/><br><br>
+    <input type="hidden" name="event" value="password"/>
+    <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+</form>
 </body>
 </html>
