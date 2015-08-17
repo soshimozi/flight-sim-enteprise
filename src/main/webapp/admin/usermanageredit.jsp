@@ -401,8 +401,8 @@
     </div>
 </div>
 <form id="formResetPw" name="formResetPw" method="post" action="/userctl">
-    <input type="hidden" name="user" value="<%=user.getName()%>"/>
-    <input type="hidden" name="email" value="<%=user.getEmail()%>"/><br><br>
+    <input type="hidden" name="user" value="<%=account.getName()%>"/>
+    <input type="hidden" name="email" value="<%=account.getEmail()%>"/><br><br>
     <input type="hidden" name="event" value="password"/>
     <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
 </form>
