@@ -963,47 +963,38 @@
 	{			 
 		e.preventDefault();
 
-        var h = $("#jsCountHolder");
-        var h2 = $("#jsCountHolder2");
-        var wc = $("#whocares");
-
-		h.val(0);
-		h2.val(0);
-		wc.val(0);
+        var h = 0;
+        var h2 = 0;
 			 
-		$.each($(".assigmentTable").find("input"), function()
-		{
-			if($(this).attr("checked") == true)
+		$.each($(".assigmentTable").find(":checkbox"), function()
 			{
-				h2.val(parseInt(h2).val() + 1);
-				if($("#assignmentType-" + $(this).val()).html() == 'A')
-				{			   
-					h.val(parseInt(h.val()) + 1);
-				}
-			}
-		 });
-		 
-		if(parseInt(h.val()) > 0 && (parseInt(h2.val()) == parseInt(h.val())))
-		{
-			   //the amount of all-in jobs matches the total number of selected jobs				
-				if(parseInt(h.val()) == 1)
-				{					
-					wc.val(1);
-					doSubmit3(document.getElementById("airportForm").select, $("#addToGroup").val());
-				}
-				else
+				if($(this).is(":checked"))
 				{
-					alert('FSE Validation Error: cannot have more then 1 All-In job selected.');				    	
+					h2++;
+                    var t = $("#assignmentType-" + $(this).val()).html();
+					if(t.indexOf('A') == 0)
+						h++;
 				}
-		}
-		else if(h.val() == 0)
+		 	});
+		 
+		if(h > 0 && h2 == h && $("#addToGroup").val() == 0)
 		{
-			wc.val(1);
+		    //the amount of all-in jobs matches the total number of selected jobs
+			if(h == 1)
+				doSubmit3(document.getElementById("airportForm").select, $("#addToGroup").val());
+			else
+				alert('FSE Validation Error: cannot have more then 1 All-In job selected.');
+		}
+		else if(h == 0 )
+		{
 			doSubmit3(document.getElementById("airportForm").select,$("#addToGroup").val());			  
 		}
 		else
 		{
-			alert('FSE Validation Error: cannot have more then 1 All-In job selected and cannot mix All-In jobs with regular jobs');			   	
+			if($("#addToGroup").val() != 0)
+				alert('FSE Validation Error: Cannot add All-In jobs to a group!');
+			else
+				alert('FSE Validation Error: Cannot have more then 1 All-In job selected and cannot mix All-In jobs with regular jobs');
 		}	 
 	});
 	</script>
