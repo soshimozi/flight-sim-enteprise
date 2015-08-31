@@ -627,7 +627,7 @@ public class Aircraft implements Serializable
         return result;
     }
 
-    public static void rentAircraft(int aircraftId, int userId, boolean rentedDry) throws DataError
+    public static void rentAircraft(int aircraftId, UserBean user, boolean rentedDry) throws DataError
     {
         try
         {
@@ -642,40 +642,22 @@ public class Aircraft implements Serializable
 
             AircraftBean aircraft = new AircraftBean(aircraftRS);
 
-            //get renter info
-            qry = "SELECT * FROM accounts WHERE id = ?";
-            ResultSet renterRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, userId);
-
-            if (!renterRS.next())
-            {
-                throw new DataError("user not found!");
-            }
-
-            UserBean renter = new UserBean(renterRS);
-            Groups.reloadMemberships(renter);
-
             //get owner of aircraft info
-            qry = "SELECT * FROM accounts WHERE id = ?";
-            ResultSet ownerRS = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraft.getOwner());
-
-            if (!ownerRS.next())
-            {
+            UserBean owner = Accounts.getAccountById(aircraft.getOwner());
+            if (owner == null)
                 throw new DataError("owner not found!");
-            }
-
-            UserBean owner = new UserBean(ownerRS);
 
             //compare the renter to the values in the owner's BanList
-            if (owner.isInBanList(renter.getName()))
+            if (owner.isInBanList(user.getName()))
             {
                 throw new DataError("The owner [" + owner.getName() + "] has indicated that you are not permitted to rent aircraft from them. " +
                         "If you wish to contact them about this issue, you must do so privately. " +
                         "You may use the forum PM (Private Message) system at <a href='http://www.fseconomy.net/inbox'> http://www.fseconomy.net/inbox</a> if you have no other contact means. " +
-                        "<b>DO NOT</b> post any public static message about this issue in the forums.");
+                        "<b>DO NOT</b> post any public message about this issue in the forums.");
             }
 
             //The following check allows ALLIN only aircraft to be rented, bypassing the exploit canceling code
-            if ((aircraft.getRentalPriceDry() + aircraft.getRentalPriceWet() == 0) && !(aircraft.canAlwaysRent(renter)))
+            if ((aircraft.getRentalPriceDry() + aircraft.getRentalPriceWet() == 0) && !(aircraft.canAlwaysRent(user)))
             {
                 ModelBean mb = Models.getModelById(aircraft.getModelId());
                 if (mb.getFuelSystemOnly() == 0) // 0 == can be fueled, so not an ALLIN limited aircraft
@@ -683,10 +665,24 @@ public class Aircraft implements Serializable
                     throw new DataError("Rental not authorized");
                 }
             }
+            else
+            {
+                // if group aircraft, and rental type set to 0, and not group member then cancel
+                boolean isGroupAircraft = Accounts.isGroup(aircraft.getOwner());
+                boolean zeroRent = rentedDry ? aircraft.getRentalPriceDry() == 0 : aircraft.getRentalPriceWet() == 0;
+                boolean isMember = !isGroupAircraft ? false : Groups.isGroupMember(aircraft.getOwner(), user);
+
+                if(isGroupAircraft && zeroRent && !isMember )
+                    throw new DataError("Permission denied!");
+
+                //if non group aircraft, and rental type set to 0 and not owner then cancel
+                if(!isGroupAircraft && zeroRent && user.getId() != owner.getId())
+                    throw new DataError("Permission denied!");
+            }
 
             //normal flow for renting a plane begins
             qry = "SELECT (count(*) > 0) AS Found FROM aircraft WHERE userlock = ?";
-            boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), userId);
+            boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user.getId());
             if (found)
             {
                 throw new DataError("There is already an aircraft selected.");
@@ -707,7 +703,7 @@ public class Aircraft implements Serializable
             Float initialFuel = rentedDry ? (float) thisCraft.getTotalFuel() : null;
 
             qry = "UPDATE aircraft SET userlock = ?, lockedSince = ?, initialFuel = ? where id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, userId, new Timestamp(GregorianCalendar.getInstance().getTime().getTime()), initialFuel, aircraftId);
+            DALHelper.getInstance().ExecuteUpdate(qry, user.getId(), new Timestamp(GregorianCalendar.getInstance().getTime().getTime()), initialFuel, aircraftId);
         }
         catch (SQLException e)
         {

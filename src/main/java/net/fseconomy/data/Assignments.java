@@ -34,14 +34,11 @@ public class Assignments implements Serializable
             {
                 paxFilter = paxFilter + "amount >= " + minPax + " ";
                 if (maxPax > -1)
-                {
                     paxFilter = paxFilter + "AND ";
-                }
             }
+
             if (maxPax > -1)
-            {
                 paxFilter = paxFilter + "amount <= " + maxPax;
-            }
 
             paxFilter = "(" + paxFilter + ")";
         }
@@ -54,14 +51,11 @@ public class Assignments implements Serializable
             {
                 kgFilter = kgFilter + "amount >= " + minKG + " ";
                 if (maxKG > -1)
-                {
                     kgFilter = kgFilter + "AND ";
-                }
             }
+
             if (maxKG > -1)
-            {
                 kgFilter = kgFilter + "amount <= " + maxKG;
-            }
 
             kgFilter = "(" + kgFilter + ")";
         }
@@ -88,9 +82,7 @@ public class Assignments implements Serializable
     {
         StringBuilder where = new StringBuilder("'" + Converters.escapeSQL(location) + "'");
         for (CloseAirport location1 : locations)
-        {
             where.append(", '").append(location1.icao).append("'");
-        }
 
         String cargoFilter = BuildAssignmentCargoFilter(minPax, maxPax, minKG, maxKG);
 
@@ -101,9 +93,7 @@ public class Assignments implements Serializable
     {
         StringBuilder where = new StringBuilder("'" + Converters.escapeSQL(location) + "'");
         for (CloseAirport location1 : locations)
-        {
             where.append(", '").append(location1.icao).append("'");
-        }
 
         String cargoFilter = BuildAssignmentCargoFilter(minPax, maxPax, minKG, maxKG);
 
@@ -118,13 +108,9 @@ public class Assignments implements Serializable
     public static List<AssignmentBean> getAssignmentsForGroup(int groupId, boolean includelocked)
     {
         if (includelocked)
-        {
             return getAssignmentsSQL("SELECT * FROM assignments WHERE groupId=" + groupId + " ORDER BY location, toicao");
-        }
         else
-        {
             return getAssignmentsSQL("SELECT * FROM assignments WHERE userlock is null AND groupId=" + groupId + " ORDER BY location, toicao");
-        }
     }
 
     public static List<AssignmentBean> getAssignmentsForUser(int userId)
@@ -169,9 +155,7 @@ public class Assignments implements Serializable
         {
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
             if (rs.next())
-            {
                 return new AssignmentBean(rs);
-            }
         }
         catch (SQLException e)
         {
@@ -201,7 +185,7 @@ public class Assignments implements Serializable
         return result;
     }
 
-    public static void unlockAssignment(int id)
+    public static void unlockAssignment(int id, UserBean user) throws DataError
     {
         try
         {
@@ -219,7 +203,7 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void unlockGoodsAssignment(int id) throws DataError
+    public static void unlockGoodsAssignment(int id, UserBean user) throws DataError
     {
         try
         {
@@ -239,7 +223,7 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void holdAssignment(int id, boolean hold)
+    public static void holdAssignment(int id, boolean hold, UserBean user)
     {
         try
         {
@@ -247,15 +231,11 @@ public class Assignments implements Serializable
             int activeflag = hold ? ASSIGNMENT_HOLD : ASSIGNMENT_ACTIVE;
 
             if (hold)
-            {
-                qry = "UPDATE assignments SET active = ? WHERE active = 0 AND id = ? AND aircraft IS NULL";
-            }
+                qry = "UPDATE assignments SET active = ? WHERE active = 0 AND id = ? AND aircraft IS NULL AND userlock = ?";
             else
-            {
-                qry = "UPDATE assignments SET active = ? WHERE active = 2 and id = ?";
-            }
+                qry = "UPDATE assignments SET active = ? WHERE active = 2 and id = ? AND userlock = ?";
 
-            DALHelper.getInstance().ExecuteUpdate(qry, activeflag, id);
+            DALHelper.getInstance().ExecuteUpdate(qry, activeflag, id, user.getId());
         }
         catch (SQLException e)
         {
@@ -263,38 +243,36 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void moveAssignment(UserBean user, int id, int groupid) throws DataError
+    public static void moveAssignment(int id, int groupid, UserBean user) throws DataError
     {
         UserBean group = Accounts.getGroupById(groupid);
         if (group == null)
-        {
             throw new DataError("Group not found.");
-        }
 
         try
         {
             String qry = "SELECT (count(*) > 0) from assignments where id = ?";
             boolean idExists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
             if (!idExists) //just return if not found
-            {
                 return;
-            }
 
             //All-In check - can't add All-In flight to a group
             qry = "SELECT (count(*) > 0) from assignments where id = ? and aircraft is not null";
             boolean isAllIn = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
             if (isAllIn)
-            {
                 throw new DataError("All-In assignments cannot be added to a group queue.");
-            }
 
-            //See if already locked
+            //Do not allow move if user has locked it
             qry = "SELECT (userlock is not null) as found from assignments where id = ?";
-            boolean isUserlock = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
-            if (isUserlock)
-            {
+            boolean isUserlocked = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
+            if (isUserlocked)
                 throw new DataError("Assignment is locked by a pilot.");
-            }
+
+            //Do not allow move if group has locked it, and user not owner/staff
+            qry = "SELECT groupId from assignments where id = ?";
+            int groupLocked = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
+            if (groupLocked != 0 && !Accounts.isGroupOwnerStaff(groupLocked, user.getId()))
+                throw new DataError("Assignment is locked by a group.");
 
             //Move it to group assignments
             qry = "UPDATE assignments SET pilotFee=pay*amount*distance*0.01*?, groupId = ? WHERE id = ?";
@@ -306,16 +284,20 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void commentAssignment(int id, String comment) throws DataError
+    public static void commentAssignment(int id, String comment, UserBean user) throws DataError
     {
         try
         {
             String qry = "SELECT (count(*) > 0) from assignments where id = ?";
             boolean idExists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
             if (!idExists) //just return if not found
-            {
                 return;
-            }
+
+            //Do not allow move if group has locked it, and user not owner/staff
+            qry = "SELECT groupId from assignments where id = ?";
+            int groupLocked = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
+            if (groupLocked != 0 && !Accounts.isGroupOwnerStaff(groupLocked, user.getId()))
+                throw new DataError("Assignment is owned by another group.");
 
             //Move it to group assignments
             qry = "UPDATE assignments SET comment=? WHERE id = ?";
@@ -341,36 +323,33 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void addAssignment(int id, int user, boolean add, boolean isAirport) throws DataError
+    public static void addAssignment(int id, UserBean user) throws DataError
     {
         try
         {
             //Myflight assignment limit rule
             String qry = "SELECT (count(*) >= ?) FROM assignments WHERE userlock= ?";
-            boolean toManyJobs = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), MAX_FLIGHT_ASSIGNMENTS, user);
+            boolean toManyJobs = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), MAX_FLIGHT_ASSIGNMENTS, user.getId());
             if (toManyJobs)
-            {
                 throw new DataError("You have reached the limit of allowed assignments. Limit: " + MAX_FLIGHT_ASSIGNMENTS);
-            }
 
             //No assignment found
             qry = "SELECT (count(*) = 0) AS notFound FROM assignments WHERE id = ?";
             boolean noRecord = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
             if (noRecord)
-            {
                 throw new DataError("No assignment found for id: " + id);
-            }
 
-            if(isAirport)
-            {
-                qry = "SELECT (userlock is not null OR groupId is not null) as owned FROM assignments WHERE id = ?";
-                boolean isOwned = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
+            //See if locked by user
+            qry = "SELECT (userlock is not null) as owned FROM assignments WHERE id = ? AND userlock <> ?";
+            boolean isOwned = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id, user.getId());
+            if (isOwned)
+                throw new DataError("Assignment locked by another pilot.");
 
-                if (isOwned)
-                {
-                    throw new DataError("Assignment already selected by a pilot or group.");
-                }
-            }
+            //if group locked, are they a member? if not, error
+            qry = "SELECT groupId from assignments where id = ?";
+            int groupLocked = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
+            if (groupLocked != 0 && !Groups.isGroupMember(groupLocked, user))
+                throw new DataError("Assignment is owned by another group.");
 
             //Get aircraft for assignment
             qry = "SELECT aircraftid FROM assignments WHERE id = ?";
@@ -382,33 +361,27 @@ public class Assignments implements Serializable
             {
                 //No jobs in the loading area
                 qry = "SELECT (count(*) > 0) AS found FROM assignments WHERE userlock = ? AND active <> 2";
-                boolean noLoadAreaJobs = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user);
+                boolean noLoadAreaJobs = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user.getId());
                 if (noLoadAreaJobs)
-                {
                     throw new DataError("Cannot have any jobs in the Loading Area when trying to select an All-In job.");
-                }
 
                 //existing all-in jobs in queue for user
                 qry = "SELECT (count(*) > 0) AS found FROM assignments WHERE userLock = ? AND aircraft IS NOT NULL";
-                boolean foundAllIn = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user);
+                boolean foundAllIn = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user.getId());
                 if (foundAllIn)
-                {
                     throw new DataError("FSE Validation Error: cannot have more than 1 All-In job in My Flight queue.");
-                }
 
                 Aircraft.rentAircraft(aircraftId, user, false);
             }
             else
             {
                 //All-In validation - cannot add regular assignments when there is an active all-in job
-                if (hasAllInJobInQueue(user))
-                {
+                if (hasAllInJobInQueue(user.getId()))
                     throw new DataError("FSE Validation Error: cannot mix All-In jobs with regular jobs.");
-                }
             }
 
             qry = "UPDATE assignments SET userlock = ? where id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, user, id);
+            DALHelper.getInstance().ExecuteUpdate(qry, user.getId(), id);
         }
         catch (SQLException e)
         {
@@ -416,7 +389,7 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void removeAssignment(int id, int user, boolean add) throws DataError
+    public static void removeAssignment(int id, UserBean user) throws DataError
     {
         try
         {
@@ -424,8 +397,18 @@ public class Assignments implements Serializable
             String qry = "SELECT (count(*) = 0) AS notFound FROM assignments WHERE id = ?";
             boolean noRecord = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
             if (noRecord)
-            {
                 throw new DataError("No assignment found for id: " + id);
+
+            //See if locked by user
+            qry = "SELECT userlock FROM assignments WHERE id = ?";
+            int lockedBy = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
+            if ( lockedBy != 0 && lockedBy != user.getId())
+            {
+                //See if already locked by group
+                qry = "SELECT groupId from assignments where id = ?";
+                int groupLocked = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), id);
+                if (groupLocked != 0 && !Accounts.isGroupOwnerStaff(groupLocked, user.getId()))
+                    throw new DataError("Assignment locked by another pilot.");
             }
 
             //Get aircraft registration for assignment
@@ -434,9 +417,7 @@ public class Assignments implements Serializable
 
             //if All-In job, remove lock on aircraft now that job is canceled
             if (aircraftId > 0)
-            {
-                Aircraft.releaseAircraft(aircraftId, user);
-            }
+                Aircraft.releaseAircraft(aircraftId, user.getId());
 
             qry = "UPDATE assignments SET userlock = null, active = 0 where id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, id);
@@ -481,15 +462,11 @@ public class Assignments implements Serializable
             String qry = "SELECT (userlock is not null) AS locked  FROM assignments WHERE id = ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, assignmentId);
             if (!rs.next())
-            {
                 throw new DataError("No assignment found for id: " + assignmentId);
-            }
 
             //Assignment is locked!
             if (rs.getBoolean("locked"))
-            {
                 throw new DataError("Assignment is locked!");
-            }
 
             if(groupId > 0 && pilotFee <= 0)
             {
@@ -523,49 +500,33 @@ public class Assignments implements Serializable
             rs = stmt.executeQuery("SELECT * from assignments WHERE id = " + assignmentId);
 
             if (!rs.next())
-            {
                 throw new DataError("No assignment found for id: " + assignmentId);
-            }
 
             AssignmentBean assignment = new AssignmentBean(rs);
 
             if (assignment.getActive() == 1)
-            {
                 throw new DataError("The assignment is in flight");
-            }
 
             if (assignment.isGoods() && goodsAmount < 1)
-            {
                 throw new DataError("Transfer assignments must have a quantity greater than zero");
-            }
 
             if (assignment.isCreatedByUser() && assignment.calcPay() < 0)
-            {
                 throw new DataError("Assignment pay may not be less than zero");
-            }
 
             if (assignment.getPilotFee() < 0)
-            {
                 throw new DataError("Pilot fee may not be less than zero");
-            }
 
             if (assignment.isGroup() && !Banking.checkAnyFunds(assignment.getGroupId(), pilotFee))
-            {
                 throw new DataError("Not enough money for paying this pilot fee.");
-            }
 
             if (assignment.calcPay() != 0 && assignment.isCreatedByUser() && !Banking.checkAnyFunds(assignment.getOwner(), assignment.calcPay()))
-            {
                 throw new DataError("Not enough money for paying this assignment. ");
-            }
 
             int diffAmount = assignment.getAmount() - goodsAmount;
 
             //added for aircraft shipping - Airboss 1/10/11
             if (diffAmount != 0 && assignment.getCommodityId() > 0 && assignment.getCommodityId() < 99) //ignore aircraft crate
-            {
                 Goods.changeGoodsRecord(assignment.getLocation(), assignment.getCommodityId(), assignment.getOwner(), diffAmount, false);
-            }
 
             assignment.setAmount(goodsAmount);
             assignment.setPilotFee(pilotFee);
@@ -608,34 +569,22 @@ public class Assignments implements Serializable
             assignment.updateData();
 
             if (assignment.getActive() == 1)
-            {
                 throw new DataError("The assignment is in flight");
-            }
 
             if (assignment.isGoods() && assignment.getAmount() < 1)
-            {
                 throw new DataError("Transfer assignments must have a quantity greater than zero");
-            }
 
             if (assignment.isCreatedByUser() && assignment.calcPay() < 0)
-            {
                 throw new DataError("Assignment pay may not be less than zero");
-            }
 
             if (assignment.getPilotFee() < 0)
-            {
                 throw new DataError("Pilot fee may not be less than zero");
-            }
 
             if (assignment.isGroup() && !Banking.checkAnyFunds(assignment.getGroupId(), assignment.getPilotFee()))
-            {
                 throw new DataError("Not enough money for paying this pilot fee.");
-            }
 
             if (assignment.calcPay() != 0 && assignment.isCreatedByUser() && !Banking.checkAnyFunds(assignment.getOwner(), assignment.calcPay()))
-            {
                 throw new DataError("Not enough money for paying this assignment. ");
-            }
 
             stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
             rs = stmt.executeQuery("SELECT * from assignments WHERE id = " + assignment.getId());
@@ -655,20 +604,14 @@ public class Assignments implements Serializable
 
             //added for aircraft shipping - Airboss 1/10/11
             if (diffAmount != 0 && assignment.getCommodityId() > 0 && assignment.getCommodityId() < 99) //ignore aircraft crate
-            {
                 Goods.changeGoodsRecord(assignment.getLocation(), assignment.getCommodityId(), assignment.getOwner(), -diffAmount, false);
-            }
 
             assignment.writeBean(rs);
 
             if (newEntry)
-            {
                 rs.insertRow();
-            }
             else
-            {
                 rs.updateRow();
-            }
         }
         catch (SQLException e)
         {
@@ -707,9 +650,7 @@ public class Assignments implements Serializable
             boolean isAllInAircraft = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getId(), aircraft.getLocation());
 
             if (isAllInAircraft && !hasAllInJobInQueue(aircraft.getUserLock()))
-            {
                 return true;
-            }
         }
         catch (SQLException e)
         {
@@ -726,9 +667,7 @@ public class Assignments implements Serializable
             boolean isAllInAircraft = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getRegistration(), aircraft.getLocation());
 
             if (isAllInAircraft && !hasAllInJobInQueue(aircraft.getUserLock()))
-            {
                 return true;
-            }
         }
         catch (SQLException e)
         {
@@ -826,23 +765,23 @@ public class Assignments implements Serializable
         }
     }
 
-    public static void deleteGroupAssignment(int assignmentId) throws DataError
+    public static void deleteGroupAssignment(int assignmentId, UserBean user) throws DataError
     {
         try
         {
-            //No assignment found
-            String qry = "SELECT (userlock is not null) AS locked  FROM assignments WHERE id = ?";
+            String qry = "SELECT * FROM assignments WHERE id = ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, assignmentId);
             if (!rs.next())
-            {
-                throw new DataError("No assignment found for id: " + assignmentId);
-            }
+                throw new DataError("Assignment not found.");
+
+            AssignmentBean assignment = new AssignmentBean(rs);
 
             //Assignment is locked!
-            if (rs.getBoolean("locked"))
-            {
+            if (assignment.isUserlock())
                 throw new DataError("Assignment is locked!");
-            }
+
+            if (!assignment.deleteAllowed(user))
+                throw new DataError("Permission denied.");
 
             qry = "DELETE FROM assignments WHERE id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, assignmentId);
@@ -852,5 +791,4 @@ public class Assignments implements Serializable
             e.printStackTrace();
         }
     }
-
 }

@@ -996,70 +996,80 @@ public class UserCtl extends HttpServlet
 	{
 		// id = assignment id - single record
 		// select = checkbox values - multiple records		
-		String sId = req.getParameter("id");
+        String sId = req.getParameter("id");
 		String saId[] = req.getParameterValues("select");
 		String comment = req.getParameter("comment");
-		
-		if (sId == null && saId == null)
+
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
+        if (sId == null && saId == null)
 			return;
-		
+
+        int id;
         int x = 1;
-        
+
+        Groups.reloadMemberships(user);
+
         if (saId != null)
         	x = saId.length;
         
-		int id[] = new int[x];
-		
 		for (int i=0; i< x; i++)
 		{
 			if (saId != null)	
-				id[i] = Integer.parseInt(saId[i]);
+				id = Integer.parseInt(saId[i]);
 			else
-				id[i] = Integer.parseInt(sId);	
-			
-			UserBean user = (UserBean) req.getSession().getAttribute("user");
-			if (user == null || !user.isLoggedIn())
-				return;
+				id = Integer.parseInt(sId);
 			
 			String type = req.getParameter("type");
 			
 			if (type == null)
 				return;
 			
-//			AssignmentBean bean = data.getAssignmentById(id[i])[0];
-//			if(bean.isGroup() && !bean.groupAuthority(user))
-//				throw new DataError("You do not have permission to change that assignment!");
-				
 			if (type.equals("move"))
 			{
 				String group = req.getParameter("groupid");
+                if(Helpers.isNullOrBlank(group))
+                    throw new DataError("Missing groupid parameter");
+
 				int groupId = Integer.parseInt(group);
-				Assignments.moveAssignment(user, id[i], groupId);
+				Assignments.moveAssignment(id, groupId, user);
 			} 
 			else if (type.equals("comment"))
 			{
-                Assignments.commentAssignment(id[i], comment);
+                Assignments.commentAssignment(id, comment, user);
 			} 
 			else if (type.equals("delete"))
 			{
-                Assignments.deleteAssignment(id[i], user);
+                Assignments.deleteAssignment(id, user);
 			} 
 			else if (type.equals("unlock"))
 			{
-                Assignments.unlockAssignment(id[i]);
+                AssignmentBean ab = Assignments.getAssignmentById(id);
+                if(user.getId() != ab.getUserlock())
+                {
+                    String group = req.getParameter("groupid");
+                    if (Helpers.isNullOrBlank(group))
+                        throw new DataError("Missing groupid parameter");
+
+                    int groupId = Integer.parseInt(group);
+                    if (groupId != 0 && !Accounts.isGroupOwnerStaff(groupId, user.getId()))
+                        throw new DataError("Assignment is owned by another group.");
+                }
+                Assignments.unlockAssignment(id, user);
 			} 
 			else if (type.equals("hold") || type.equals("load"))
 			{
-                Assignments.holdAssignment(id[i], type.equals("hold"));
+                Assignments.holdAssignment(id, type.equals("hold"), user);
 			} 
 			else if(type.equals("add"))
 			{
-                boolean isAirport = req.getParameter("returnpage").contains("airport.jsp");
-                Assignments.addAssignment(id[i], user.getId(), type.equals("add"), isAirport);
+                Assignments.addAssignment(id, user);
 			}
 			else if(!type.equals("add"))
 			{
-                Assignments.removeAssignment(id[i], user.getId(), type.equals("add"));
+                Assignments.removeAssignment(id, user);
 			}
 		}
 	}
@@ -1339,7 +1349,7 @@ public class UserCtl extends HttpServlet
             return;
 
         for(int assignmentId: array)
-            Assignments.unlockGoodsAssignment(assignmentId);
+            Assignments.unlockGoodsAssignment(assignmentId, user);
     }
 
     void deleteGroupAssignment(HttpServletRequest req) throws DataError
@@ -1361,27 +1371,27 @@ public class UserCtl extends HttpServlet
         if (Groups.getRole(groupId, user.getId()) < UserBean.GROUP_STAFF)
             throw new DataError("You do not have permission to do that.");
 
-        Assignments.deleteGroupAssignment(assignmentId);
+        Assignments.deleteGroupAssignment(assignmentId, user);
     }
 
     void addAircraft(HttpServletRequest req) throws DataError
 	{
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        if (user == null || !user.isLoggedIn())
+            return;
+
         if (req.getParameter("id") == null)
             return;
 
         int id = Integer.parseInt(req.getParameter("id"));
 		
-		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		if (user == null || !user.isLoggedIn())
-			return;
-
 		String type = req.getParameter("type");
 		String rentalType = req.getParameter("rentalType");
 		if (type == null)
 			return;
 		
 		if (type.equals("add"))
-			Aircraft.rentAircraft(id, user.getId(), "dry".equals(rentalType));
+			Aircraft.rentAircraft(id, user, "dry".equals(rentalType));
 		else if (type.equals("remove"))
             Aircraft.releaseAircraft(id, user.getId());
 	}

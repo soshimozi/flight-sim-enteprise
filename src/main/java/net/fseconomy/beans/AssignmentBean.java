@@ -202,6 +202,11 @@ public class AssignmentBean implements Serializable
 		return userlock;
 	}
 
+	public boolean isUserlock()
+	{
+		return userlock != 0;
+	}
+
 	/**
 	 * Sets the aircraft.
 	 * @param aircraftId The aircraft to set

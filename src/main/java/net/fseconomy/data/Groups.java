@@ -9,6 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Groups implements Serializable
 {
@@ -450,5 +451,14 @@ public class Groups implements Serializable
         }
 
         return result;
+    }
+
+    public static boolean isGroupMember(int groupId, UserBean user)
+    {
+        Map<Integer, groupMemberData> memberships = user.getMemberships();
+        if(memberships != null && memberships.get(groupId) != null)
+            return true;
+
+        return false;
     }
 }
