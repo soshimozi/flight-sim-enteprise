@@ -20,6 +20,8 @@ public class Groups implements Serializable
         public int memberLevel;
         public String groupName;
 
+
+
         public groupMemberData(int groupId, int memberLevel, String name)
         {
             this.groupId = groupId;
@@ -32,14 +34,21 @@ public class Groups implements Serializable
     {
         Accounts.mustBeLoggedIn(user);
 
-        if (group.getName().trim().length() < 4)
+        String grpName = group.getName().trim();
+
+        if(group.getName().length() > grpName.length())
         {
-            throw new DataError("Group name must be at least 4 characters.");
+            throw new DataError("Group name cannot start, or end with whitespace characters.");
         }
 
-        if (!(group.getDefaultPilotFee() >= 0 && group.getDefaultPilotFee() <= 100))
+        if (group.getName().length() < 4 || group.getName().length() > 45)
         {
-            throw new DataError("Pilot Fee must be in the range of 0 to 100%");
+            throw new DataError("Group name must be at least 4 characters and no more then 45.");
+        }
+
+        if (group.getDefaultPilotFee() > 100)
+        {
+            throw new DataError("Pilot Fee cannot exceed 100%");
         }
 
         try
@@ -51,8 +60,15 @@ public class Groups implements Serializable
                 throw new DataError("Group not found!");
             }
 
+            qry = "select (count(*) > 0) from accounts where upper(name) = upper(?)";
+            exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), grpName);
+            if (exists)
+            {
+                throw new DataError("Group name already exists. (Names are case-insensitive)");
+            }
+
             qry = "UPDATE accounts SET name=?, comment=?, url=?, defaultPilotFee=?, banList=?, exposure=?, readAccessKey=? WHERE id=?";
-            DALHelper.getInstance().ExecuteUpdate(qry, group.getName(), group.getComment(), group.getUrl(), group.getDefaultPilotFee(), group.getBanList(), group.getExposure(), group.getReadAccessKey(), group.getId());
+            DALHelper.getInstance().ExecuteUpdate(qry, grpName, group.getComment(), group.getUrl(), group.getDefaultPilotFee(), group.getBanList(), group.getExposure(), group.getReadAccessKey(), group.getId());
         }
         catch (SQLException e)
         {
@@ -64,9 +80,16 @@ public class Groups implements Serializable
     {
         Accounts.mustBeLoggedIn(user);
 
-        if (group.getName().length() < 4)
+        String grpName = group.getName().trim();
+
+        if(group.getName().length() > grpName.length())
         {
-            throw new DataError("Group name must be at least 4 characters.");
+            throw new DataError("Group name cannot start, or end with whitespace characters.");
+        }
+
+        if (group.getName().length() < 4 || group.getName().length() > 45)
+        {
+            throw new DataError("Group name must be at least 4 characters and no more then 45.");
         }
 
         if (group.getDefaultPilotFee() > 100)
@@ -77,20 +100,20 @@ public class Groups implements Serializable
         try
         {
             String qry = "select (count(*) > 0) from accounts where upper(name) = upper(?)";
-            boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), group.getName());
+            boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), grpName);
             if (exists)
             {
-                throw new DataError("Group name already exists.");
+                throw new DataError("Group name already exists. (Names are case-insensitive)");
             }
 
             qry = "INSERT INTO accounts (created, type, name, comment, url, defaultPilotFee, banList, exposure, readAccessKey) VALUES(?,?,?,?,?,?,?,?,?)";
-            DALHelper.getInstance().ExecuteUpdate(qry, new Timestamp(System.currentTimeMillis()), "group", group.getName(), group.getComment(), group.getUrl(), group.getDefaultPilotFee(), group.getBanList(), group.getExposure(), group.getReadAccessKey());
+            DALHelper.getInstance().ExecuteUpdate(qry, new Timestamp(System.currentTimeMillis()), "group", grpName, group.getComment(), group.getUrl(), group.getDefaultPilotFee(), group.getBanList(), group.getExposure(), group.getReadAccessKey());
 
             qry = "select id from accounts where upper(name) = upper(?)";
-            int id = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), group.getName());
+            int id = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), grpName);
             joinGroup(user, id, "owner");
 
-            Accounts.addAccountNote(user.getId(), user.getId(), "Created group: " + group.getName() + "[" + group.getId() + "]");
+            Accounts.addAccountNote(user.getId(), user.getId(), "Created group: " + grpName + "[" + group.getId() + "]");
         }
         catch (SQLException e)
         {

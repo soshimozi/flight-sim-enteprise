@@ -2,6 +2,8 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.beans.*, net.fseconomy.data.*"
 %>
+<%@ page import="net.fseconomy.util.Converters" %>
+<%@ page import="net.fseconomy.util.Helpers" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -37,31 +39,38 @@
     }
     else if (error == null)
     {
-        try
+        String grpName = request.getParameter("name");
+        grpName = Helpers.truncate(Converters.clearHtml(grpName.trim()), 45);
+        if(   grpName == null
+           && grpName.equals("")
+           && grpName.length() < 4)
         {
-            if(request.getParameter("name") != null
-                    && !request.getParameter("name").equals("")
-                    && request.getParameter("name").length() > 3)
-                group.setName(request.getParameter("name"));
-
-            group.setComment(request.getParameter("comment"));
-            group.setUrl(request.getParameter("url"));
-            group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
-            group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
-            group.setBanList(request.getParameter("banList"));
-            int pilotFee = 0;
-            if(request.getParameter("defaultPilotFee") != null && !request.getParameter("defaultPilotFee").equals(""))
-                pilotFee = Integer.parseInt(request.getParameter("defaultPilotFee"));
-
-            group.setDefaultPilotFee(pilotFee);
-            Groups.updateGroup(group, user);
-%>
-            <jsp:forward page="groups.jsp" />
-<%
+            error = "Invalid Group Name. Must be 4 characters or more, not start or end with whitespace, no HTML";
         }
-        catch (DataError e)
+        else
         {
-            error = e.getMessage();
+            try
+            {
+                group.setName(grpName);
+                group.setComment(request.getParameter("comment"));
+                group.setUrl(request.getParameter("url"));
+                group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
+                group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
+                group.setBanList(request.getParameter("banList"));
+                int pilotFee = 0;
+                if(request.getParameter("defaultPilotFee") != null && !request.getParameter("defaultPilotFee").equals(""))
+                    pilotFee = Integer.parseInt(request.getParameter("defaultPilotFee"));
+
+                group.setDefaultPilotFee(pilotFee);
+                Groups.updateGroup(group, user);
+%>
+                <jsp:forward page="groups.jsp" />
+<%
+            }
+            catch (DataError e)
+            {
+                error = e.getMessage();
+            }
         }
     }
 %>
@@ -106,17 +115,17 @@
 	<table>
 	<caption>Edit Flight Group</caption>
 	<tr>
-		<td>Name</td><td><input name="name" type="text" class="textarea" value="<%= group.getName().replaceAll("\"","''") %>" size="40"></td>
+		<td>Name</td><td><input name="name" type="text" class="textarea" value="<%= group.getName().replaceAll("\"","''") %>" size="45" maxlength="45"></td>
 	</tr>
 
 	<tr>
-		<td>Comment</td><td><input name="comment" type="text" class="textarea" value="<%= group.getComment() == null?"" : group.getComment() %>" size="40"></td>
+		<td>Comment</td><td><input name="comment" type="text" class="textarea" value="<%= group.getComment() == null?"" : group.getComment() %>" size="45"></td>
 	</tr>
 	<tr>
-		<td>Url of website</td><td><input name="url" type="text" class="textarea" value="<%= group.getUrl() == null?"":group.getUrl() %>" size="40"></td>
+		<td>Url of website</td><td><input name="url" type="text" class="textarea" value="<%= group.getUrl() == null?"":group.getUrl() %>" size="45"></td>
 	</tr>	
 	<tr>
-		<td>Default pilot fee</td><td><input name="defaultPilotFee" type="text" class="textarea" value="<%= group.getDefaultPilotFee() %>" size="5">
+		<td>Default pilot fee</td><td><input name="defaultPilotFee" type="number" min="0" max="100" class="textarea" value="<%= group.getDefaultPilotFee() %>" size="5">
 		%</td>
 	</tr>
 	<tr>
