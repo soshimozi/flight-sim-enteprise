@@ -34,6 +34,7 @@ import java.util.TimeZone;
 import net.fseconomy.data.Groups;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.GlobalLogger;
+import net.fseconomy.util.Helpers;
 
 public class UserBean implements Serializable
 {
@@ -53,7 +54,9 @@ public class UserBean implements Serializable
 	public static final int EXPOSURE_JOIN = 1;
 	public static final int EXPOSURE_SCORE = 2;
 	public static final int EXPOSURE_GROUPS = 4;
-	
+
+    int MAXNAMESIZE = 45;
+	int MAXCOMMENTSIZE = 255;
 
 	int id;
     Timestamp created;
@@ -170,24 +173,6 @@ public class UserBean implements Serializable
 		else if (level.equals("aca"))
 			this.level = LEV_ACA;
 	}
-	
-	private String TruncateName(String name)
-	{
-			int MAXNAMESIZE = 45;
-		int maxLength = (name.length() < MAXNAMESIZE) ? name.length() : MAXNAMESIZE;
-		return name.substring(0, maxLength);
-	}
-	
-	private String TruncateComment(String comment)
-	{
-		if(comment == null)
-			return null;
-		
-		int MAXCOMMENTSIZE = 255;	
-		int maxLength = (comment.length() < MAXCOMMENTSIZE) ? comment.length() : MAXCOMMENTSIZE;
-		return comment.substring(0, maxLength);
-	}
-	
 
 	/**
 	 * Returns the email.
@@ -337,7 +322,7 @@ public class UserBean implements Serializable
 			GlobalLogger.logGroupAuditLog("Group name NULL", UserBean.class);
 
         //Trim and clean up name!
-		this.name = TruncateName(Converters.clearHtml(name.trim()));
+        this.name = Helpers.truncate(Converters.clearHtml(name.trim()), MAXNAMESIZE);
 	}
 
 	/**
@@ -390,7 +375,7 @@ public class UserBean implements Serializable
 
 	public void setComment(String string)
 	{
-		comment = TruncateComment(Converters.clearHtml(string));
+		comment = Helpers.truncate(Converters.clearHtml(string), MAXCOMMENTSIZE);
 	}
 
 	public Map<Integer, Groups.groupMemberData> getMemberships()
