@@ -2307,8 +2307,9 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("Pay");
 			buffer.appendHeaderItem("PilotFee");		
 			buffer.appendHeaderItem("Expires");		
-			buffer.appendHeaderItem("ExpireDateTime");		
-			buffer.appendHeaderItem("Locked");			
+			buffer.appendHeaderItem("ExpireDateTime");
+			buffer.appendHeaderItem("Express");
+			buffer.appendHeaderItem("Locked");
 			buffer.appendHeaderItem("Comment");			
 		}
 
@@ -2365,6 +2366,7 @@ public class Datafeed extends HttpServlet
             buffer.appendMoney(assignment.getPilotFee());
             buffer.append(expires);
             buffer.append(assignment.getExpires() == null ? "9999/1/1 00:00:00" : assignment.getExpiresGMTDate());
+			buffer.append(assignment.isNoExt() ? "True" : "False");
             buffer.append(locked);
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(assignment.getComment()));
             buffer.newrow();
@@ -2429,6 +2431,7 @@ public class Datafeed extends HttpServlet
             buffer.appendMoney("PilotFee", assignment.getPilotFee());
             buffer.append("Expires", expires);
             buffer.append("ExpireDateTime", assignment.getExpires() == null ? "9999/1/1 00:00:00" : assignment.getExpiresGMTDate());
+			buffer.append("Express", assignment.isNoExt() ? "True" : "False");
             buffer.append("Locked", locked);
             buffer.append("Comment", Converters.XMLHelper.protectSpecialCharacters(assignment.getComment()));
             buffer.append("</Assignment>\n");
@@ -3189,6 +3192,7 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("Pay");
 			buffer.appendHeaderItem("Expires");
 			buffer.appendHeaderItem("ExpireDateTime");
+            buffer.appendHeaderItem("Express");
 			buffer.appendHeaderItem("PtAssignment");
 			buffer.appendHeaderItem("All-In");
 		}
@@ -3205,6 +3209,7 @@ public class Datafeed extends HttpServlet
             buffer.appendMoney(assignment.calcPay());
             buffer.append(assignment.getSExpires());
             buffer.append(assignment.getExpiresGMTDate());
+            buffer.append(assignment.isNoExt() ? "True" : "False");
             buffer.append(Boolean.toString(assignment.isPtAssignment()));
             buffer.append(assignment.getType() == AssignmentBean.TYPE_ALLIN);
             buffer.newrow();
@@ -3226,6 +3231,7 @@ public class Datafeed extends HttpServlet
             buffer.appendMoney("Pay", assignment.calcPay());
             buffer.append("Expires", assignment.getSExpires());
             buffer.append("ExpireDateTime", assignment.getExpiresGMTDate());
+            buffer.append("Express", assignment.isNoExt() ? "True" : "False");
             buffer.append("PtAssignment", Boolean.toString(assignment.isPtAssignment()));
             buffer.append("</Assignment>\n");
         }
