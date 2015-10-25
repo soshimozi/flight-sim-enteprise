@@ -41,4 +41,12 @@ public class Helpers
             return false;
         }
     }
+
+    public static String truncate(String str, int maxLen)
+    {
+        if(str == null)
+            return str;
+
+        return (str.length() < maxLen) ? str : str.substring(0, maxLen);
+    }
 }
