@@ -894,7 +894,8 @@ public class Accounts implements Serializable
                 qry = "SELECT * FROM accounts WHERE exposure <> 0 AND name like ? " + accttype + " ORDER BY name LIMIT " + limit;
             }
 
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, partialName + "%");
+            String pn = partialName.replace("_", "\\_");
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, pn + "%");
             while (rs.next())
             {
                 UserBean template = new UserBean(rs);
