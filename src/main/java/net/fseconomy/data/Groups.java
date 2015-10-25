@@ -60,11 +60,14 @@ public class Groups implements Serializable
                 throw new DataError("Group not found!");
             }
 
-            qry = "select (count(*) > 0) from accounts where upper(name) = upper(?)";
-            exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), grpName);
-            if (exists)
+            if(!group.getName().contains(grpName))
             {
-                throw new DataError("Group name already exists. (Names are case-insensitive)");
+                qry = "select (count(*) > 0) from accounts where upper(name) = upper(?)";
+                exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), grpName);
+                if (exists)
+                {
+                    throw new DataError("Group name already exists. (Names are case-insensitive)");
+                }
             }
 
             qry = "UPDATE accounts SET name=?, comment=?, url=?, defaultPilotFee=?, banList=?, exposure=?, readAccessKey=? WHERE id=?";
