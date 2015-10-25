@@ -223,6 +223,10 @@ public class ServiceData
         boolean success;
         String mode;
 
+        // Catch trying to lease to bank, as it will sell it first chance!
+        if(leaseTo == 0)
+            return createErrorResponse(200, 200, "Bad Request", "Cannot lease to bank.");
+
         try
         {
             AircraftBean aircraft = Aircraft.getAircraftById(serialNumber);
