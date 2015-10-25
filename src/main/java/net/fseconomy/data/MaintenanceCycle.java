@@ -711,7 +711,7 @@ public class MaintenanceCycle implements Runnable
 				//this will ensure a 172 is not chosen to take a 10 pax job
 				//if filter values are set those are used instead in the where clause
 				if (seatsFrom == 0 && seatsTo == 0)
-				{	//no filters set, use some base values to make sure an in appropriate plane is not assigned
+				{	//no filters set, use some base values to make sure an inappropriate plane is not assigned
 					if (units.equals("passengers"))
 					{
 						aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
@@ -749,7 +749,7 @@ public class MaintenanceCycle implements Runnable
 				{
 					icaoSet1 = new HashSet<>();
 
-					qry = "Select location as icao from aircraft, models where aircraft.model=models.id AND owner=0 AND location is not null " + aircraftFilterWhereClause.toString();
+					qry = "Select location as icao from aircraft, models where aircraft.model=models.id AND owner=0 AND location is not null AND userlock is null " + aircraftFilterWhereClause.toString();
 					ResultSet result = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 
 					while(result.next())
