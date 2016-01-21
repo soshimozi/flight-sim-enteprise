@@ -17,7 +17,7 @@ public class ClientServices
         if(ab != null)
         {
             RentedAircraftConfig ac = new RentedAircraftConfig(ab.getId(), ab.getRegistration());
-            Aircraft.fillModelData(ac, ab.getModelId());
+            Aircraft.fillRentedAircraftData(ac, ab);
             return common.createSuccessResponse(200, 200, null, null, ac);
         }
 
