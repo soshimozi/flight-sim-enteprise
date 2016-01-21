@@ -14,6 +14,8 @@ public class Fbos implements Serializable
     public static final int FBO_ID = 0;
     public static final int FBO_REPAIR_MARGIN = 1;
     public static final int FBO_EQUIPMENT_MARGIN = 2;
+    public static final int FBO_ORDER_FUEL = 3;
+    public static final int FBO_ORDER_SUPPLIES = 4;
 
 
     public static void doTransferFbo(FboBean fbo, int buyer, int owner, String icao, boolean goods) throws DataError
@@ -522,9 +524,10 @@ public class Fbos implements Serializable
                 throw new DataError("Permission denied.");
             }
 
-            if (doesBulkFuelRequestExist(fbo.getId()))
+            if (doesBulkGoodsRequestExist(fbo.getId(), FBO_ORDER_FUEL) ||
+                doesBulkGoodsRequestExist(fbo.getId(), FBO_ORDER_SUPPLIES))
             {
-                throw new DataError("Cannot teardown an FBO that has an active pending bulk fuel delivery.");
+                throw new DataError("Cannot teardown an FBO that has an active bulk order pending delivery.");
             }
 
             int inUse = Facilities.getFacilityBlocksInUse(fbo.getId());
@@ -709,47 +712,63 @@ public class Fbos implements Serializable
         }
     }
 
-    public static void logBulkFuelRequest(int fboId)
+    public static void logBulkGoodsRequest(int fboId, int order)
     {
         //log the current date/time for this request so another one cannot be requested for 24hrs.
         Timestamp timestamp = new Timestamp(new java.util.Date().getTime());
 
+
         try
         {
-            String qry = "UPDATE fbo SET bulkFuelOrderTimeStamp = ? WHERE id = ?";
+            String qry;
+            if(order == FBO_ORDER_FUEL)
+                qry = "UPDATE fbo SET bulkFuelOrderTimeStamp = ? WHERE id = ?";
+            else //(order == FBO_ORDER_SUPPLIES)
+                qry = "UPDATE fbo SET bulkSupplyOrderTimeStamp = ? WHERE id = ?";
+
             DALHelper.getInstance().ExecuteUpdate(qry, timestamp, fboId);
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
-    }//reset the timestamp for a given FBO so they can process a request for bulk fuel without waiting for the 24 hour rule
+    }
 
-    public static void resetBulkFuelOrder(int fboId)
+    //reset the timestamp for a given FBO so they can process a request for bulk fuel without waiting for the 24 hour rule
+    public static void resetBulkGoodsOrder(int fboId, int order)
     {
         try
         {
-            String qry = "UPDATE fbo SET bulkFuelOrderTimeStamp = null, bulk100llOrdered = null, bulkJetAOrdered = null, bulkFuelDeliveryDateTime = null WHERE id = ?";
+            String qry;
+            if(order == FBO_ORDER_FUEL)
+                qry = "UPDATE fbo SET bulkFuelOrderTimeStamp = null, bulk100llOrdered = null, bulkJetAOrdered = null, bulkFuelDeliveryDateTime = null WHERE id = ?";
+            else //(order == FBO_ORDER_SUPPLIES)
+                qry = "UPDATE fbo SET bulkSupplyOrderTimeStamp = null, bulkSuppliesOrdered = null, bulkSupplyDeliveryDateTime = null WHERE id = ?";
+
             DALHelper.getInstance().ExecuteUpdate(qry, fboId);
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
-    }//check to see if a request has been made in the past 24 hrs for an FBO
+    }
 
-    public static boolean doesBulkFuelRequestExist(int id)
+    //check to see if a request has been made in the past 24 hrs for an FBO
+    public static boolean doesBulkGoodsRequestExist(int id, int order)
     {
         Calendar calNow = Calendar.getInstance();
         try
         {
-            String qry = "SELECT bulkFuelOrderTimeStamp, bulkFuelDeliveryDateTime FROM fbo WHERE id = ?";
+            String qry;
+            if(order == FBO_ORDER_FUEL)
+                qry = "SELECT bulkFuelOrderTimeStamp, bulkFuelDeliveryDateTime FROM fbo WHERE id = ?";
+            else //(order == FBO_ORDER_SUPPLIES)
+                qry = "SELECT bulkSupplyOrderTimeStamp, bulkSupplyDeliveryDateTime FROM fbo WHERE id = ?";
+
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, id);
 
             if (!rs.next())
-            {
                 return false;
-            }
 
             Timestamp orderTS = rs.getTimestamp(1);
             Timestamp deliveryTS = rs.getTimestamp(2);
@@ -782,13 +801,18 @@ public class Fbos implements Serializable
         }
 
         return false;
-    }//check to see if a order in progress
+    }
 
-    public static boolean doesBulkFuelOrderExist(int id)
+    //check to see if a order in progress
+    public static boolean doesBulkGoodsOrderExist(int id, int order)
     {
         try
         {
-            String qry = "SELECT (bulkFuelDeliveryDateTime is not null) as found FROM fbo WHERE id = ?";
+            String qry;
+            if(order == FBO_ORDER_FUEL)
+                qry = "SELECT (bulkFuelDeliveryDateTime is not null) as found FROM fbo WHERE id = ?";
+            else //(order == FBO_ORDER_SUPPLIES)
+                qry = "SELECT (bulkSupplyDeliveryDateTime is not null) as found FROM fbo WHERE id = ?";
 
             return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
         }
@@ -798,14 +822,93 @@ public class Fbos implements Serializable
         }
 
         return false;
-    }//calculate a shipping day for bulk fuel
+    }
 
-    public static int calculateShippingDay()
+    //record the transaction request for bulk fuel - to be delivered later by the maintenance code
+    public static void registerBulkGoodsOrder(UserBean user, int fboID, int order, int amount100ll, int amountJetA, int amount, int daysOut, int accountToPay, int location, String icao) throws DataError
+    {
+        UserBean account = Accounts.getAccountById(accountToPay);
+
+        if (account.getId() != user.getId() && user.groupMemberLevel(account.getId()) < UserBean.GROUP_STAFF)
+        {
+            throw new DataError("Permission denied");
+        }
+
+        if (doesBulkGoodsOrderExist(fboID, order))
+        {
+            throw new DataError("Bulk order already exists.");
+        }
+
+        double total;
+        double price100ll = 0;
+        double priceJetA = 0;
+        if(order == FBO_ORDER_FUEL)
+        {
+            price100ll = Goods.quoteOrder(icao, GoodsBean.GOODS_FUEL100LL, amount100ll);
+            priceJetA = Goods.quoteOrder(icao, GoodsBean.GOODS_FUELJETA, amountJetA);
+
+            total = price100ll + priceJetA;
+        }
+        else
+        {
+            total = Goods.quoteOrder(icao, GoodsBean.GOODS_SUPPLIES, amount);
+        }
+
+        if (account.getMoney() < total)
+            throw new DataError(account.getName() + " has insufficent funds for this purchase!");
+
+        Calendar calDeliveryDate = Calendar.getInstance();
+        if (daysOut == 0)
+            calDeliveryDate.add(Calendar.HOUR_OF_DAY, 4); //add 4 hours if same day
+        else
+            calDeliveryDate.add(Calendar.DATE, daysOut);
+
+        Timestamp deliveryTS = new Timestamp(calDeliveryDate.getTimeInMillis());
+
+        try
+        {
+            String daysMsg = " -- delivery ETA: " + deliveryDateFormatted(daysOut);
+            String comment1 = "", comment2 = "";
+
+            if(order == FBO_ORDER_FUEL)
+            {
+                if (amount100ll > 0)
+                    comment1 = "100LL:" + amount100ll + " Kg";
+
+                if (amountJetA > 0)
+                    comment2 = " JetA:" + amountJetA + " Kg";
+
+                String qry = "UPDATE fbo SET bulk100llOrdered = ?, bulkJetAOrdered = ?, bulkFuelDeliveryDateTime = ? WHERE id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, amount100ll, amountJetA, deliveryTS, fboID);
+
+                //Now deduct the $ from the account paying for the order - transfer amount to Bank of FSE, log each payment seperately
+                Banking.doPayBulkGoods(accountToPay, 0, (int) price100ll, location, comment1 + daysMsg, icao, GoodsBean.GOODS_FUEL100LL);
+                Banking.doPayBulkGoods(accountToPay, 0, (int) priceJetA, location, comment2 + daysMsg, icao, GoodsBean.GOODS_FUELJETA);
+            }
+            else
+            {
+                if (amount > 0)
+                    comment1 = "Supplies:" + amount + " Kg";
+
+                String qry = "UPDATE fbo SET bulkSuppliesOrdered = ?, bulkSupplyDeliveryDateTime = ? WHERE id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, amount, deliveryTS, fboID);
+
+                //Now deduct the $ from the account paying for the order - transfer amount to Bank of FSE, log each payment seperately
+                Banking.doPayBulkGoods(accountToPay, 0, (int) total, location, comment1 + daysMsg, icao, GoodsBean.GOODS_SUPPLIES);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    //calculate a shipping day for bulk fuel
+    public static int calculateShippingDay(int min, int max)
     {
         Random randomGenerator = new Random();
         int randomInt;
-        int base = 3;    //from 0 to 3 days out
-        randomInt = randomGenerator.nextInt(base);
+        randomInt = min + randomGenerator.nextInt(max);
 
         return randomInt;
     }
@@ -825,69 +928,6 @@ public class Fbos implements Serializable
         Timestamp deliveryDateSql = new Timestamp(deliveryDate.getTimeInMillis());
 
         return Formatters.dateyyyymmddhhmmzzz.format(deliveryDateSql);
-    }//record the transaction request for bulk fuel - to be delivered later by the maintenance code
-
-    public static void registerBulkFuelOrder(UserBean user, int fboID, int amount100ll, int amountJetA, int daysOut, int accountToPay, int location, String icao) throws DataError
-    {
-        UserBean account = Accounts.getAccountById(accountToPay);
-
-        if (account.getId() != user.getId() && user.groupMemberLevel(account.getId()) < UserBean.GROUP_STAFF)
-        {
-            throw new DataError("Permission denied");
-        }
-
-        if (doesBulkFuelOrderExist(fboID))
-        {
-            throw new DataError("Fuel order already exists.");
-        }
-
-        double price100ll = Goods.quoteFuel(icao, GoodsBean.GOODS_FUEL100LL, amount100ll);
-        double priceJetA = Goods.quoteFuel(icao, GoodsBean.GOODS_FUELJETA, amountJetA);
-
-        double total = price100ll + priceJetA;
-        if (account.getMoney() < total)
-        {
-            throw new DataError(account.getName() + " has insufficent funds for this purchase!");
-        }
-
-        Calendar calDeliveryDate = Calendar.getInstance();
-        if (daysOut == 0)
-        {
-            calDeliveryDate.add(Calendar.HOUR_OF_DAY, 4); //add 4 hours if same day
-        }
-        else
-        {
-            calDeliveryDate.add(Calendar.DATE, daysOut);
-        }
-
-        Timestamp deliveryTS = new Timestamp(calDeliveryDate.getTimeInMillis());
-
-        try
-        {
-            String daysMsg = " -- delivery ETA: " + deliveryDateFormatted(daysOut);
-            String comment1 = "", comment2 = "";
-
-            if (amount100ll > 0)
-            {
-                comment1 = "100LL:" + amount100ll + " Kg";
-            }
-
-            if (amountJetA > 0)
-            {
-                comment2 = " JetA:" + amountJetA + " Kg";
-            }
-
-            String qry = "UPDATE fbo SET bulk100llOrdered = ?, bulkJetAOrdered = ?, bulkFuelDeliveryDateTime = ? WHERE id = ?";
-            DALHelper.getInstance().ExecuteUpdate(qry, amount100ll, amountJetA, deliveryTS, fboID);
-
-            //Now deduct the $ from the account paying for the order - transfer amount to Bank of FSE, log each payment seperately
-            Banking.doPayBulkFuel(accountToPay, 0, (int) price100ll, location, comment1 + daysMsg, icao, GoodsBean.GOODS_FUEL100LL);
-            Banking.doPayBulkFuel(accountToPay, 0, (int) priceJetA, location, comment2 + daysMsg, icao, GoodsBean.GOODS_FUELJETA);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
     }
 
     public static int getFboJobCount(int id, String location)

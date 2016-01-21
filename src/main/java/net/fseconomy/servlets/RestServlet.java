@@ -201,7 +201,7 @@ public class RestServlet
                                   @PathParam("amount") final int amount,
                                   @PathParam("icao") final String icao)
     {
-        String price = Formatters.currency.format(Goods.quoteFuel(icao, fueltype, amount));
+        String price = Formatters.currency.format(Goods.quoteOrder(icao, fueltype, amount));
 
         return createSuccessResponse(200, 200, null, null, price);
     }

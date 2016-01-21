@@ -1377,7 +1377,7 @@ public class Aircraft implements Serializable
         return result;
     }
 
-    public static void fillModelData(RentedAircraftConfig rac, int modelid)
+    public static void fillRentedAircraftData(RentedAircraftConfig rac, AircraftBean ab)
     {
         ResultSet rs;
         try
@@ -1387,12 +1387,21 @@ public class Aircraft implements Serializable
                     "fcapCenter, fcapCenter2, fcapCenter3, fcapRightMain, " +
                     "fcapRightAux, fcapRightTip, fcapExt2, " +
                     "gph, maxWeight, emptyWeight, price, engines, fcaptotal " +
-                    "FROM models WHERE id=? ORDER BY make, model";
+                    "FROM models WHERE models.id=? ORDER BY make, model";
 
-            rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, modelid);
+            rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, ab.getModelId());
             if (rs.next())
             {
-                rac.updateRentedAircraftConfig(rs.getString(1) + " " + rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9), rs.getInt(10), rs.getInt(11), rs.getInt(12), rs.getInt(13), rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17), rs.getInt(18), rs.getInt(19), rs.getInt(20), rs.getInt(21), rs.getInt(22), (int) rs.getDouble(23));
+                int equipment = ab.getEquipment();
+                boolean vfr = true;
+                boolean ifr = ((equipment & ModelBean.EQUIPMENT_IFR_MASK) != 0) ? true : false;
+                boolean ap = ((equipment & ModelBean.EQUIPMENT_AP_MASK) != 0) ? true : false;
+                boolean gps = ((equipment & ModelBean.EQUIPMENT_GPS_MASK) != 0) ? true : false;
+
+                rac.updateRentedAircraftConfig(rs.getString(1) + " " + rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getInt(5),
+                        rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9), rs.getInt(10), rs.getInt(11), rs.getInt(12),
+                        rs.getInt(13), rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17), rs.getInt(18), rs.getInt(19),
+                        rs.getInt(20), rs.getInt(21), rs.getInt(22), (int) rs.getDouble(23), vfr, ifr, ap, gps);
                 rac.updateCalculatedFields(Goods.currFuelPrice, Goods.currFuelPrice * Goods.currJetAMultiplier);
             }
         }

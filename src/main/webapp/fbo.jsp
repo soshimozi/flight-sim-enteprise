@@ -342,7 +342,8 @@
                 <td class="numeric"><%= buildingmaterials != null ? buildingmaterials.getAmount() : "" %></td>
                 <td>
                     <a class="link" href="<%= response.encodeURL("editfbo.jsp?id=" + fbo.getId()) %>">Edit</a>
-                    |<a class="link" href="<%= response.encodeURL("buyBulkFuel.jsp?id=" + fbo.getId()) %>"><%=Fbos.doesBulkFuelRequestExist(fbo.getId()) ? " Order Pending ":" Order Bulk Fuel " %></a>
+					|<a class="link" href="<%= response.encodeURL("buybulksupplies.jsp?id=" + fbo.getId()) %>"><%=Fbos.doesBulkGoodsRequestExist(fbo.getId(), Fbos.FBO_ORDER_FUEL) ? " Supplies Pending ":" Order Supplies " %></a>
+                    |<a class="link" href="<%= response.encodeURL("buybulkfuel.jsp?id=" + fbo.getId()) %>"><%=Fbos.doesBulkGoodsRequestExist(fbo.getId(), Fbos.FBO_ORDER_FUEL) ? " Fuel Pending ":" Order Fuel " %></a>
 <%		
 		String paymentUrl;
         if (account.isGroup())

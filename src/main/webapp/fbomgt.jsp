@@ -288,8 +288,8 @@
 	<td class="numeric"><%= jeta != null ? (jeta.getSaleFlag() == 1 | jeta.getSaleFlag() == 3 ?  Formatters.currency.format(jeta.getPriceSell()) : "<span style=\'color: gray;\'><small>NFS</small></span>"): "" %></td>
 
 	<td>
-		<a class="link" href="<%= response.encodeURL("editfbo.jsp?id=" + fbo.getId()) %>">Edit FBO</a>
-		<a class="link" href="<%= response.encodeURL("buyBulkFuel.jsp?id=" + fbo.getId()) %>"><%=Fbos.doesBulkFuelRequestExist(fbo.getId()) ? " Order Pending ":" Order Fuel " %></a>
+		|<a class="link" href="<%= response.encodeURL("buybulksupplies.jsp?id=" + fbo.getId()) %>"><%=Fbos.doesBulkGoodsRequestExist(fbo.getId(), Fbos.FBO_ORDER_SUPPLIES) ? " Supplies Pending ":" Order Supplies " %></a>
+		<a class="link" href="<%= response.encodeURL("buybulkfuel.jsp?id=" + fbo.getId()) %>"><%=Fbos.doesBulkGoodsRequestExist(fbo.getId(), Fbos.FBO_ORDER_FUEL) ? " Fuel Pending ":" Order Fuel " %></a>
 	</td>
 	</tr>
 <%

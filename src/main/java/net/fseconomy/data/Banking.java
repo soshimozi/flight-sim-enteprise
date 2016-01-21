@@ -1,7 +1,11 @@
 package net.fseconomy.data;
 
+import net.fseconomy.beans.GoodsBean;
 import net.fseconomy.beans.PaymentBean;
 import net.fseconomy.beans.UserBean;
+import net.fseconomy.data.DALHelper;
+import net.fseconomy.data.DataError;
+import net.fseconomy.data.Money;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
 
@@ -186,7 +190,7 @@ public class Banking implements Serializable
             String sValue = Formatters.twoDecimals.format(amount);
 
             String qry = "UPDATE accounts SET bank = ROUND(bank + " + sValue + ", 2) WHERE id = " + userId + ";" +
-                         "UPDATE accounts SET money = ROUND(money - " + sValue + ", 2) WHERE id =  " + userId + ";";
+                    "UPDATE accounts SET money = ROUND(money - " + sValue + ", 2) WHERE id =  " + userId + ";";
             DALHelper.getInstance().ExecuteBatchUpdate(qry);
         }
         catch (SQLException e)
@@ -202,7 +206,7 @@ public class Banking implements Serializable
             String sValue = Formatters.twoDecimals.format(amount);
 
             String qry = "UPDATE accounts SET bank = ROUND(bank - " + sValue + ", 2) WHERE id = " + userId + ";" +
-                         "UPDATE accounts SET money = ROUND(money + " + sValue + ", 2) WHERE id =  " + userId + ";";
+                    "UPDATE accounts SET money = ROUND(money + " + sValue + ", 2) WHERE id =  " + userId + ";";
             DALHelper.getInstance().ExecuteBatchUpdate(qry);
 
         }
@@ -224,14 +228,30 @@ public class Banking implements Serializable
         doPayment(user, group, value, PaymentBean.GROUP_PAYMENT, 0, -1, "", 0, comment, false);
     }
 
-    public static void doPayBulkFuel(int user, int group, float value, int fbo, String comment, String icao, int type)
+    public static void doPayBulkGoods(int user, int group, float value, int fbo, String comment, String icao, int type)
     {
-        doPayment(user, group, value, (type == 3) ? PaymentBean.SALE_GOODS_FUEL : PaymentBean.SALE_GOODS_JETA, 0, fbo, icao, 0, comment, false);
+        short paytype = 0;
+        if(type == GoodsBean.GOODS_FUEL100LL)
+            paytype = PaymentBean.SALE_GOODS_FUEL;
+        if(type == GoodsBean.GOODS_FUELJETA)
+            paytype = PaymentBean.SALE_GOODS_JETA;
+        if(type == GoodsBean.GOODS_SUPPLIES)
+            paytype = PaymentBean.SALE_GOODS_SUPPLIES;
+
+        doPayment(user, group, value, paytype, 0, fbo, icao, 0, comment, false);
     }
 
-    public static void doPayBulkFuelDelivered(int user, int group, float value, int fbo, String comment, String icao)
+    public static void doPayBulkGoodsDelivered(int user, int group, float value, int fbo, String comment, String icao, int type)
     {
-        doPayment(user, group, value, PaymentBean.BULK_FUEL, 0, fbo, icao, 0, comment, false);
+        short paytype = 0;
+        if(type == GoodsBean.GOODS_FUEL100LL)
+            paytype = PaymentBean.BULK_FUEL;
+        if(type == GoodsBean.GOODS_FUELJETA)
+            paytype = PaymentBean.BULK_FUEL;
+        if(type == GoodsBean.GOODS_SUPPLIES)
+            paytype = PaymentBean.BULK_SUPPLIES;
+
+        doPayment(user, group, value, paytype, 0, fbo, icao, 0, comment, false);
     }
 
     /**
@@ -310,12 +330,13 @@ public class Banking implements Serializable
         if (amount.getAsDouble() == 0 &&
                 reason != PaymentBean.FBO_SALE &&
                 reason != PaymentBean.AIRCRAFT_SALE &&
-                reason != PaymentBean.AIRCRAFT_LEASE &&    //Added by Airboss 5/8/11
+                reason != PaymentBean.AIRCRAFT_LEASE &&
                 reason != PaymentBean.TRANSFER_GOODS_BUILDING_MATERIALS &&
                 reason != PaymentBean.TRANSFER_GOODS_FUEL &&
                 reason != PaymentBean.TRANSFER_GOODS_JETA &&
                 reason != PaymentBean.TRANSFER_GOODS_SUPPLIES &&
-                reason != PaymentBean.BULK_FUEL)    //added by gurka bulk fuel delivery transfers
+                reason != PaymentBean.BULK_FUEL&&
+                reason != PaymentBean.BULK_SUPPLIES)
         {
             return true;
         }

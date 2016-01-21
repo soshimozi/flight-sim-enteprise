@@ -60,8 +60,9 @@ public class PaymentBean implements Serializable
 	public static final short AIRCRAFT_LEASE = 28; //Added Airboss 5/7/11
 	public static final short BULK_FUEL = 29;
     public static final short TRANSFER_GROUP = 30;
-	
-	public static final short MAX_REASON = 30;
+	public static final short BULK_SUPPLIES = 31;
+
+	public static final short MAX_REASON = 31;
 	
 	long id;
 	Timestamp time;
@@ -148,6 +149,7 @@ public class PaymentBean implements Serializable
 			case AIRCRAFT_SHIPPING: return "Aircraft Shipment";
 			case BULK_FUEL: return "Fuel Delivered";
             case TRANSFER_GROUP: return "Group Transfer";
+			case BULK_SUPPLIES: return "Supplies Delivered";
 			default: return "Unknown";
 		}
 	}

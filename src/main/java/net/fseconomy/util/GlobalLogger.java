@@ -4,12 +4,17 @@ import org.slf4j.LoggerFactory;
 
 public class GlobalLogger
 {
+    static final String AUTHENTICATION_LOG = "Authentication";
     static final String APPLICATION_LOG = "FSEconomy";
     static final String DEBUG_LOG = "FSE-Debug";
     static final String JSP_LOG = "FSE-Jsp";
     static final String FLIGHT_LOG = "FSE-Flight";
     static final String GROUPAUDIT_LOG = "Group-Audit";
     static final String EXPLOITAUDIT_LOG = "Exploit-Audit";
+
+    public static void logAuthenticationLog( String message, Class source ) {
+        LoggerFactory.getLogger(source).info("[" + AUTHENTICATION_LOG + "]" + message);
+    }
 
     public static void logApplicationLog( String message, Class source ) {
         LoggerFactory.getLogger(source).info("[" + APPLICATION_LOG + "]" + message);

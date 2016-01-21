@@ -75,11 +75,20 @@ public class CommodityBean implements Serializable
 		
 		return price * (1-discount/100.0) * (1-overstockDiscount/100.0);
 	}
-	
-	// User acquires goods for money
+
 	public double getKgSalePrice(int amount, int airportSize, double fuelPrice, int overstock, double JetAPrice)
 	{
+		return getKgSalePrice(amount, airportSize, fuelPrice, overstock, JetAPrice, true);
+	}
+
+	// User acquires goods for money
+	public double getKgSalePrice(int amount, int airportSize, double fuelPrice, int overstock, double JetAPrice, boolean isDiscounted)
+	{
 		double price = getWeightedPrice(airportSize, fuelPrice, overstock, JetAPrice);
+
+		if(!isDiscounted)
+			return price;
+
 		double discount = amount/(double)maxDiscountAmount;
 
 		if (discount > 1)

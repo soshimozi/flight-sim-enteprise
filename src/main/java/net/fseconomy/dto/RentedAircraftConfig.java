@@ -28,6 +28,11 @@ public class RentedAircraftConfig
     public int BasePrice;
     public int TotalFuel;
     public int PayloadNoFuel;
+    public boolean VFR;
+    public boolean IFR;
+    public boolean AP;
+    public boolean GPS;
+
     public double EstEnduranceNM;
     public double EstEnduranceHrs;
     public double EstCostPerHr;
@@ -49,7 +54,7 @@ public class RentedAircraftConfig
         Registration = registration;
     }
 
-    public void updateRentedAircraftConfig(String makemodel, int crew, int fueltype, int seats, int cruisespeed, int fcapExt1, int fcapLeftTip, int fcapLeftAux, int fcapLeftMain, int fcapCenter, int fcapCenter2, int fcapCenter3, int fcapRightMain, int fcapRightAux, int fcapRightTip, int fcapExt2, int gph, int maxWeight, int emptyWeight, int price, int engines, int fcaptotal)
+    public void updateRentedAircraftConfig(String makemodel, int crew, int fueltype, int seats, int cruisespeed, int fcapExt1, int fcapLeftTip, int fcapLeftAux, int fcapLeftMain, int fcapCenter, int fcapCenter2, int fcapCenter3, int fcapRightMain, int fcapRightAux, int fcapRightTip, int fcapExt2, int gph, int maxWeight, int emptyWeight, int price, int engines, int fcaptotal, boolean vfr, boolean ifr, boolean ap, boolean gps)
     {
         MakeModel = makemodel;
         Seats = seats;
@@ -73,6 +78,10 @@ public class RentedAircraftConfig
         BasePrice = price;
         Engines = engines;
         TotalFuel = fcaptotal;
+        VFR = vfr;
+        IFR = ifr;
+        AP = ap;
+        GPS = gps;
     }
 
 }

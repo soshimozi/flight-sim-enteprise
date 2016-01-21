@@ -249,7 +249,10 @@ public class UserCtl extends HttpServlet
                         doResetBanList(req);
                         break;
                     case "confirmBulkFuel":
-                        doBulkFuelPurchase(req);
+                        doBulkGoodsPurchase(req, Fbos.FBO_ORDER_FUEL);
+                        break;
+                    case "confirmBulkSupplies":
+                        doBulkGoodsPurchase(req, Fbos.FBO_ORDER_SUPPLIES);
                         break;
                     case "updateXPlaneMD5":
                         doUpdateXPlaneMD5(req);
@@ -2311,17 +2314,29 @@ public class UserCtl extends HttpServlet
 		req.setAttribute("message", "Completed - Adjusted " + goods + " by " + amount + "kg to " + ownername + "'s inventory @ " + location );
 	}
 	
-	void doBulkFuelPurchase(HttpServletRequest req) throws DataError
+	void doBulkGoodsPurchase(HttpServletRequest req, int order) throws DataError
 	{
+        int amount100ll = 0;
+        int amountJetA = 0;
+        int amount = 0;
+
+        if(order == Fbos.FBO_ORDER_FUEL)
+        {
+            amount100ll = Integer.parseInt(req.getParameter("amount100ll"));
+            amountJetA = Integer.parseInt(req.getParameter("amountJetA"));
+        }
+        else //(order == Fbos.FBO_ORDER_SUPPLIES)
+        {
+            amount = Integer.parseInt(req.getParameter("amount"));
+        }
+
 		int fboID = Integer.parseInt(req.getParameter("fboID"));			
-		int amount100ll = Integer.parseInt(req.getParameter("amount100ll"));
-		int amountJetA = Integer.parseInt(req.getParameter("amountJetA"));
 		int daysOut = Integer.parseInt(req.getParameter("daysOut"));
 		int accountToPay = Integer.parseInt(req.getParameter("accountToPay"));
 		int location = Integer.parseInt(req.getParameter("location"));
 		String icao = req.getParameter("icao");
 		
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		Fbos.registerBulkFuelOrder(user, fboID, amount100ll, amountJetA, daysOut, accountToPay, location, icao);
+		Fbos.registerBulkGoodsOrder(user, fboID, order, amount100ll, amountJetA, amount, daysOut, accountToPay, location, icao);
 	}
 }

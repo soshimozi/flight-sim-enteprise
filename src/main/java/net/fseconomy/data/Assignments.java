@@ -359,11 +359,11 @@ public class Assignments implements Serializable
             //Do our checks and rent the aircraft
             if (aircraftId > 0)
             {
-                //No jobs in the loading area
-                qry = "SELECT (count(*) > 0) AS found FROM assignments WHERE userlock = ? AND active <> 2";
+                //No jobs in the loading or holding area
+                qry = "SELECT (count(*) > 0) AS found FROM assignments WHERE userlock = ?  AND aircraft IS NULL";
                 boolean noLoadAreaJobs = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user.getId());
                 if (noLoadAreaJobs)
-                    throw new DataError("Cannot have any jobs in the Loading Area when trying to select an All-In job.");
+                    throw new DataError("Cannot have any jobs in the Loading or Holding Area when trying to select an All-In job.");
 
                 //existing all-in jobs in queue for user
                 qry = "SELECT (count(*) > 0) AS found FROM assignments WHERE userLock = ? AND aircraft IS NOT NULL";

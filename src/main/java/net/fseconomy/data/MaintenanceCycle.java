@@ -172,6 +172,7 @@ public class MaintenanceCycle implements Runnable
 	    processFboStatus();
 		processFboRenters();
 		processBulkFuelOrders();
+		processSupplyOrders();
 		
 		//TODO: comment out for test server for faster cycle times
 		processFboAssignments(); //green assignments
@@ -1552,10 +1553,10 @@ public class MaintenanceCycle implements Runnable
 				int amountJetA = rs.getInt("bulkJetAOrdered");					
 
 				updateFboFuelRecord(amount100ll, amountJetA, icao, owner);
-				Fbos.resetBulkFuelOrder(id);
+				Fbos.resetBulkGoodsOrder(id, Fbos.FBO_ORDER_FUEL);
 
 				//log the delivery as a $0 transaction
-				Banking.doPayBulkFuelDelivered(owner, 0, 0, id, "Delivery report --  100LL " + amount100ll + " Kg -- JetA " + amountJetA + " Kg", icao);
+				Banking.doPayBulkGoodsDelivered(owner, 0, 0, id, "Delivery report --  100LL " + amount100ll + " Kg -- JetA " + amountJetA + " Kg", icao, GoodsBean.GOODS_FUEL100LL);
 			}
 		}
 		catch (SQLException e ) 
@@ -1571,12 +1572,12 @@ public class MaintenanceCycle implements Runnable
 		
 		String qry = ""; 
 		
-		if(amount100ll > 0 && doesFuelRecordExist(GoodsBean.GOODS_FUEL100LL, icao, owner))
+		if(amount100ll > 0 && doesGoodsRecordExist(GoodsBean.GOODS_FUEL100LL, icao, owner))
 			qry = "update goods set amount=amount + " + amount100ll + " where type = " + GoodsBean.GOODS_FUEL100LL + " AND location = '" + icao + "' AND owner = " + owner+ ";";
 		else if(amount100ll > 0)
 			qry = "insert into goods(amount, type, location, owner) values(" + amount100ll + ", " + GoodsBean.GOODS_FUEL100LL + ", '" + icao + "', " + owner + ");";
 		
-		if(amountJetA > 0 && doesFuelRecordExist(GoodsBean.GOODS_FUELJETA, icao, owner))
+		if(amountJetA > 0 && doesGoodsRecordExist(GoodsBean.GOODS_FUELJETA, icao, owner))
 			qry += "update goods set amount=amount + " + amountJetA + " where type = " + GoodsBean.GOODS_FUELJETA + " AND location = '" + icao + "' AND owner = " + owner + ";";
 		else if(amountJetA > 0)
 			qry += "insert into goods(amount, type, location, owner) values(" + amountJetA + ", " + GoodsBean.GOODS_FUELJETA + ", '" + icao + "', " + owner + ");";
@@ -1584,12 +1585,56 @@ public class MaintenanceCycle implements Runnable
 		DALHelper.getInstance().ExecuteBatchUpdate(qry);			
 	}
 	
-	boolean doesFuelRecordExist(int type, String icao, int owner) throws SQLException
+	boolean doesGoodsRecordExist(int type, String icao, int owner) throws SQLException
 	{
 		String qry = "SELECT (count(type) > 0) as found FROM goods where type = ? AND location = ? AND owner = ?";
 		return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), type, icao, owner);
 	}
-	
+
+	void processSupplyOrders()
+	{
+		updateStatus("Doing Bulk Supply orders");
+
+		try
+		{
+			String qry = "select id, owner, location, bulkSuppliesOrdered from fbo where bulkSupplyOrderTimeStamp IS NOT NULL AND bulkSupplyDeliveryDateTime < now()";
+			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				int id = rs.getInt("id");
+				int owner = rs.getInt("owner");
+				String icao = rs.getString("location");
+				int amount = rs.getInt("bulkSuppliesOrdered");
+
+				updateFboSupplyRecord(amount, icao, owner);
+				Fbos.resetBulkGoodsOrder(id, Fbos.FBO_ORDER_SUPPLIES);
+
+				//log the delivery as a $0 transaction
+				Banking.doPayBulkGoodsDelivered(owner, 0, 0, id, "Delivery report --  Supplies " + amount + " Kg", icao, GoodsBean.GOODS_SUPPLIES);
+			}
+		}
+		catch (SQLException e )
+		{
+			e.printStackTrace();
+		}
+	}
+
+	void updateFboSupplyRecord(int amount, String icao, int owner) throws SQLException
+	{
+		if(amount <= 0)
+			return;
+
+		String qry = "";
+
+		if(amount > 0 && doesGoodsRecordExist(GoodsBean.GOODS_SUPPLIES, icao, owner))
+			qry = "update goods set amount=amount + " + amount + " where type = " + GoodsBean.GOODS_SUPPLIES + " AND location = '" + icao + "' AND owner = " + owner+ ";";
+		else if(amount > 0)
+			qry = "insert into goods(amount, type, location, owner) values(" + amount + ", " + GoodsBean.GOODS_SUPPLIES + ", '" + icao + "', " + owner + ");";
+
+		DALHelper.getInstance().ExecuteBatchUpdate(qry);
+	}
+
+
 	/**
 	 * This method checks for aircraft with shipping states of 1 or 3, for processing
 	 * State 1 is disassembly and upon completion creates a new assignment, and changes

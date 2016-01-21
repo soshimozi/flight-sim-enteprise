@@ -93,7 +93,7 @@
 
 <div id="wrapper">
 <%		
-	if (Fbos.doesBulkFuelRequestExist(Integer.parseInt(fboID)) )
+	if (Fbos.doesBulkGoodsRequestExist(fboAccount.getId(), Fbos.FBO_ORDER_FUEL) )
 	{
 %>
 	<div class="form" style="width: 500px">
@@ -113,7 +113,7 @@
 	{
 %>
 	<div class="form" style="width: 500px">
-		<form method="post" action="buyBulkFuelConfirm.jsp"  onsubmit="return checkForm()">
+		<form method="post" action="buybulkfuelconfirm.jsp" onsubmit="return checkForm()">
 			<div>
 				<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
 			</div>

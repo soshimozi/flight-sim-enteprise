@@ -26,7 +26,7 @@
 	double dAmountJetA = Integer.parseInt(amountJetA) / Constants.GALLONS_TO_KG;
 	
 	String fboID = request.getParameter("id");
-	int days = Fbos.calculateShippingDay();
+	int days = Fbos.calculateShippingDay(GoodsBean.GOODS_ORDER_FUEL_MIN, GoodsBean.GOODS_ORDER_FUEL_MAX);
 	
 	//check if enough v$ exists to pay for the request
 	double price=0;
@@ -36,10 +36,10 @@
 	UserBean account = Accounts.getAccountById(fboAccount.getOwner());
 
 	if (Integer.parseInt(amount100ll) > 0)
-		price = Goods.quoteFuel(fboAccount.getLocation(), GoodsBean.GOODS_FUEL100LL, Integer.parseInt(amount100ll));
+		price = Goods.quoteOrder(fboAccount.getLocation(), GoodsBean.GOODS_FUEL100LL, Integer.parseInt(amount100ll));
 	
 	if (Integer.parseInt(amountJetA) > 0)
-		price += Goods.quoteFuel(fboAccount.getLocation(), GoodsBean.GOODS_FUELJETA, Integer.parseInt(amountJetA));
+		price += Goods.quoteOrder(fboAccount.getLocation(), GoodsBean.GOODS_FUELJETA, Integer.parseInt(amountJetA));
 %>
 
 <!DOCTYPE html>
@@ -83,13 +83,13 @@
 	</div> 
 <%
 		//reset the flag so user is not penalized for not having enough on hand funds and can make another request
-		Fbos.resetBulkFuelOrder(Integer.parseInt(fboID));
+		Fbos.resetBulkGoodsOrder(Integer.parseInt(fboID), Fbos.FBO_ORDER_FUEL);
 		
 		return;				
 	}
 	else 
 	{
-		if (Fbos.doesBulkFuelRequestExist(Integer.parseInt(fboID)) )
+		if (Fbos.doesBulkGoodsRequestExist(fbo.getId(), Fbos.FBO_ORDER_FUEL) )
 		{ 
 %>
 	<div class="form" style="width: 500px">
@@ -108,7 +108,7 @@
 		else 
 		{		
 		//we have enough money - proceed - log this request
-			Fbos.logBulkFuelRequest(Integer.parseInt(fboID));
+			Fbos.logBulkGoodsRequest(Integer.parseInt(fboID), Fbos.FBO_ORDER_FUEL);
 %>
 	<div class="form" style="width: 600px">
 		<h3>Bulk Order Confirmation</h3>

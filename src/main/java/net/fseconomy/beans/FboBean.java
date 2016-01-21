@@ -48,7 +48,10 @@ public class FboBean implements Serializable
 	//fuel delivery delay changes - gurka
 	Date bulkFuelOrderTimeStamp=null,  bulkFuelDeliveryDateTime=null;
 	int bulk100llOrdered, bulkJetAOrdered;
-	
+
+	Date bulkSupplyOrderTimeStamp=null,  bulkSupplyDeliveryDateTime=null;
+	int bulkSuppliesOrdered;
+
 	
 	public static final int FBO_REPAIRSHOP			= 1;
 	public static final int FBO_RESTAURANT			= 2;
@@ -100,6 +103,9 @@ public class FboBean implements Serializable
 		bulk100llOrdered = rs.getInt("bulk100llOrdered");
 		bulkJetAOrdered = rs.getInt("bulkJetAOrdered");
 		bulkFuelDeliveryDateTime = rs.getTimestamp("bulkFuelDeliveryDateTime");
+		bulkSupplyOrderTimeStamp = rs.getTimestamp("bulkSupplyOrderTimeStamp");
+		bulkSuppliesOrdered = rs.getInt("bulkSuppliesOrdered");
+		bulkSupplyDeliveryDateTime = rs.getTimestamp("bulkSupplyDeliveryDateTime");
 	}
 	
 	public void writeBean(ResultSet rs) throws SQLException
@@ -122,8 +128,15 @@ public class FboBean implements Serializable
 		
 		if (bulkFuelDeliveryDateTime != null)
 			rs.updateTimestamp("bulkFuelDeliveryDateTime", new Timestamp(bulkFuelDeliveryDateTime.getTime()));
-		
-		//rs.updateBoolean("publicLogs", publicLogs);
+
+		if (bulkSupplyOrderTimeStamp != null)
+			rs.updateTimestamp("bulkSupplyOrderTimeStamp", new Timestamp(bulkSupplyOrderTimeStamp.getTime()));
+
+		rs.updateInt("bulkSuppliesOrdered", bulkSuppliesOrdered);
+
+		if (bulkSupplyDeliveryDateTime != null)
+			rs.updateTimestamp("bulkSupplyDeliveryDateTime", new Timestamp(bulkSupplyDeliveryDateTime.getTime()));
+
 	}
 	
 	public boolean updateAllowed(UserBean who)
@@ -326,5 +339,8 @@ public class FboBean implements Serializable
 	public int getBulk100llOrdered(){ return bulk100llOrdered; }	
 	public int getBulkJetAOrdered()	{ return bulkJetAOrdered; }	
 	public Date getBulkFuelDeliveryDateTime(){	return bulkFuelDeliveryDateTime; }
-	
+
+	public Date getBulkSupplyOrderTimeStamp()	{ return bulkSupplyOrderTimeStamp; }
+	public int getBulkSuppliesOrdered(){ return bulkSuppliesOrdered; }
+	public Date getBulkSupplyDeliveryDateTime(){	return bulkSupplyDeliveryDateTime; }
 }

@@ -40,8 +40,14 @@ public class GoodsBean implements Serializable
 	public static final int CONSTRUCT_FBO = 10000;				// 10.000 kg needed to construct an FBO
 	public static final int CONSTRUCT_REPAIRSHOP = 2000;		// 2.000 kg needed to construct repair shop
 	public static final int CONSTRUCT_PASSENGERTERMINAL = 2000;
-	public static final int AMOUNT_FBO_SUPPLIES_PER_DAY = 10;  // 10 kg supplies per day for an FBO	
-	
+	public static final int AMOUNT_FBO_SUPPLIES_PER_DAY = 10;  // 10 kg supplies per day for an FBO
+
+	public static final int GOODS_ORDER_FUEL_MIN = 0;
+	public static final int GOODS_ORDER_FUEL_MAX = 3;
+	public static final int GOODS_ORDER_SUPPLIES_MIN = 5;
+	public static final int GOODS_ORDER_SUPPLIES_MAX = 10;
+	public static final double GOODS_ORDER_SUPPLIES_MULTIPLIER = 1.5d;
+
 	String location;
 	String commodity;
 	String ownerName;
