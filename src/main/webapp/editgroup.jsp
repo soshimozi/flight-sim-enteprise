@@ -42,10 +42,14 @@
         String grpName = request.getParameter("name");
         grpName = Helpers.truncate(Converters.clearHtml(grpName.trim()), 45);
         if(   grpName == null
-           && grpName.equals("")
-           && grpName.length() < 4)
+           || grpName.equals("")
+           || grpName.length() < 4)
         {
             error = "Invalid Group Name. Must be 4 characters or more, not start or end with whitespace, no HTML";
+        }
+        else if(!grpName.contains(group.getName()) && !Accounts.accountNameIsUnique(grpName))
+        {
+            error = "Group name is not unique!";
         }
         else
         {
