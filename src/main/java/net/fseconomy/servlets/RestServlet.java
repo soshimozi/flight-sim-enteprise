@@ -1,6 +1,8 @@
 package net.fseconomy.servlets;
 
+import net.fseconomy.beans.GoodsBean;
 import net.fseconomy.data.Data;
+import net.fseconomy.data.Fbos;
 import net.fseconomy.data.Goods;
 import net.fseconomy.data.Stats;
 import net.fseconomy.dto.LatLonCount;
@@ -201,7 +203,11 @@ public class RestServlet
                                   @PathParam("amount") final int amount,
                                   @PathParam("icao") final String icao)
     {
-        String price = Formatters.currency.format(Goods.quoteOrder(icao, fueltype, amount));
+        String price;
+        if(fueltype == GoodsBean.GOODS_SUPPLIES)
+            price = Formatters.currency.format(Goods.quoteOrder(icao, fueltype, amount, false));
+        else
+            price = Formatters.currency.format(Goods.quoteOrder(icao, fueltype, amount, true));
 
         return createSuccessResponse(200, 200, null, null, price);
     }

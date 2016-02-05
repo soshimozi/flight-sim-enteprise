@@ -325,7 +325,7 @@ public class Goods implements Serializable
         return 0.0;
     }
 
-    public static double quoteOrder(String location, int type, int amount)
+    public static double quoteOrder(String location, int type, int amount, boolean isDiscounted)
     {
         try
         {
@@ -335,7 +335,7 @@ public class Goods implements Serializable
             double mult = getJetaMultiplier();
             double JetAPrice = fuelPrice * mult;
 
-            double kgPrice = commodities[type].getKgSalePrice(amount, airportSize, fuelPrice, overstock, JetAPrice, false);
+            double kgPrice = commodities[type].getKgSalePrice(amount, airportSize, fuelPrice, overstock, JetAPrice, isDiscounted);
 
             if(type == GoodsBean.GOODS_SUPPLIES)
                 return kgPrice * amount * GoodsBean.GOODS_ORDER_SUPPLIES_MULTIPLIER;

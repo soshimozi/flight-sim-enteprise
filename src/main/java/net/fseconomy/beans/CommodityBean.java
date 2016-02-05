@@ -50,22 +50,22 @@ public class CommodityBean implements Serializable
 		if (id == 4)
 			price = (JetAPrice / Constants.GALLONS_TO_KG);
 
-		double sizePart = Math.log(airportSize)/9.0;
-		sizePart = (sizePart - 1) * sizeFactor + 1;		
+		//double sizePart = Math.log(airportSize)/9.0;
+		//sizePart = (sizePart - 1) * sizeFactor + 1;
 
-		double fuelPart = 0.75+ Math.log(fuelPrice)/7.0;
-		fuelPart = (fuelPart - 1) * fuelFactor + 1;
+		//double fuelPart = 0.75+ Math.log(fuelPrice)/7.0;
+		//fuelPart = (fuelPart - 1) * fuelFactor + 1;
 
-		double overstockPart = overstock / (double)maxOverstockDiscountAmount;
+		//double overstockPart = overstock / (double)maxOverstockDiscountAmount;
 
-		if (overstockPart > 1)
-			overstockPart = 1;
-		else if (overstockPart < -1)
-			overstockPart = -1;
+		//if (overstockPart > 1)
+		//	overstockPart = 1;
+		//else if (overstockPart < -1)
+		//	overstockPart = -1;
 
-		overstockPart *= overstockDiscount;
+		//overstockPart *= overstockDiscount;
 		
-		return price * sizePart * fuelPart * (1-overstockPart/100.0);
+		return price; // * sizePart * fuelPart * (1-overstockPart/100.0);
 	}
 	
 	// User transfers goods to company for money

@@ -27,13 +27,10 @@
         int ibuyer = Integer.parseInt(request.getParameter("buyer"));
         int iseller = Integer.parseInt(request.getParameter("seller"));
         String icao = request.getParameter("icao");
-        String goods = request.getParameter("transferGoods");
-        if (goods == null)
-            goods = "no";
 
         try
         {
-            Fbos.transferFbo(fbo, user, ibuyer, iseller, icao, goods.equals("checkbox"));
+            Fbos.transferFbo(fbo, user, ibuyer, iseller, icao, false);
             String forwardpage = "fbo.jsp?id=" + sId;
 %>
         <jsp:forward page="<%=forwardpage%>" />
@@ -122,14 +119,10 @@ if (fbo.getId() > 0)
 
 	<br />
 	<br />
-	<strong>Transfer All Goods With FBO</strong>
-    <input name="transferGoods" type="checkbox" id="transferGoods" value="checkbox" checked="checked">
 	</p>
 	</div>
 	<div class="formgroup high">
-	<ul class="footer">
-		<li>If the goods checkmark is checked, all goods that belong to the seller at the FBO  will be transferred to the buyer.</li>
-	</ul>
+        <strong style="color: red;">All goods associated with this FBO will be transferred to the new owner. You should transfer any goods you desire to keep before submitting.</strong>
 	</div>
 	<div class="formgroup">
 		<input type="submit" class="button" value="Transfer FBO"/>

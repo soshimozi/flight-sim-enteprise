@@ -36,10 +36,10 @@
 	UserBean account = Accounts.getAccountById(fboAccount.getOwner());
 
 	if (Integer.parseInt(amount100ll) > 0)
-		price = Goods.quoteOrder(fboAccount.getLocation(), GoodsBean.GOODS_FUEL100LL, Integer.parseInt(amount100ll));
+		price = Goods.quoteOrder(fboAccount.getLocation(), GoodsBean.GOODS_FUEL100LL, Integer.parseInt(amount100ll), true);
 	
 	if (Integer.parseInt(amountJetA) > 0)
-		price += Goods.quoteOrder(fboAccount.getLocation(), GoodsBean.GOODS_FUELJETA, Integer.parseInt(amountJetA));
+		price += Goods.quoteOrder(fboAccount.getLocation(), GoodsBean.GOODS_FUELJETA, Integer.parseInt(amountJetA), true);
 %>
 
 <!DOCTYPE html>

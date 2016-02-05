@@ -844,14 +844,14 @@ public class Fbos implements Serializable
         double priceJetA = 0;
         if(order == FBO_ORDER_FUEL)
         {
-            price100ll = Goods.quoteOrder(icao, GoodsBean.GOODS_FUEL100LL, amount100ll);
-            priceJetA = Goods.quoteOrder(icao, GoodsBean.GOODS_FUELJETA, amountJetA);
+            price100ll = Goods.quoteOrder(icao, GoodsBean.GOODS_FUEL100LL, amount100ll, true);
+            priceJetA = Goods.quoteOrder(icao, GoodsBean.GOODS_FUELJETA, amountJetA, true);
 
             total = price100ll + priceJetA;
         }
         else
         {
-            total = Goods.quoteOrder(icao, GoodsBean.GOODS_SUPPLIES, amount);
+            total = Goods.quoteOrder(icao, GoodsBean.GOODS_SUPPLIES, amount, false);
         }
 
         if (account.getMoney() < total)
@@ -908,7 +908,7 @@ public class Fbos implements Serializable
     {
         Random randomGenerator = new Random();
         int randomInt;
-        randomInt = min + randomGenerator.nextInt(max);
+        randomInt = min + randomGenerator.nextInt(max-min);
 
         return randomInt;
     }

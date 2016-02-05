@@ -32,7 +32,7 @@
     UserBean account = Accounts.getAccountById(fboAccount.getOwner());
 
     if (Integer.parseInt(amount) > 0)
-        price = Goods.quoteOrder(fboAccount.getLocation(), GoodsBean.GOODS_SUPPLIES, Integer.parseInt(amount));
+        price = Goods.quoteOrder(fboAccount.getLocation(), GoodsBean.GOODS_SUPPLIES, Integer.parseInt(amount), false);
 %>
 
 <!DOCTYPE html>
@@ -85,7 +85,7 @@
     }
     else
     {
-        if (Fbos.doesBulkGoodsRequestExist(fboAccount.getId(), Fbos.FBO_ORDER_FUEL) )
+        if (Fbos.doesBulkGoodsRequestExist(fboAccount.getId(), Fbos.FBO_ORDER_SUPPLIES) )
         {
     %>
     <div class="form" style="width: 500px">

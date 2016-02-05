@@ -69,12 +69,12 @@
 				<div class="formgroup high">
 				  	<strong>Aircraft Registration:</strong> <%=aircraft.getRegistration()%><br><br>
 				  	<strong>Aircraft Make/Model:</strong> <%=aircraft.getMakeModel()%><br><br>
-				  	<strong>From:</strong> <%=owneraccount.getName()%><br><br>					  
-					<strong>To: </strong><br>
+				  	<strong>Current Owner:</strong> <%=owneraccount.getName()%><br><br>
+					<strong>New Owner: </strong><br>
 				  	<input type="text" id="buyername" name="buyername"/>
 				</div>
 				<div class="formgroup">
-					<input type="submit" class="button" value="Transfer Aircraft"/>
+					<input type="submit" class="button clickable" value="Complete Aircraft Transfer to New Owner"/>
 				</div>
 			</form>
 		</div>
