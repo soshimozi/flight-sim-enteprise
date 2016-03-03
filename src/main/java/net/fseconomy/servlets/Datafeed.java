@@ -1643,6 +1643,7 @@ public class Datafeed extends HttpServlet
 			csvoutput.appendHeaderItem("RExt2");
 			csvoutput.appendHeaderItem("Engines");
 			csvoutput.appendHeaderItem("EnginePrice");
+			csvoutput.appendHeaderItem("ModelId");
 		}
 		
 		//create an aircraft tag section for each config
@@ -1672,6 +1673,7 @@ public class Datafeed extends HttpServlet
                 csvoutput.append(anAircraft.fcapExt2);
                 csvoutput.append(anAircraft.engines);
                 csvoutput.appendMoney(anAircraft.enginePrice);
+				csvoutput.append(anAircraft.modelId);
                 csvoutput.newrow();
             }
             else
@@ -1699,6 +1701,7 @@ public class Datafeed extends HttpServlet
                 xmloutput.append("Ext2", anAircraft.fcapExt2);
                 xmloutput.append("Engines", anAircraft.engines);
                 xmloutput.appendMoney("EnginePrice", anAircraft.enginePrice);
+				xmloutput.append("ModelId", anAircraft.modelId);
                 xmloutput.append("</AircraftConfig>\n");
             }
         }

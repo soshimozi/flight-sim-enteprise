@@ -1427,7 +1427,7 @@ public class Aircraft implements Serializable
             rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, modelid);
             if (rs.next())
             {
-                aircraft = new AircraftConfig(rs.getString(1) + " " + rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9), rs.getInt(10), rs.getInt(11), rs.getInt(12), rs.getInt(13), rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17), rs.getInt(18), rs.getInt(19), rs.getInt(20), rs.getInt(21), rs.getInt(22), rs.getInt(23), rs.getBoolean(24), (int) rs.getDouble(25));
+                aircraft = new AircraftConfig(rs.getString(1) + " " + rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9), rs.getInt(10), rs.getInt(11), rs.getInt(12), rs.getInt(13), rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17), rs.getInt(18), rs.getInt(19), rs.getInt(20), rs.getInt(21), rs.getInt(22), rs.getInt(23), rs.getBoolean(24), (int) rs.getDouble(25), rs.getInt(26));
             }
         }
         catch (SQLException e)
@@ -1449,13 +1449,13 @@ public class Aircraft implements Serializable
                     "fcapExt1, fcapLeftTip, fcapLeftAux, fcapLeftMain, " +
                     "fcapCenter, fcapCenter2, fcapCenter3, fcapRightMain, " +
                     "fcapRightAux, fcapRightTip, fcapExt2, " +
-                    "gph, maxWeight, emptyWeight, price, engines, engineprice, canShip, fcaptotal " +
+                    "gph, maxWeight, emptyWeight, price, engines, engineprice, canShip, fcaptotal, id " +
                     "FROM models ORDER BY make, model";
 
             rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
             while (rs.next())
             {
-                AircraftConfig aircraft = new AircraftConfig(rs.getString(1) + " " + rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9), rs.getInt(10), rs.getInt(11), rs.getInt(12), rs.getInt(13), rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17), rs.getInt(18), rs.getInt(19), rs.getInt(20), rs.getInt(21), rs.getInt(22), rs.getInt(23), rs.getBoolean(24), (int) rs.getDouble(25));
+                AircraftConfig aircraft = new AircraftConfig(rs.getString(1) + " " + rs.getString(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getInt(8), rs.getInt(9), rs.getInt(10), rs.getInt(11), rs.getInt(12), rs.getInt(13), rs.getInt(14), rs.getInt(15), rs.getInt(16), rs.getInt(17), rs.getInt(18), rs.getInt(19), rs.getInt(20), rs.getInt(21), rs.getInt(22), rs.getInt(23), rs.getBoolean(24), (int) rs.getDouble(25), rs.getInt(26));
                 result.add(aircraft);
             }
         }

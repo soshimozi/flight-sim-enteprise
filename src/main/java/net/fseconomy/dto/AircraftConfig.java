@@ -5,10 +5,10 @@ package net.fseconomy.dto;
 public class AircraftConfig
 {
     public String makemodel;
-    public int seats,crew,fueltype,cruisespeed,fcapExt1,fcapLeftTip,fcapLeftAux,fcapLeftMain,fcapCenter,fcapCenter2,fcapCenter3,fcapRightMain,fcapRightAux,fcapRightTip,fcapExt2,gph,maxWeight,emptyWeight,price,engines,enginePrice,fcaptotal;
+    public int seats,crew,fueltype,cruisespeed,fcapExt1,fcapLeftTip,fcapLeftAux,fcapLeftMain,fcapCenter,fcapCenter2,fcapCenter3,fcapRightMain,fcapRightAux,fcapRightTip,fcapExt2,gph,maxWeight,emptyWeight,price,engines,enginePrice,fcaptotal,modelId;
     public boolean canShip;
 
-    public AircraftConfig(String makemodel, int crew, int fueltype, int seats, int cruisespeed, int fcapExt1, int fcapLeftTip, int fcapLeftAux, int fcapLeftMain, int fcapCenter, int fcapCenter2, int fcapCenter3, int fcapRightMain, int fcapRightAux, int fcapRightTip, int fcapExt2, int gph, int maxWeight, int emptyWeight, int price, int engines, int enginePrice, boolean canShip, int fcaptotal)
+    public AircraftConfig(String makemodel, int crew, int fueltype, int seats, int cruisespeed, int fcapExt1, int fcapLeftTip, int fcapLeftAux, int fcapLeftMain, int fcapCenter, int fcapCenter2, int fcapCenter3, int fcapRightMain, int fcapRightAux, int fcapRightTip, int fcapExt2, int gph, int maxWeight, int emptyWeight, int price, int engines, int enginePrice, boolean canShip, int fcaptotal, int modelId)
     {
         this.makemodel = makemodel;
         this.seats = seats;
@@ -34,6 +34,7 @@ public class AircraftConfig
         this.enginePrice = enginePrice;
         this.canShip = canShip;
         this.fcaptotal = fcaptotal;
+        this.modelId = modelId;
     }
 }
 

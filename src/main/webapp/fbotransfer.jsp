@@ -30,7 +30,7 @@
 
         try
         {
-            Fbos.transferFbo(fbo, user, ibuyer, iseller, icao, false);
+            Fbos.transferFbo(fbo, user, ibuyer, iseller, icao, true);
             String forwardpage = "fbo.jsp?id=" + sId;
 %>
         <jsp:forward page="<%=forwardpage%>" />
