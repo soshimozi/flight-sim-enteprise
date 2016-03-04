@@ -1421,7 +1421,7 @@ public class Aircraft implements Serializable
                     "fcapExt1, fcapLeftTip, fcapLeftAux, fcapLeftMain, " +
                     "fcapCenter, fcapCenter2, fcapCenter3, fcapRightMain, " +
                     "fcapRightAux, fcapRightTip, fcapExt2, " +
-                    "gph, maxWeight, emptyWeight, price, engines, engineprice, canShip, fcaptotal " +
+                    "gph, maxWeight, emptyWeight, price, engines, engineprice, canShip, fcaptotal, id " +
                     "FROM models WHERE id=? ORDER BY make, model";
 
             rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, modelid);
