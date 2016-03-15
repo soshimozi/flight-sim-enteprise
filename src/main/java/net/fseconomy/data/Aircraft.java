@@ -676,7 +676,7 @@ public class Aircraft implements Serializable
                     throw new DataError("Permission denied!");
 
                 //if non group aircraft, and rental type set to 0 and not owner then cancel
-                if(!isGroupAircraft && zeroRent && user.getId() != owner.getId())
+                if(!isGroupAircraft && zeroRent && (user.getId() != owner.getId() && owner.getId() != 0))
                     throw new DataError("Permission denied!");
             }
 
