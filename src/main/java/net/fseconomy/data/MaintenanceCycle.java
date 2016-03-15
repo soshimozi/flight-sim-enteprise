@@ -713,7 +713,7 @@ public class MaintenanceCycle implements Runnable
 
 				if (isAllIn)
 				{
-					String where = "";
+					String whatModels = "";
 
 					// check for seats and cruise speed filters on aircraft assignment for template
 					// if no filters are set for seats size filter, just add a condition to be bigger then the units specified in the job
@@ -722,16 +722,16 @@ public class MaintenanceCycle implements Runnable
 
 					if(isFilterByModel) //use specified models
 					{
-						where = filterModels;
+						whatModels = filterModels;
 					}
 					else if (seatsFrom != 0 && seatsTo != 0) //use to/from values
 					{	//filters set
-						where = "select t.id from (select id from models where  seats between " + seatsFrom + " and " + seatsTo + " and cruisespeed  between " + speedFrom + " and " + speedTo + ") as t";
+						whatModels = "select t.id from (select id from models where  seats between " + seatsFrom + " and " + seatsTo + " and cruisespeed  between " + speedFrom + " and " + speedTo + ") as t";
 					}
 					else //no filters set, use some base values to make sure an inappropriate plane is not assigned
 					{
 						if (units.equals("passengers"))
-							where = "select t.id from (select id from models where  seats >= " + targetAmount + ") as t";
+							whatModels = "select t.id from (select id from models where  seats >= " + targetAmount + ") as t";
 					}
 
 					double multipler = 0;
@@ -741,10 +741,14 @@ public class MaintenanceCycle implements Runnable
 					icaoSet1 = new HashSet<>();
 
 					qry = "SELECT * FROM aircraft, models WHERE  owner=0 AND location is not null AND userlock is null"
-					+ " AND aircraft.model=models.id"
-					+ " AND aircraft.model in (" + where + ")"
-					+ " and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + (targetAmount * multipler) + " < maxWeight"
-					+ " AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)";
+					+ " AND aircraft.model=models.id";
+
+					// Not needed if default and payload is KG, needs to be here for query performance if used
+					if(isFilterByModel || units.equals("passengers"))
+						qry += " AND aircraft.model in (" + whatModels + ")";
+
+					qry += " AND (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + (targetAmount * multipler) + " < maxWeight"
+						 + " AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)";
 
 					allInAircraft = Aircraft.getAircraftSQL(qry);
 
