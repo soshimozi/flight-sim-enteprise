@@ -79,6 +79,7 @@
 				<th>Distance</th>
 				<th># Active</th>
                 <th># Grp Locked</th>
+				<th>Review</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -117,6 +118,7 @@
 				</td>
 				<td><span title="Max=<%= statArray[MaintenanceCycle.ASSGN_MAX] %>, Min=<%= statArray[MaintenanceCycle.ASSGN_MIN] %>, Avg=<%= statArray[MaintenanceCycle.ASSGN_AVG] %>"><%= statArray[MaintenanceCycle.ASSGN_COUNT] %></span></td>
                 <td><%= statArray[MaintenanceCycle.ASSGN_GLOCKED] %></td>
+				<td><a href="/admin/templateassignments.jsp?id=<%=template.getId()%>">View</a></td>
 			</tr>
 <%
 	}
