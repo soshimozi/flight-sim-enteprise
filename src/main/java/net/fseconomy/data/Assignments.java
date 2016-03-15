@@ -149,6 +149,13 @@ public class Assignments implements Serializable
         return getAssignmentsSQL(sql);
     }
 
+    public static List<AssignmentBean> getAssignmentsByTemplateId(int id)
+    {
+        String sql = "SELECT * FROM assignments, aircraft WHERE aircraft is not null AND fromTemplate = " + id + " ORDER BY location, distance";
+
+        return getAssignmentsSQL(sql);
+    }
+
     public static AssignmentBean getAssignmentSQL(String qry)
     {
         try
