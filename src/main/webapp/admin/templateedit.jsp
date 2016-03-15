@@ -379,7 +379,7 @@
 						<input type="radio" name="filterByModels" id="r1" value="false" <%= !template.isFilterByModels() ? "checked" : "" %> /><label>Seats & Speeds</label>
 						<input type="radio" name="filterByModels" id="r2" value="true" <%= template.isFilterByModels() ? "checked" : "" %>/><label>Aircraft Models</label>
 					</div>
-					<table id="tableFilterParams" style="display: <%= template.isFilterByModels() ? "none" : "initial" %>">
+					<table id="tableFilterParams" style="display: <%= template.isFilterByModels() ? "none" : "initial" %>;">
 						<tr>
 							<td colspan="2">
 								<div style="font-size:10pt">Notes:
@@ -404,7 +404,7 @@
 								To: <input type="text" name="seatsTo" size="3" value="<%= template.getSeatsTo() %>" maxlength="3"/></td>
 						</tr>
 					</table>
-					<table id="tableFilterModels">
+					<table id="tableFilterModels" style="display: <%= template.isFilterByModels() ? "initial" : "none"%>;" >
 						<tr>
 							<td colspan="3">Select the aircraft model</td>
 						</tr>

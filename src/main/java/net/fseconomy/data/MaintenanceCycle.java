@@ -723,15 +723,20 @@ public class MaintenanceCycle implements Runnable
 					if(isFilterByModel) //use specified models
 					{
 						whatModels = filterModels;
+						if(whatModels == "")
+						{
+							GlobalLogger.logApplicationLog("Error: Template " + templateId + ", missing aircraft models!", MaintenanceCycle.class);
+							continue;
+						}
 					}
-					else if (seatsFrom != 0 && seatsTo != 0) //use to/from values
+					else if (seatsFrom != 0 && seatsTo != 0 && speedFrom !=  0 && speedTo != 0) //use to/from values
 					{	//filters set
 						whatModels = "select t.id from (select id from models where  seats between " + seatsFrom + " and " + seatsTo + " and cruisespeed  between " + speedFrom + " and " + speedTo + ") as t";
 					}
-					else //no filters set, use some base values to make sure an inappropriate plane is not assigned
+					else //no filters set, log template error
 					{
-						if (units.equals("passengers"))
-							whatModels = "select t.id from (select id from models where  seats >= " + targetAmount + ") as t";
+						GlobalLogger.logApplicationLog("Error: Template " + templateId + ", missing To/From values!", MaintenanceCycle.class);
+						continue;
 					}
 
 					double multipler = 0;
@@ -741,14 +746,10 @@ public class MaintenanceCycle implements Runnable
 					icaoSet1 = new HashSet<>();
 
 					qry = "SELECT * FROM aircraft, models WHERE  owner=0 AND location is not null AND userlock is null"
-					+ " AND aircraft.model=models.id";
-
-					// Not needed if default and payload is KG, needs to be here for query performance if used
-					if(isFilterByModel || units.equals("passengers"))
-						qry += " AND aircraft.model in (" + whatModels + ")";
-
-					qry += " AND (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + (targetAmount * multipler) + " < maxWeight"
-						 + " AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)";
+					+ " AND aircraft.model=models.id"
+					+ " AND aircraft.model in (" + whatModels + ")"
+					+ " AND (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + (targetAmount * multipler) + " < maxWeight"
+					+ " AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)";
 
 					allInAircraft = Aircraft.getAircraftSQL(qry);
 
@@ -941,6 +942,7 @@ public class MaintenanceCycle implements Runnable
 						
 						String fromIcao;
 						String toIcao;
+
 						if (isAllIn || Math.random() < 0.5) // never reverse an AllIn flight
 						{
 							fromIcao = icao;
