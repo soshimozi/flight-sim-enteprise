@@ -6,7 +6,10 @@ import net.fseconomy.dto.CloseAirport;
 
 import java.io.Serializable;
 import java.sql.*;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AirportBean implements Serializable
 {
@@ -32,11 +35,58 @@ public class AirportBean implements Serializable
 	public static final int SURFACETYPE_SNOW = 9;
 	public static final int SURFACETYPE_STEELMATS = 10;
 	public static final int SURFACETYPE_WATER = 11;
-	
+
+	public enum Surface {
+		ASPHALT (1, "Asphalt"),
+		CONCRETE (2, "Concrete"),
+		CORAL (3, "Coral"),
+		DIRT (4, "Dirt"),
+		GRASS (5, "Grass"),
+		GRAVEL (6, "Gravel"),
+		HELIPAD (7, "Helipad"),
+		OILTREATED (8, "Oil Treated"),
+		SNOW (9, "Snow"),
+		STEELMATS (10, "Steel Mats"),
+		WATER (11, "Water");
+
+		private static final Map<Integer, Surface> MAP = new HashMap<Integer, Surface>();
+		static {
+			for (Surface s : Surface.values()) {
+				MAP.put(s.getIndex(), s);
+			}
+		}
+
+		private int _index;
+		private String _name;
+		Surface(int index, String name) {
+			_index = index;
+			_name = name;
+		}
+
+		public int getIndex()
+		{
+			return _index;
+		}
+		public int getIndex(int type)
+		{
+			Surface s = MAP.get(type);
+			return s == null ? s.getIndex() : -1;
+		}
+		public String getName()
+		{
+			return _name;
+		}
+		public static Collection<Surface> getValues()
+		{
+			return MAP.values();
+		}
+	}
+
 	public boolean available;
 	String icao, country, city, state, name;
 	int elev, type, size;
-	int longestRwy, surfaceType;
+	int longestRwy;
+	Surface surfaceType;
 	double fuelPrice,landingFee,JetAPrice,JetAMult;
 	double lat, lon;
 	public List<CloseAirport> closestAirports = null;
@@ -348,31 +398,17 @@ public class AirportBean implements Serializable
 
 	public int getSurfaceType()
 	{
-		return surfaceType;
+		return surfaceType.getIndex();
 	}
 
 	public String getSurfaceTypeName()
 	{
-		switch (surfaceType)
-		{
-			case 1: return "Asphalt";
-			case 2: return "Concrete";
-			case 3: return "Coral";
-			case 4: return "Dirt";
-			case 5: return "Grass";
-			case 6: return "Gravel";
-			case 7: return "Helipad";
-			case 8: return "Oil Treated";
-			case 9: return "Snow";
-			case 10: return "Steel Mats";
-			case 11: return "Water";
-			default: return "Unknown";
-		}
+		return surfaceType.getName();
 	}
 
 	public void setSurfaceType(int i)
 	{
-		surfaceType = i;
+		surfaceType = Surface.MAP.get(i);
 	}
 	
 	public static int bucket(double lat, double lon)

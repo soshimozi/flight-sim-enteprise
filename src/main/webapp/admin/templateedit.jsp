@@ -4,6 +4,7 @@
 %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="net.fseconomy.dto.AircraftConfig" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 <jsp:useBean id="template" class="net.fseconomy.beans.TemplateBean">
@@ -50,6 +51,7 @@
 			}
 
 			template.setAllowedSurfaceTypes(list);
+			template.setFilterModelSet(request.getParameter("filterset"));
 
 			Templates.updateTemplate(template, user);
 %>
@@ -153,6 +155,52 @@
 			$('#deselectAll').click(function () {
 				uncheckAll();
 			});
+
+			$("#r1").click(function() {
+				var test = $(this).val();
+				$("#tableFilterParams").show();
+				$("#tableFilterModels").hide();
+			});
+			$("#r2").click(function() {
+				var test = $(this).val();
+				$("#tableFilterParams").hide();
+				$("#tableFilterModels").show();
+			});
+
+			function optionSort(a, b) {
+				return $(a).data("index") - $(b).data("index");
+			}
+
+			$("#btnAdd").click(function () {
+				$("#models > option:selected").each(function () {
+					$(this).remove().appendTo("#modelset");
+				});
+
+				var opts = $("#modelset option").get();
+				$("#modelset").html(opts.sort(optionSort));
+			});
+
+			$("#btnRemove").click(function () {
+				$("#modelset > option:selected").each(function () {
+					$(this).remove().appendTo("#models");
+				});
+
+				var opts = $("#models option").get();
+				$("#models").html(opts.sort(optionSort));
+			});
+
+			$('#templateForm').submit(function() {
+				var s = "";
+
+				$("#modelset option").each(function () {
+					if(s !== "")
+							s += ", ";
+					s += this.value;
+				});
+
+				$("#filterset").val(s);
+			});
+
 		});
 
 	</script>
@@ -179,6 +227,7 @@
 			<input type="hidden" name="submit" value="true"/>
 			<input type="hidden" name="event" value="editTemplate"/>
 			<input type="hidden" name="id" value="<%= template.getId() %>"/>
+			<input type="hidden" name="filterset" id="filterset" value="" />
 
 			<table>
 				<caption>Edit Template</caption>
@@ -192,18 +241,14 @@
 					<td>Target Keep Alive</td>
 					<td>
 					<select name="targetKeepAlive" class="formselect">
-						<option class="formselect" value="1" <%=  keepAlive == 1 ? "selected" : "" %>>1 day</option>
-						<option class="formselect" value="2" <%=  keepAlive == 2 ? "selected" : "" %>>2 days</option>
-						<option class="formselect" value="3" <%=  keepAlive == 3 ? "selected" : "" %>>3 days</option>
-						<option class="formselect" value="4" <%=  keepAlive == 4 ? "selected" : "" %>>4 days</option>									
-						<option class="formselect" value="5" <%=  keepAlive == 5 ? "selected" : "" %>>5 days</option>
-						<option class="formselect" value="5" <%=  keepAlive == 6 ? "selected" : "" %>>6 days</option>
-						<option class="formselect" value="5" <%=  keepAlive == 7 ? "selected" : "" %>>7 days</option>
-						<option class="formselect" value="5" <%=  keepAlive == 8 ? "selected" : "" %>>8 days</option>
-						<option class="formselect" value="5" <%=  keepAlive == 9 ? "selected" : "" %>>9 days</option>
-						<option class="formselect" value="5" <%=  keepAlive == 10 ? "selected" : "" %>>10 days</option>
-						<option class="formselect" value="5" <%=  keepAlive == 11 ? "selected" : "" %>>11 days</option>
-						<option class="formselect" value="5" <%=  keepAlive == 12 ? "selected" : "" %>>12 days</option>
+<%
+	for(int i = 1, e = TemplateBean.MAX_KEEPALIVE_DAYS;i <= e; i++)
+	{
+%>
+						<option class="formselect" value="<%= i %>" <%=  keepAlive == i ? "selected" : "" %>><%= i %> day</option>
+<%
+	}
+%>
 					</select>
 					</td>
 				</tr>
@@ -253,17 +298,15 @@
 							<div><small>Note: if none are selected it will default to ALL</small></div>
 							<hr>
 							<div style="text-align: center;"><span id="selectAll" style="font-size: small;">Select All</span> <span id="deselectAll" style="font-size: small;">Deselect All</span><br></div>
-							<label><input type="checkbox" name="surfType" value="1" <%=surfList.contains(1) ? "checked" : ""%>> Asphalt</label><br>
-							<label><input type="checkbox" name="surfType" value="2" <%=surfList.contains(2) ? "checked" : ""%>> Concrete</label><br>
-							<label><input type="checkbox" name="surfType" value="3" <%=surfList.contains(3) ? "checked" : ""%>> Coral</label><br>
-							<label><input type="checkbox" name="surfType" value="4" <%=surfList.contains(4) ? "checked" : ""%>> Dirt</label><br>
-							<label><input type="checkbox" name="surfType" value="5" <%=surfList.contains(5) ? "checked" : ""%>> Grass</label><br>
-							<label><input type="checkbox" name="surfType" value="6" <%=surfList.contains(6) ? "checked" : ""%>> Gravel</label><br>
-							<label><input type="checkbox" name="surfType" value="7" <%=surfList.contains(7) ? "checked" : ""%>> Helipad</label><br>
-							<label><input type="checkbox" name="surfType" value="8" <%=surfList.contains(8) ? "checked" : ""%>> Oil Treated</label><br>
-							<label><input type="checkbox" name="surfType" value="9" <%=surfList.contains(9) ? "checked" : ""%>> Snow</label><br>
-							<label><input type="checkbox" name="surfType" value="10" <%=surfList.contains(10) ? "checked" : ""%>> Steel Mats</label><br>
-							<label><input type="checkbox" name="surfType" value="11" <%=surfList.contains(11) ? "checked" : ""%>> Water</label>
+<%
+	for(AirportBean.Surface s: AirportBean.Surface.getValues())
+	{
+		int index = s.getIndex();
+%>
+							<label>&nbsp;&nbsp;<input type="checkbox" name="surfType" value="<%=index%>" <%=surfList.contains(index) ? "checked" : ""%>> <%=s.getName()%></label><br>
+<%
+	}
+%>
 						</div>
 					</td>
 				</tr>
@@ -323,18 +366,27 @@
                 </tr>
 				<tr>
 				<!-- All-In changes begin here -->
-				<td colspan="2" style="border:1px solid #000;">
-					<table>
+				<td colspan="2" style="border:1px solid #000;padding: 4px;">
+					<div>
+						<b>Filters - these values only apply to All-In jobs</b>
+					</div>
+					<div style="display: none;">
+						Percentage of Aircraft Matching filters to use:<br>
+						<input name="percentToUse" type="text" class="textarea" value="<%= template.getPercentToUse() %>" size="7"/>%
+					</div>
+					<div>
+						Select filter by:<br>
+						<input type="radio" name="filterByModels" id="r1" value="false" <%= !template.isFilterByModels() ? "checked" : "" %> /><label>Seats & Speeds</label>
+						<input type="radio" name="filterByModels" id="r2" value="true" <%= template.isFilterByModels() ? "checked" : "" %>/><label>Aircraft Models</label>
+					</div>
+					<table id="tableFilterParams" style="display: <%= template.isFilterByModels() ? "none" : "initial" %>">
 						<tr>
 							<td colspan="2">
-								<div>
-								<b>Filters - these values only apply to All-In jobs</b><br/>
 								<div style="font-size:10pt">Notes:
 									<ul>
-							 			<li>Leaving the "to" field empty defaults to the maximum possible value.</li>
+							 			<li>Please enter both TO and FROM values for template to work correctly</li>
 							 			<li>To set an exact match value, place the value in both the "From" and "To" fields.</li>
 									</ul>
-							 	</div>
 							 	</div>
 							 </td>
 						 </tr>
@@ -350,6 +402,57 @@
 							<td>
 								From: <input type="text" name="seatsFrom" value="<%= template.getSeatsFrom() %>" size="3" maxlength="3"/> 
 								To: <input type="text" name="seatsTo" size="3" value="<%= template.getSeatsTo() %>" maxlength="3"/></td>
+						</tr>
+					</table>
+					<table id="tableFilterModels">
+						<tr>
+							<td colspan="3">Select the aircraft model</td>
+						</tr>
+						<tr>
+							<td>
+								<select name="models" id="models" multiple="multiple" rows=2 style="width: 200px; height: 200px; margin: auto;">
+<%
+	List<AircraftConfig> list = Aircraft.getAircraftConfigs();
+	List<Integer> filterList = new ArrayList<>();
+	int index = 0;
+	for(AircraftConfig ac: list)
+	{
+		index++;
+		if(template.isInFilterModelSet(ac.modelId))
+		{
+			filterList.add(index);
+			continue;
+		}
+%>
+									<option value=<%=ac.modelId%> data-index=<%=index%>><%=ac.makemodel%></option>
+<%
+	}
+%>
+								</select>
+							</td>
+							<td>
+								<div style="align-content: center">
+								<input id="btnAdd" type="button" value=">>" /><br><br>
+								<input id="btnRemove" type="button" value="<<" />
+								</div>
+							</td>
+							<td>
+								<select name="modelset" id="modelset" multiple="multiple" rows=2 style="width: 200px; height: 200px; margin: auto;">
+<%
+	Integer[] idx = filterList.toArray(new Integer[filterList.size()]);
+	index = 0;
+	for(AircraftConfig ac: list)
+	{
+		if(!template.isInFilterModelSet(ac.modelId))
+			continue;
+%>
+									<option value=<%=ac.modelId%> data-index=<%=idx[index]%>><%=ac.makemodel%></option>
+<%
+		index++;
+	}
+%>
+								</select>
+							</td>
 						</tr>
 					</table>
 				</tr>

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import javax.sql.rowset.CachedRowSet;
 
@@ -687,6 +688,7 @@ public class MaintenanceCycle implements Runnable
 				int minSize = rsTemplate.getInt("matchMinSize");
 				int surfType = rsTemplate.getInt("allowedSurfaceTypes");
 
+				List<AircraftBean> allInAircraft = null;
 				boolean isAllIn = rsTemplate.getString("typeOfPay").equals("allin");
                 boolean direct = rsTemplate.getBoolean("direct");
 				boolean waterOk = !isAllIn;
@@ -701,66 +703,55 @@ public class MaintenanceCycle implements Runnable
 				int speedFrom = rsTemplate.getInt("speedFrom");
 				int speedTo = rsTemplate.getInt("speedTo");
 
-				Set<String> icaoSet1;
-				Set<String> icaoSet2;
+				boolean isFilterByModel = rsTemplate.getBoolean("modelfilter");
+				String filterModels = rsTemplate.getString("modelset");
+
+
 				StringBuffer where = new StringBuffer();
-
-				//check for seats and cruise speed filters on aircraft assignment for template
-				StringBuilder aircraftFilterWhereClause = new StringBuilder();
-
-				//if no filters are set for seats size filter, just add a condition to be bigger then the units specified in the job
-				//this will ensure a 172 is not chosen to take a 10 pax job
-				//if filter values are set those are used instead in the where clause
-				if (seatsFrom == 0 && seatsTo == 0)
-				{	//no filters set, use some base values to make sure an inappropriate plane is not assigned
-					if (units.equals("passengers"))
-					{
-						aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
-						aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount * 77).append(" < maxWeight");
-					}
-					else if (units.equals("KGs"))
-					{
-						aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount).append(" < maxWeight");
-					}
-				}
-				else
-				{	//filters set
-					if (seatsFrom > 0)
-						aircraftFilterWhereClause.append(" and seats >= ").append(seatsFrom);
-
-					if (seatsFrom == 0 && seatsTo > 0)
-						aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
-
-					if (seatsTo > 0)
-						aircraftFilterWhereClause.append(" and seats <= ").append(seatsTo);
-
-					if (speedFrom > 0)
-						aircraftFilterWhereClause.append(" and cruisespeed >= ").append(speedFrom);
-
-					if (speedTo > 0)
-						aircraftFilterWhereClause.append(" and cruisespeed <= ").append(speedTo);
-
-					if (units.equals("passengers"))
-						aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount * 77).append(" < maxWeight");
-					else
-						aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount).append(" < maxWeight");
-				}
+				Set<String> icaoSet1 = null;
+				Set<String> icaoSet2 = null;
 
 				if (isAllIn)
 				{
+					String where = "";
+
+					// check for seats and cruise speed filters on aircraft assignment for template
+					// if no filters are set for seats size filter, just add a condition to be bigger then the units specified in the job
+					// this will ensure a 172 is not chosen to take a 10 pax job
+					// if filter values are set those are used instead in the where clause
+
+					if(isFilterByModel) //use specified models
+					{
+						where = filterModels;
+					}
+					else if (seatsFrom != 0 && seatsTo != 0) //use to/from values
+					{	//filters set
+						where = "select t.id from (select id from models where  seats between " + seatsFrom + " and " + seatsTo + " and cruisespeed  between " + speedFrom + " and " + speedTo + ") as t";
+					}
+					else //no filters set, use some base values to make sure an inappropriate plane is not assigned
+					{
+						if (units.equals("passengers"))
+							where = "select t.id from (select id from models where  seats >= " + targetAmount + ") as t";
+					}
+
+					double multipler = 0;
+					if (units.equals("passengers"))
+						multipler = 77;
+
 					icaoSet1 = new HashSet<>();
 
-					qry = "Select location as icao from aircraft, models where aircraft.model=models.id AND owner=0 AND location is not null AND userlock is null " + aircraftFilterWhereClause.toString();
-					ResultSet result = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+					qry = "SELECT * FROM aircraft, models WHERE  owner=0 AND location is not null AND userlock is null"
+					+ " AND aircraft.model=models.id"
+					+ " AND aircraft.model in (" + where + ")"
+					+ " and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + (targetAmount * multipler) + " < maxWeight"
+					+ " AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)";
 
-					while(result.next())
-						icaoSet1.add(result.getString("icao"));
+					allInAircraft = Aircraft.getAircraftSQL(qry);
+
+					for(AircraftBean a: allInAircraft)
+						icaoSet1.add(a.getLocation());
 				}
-				else if (icaos1 == null)
-				{
-					icaoSet1 = null;
-				}
-				else
+				else if (icaos1 != null)
                 {
                     switch (icaos1)
                     {
@@ -794,11 +785,7 @@ public class MaintenanceCycle implements Runnable
                     }
                 }
 
-                if(icaos2 == null)
-                {
-                    icaoSet2 = null;
-                }
-                else
+				if(icaos2 != null)
                 {
                     switch (icaos2)
                     {
@@ -894,9 +881,6 @@ public class MaintenanceCycle implements Runnable
 							where.append (" AND surfaceType in (" + sSurfaceTypes + ")");
 						}
 
-						if (isAllIn)
-							where.append(" AND exists (SELECT * FROM aircraft WHERE aircraft.location = airports.icao and aircraft.owner = 0)");
-													
 						airportFromList = new ArrayList<>();
 
 						qry = "SELECT icao FROM airports WHERE  " + where.toString();
@@ -925,23 +909,27 @@ public class MaintenanceCycle implements Runnable
 						int aircraftId = 0;
 						if (isAllIn) 
 						{
-							//TODO This should probably randomize the returned aircraft that meet the criteria if more then one
-							//All-In change - find available aircraft at airport that have not already been assigned to an All-In job - thanks Airboss for query help
-							String queryToFindFreeAircraft = "select aircraft.id from aircraft, models " +
-									"where location = '" + icao + "' " +
-									"and owner = 0 " + 
-									"and userlock is null " +
-									"and aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null and location = '" + icao+ "') as t) " +
-									"and models.id = aircraft.model ";
-							
+							//All-In change - find available aircraft at airport that have not already been assigned to an All-In job
+							List<AircraftBean> acList = allInAircraft.stream().filter(p -> p.getLocation().contains(icao) ).collect(Collectors.toList());
 
-                            //We only use one, so limit it.
-                            ResultSet aircraftRs = DALHelper.getInstance().ExecuteReadOnlyQuery(queryToFindFreeAircraft + aircraftFilterWhereClause.toString() + " LIMIT 1");
-
-							if (aircraftRs.next())
-								aircraftId = aircraftRs.getInt(1);
-							else // no aircraft found, skip it
+							//if no aircraft skip this one
+							if(acList.size() == 0)
 								continue;
+
+							int index = 0; //default aircraft selection is the first one
+
+							//if more then 1 airplane available randomly select
+							if(acList.size() > 1)
+							{
+								Random rnd = new Random();
+								index = rnd.nextInt(acList.size());
+							}
+
+							AircraftBean selected = acList.get(index);
+							aircraftId = selected.getId();
+
+							//remove so not selected again
+							allInAircraft.remove(selected);
 						}
 						
 						int distance = (int) Math.round(to.distance);

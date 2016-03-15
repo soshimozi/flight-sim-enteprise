@@ -32,6 +32,8 @@ public class TemplateBean implements Serializable
 	private static final long serialVersionUID = 1L;
 	public static final int TYPE_ALLIN = 1;
 	public static final int TYPE_TRIPONLY = 2;
+
+	public static final int MAX_KEEPALIVE_DAYS = 12;
 	
 	int id;
 	float frequency;
@@ -49,6 +51,10 @@ public class TemplateBean implements Serializable
 	int surfaceTypes;
     boolean direct; //flight cannot have any stops between start and finish
 	boolean noExtension;
+	boolean filterByModels;
+	int percentToUse;
+
+	List<Integer> filterModelSet;
 	
 	//All-In template changes
 	int speedFrom, speedTo;
@@ -80,6 +86,9 @@ public class TemplateBean implements Serializable
 		setAllowedSurfaceTypes(rs.getInt("allowedSurfaceTypes"));
         setDirect(rs.getBoolean("direct"));
 		setNoExt(rs.getBoolean("noext"));
+		setFilterByModels(rs.getBoolean("modelfilter"));
+		setFilterModelSet(rs.getString("modelset"));
+		setPercentToUse(rs.getInt("percentToUse"));
 
 		//All-In changes
 		setSeatsFrom(rs.getInt("seatsFrom"));
@@ -104,6 +113,9 @@ public class TemplateBean implements Serializable
 		rs.updateInt("allowedSurfaceTypes", surfaceTypes);
         rs.updateBoolean("direct", direct);
 		rs.updateBoolean("noext", noExtension);
+		rs.updateBoolean("modelfilter", isFilterByModels());
+		rs.updateString("modelset", getFilterModelSet());
+		rs.updateInt("percentToUse", percentToUse);
 
 		if (getMatchMaxSize() == 0)
 			rs.updateNull("matchMaxSize");
@@ -347,6 +359,59 @@ public class TemplateBean implements Serializable
 	}
 
 
+	public boolean isFilterByModels() {
+		return filterByModels;
+	}
+
+	public void setFilterByModels(boolean b) {
+		filterByModels = b;
+	}
+
+	public void setFilterModelSet(String models)
+	{
+		List<Integer> list = new ArrayList<>();
+
+		if(models != null)
+		{
+			String[] items = models.trim().split(",\\ *");
+
+			for (String i : items)
+				list.add(Integer.parseInt(i));
+		}
+
+		filterModelSet = list;
+	}
+
+	public boolean isInFilterModelSet(int id)
+	{
+		return filterModelSet.contains(id);
+	}
+
+	public String getFilterModelSet()
+	{
+		if(filterModelSet == null)
+			return null;
+
+		String s = "";
+		for(Integer i: filterModelSet)
+		{
+			if(s != "")
+				s+= ", ";
+			s += i;
+		}
+
+		return s;
+	}
+
+	public void setPercentToUse(int i)
+	{
+		percentToUse = i;
+	}
+
+	public int getPercentToUse()
+	{
+		return percentToUse;
+	}
 
 	public int getSeatsFrom() {
 		return seatsFrom;
