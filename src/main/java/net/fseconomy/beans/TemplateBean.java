@@ -19,6 +19,8 @@
 
 package net.fseconomy.beans;
 
+import net.fseconomy.util.Helpers;
+
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -375,8 +377,11 @@ public class TemplateBean implements Serializable
 		{
 			String[] items = models.trim().split(",\\ *");
 
-			for (String i : items)
-				list.add(Integer.parseInt(i));
+			if(!Helpers.isNullOrBlank(items[0]))
+			{
+				for (String i : items)
+					list.add(Integer.parseInt(i));
+			}
 		}
 
 		filterModelSet = list;

@@ -1360,7 +1360,7 @@ public class AircraftBean implements Serializable
 		return getMinimumPrice(BASESELLBACKPERCENT, false);
 	}
 	
-	public int getMinimumPrice(double basesellbackprecent, boolean retail)
+	public int getMinimumPrice(double basesellbackpercent, boolean retail)
 	{
 		//8-2-12 Airboss - reworked to now include airframe time in sellback price reduction.
 		
@@ -1374,7 +1374,7 @@ public class AircraftBean implements Serializable
 		depreciatedAirframeAmount = depreciatedAirframeAmount > MAXDEPRECIATIONPERCENT ? MAXDEPRECIATIONPERCENT : depreciatedAirframeAmount; 
 
 		//Subtract airframe depreciation for the base sell back price
-		double depreciatedAmount = basesellbackprecent - depreciatedAirframeAmount;
+		double depreciatedAmount = basesellbackpercent - depreciatedAirframeAmount;
 		
 		//Calculate the new sell back price
 		int returnValue = (int)(getModelPrice() * depreciatedAmount);
