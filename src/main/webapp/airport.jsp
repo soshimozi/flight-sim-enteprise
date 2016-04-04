@@ -14,6 +14,8 @@
 		return;
 	}
 
+	boolean flgError = false;
+	String error = "";
     CachedAirportBean airport = null;
 
 	//setup return page if action used
@@ -24,16 +26,25 @@
     if(selectedIcao != null)
     {
 		selectedIcao = selectedIcao.toUpperCase();
-        returnPage = request.getRequestURI() + "?icao=" + selectedIcao;
-        airport = Airports.cachedAirports.get(selectedIcao);
-        session.setAttribute("icao", selectedIcao);
+		if(Airports.cachedAirports.containsKey(selectedIcao))
+		{
+			selectedIcao = selectedIcao.toUpperCase();
+			returnPage = request.getRequestURI() + "?icao=" + selectedIcao;
+			airport = Airports.cachedAirports.get(selectedIcao);
+			session.setAttribute("icao", selectedIcao);
+		}
+		else
+		{
+			flgError = true;
+			error = "Error: Bad ICAO";
+		}
     }
     else
     {
         selectedIcao = (String)session.getAttribute("icao");
         if(!Helpers.isNullOrBlank(selectedIcao))
         {
-            returnPage = request.getRequestURI() + "?icao=" + selectedIcao;
+			returnPage = request.getRequestURI() + "?icao=" + selectedIcao;
 			airport = Airports.cachedAirports.get(selectedIcao);
         }
     }
@@ -1350,10 +1361,10 @@
 }
 else
 {
-    if (airport != null)
+    if (flgError && !Helpers.isNullOrBlank(selectedIcao))
     {
 %>
-    <div class="message">No information available</div>
+    <div class="error"><%=error%></div>
 <%
     }
     if (isSearch)

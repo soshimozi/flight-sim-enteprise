@@ -1120,7 +1120,9 @@ public class Datafeed extends HttpServlet
 				}
 			}
 			if(csvformat)
+			{
 				results = csvoutput.toString();
+			}
 			else
 			{
 				String xsd = GetXsdByQuery("Members");
@@ -1322,9 +1324,16 @@ public class Datafeed extends HttpServlet
                         AddXMLSystemFboItem(xmloutput, airport);
                 }
 
-                //save to our output string
-                String xsd = GetXsdByQuery("IcaoFbos");
-                results = GetXMLHeader() + "<IcaoFboItems total=\"" + numfbos + "\"" + xsd + ">\n" + xmloutput.toString() + "</IcaoFboItems>\n";
+				if(csvformat)
+				{
+					results = csvoutput.toString();
+				}
+				else
+				{
+					//save to our output string
+					String xsd = GetXsdByQuery("IcaoFbos");
+					results = GetXMLHeader() + "<IcaoFboItems total=\"" + numfbos + "\"" + xsd + ">\n" + xmloutput.toString() + "</IcaoFboItems>\n";
+				}
                 break;
             }
             case "jobsto":
@@ -1864,7 +1873,8 @@ public class Datafeed extends HttpServlet
 		else
 		{
 			String xsd = GetXsdByQuery(queryname);
-			return GetXMLHeader() + "<" + queryname + " total=\"" + flightlog.size() + "\"" + xsd + ">\n" + xmloutput.toString() + "</" + queryname + ">\n";
+			int size = flightlog != null ? flightlog.size() : 0;
+			return GetXMLHeader() + "<" + queryname + " total=\"" + size + "\"" + xsd + ">\n" + xmloutput.toString() + "</" + queryname + ">\n";
 		}
 	}
 
@@ -2471,6 +2481,9 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("RentalCost");
 		}
 
+		if(logs == null || logs.size() == 0)
+			return;
+
         for (LogBean log : logs)
         {
 			int serialNumber = -1;
@@ -2547,6 +2560,9 @@ public class Datafeed extends HttpServlet
 	
 	void AddXMLFlightLogItems(Converters.xmlBuffer buffer, List<LogBean> logs)
 	{
+		if(logs == null || logs.size() == 0)
+			return;
+
         for (LogBean log : logs)
         {
 			int serialNumber = -1;
