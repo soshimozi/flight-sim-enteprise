@@ -59,7 +59,9 @@ public class FboBean implements Serializable
 	
 	public static final int FBO_DEFAULT_REPAIRSHOPMARGIN = 25;
 	public static final int FBO_DEFAULT_EQUIPMENTMARGIN = 50;
-	
+
+	public static final double MAX_FUEL_PRICE = 10.00d;
+
 	public FboBean()
 	{
 	}
@@ -233,11 +235,17 @@ public class FboBean implements Serializable
 
 	public void setFuel100LL(double d)
 	{
+		if(d < 0.0 ||d > MAX_FUEL_PRICE)
+			d = MAX_FUEL_PRICE;
+
 		fuel100LL = d;
 	}
 
 	public void setFueljeta(double d)
 	{
+		if(d < 0.0 ||d > MAX_FUEL_PRICE)
+			d = MAX_FUEL_PRICE;
+
 		fueljeta = d;
 	}
 

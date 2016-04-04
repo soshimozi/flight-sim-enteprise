@@ -176,9 +176,9 @@
 		<div class="formgroup high">
 			<h3>Fuel</h3>
 			100LL Price: <input name="fuel100ll" type="text" class="textarea" value="<%= fbo.getFuel100LL() %>" size="4">
-			Per Gallon<br/>
+			Per Gallon (Max: 10.00)<br/>
 			JetA Price: <input name="fueljeta" type="text" class="textarea" value="<%= fbo.getFueljeta() %>" size="4">
-			Per Gallon
+			Per Gallon (Max: 10.00)
 		</div>
 		<div class="formgroup high">
 			<h3>Repair Shop</h3>

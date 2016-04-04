@@ -64,8 +64,8 @@
 			<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
 		</div>
 		<div class="formgroup high">
-			100ll Price: <input type="text" name="price100ll" value="" size="7" maxlength="7"><br><br>
-			JetA Price: <input type="text" name="priceJetA" value=""  size="7" maxlength="7">
+			100ll Price: <input type="text" name="price100ll" value="" size="7" maxlength="7"> (Max: 10.00)<br><br>
+			JetA Price: <input type="text" name="priceJetA" value=""  size="7" maxlength="7"> (Max: 10.00)
 		</div>
 		<div class="formgroup">
 			<input type="submit" class="button" value="Update"/>
