@@ -820,7 +820,7 @@ public class Airports implements Serializable
         String qry;
         try
         {
-            if(Helpers.isNullOrBlank(from) || !cachedAirports.containsKey(from.toUpperCase()))
+            if(!Helpers.isNullOrBlank(from) && !cachedAirports.containsKey(from.toUpperCase()))
                 throw new DataError("Error: Bad ICAO");
 
             StringBuilder tables = new StringBuilder("airports");
@@ -938,7 +938,7 @@ public class Airports implements Serializable
             {
                 CachedAirportBean airport = Airports.cachedAirports.get(rs.getString("icao"));
 
-                if (getDistance(rs.getString("icao"), from) > distance)
+                if (!Helpers.isNullOrBlank(from) && getDistance(rs.getString("icao"), from) > distance)
                     continue;
 
                 result.add(airport);
