@@ -158,7 +158,7 @@ public class common
 
     static boolean isAircraftLeased(int aircraftid) throws SQLException
     {
-        String qry = "SELECT IFNULL(id, 0) FROM aircraft WHERE id = ? and lessor is not null";
+        String qry = "SELECT IFNULL(id, 0) FROM aircraft WHERE id = ? and (lessor is not null AND lessor > 0)";
 
         return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraftid);
     }
