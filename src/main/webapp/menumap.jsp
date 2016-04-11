@@ -96,7 +96,7 @@ if (user.isLoggedIn())
 	<%= groupMenu(user, "Payment logs", false, true, "paymentlog.jsp", "?groupid=", response) %>
 	<br/><br/>
 	<%= groupMenu(user, "Aircraft", false, true, "aircraft.jsp", "?id=", response) %>
-	<a href="market.jsp">Aircraft - Purchase</a><br/><br/>
+	<a href="aircraftforsale.jsp">Aircraft - Purchase</a><br/><br/>
 	<br/><br/>
 	<a href="banksummary.jsp">Banking</a><br/><br/>
 	<br/>

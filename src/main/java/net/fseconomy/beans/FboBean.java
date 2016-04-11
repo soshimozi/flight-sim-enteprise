@@ -41,6 +41,8 @@ public class FboBean implements Serializable
 	int id;
 	int equipmentInstallMargin;
 	int price;
+	boolean privateSale;
+	int sellToId;
 	boolean priceincludesgoods;
 	int fbosize;
 	boolean publicLogs = false;
@@ -99,6 +101,8 @@ public class FboBean implements Serializable
 		id = rs.getInt("id");	
 		equipmentInstallMargin = rs.getInt("equipmentmargin");
 		price = rs.getInt("saleprice");
+		privateSale = rs.getBoolean("privatesale");
+		sellToId = rs.getInt("selltoid");
 		priceincludesgoods = true;
 		fbosize = rs.getInt("fbosize");
 		bulkFuelOrderTimeStamp = rs.getTimestamp("bulkFuelOrderTimeStamp");
@@ -119,6 +123,8 @@ public class FboBean implements Serializable
 		rs.updateInt("margin", repairShopMargin);
 		rs.updateInt("equipmentmargin",equipmentInstallMargin);
 		rs.updateInt("saleprice", price);
+		rs.updateBoolean("privatesale", privateSale);
+		rs.updateInt("selltoid", sellToId);
 		rs.updateInt("saleincludesgoods", 1);
 		
 		//bulk fuel changes
@@ -308,6 +314,26 @@ public class FboBean implements Serializable
 		price = i;
 		if (price < 0)
 			price = 0;
+	}
+
+	public boolean isPrivateSale()
+	{
+		return privateSale;
+	}
+
+	public void setPrivateSale(boolean b)
+	{
+		privateSale = b;
+	}
+
+	public int getSellToId()
+	{
+		return sellToId;
+	}
+
+	public void setSellToId(int id)
+	{
+		sellToId = id;
 	}
 	
 	public boolean isForSale()

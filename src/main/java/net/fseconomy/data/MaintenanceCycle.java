@@ -181,7 +181,7 @@ public class MaintenanceCycle implements Runnable
 		
 		//TODO examine to see if we need to randomize release times on this a bit more
 		freeExpiredFBOs();
-		
+
 		if(isOncePerDay())
 		{
 			cycletype = CycleTypeDaily;
@@ -189,7 +189,7 @@ public class MaintenanceCycle implements Runnable
 			processBankInterest();
 			processAircraftCondition();				
 			processFboSupplyUsage();
-			
+
 			checkRegistrations();
 		}		
 

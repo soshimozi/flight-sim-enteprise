@@ -50,6 +50,8 @@ public class AircraftBean implements Serializable
 	int capacity[];
 	double initialFuel;
 	int sellPrice;
+	boolean privateSale;
+	int sellToId;
 	int equipment;
 	int modelPrice;
 	int bearing, distance;
@@ -104,7 +106,9 @@ public class AircraftBean implements Serializable
 		setRentalPriceDry(rs.getInt("aircraft.rentalDry"));
 		setRentalPriceWet(rs.getInt("aircraft.rentalWet"));
 		setInitialFuel(rs.getFloat("aircraft.initialFuel"));
-		setSellPrice(rs.getInt("sellPrice"));		
+		setSellPrice(rs.getInt("sellPrice"));
+		setPrivateSale(rs.getBoolean("privatesale"));
+		setSellToId(rs.getInt("selltoid"));
 		setMaxRentTime(rs.getString("aircraft.maxRentTime") == null ? rs.getInt("models.maxRentTime") : rs.getInt("aircraft.maxRentTime"));
 		setAccounting();
 		setDepartedFrom(rs.getString("departedFrom"));
@@ -175,16 +179,26 @@ public class AircraftBean implements Serializable
 		{
 			rs.updateNull("bearingToHome");
 			rs.updateInt("distanceFromHome", 0);
-		} else
+		}
+		else
 		{
 			rs.updateInt("bearingToHome", getBearing());
 			rs.updateInt("distanceFromHome", getDistance());
 		}
+
 		if (getSellPrice() != 0)
 			rs.updateInt("sellPrice", getSellPrice());
 		else
 			rs.updateNull("sellPrice");
-		
+
+		rs.updateBoolean("privatesale", privateSale);
+
+		if (getSellPrice() > 0 && sellToId != 0)
+			rs.updateInt("selltoid", sellToId);
+		else
+			rs.updateNull("selltoid");
+
+
 		rs.updateBoolean("holdRental", holdRental);
 	}
 	
@@ -1059,7 +1073,28 @@ public class AircraftBean implements Serializable
 	{
 		this.sellPrice = sellPrice;
 	}
-	
+
+
+	public boolean isPrivateSale()
+	{
+		return privateSale;
+	}
+
+	public void setPrivateSale(boolean b)
+	{
+		privateSale = b;
+	}
+
+	public int getSellToId()
+	{
+		return sellToId;
+	}
+
+	public void setSellToId(int id)
+	{
+		sellToId = id;
+	}
+
 	public String getSLocation()
 	{
 		return location == null ? "Airborne" : location;

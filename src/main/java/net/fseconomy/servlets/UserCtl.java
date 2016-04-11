@@ -595,7 +595,25 @@ public class UserCtl extends HttpServlet
 		else
             aircraft.setSellPrice(Integer.parseInt(sSellPrice));
 
-		boolean advertiseFerry = Boolean.parseBoolean(req.getParameter("advertiseFerry"));
+        if (!Helpers.isNullOrBlank(sSellPrice))
+        {
+            String sSaleType = req.getParameter("saletype");
+            String sSellToId = req.getParameter("selltoid");
+            if("1".equals(sSaleType))
+            {
+                aircraft.setPrivateSale(true);
+                aircraft.setSellToId(Integer.parseInt(sSellToId));
+            }
+            else
+            {
+                aircraft.setPrivateSale(false);
+                aircraft.setSellToId(0);
+            }
+
+            aircraft.setSellPrice(Integer.parseInt(sSellPrice));
+        }
+
+        boolean advertiseFerry = Boolean.parseBoolean(req.getParameter("advertiseFerry"));
 		aircraft.setAdvertiseFerry(advertiseFerry);
 		
 		boolean allowRepair = Boolean.parseBoolean(req.getParameter("allowRepair"));
@@ -723,8 +741,23 @@ public class UserCtl extends HttpServlet
 		if (sEquipmentInstallMargin != null)
 			fbo.setEquipmentInstallMargin(Integer.parseInt(sEquipmentInstallMargin));
 		
-		if (sPrice != null)
-			fbo.setPrice("".equals(sPrice) ? 0 : Integer.parseInt(sPrice));
+		if (!Helpers.isNullOrBlank(sPrice))
+        {
+            String sSaleType = req.getParameter("saletype");
+            String sSellToId = req.getParameter("selltoid");
+            if("1".equals(sSaleType))
+            {
+                fbo.setPrivateSale(true);
+                fbo.setSellToId(Integer.parseInt(sSellToId));
+            }
+            else
+            {
+                fbo.setPrivateSale(false);
+                fbo.setSellToId(0);
+            }
+
+            fbo.setPrice("".equals(sPrice) ? 0 : Integer.parseInt(sPrice));
+        }
 
 		Fbos.updateFbo(fbo, user);
 		

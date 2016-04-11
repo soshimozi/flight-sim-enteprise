@@ -21,10 +21,14 @@
 	String error = null;
 	
 	FboBean fbo;
-	
+	String sellToName = "";
+
 	id = Integer.parseInt(sId);
 	fbo = Fbos.getFbo(id);
-	
+
+	if(fbo.getSellToId() != 0)
+		sellToName = Accounts.getAccountNameById(fbo.getSellToId());
+
 	CachedAirportBean airport = null;
 	FboFacilityBean defaultPass = null;
 	GoodsBean[] goodsList = null;
@@ -106,8 +110,17 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 	
 	<title>FSEconomy terminal</title>
-	
+
+	<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css" />
 	<link href="css/Master.css" rel="stylesheet" type="text/css" />
+
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+	<script src="scripts/jquery.cookie.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="scripts/AutoComplete.js"></script>
 
 	<script>
 		function submitBuildRepair(form){
@@ -125,6 +138,34 @@
 				form.submit();
 			}
 		}
+
+		function showSellToName() {
+			if($('input[name=saletype]:checked').val() === 1){
+				$("#divSellTo").css("visibility", "visible")
+			}
+			else {
+				$("#divSellTo").css("visibility", "hidden")
+			}
+		}
+
+		$(function() {
+			initAutoComplete("#selltoname", "#selltoid", <%= Accounts.ACCT_TYPE_ALL %>);
+
+			$("input[name=saletype]") // select the radio by its id
+					.change(function(){ // bind a function to the change event
+						if( $(this).is(":checked") ){ // check if the radio is checked
+							var val = $(this).val(); // retrieve the value
+							if(val==1){
+								$("#divSellTo").css("display", "block")
+							}
+							else {
+								$("#divSellTo").css("display", "none")
+							}
+						}
+					});
+		});
+
+
 	</script>
 
 </head>
@@ -171,7 +212,20 @@
 %>
 			Name: <input name="name" type="text" class="textarea" value="<%= fbo.getName() %>" size="40" maxlength="255">
 			<br/><br/><br/>
-			Sale Price: $<input name="price" type="text" class="textarea" style="text-align:right" value="<%= fbo.isForSale() ? fbo.getPrice() : "" %>" size="10">.00<br/><br/>
+			<div class="form" style="width:300px;">
+				Sale Type:<br>
+				<input type="radio" name="saletype" value="0" <%=!fbo.isPrivateSale() ? "checked" : ""%>> Public&nbsp&nbsp&nbsp&nbsp&nbsp
+				<input type="radio" name="saletype" value="1" <%=fbo.isPrivateSale() ? "checked" : ""%>> Private<br>
+				<div id="divSellTo" class="formgroup" <%= fbo.isPrivateSale() ? "style=\"display: block;\"" : "style=\"display: none;\""%>>
+					Enter Account:
+					<input type="hidden" id="selltoid" name="selltoid" value="<%=fbo.getSellToId()%>"/>
+					<input type="text" id="selltoname" name="selltoname" style="padding: 2px; margin-bottom: 15px;" value="<%=sellToName%>"/>
+					<br/>
+				</div>
+
+				Sale Price: $<input name="price" type="text" class="textarea" style="text-align:right" value="<%= fbo.isForSale() ? fbo.getPrice() : "" %>" size="10">.00<br/>
+				*Blank or 0 = not for sale
+			</div>
 		</div>
 		<div class="formgroup high">
 			<h3>Fuel</h3>

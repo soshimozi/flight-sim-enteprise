@@ -104,7 +104,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 
 		oM.makeMenu('m6','','Aircraft','<%= response.encodeURL("aircraft.jsp")%>', "", 80);
 		<%= groupMenu(user, "m6", 1, "Aircraft", false, true, "aircraft.jsp", "?id=", response) %>
-		oM.makeMenu('sub6_1','m6','Purchase aircraft','<%= response.encodeURL("market.jsp") %>');
+		oM.makeMenu('sub6_1','m6','Purchase aircraft','<%= response.encodeURL("aircraftforsale.jsp") %>');
 
 		oM.makeMenu('m7','','Banking','<%= response.encodeURL("banksummary.jsp") %>', "", 80);
 
@@ -124,7 +124,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 		<%= groupMenu(user, "m10", 2, "FBO Mgt", true, true, "fbomgt.jsp", "?id=", response) %>
 		<%= groupMenu(user, "m10", 3, "Facilities", true, true, "fbofacility.jsp", "?id=", response) %>
 		oM.makeMenu('sub10_0','m10','FBO Maps','<%= response.encodeURL("fbomap.jsp")%>');
-		oM.makeMenu('sub10_1','m10','Purchase FBO','<%= response.encodeURL("marketfbo.jsp") %>');
+		oM.makeMenu('sub10_1','m10','Purchase FBO','<%= response.encodeURL("fbosforsale.jsp") %>');
 
    		oM.makeMenu('m11','','Site Map','<%= response.encodeURL("menumap.jsp") %>', "", 75);
 

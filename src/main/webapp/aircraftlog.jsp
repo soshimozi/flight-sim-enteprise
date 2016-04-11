@@ -147,14 +147,14 @@
         <input type="hidden" name="event" value="Market"/>
         <input type="hidden" name="id">
         <input type="hidden" name="account" value="<%= user.getId() %>"/>
-        <input type="hidden" name="return" value="market.jsp" />
+        <input type="hidden" name="return" value="aircraftforsale.jsp" />
         <table border="1">
             <caption>Aircraft</caption>
             <thead>
             <tr>
                 <th>Registration</th>
                 <th>Owner</th>
-                <th>Type (<a class="normal" href="<%= response.encodeURL("market.jsp?model=" + aircraft.getModelId() + "&submit=" +"true" )%>"><%= acForSale %> for sale</a>)</th>
+                <th>Type (<a class="normal" href="<%= response.encodeURL("aircraftforsale.jsp?model=" + aircraft.getModelId())%>"><%= acForSale %> for sale</a>)</th>
                 <th>Home</th>
                 <th>Current Location</th>
             </tr>

@@ -57,6 +57,31 @@ public class Fbos implements Serializable
                     Goods.changeGoodsRecord(icao, type, buyer, amount, true);
                 }
                 rs.close();
+
+                //verify record for fbo supplies exists
+                boolean supplies = false;
+                boolean fuel100LL = false;
+                boolean fuelJetA = false;
+                rs = stmt.executeQuery("SELECT type, amount FROM goods where owner = " + buyer + " and location = '" + icao + "'");
+                while (rs.next())
+                {
+                    int type = rs.getInt("type");
+                    switch(type)
+                    {
+                        case GoodsBean.GOODS_SUPPLIES: supplies = true; break;
+                        case GoodsBean.GOODS_FUEL100LL: fuel100LL = true; break;
+                        case GoodsBean.GOODS_FUELJETA: fuelJetA = true; break;
+                    }
+                }
+                rs.close();
+
+                //create fbo goods records if missing
+                if(!supplies)
+                    Goods.changeGoodsRecord(icao, GoodsBean.GOODS_SUPPLIES, buyer, 0, true);
+                if(!fuel100LL)
+                    Goods.changeGoodsRecord(icao, GoodsBean.GOODS_FUEL100LL, buyer, 0, true);
+                if(!fuelJetA)
+                    Goods.changeGoodsRecord(icao, GoodsBean.GOODS_FUELJETA, buyer, 0, true);
             }
             else // Keeping goods remove for sell/buy flags
             {
@@ -67,7 +92,7 @@ public class Fbos implements Serializable
             if (mergeWithId == 0)
             {
                 // Buyer does not have an existing FBO. Just transfer ownership.
-                sUpdate = "UPDATE fbo SET fbo.owner = " + buyer + ", fbo.saleprice = 0 WHERE fbo.owner = " + owner + " AND fbo.location ='" + icao + "'";
+                sUpdate = "UPDATE fbo SET fbo.owner = " + buyer + ", fbo.saleprice = 0, fbo.selltoid = 0, fbo.privatesale = null WHERE fbo.owner = " + owner + " AND fbo.location ='" + icao + "'";
                 stmt.executeUpdate(sUpdate);
                 sUpdate = "UPDATE fbofacilities set occupant = " + buyer + " WHERE occupant = " + owner + " and fboId = " + fbo.getId();
                 stmt.executeUpdate(sUpdate);
@@ -162,15 +187,15 @@ public class Fbos implements Serializable
         }
     }
 
-    public static void transferFbo(FboBean fbo, UserBean user, int buyer, int owner, String icao, boolean goods) throws DataError
-    {
-        if (!fbo.updateAllowed(user) && (!Accounts.needLevel(user, UserBean.LEV_MODERATOR)))
-        {
-            throw new DataError("Permission denied.");
-        }
-
-        doTransferFbo(fbo, buyer, owner, icao, goods);
-    }
+//    public static void transferFbo(FboBean fbo, UserBean user, int buyer, int owner, String icao, boolean goods) throws DataError
+//    {
+//        if (!fbo.updateAllowed(user) && (!Accounts.needLevel(user, UserBean.LEV_MODERATOR)))
+//        {
+//            throw new DataError("Permission denied.");
+//        }
+//
+//        doTransferFbo(fbo, buyer, owner, icao, goods);
+//    }
 
     public static void buildRepairShop(FboBean fbo) throws DataError
     {
@@ -425,14 +450,23 @@ public class Fbos implements Serializable
         return returnValue;
     }
 
-    public static List<FboBean> getFboForSale()
+    public static List<FboBean> getFboForSale() {
+        return getFboForSale(0);
+    }
+
+    public static List<FboBean> getFboForSale(int userId)
     {
         //id, name, price, location
         ArrayList<FboBean> result = new ArrayList<>();
+        String qry = "";
+
+        if(userId <=0)
+            qry = "SELECT id, owner, name, active, fbosize, services, saleprice, location FROM fbo f WHERE f.saleprice > 0 AND NOT privatesale ORDER BY f.saleprice";
+        else
+            qry = "SELECT id, owner, name, active, fbosize, services, saleprice, location FROM fbo f WHERE f.saleprice > 0 AND (selltoid=" + userId + " OR  selltoid in (SELECT groupid FROM groupmembership WHERE userid=" + userId + " AND level='owner')) ORDER BY f.saleprice";
 
         try
         {
-            String qry = "SELECT id, owner, name, active, fbosize, services, saleprice, location FROM fbo f WHERE f.saleprice > 0 ORDER BY f.saleprice";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
             while (rs.next())
             {

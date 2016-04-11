@@ -50,9 +50,17 @@
         int supplies = suppliesbean != null ? suppliesbean.getAmount() : 0;
         int bms = buildingmaterialsbean != null ? buildingmaterialsbean.getAmount() : 0;
 
+        String alertPre = "";
+        String alertPost = "";
+
+        if(supplies <= 0)
+        {
+            alertPre = "<span style=\"color: red;\">";
+            alertPost = "</span>";
+        }
         goodsincluded = "100LL Fuel: " + Formatters.oneDigit.format(avgas) + " KG<br>";
         goodsincluded = goodsincluded + "JetA Fuel: " + Formatters.oneDigit.format(jeta) + " KG<br>";
-        goodsincluded = goodsincluded + "Supplies: " + Formatters.oneDigit.format(supplies) + " KG<br>";
+        goodsincluded = goodsincluded + alertPre + "Supplies: " + Formatters.oneDigit.format(supplies) + " KG" + alertPost + "<br>";
         goodsincluded = goodsincluded + "Building Materials: " + Formatters.oneDigit.format(bms) + " KG<br>";
     }
 
@@ -81,7 +89,7 @@
     else
     {
 %>
-                    <div class="text-right">owner</div>
+                    <div class="text-right">Owner</div>
 <%
     }
 %>

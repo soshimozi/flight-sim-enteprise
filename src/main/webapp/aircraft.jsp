@@ -257,7 +257,6 @@
 	<option value="<%= response.encodeURL("editaircraft.jsp?id=" + aircraft.getId()) %>">Edit</option>
 	<option value="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>">Log</option>
 	<option value="<%= response.encodeURL("maintenance.jsp?id=" + aircraft.getId()) %>">Maintenance</option>
-	<option value="<%= response.encodeURL("transferac.jsp?id=" + aircraft.getId()) %>">Transfer</option>
 <%
 				if(aircraft.getLessor() == 0)
 				{

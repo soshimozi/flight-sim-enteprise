@@ -91,6 +91,11 @@ public class Aircraft implements Serializable
         return getAircraftSQL("SELECT * FROM (SELECT id FROM aircraft WHERE sellPrice is not null ) a left join aircraft on a.id=aircraft.id left join models on aircraft.model=models.id ORDER BY models.make, models.model, sellPrice");
     }
 
+    public static List<AircraftBean> getAircraftForPrivateSaleById(int userId)
+    {
+        return getAircraftSQL("SELECT * FROM (SELECT id FROM aircraft WHERE sellPrice is not null AND (selltoid=" + userId + " OR  selltoid in (SELECT groupid FROM groupmembership WHERE userid=" + userId + " AND level='owner'))) a left join aircraft on a.id=aircraft.id left join models on aircraft.model=models.id ORDER BY models.make, models.model, sellPrice");
+    }
+
     public static AircraftBean getAircraftById(int aircraftId)
     {
         AircraftBean result = null;
@@ -401,7 +406,7 @@ public class Aircraft implements Serializable
         try
         {
             StringBuilder tables = new StringBuilder("aircraft");
-            StringBuilder where = new StringBuilder(" WHERE aircraft.model = models.id AND sellPrice is not null ");
+            StringBuilder where = new StringBuilder(" WHERE aircraft.model = models.id AND sellPrice is not null and not privatesale ");
             StringBuilder query = new StringBuilder("SELECT * FROM ");
             StringBuilder query2 = new StringBuilder("SELECT DISTINCT location FROM aircraft, models, airports ");
 
@@ -1042,12 +1047,17 @@ public class Aircraft implements Serializable
                 int oldOwner = rs.getInt("owner");
                 String location = rs.getString("location");
 
+                if(oldOwner == account)
+                {
+                    throw new DataError("Buyer already owns this aircraft.");
+                }
+
                 if (!Banking.checkFunds(account, sellPrice))
                 {
                     throw new DataError("Not enough money to buy aircraft");
                 }
 
-                qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null where id = ?";
+                qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = null where id = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, account, aircraftId);
 
                 Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraftId, "", false);

@@ -326,7 +326,9 @@
 		GoodsBean buildingmaterials = Goods.getGoods(fbo.getLocation(), fbo.getOwner(), GoodsBean.GOODS_BUILDING_MATERIALS);
 		CachedAirportBean ap = Airports.cachedAirports.get(fbo.getLocation());
 
-		int daysAvail = supplies.getAmount() / fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation()));
+		int daysAvail = 0;
+		if(supplies != null)
+			daysAvail = supplies.getAmount() / fbo.getSuppliesPerDay(Airports.getTotalFboSlots(fbo.getLocation()));
 %>
     		<tr>
                 <td class="nowrap"><%= Airports.airportLink(ap.getIcao(), ap.getIcao(), response) %></td>
@@ -357,8 +359,7 @@
 %>
                     | <a class="link" href="<%= response.encodeURL(paymentUrl) %>">Payments</a>
                     | <a class="link" href="<%= response.encodeURL("fbolog.jsp?id=" + fbo.getId()) %>">Log</a>
-                    | <a class="link" href="<%= response.encodeURL("fbotransfer.jsp?id=" + fbo.getId()) %>">Transfer</a>
-<%		if (fbo.deleteAllowed(user)) 
+<%		if (fbo.deleteAllowed(user))
 		{
 %>
 				    | <a class="link" href="javascript:doSubmit<%= fbo.getFboSize() > 1 ? "3" : "2" %>('<%= "(" + fbo.getLocation() + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fbo.getId() %>', '<%= fbo.recoverableBuildingMaterials() %>')">Tear Down</a>
