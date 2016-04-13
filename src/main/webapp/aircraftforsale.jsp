@@ -82,6 +82,8 @@
             params += getValue("highLoad");
             params += getValue("from");
             params += getValue("distance");
+            params += getValue("isSystemOwned");
+            params += getValue("isPlayerOwned");
 
             return params;
         }
@@ -90,6 +92,8 @@
             var item;
             if("model distance".indexOf(name) >= 0)
                 item = $("select[name="+name+"]").val();
+            else if("isPlayerOwned isSystemOwned".indexOf(name) >= 0)
+                item = $("input[name="+name+"]").is(':checked');
             else
                 item = $("input[name="+name+"]").val();
 
@@ -319,7 +323,7 @@
 %>
                     </select>
                 </div>
-                <table>
+                <table style="width:480px;">
                     <tr><td colspan="4">Leaving filter blank selects minimum or maximum value available.</td></tr>
                     <tr><td></td><td>Min</td><td></td><td>Max</td></tr>
                     <tr>
@@ -362,7 +366,13 @@
                             </select>
                         </td>
                         <td style="padding: 3px;text-align: center;">NM from</td>
-                        <td><input name="from" type="text" class="form-control" value="" size="4" ></td>
+                        <td class="form-inline"><input name="from" type="text" class="form-control" value="" size="4" > (ICAO)</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td class="form-inline"><input name="isSystemOwned" type="checkbox" class="form-control" checked> Bank Owned</td>
+                        <td></td>
+                        <td class="form-inline"><input name="isPlayerOwned" type="checkbox" class="form-control" checked> Player Owned</td>
                     </tr>
                 </table>
                 <button class="btn btn-default form-control" style="margin-top: 10px;" onclick="loadSearch()">Search</button>

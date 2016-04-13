@@ -18,7 +18,7 @@ public final class Validate
 	//http://www.tek-tips.com/viewthread.cfm?qid=1379040
 	public static boolean isIPAddress(String ipAddress)
 	{
-	    String[] parts = ipAddress.split( "\\." );
+	    String[] parts = ipAddress.trim().split( "\\." );
 
 	    if ( parts.length != 4 )
 	    {

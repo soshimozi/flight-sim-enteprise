@@ -99,12 +99,20 @@
 	if(aircraft.getLessor() == 0)
 	{
 %>
-			if( document.aircraftform.sellPrice.value!= "" && (parseInt(document.aircraftform.sellPrice.value) < <%=iPrice%>))
+			if( document.aircraftform.sellPrice.value != "" && (parseInt(document.aircraftform.sellPrice.value) < <%=iPrice%>))
 			{
 				var price = Number(document.aircraftform.sellPrice.value);
 				if (!window.confirm("You have set the sell price of: $" + price.toMoney(2) + " to less then System Buyback Price of: <%=mPrice%>, are you sure?"))
 					return;
 			}
+
+			if( document.aircraftform.saletype.value == "1"
+					&& document.aircraftform.selltoid.value == "0")
+			{
+				alert("You have selected Private sale but have not selected who to sell to!");
+				return;
+			}
+
 <%
 	}
 %>

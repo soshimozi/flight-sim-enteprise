@@ -1046,6 +1046,7 @@ public class Aircraft implements Serializable
                 int sellPrice = rs.getInt("sellPrice");
                 int oldOwner = rs.getInt("owner");
                 String location = rs.getString("location");
+                int sellToId = rs.getInt("selltoid");
 
                 if(oldOwner == account)
                 {
@@ -1060,7 +1061,11 @@ public class Aircraft implements Serializable
                 qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = null where id = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, account, aircraftId);
 
-                Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraftId, "", false);
+                String comment = "";
+                if(sellToId != 0)
+                    comment = "Private Sale: " + Accounts.getAccountNameById(sellToId);
+
+                Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraftId, comment, false);
             }
             else
             {

@@ -2764,7 +2764,8 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("NeedsRepair");
 			buffer.appendHeaderItem("AirframeTime");
 			buffer.appendHeaderItem("EngineTime");
-			buffer.appendHeaderItem("TimeLast100hr");			
+			buffer.appendHeaderItem("TimeLast100hr");
+			buffer.appendHeaderItem("LeasedFrom");
 		}
 
         for (AircraftBean aircraft : aircraftlist)
@@ -2798,6 +2799,10 @@ public class Datafeed extends HttpServlet
             if (aircraft.getUserLock() > 0)
                 userlockname = Accounts.getAccountNameById(aircraft.getUserLock());
 
+			String leasedFrom = "NA";
+			if(aircraft.getLessor() != 0)
+				leasedFrom = Accounts.getAccountNameById(aircraft.getLessor());
+
 			buffer.append(aircraft.getId());
             buffer.append(aircraft.getMakeModel());
             buffer.append(aircraft.getRegistration());
@@ -2819,6 +2824,7 @@ public class Datafeed extends HttpServlet
             buffer.append(aircraft.getAirframeHoursString());
             buffer.append(aircraft.getEngineHoursString());
             buffer.append(aircraft.getHoursSinceLastCheckString());
+			buffer.append(Converters.XMLHelper.protectSpecialCharacters(leasedFrom));
             buffer.newrow();
         }
 	}
@@ -2855,7 +2861,11 @@ public class Datafeed extends HttpServlet
             if (aircraft.getUserLock() > 0)
                 userlockname = Accounts.getAccountNameById(aircraft.getUserLock());
 
-            buffer.append("<Aircraft>\n");
+			String leasedFrom = "NA";
+			if(aircraft.getLessor() != 0)
+				leasedFrom = Accounts.getAccountNameById(aircraft.getLessor());
+
+			buffer.append("<Aircraft>\n");
 			buffer.append("SerialNumber", aircraft.getId());
             buffer.append("MakeModel", aircraft.getMakeModel());
             buffer.append("Registration", aircraft.getRegistration());
@@ -2877,6 +2887,7 @@ public class Datafeed extends HttpServlet
             buffer.append("AirframeTime", aircraft.getAirframeHoursString());
             buffer.append("EngineTime", aircraft.getEngineHoursString());
             buffer.append("TimeLast100hr", aircraft.getHoursSinceLastCheckString());
+			buffer.append("LeasedFrom", Converters.XMLHelper.protectSpecialCharacters(leasedFrom));
             buffer.append("</Aircraft>\n");
         }
 	}	

@@ -4,6 +4,7 @@
 <%@ page import="net.fseconomy.data.*" %>
 <%@ page import="net.fseconomy.util.Helpers" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session"/>
 
@@ -71,17 +72,31 @@
     }
 
     List<AircraftBean> aircraftList = null;
-
+    String error = null;
     switch(sAction)
     {
         case "privatesale":
             aircraftList = Aircraft.getAircraftForPrivateSaleById(user.getId());
             break;
         case "search":
-            aircraftList = Aircraft.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
+            if(!Helpers.isNullOrBlank(fromParam) && !Airports.cachedAirports.containsKey(fromParam.toUpperCase()))
+            {
+                error = "Error: Bad From ICAO";
+                aircraftList = new ArrayList<AircraftBean>();
+            }
+            else
+                aircraftList = Aircraft.findAircraftForSale(modelId, lowPrice, highPrice, lowTime, highTime, lowPax, highPax, lowLoad, highLoad, distance, fromParam, hasVfr, hasIfr, hasAp, hasGps, isSystemOwned, isPlayerOwned, equipment);
             break;
         default:
             return;
+    }
+
+    if(error != null)
+    {
+%>
+<div class="error"><%= error %></div>
+<%
+        return;
     }
 %>
 
