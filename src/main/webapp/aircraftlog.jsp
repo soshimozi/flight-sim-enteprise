@@ -211,20 +211,30 @@
             </tr>
             </thead>
             <tr>
-                <td><%=salePrice%></td>
                 <td>
-                    <a class="link" href="javascript:doSubmit2('<%= aircraft.getId() %>', '<%= price %>', <%= user.getId() %>)">Buy</a>
 <%
-        for (Groups.groupMemberData staffGroup : staffGroups)
-        {
+    if(!aircraft.isPrivateSale())
+    {
 %>
-                    <a class="link"
-                       href="javascript:doSubmit2('<%= aircraft.getId() %>', '<%= price %>', <%= staffGroup.groupId %>)">Buy
-                        for <%= staffGroup.groupName %>
-                    </a>
-                    <%
-                        }
+                    <%=salePrice%>
+<%
+    }
+    else if(aircraft.isPrivateSale() && user.getId() == aircraft.getSellToId())
+    {
 %>
+                    Private Sale: <%=salePrice%>
+<%
+    }
+    else
+    {
+%>
+                    Private Sale
+<%
+    }
+%>
+                </td>
+                <td>
+                    <a href="aircraftforsale.jsp">Go to Aircraft For Sale</a>
                 </td>
             </tr>
         </table>
