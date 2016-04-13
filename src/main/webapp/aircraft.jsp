@@ -219,8 +219,15 @@
 <%
 		if(aircraft.getLessor() == 0)
 		{
+			String priceField = "";
+			if(aircraft.getSellPrice() > 0 && aircraft.isPrivateSale())
+				priceField = Formatters.currency.format(aircraft.getSellPrice()) + " to " + Accounts.getAccountNameById(aircraft.getSellToId());
+			else if(aircraft.getSellPrice() > 0)
+				priceField = Formatters.currency.format(aircraft.getSellPrice());
+			else
+				priceField = "Not for sale";
 %>			
-			<td class="numeric"><%= aircraft.getSellPrice() == 0? "Not for sale" : Formatters.currency.format(aircraft.getSellPrice()) %></td>
+			<td class="numeric"><%= priceField %></td>
 <%
 		}
 		else
