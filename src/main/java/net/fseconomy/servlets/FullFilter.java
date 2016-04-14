@@ -244,6 +244,10 @@ public class FullFilter implements Filter
 		}
 	}	
 
+	public static void setMaintenanceMode(boolean flag)
+	{
+		isClosedForMaintenance = flag;
+	}
 	//
 	// Update all our DB set parameters
 	//

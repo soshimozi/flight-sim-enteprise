@@ -1,7 +1,10 @@
 package net.fseconomy.data;
 
 import net.fseconomy.util.GlobalLogger;
+import net.fseconomy.util.Helpers;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.concurrent.*;
@@ -10,10 +13,10 @@ public class ScheduledTasks
 {
     private static ScheduledTasks instance = null;
     private static ScheduledFuture<?> futureMaintenanceCycle = null;
-    private static ScheduledFuture<?> futureDbOptimize = null;
+    private static ScheduledFuture<?> futureDbTasks = null;
     public static MaintenanceCycle maintenanceObject = null;
     private ScheduledExecutorService executorMaint;
-    private ScheduledExecutorService executorOptimize;
+    private ScheduledExecutorService executorDbTasks;
 
     public static ScheduledTasks getInstance()
     {
@@ -25,7 +28,7 @@ public class ScheduledTasks
 
     private ScheduledTasks()
     {
-        //do this section last as this kicks off the timer
+        //setup instance of maintenance cycle to run
         maintenanceObject = new MaintenanceCycle();
     }
 
@@ -33,52 +36,39 @@ public class ScheduledTasks
     {
         //do this section last as this kicks off the timer
         executorMaint = Executors.newSingleThreadScheduledExecutor();
-        executorOptimize = Executors.newSingleThreadScheduledExecutor();
+        executorDbTasks = Executors.newSingleThreadScheduledExecutor();
 
         startMaintenanceCycle();
-        startDbOptimize();
+        startDbTasks();
     }
 
     public void endScheduledTasks()
     {
         futureMaintenanceCycle.cancel(false);
-        futureDbOptimize.cancel(false);
+        futureDbTasks.cancel(false);
         executorMaint.shutdown();
-        executorOptimize.shutdown();
+        executorDbTasks.shutdown();
     }
 
-    private void startMaintenanceCycleOld()
-    {
-        if(Boolean.getBoolean("Debug"))
-        {
-            //5 minute cycles if Debug set on command line
-            futureMaintenanceCycle = executorMaint.scheduleWithFixedDelay(maintenanceObject, 0, 5, TimeUnit.MINUTES);
-        }
-        else
-        {
-            long delay = minutesToNextHalfHour();
-
-            GlobalLogger.logApplicationLog("Restart: Main cycle starts in (minutes): " + delay, ScheduledTasks.class);
-
-            //if delay is 3 minutes or greater then run the cycle now to update stats
-            if(delay >= 3)
-            {
-                //Do it now, then setup the schedule runs
-                maintenanceObject.SetOneTimeStatsOnly(true);
-                executorMaint.execute(maintenanceObject);
-            }
-
-            //Schedule it at the top and bottom of the hour
-            futureMaintenanceCycle = executorMaint.scheduleAtFixedRate(maintenanceObject, delay, 30, TimeUnit.MINUTES);
-        }
-    }
-
-
-    private void dbOptimize() throws RuntimeException
+    private void runDbTasks()
     {
         try
         {
-            GlobalLogger.logApplicationLog("dbOptimize executed", ScheduledTasks.class);
+            net.fseconomy.servlets.FullFilter.setMaintenanceMode(true);
+            runDbOptimize();
+            runDbBackup();
+        }
+        finally
+        {
+            net.fseconomy.servlets.FullFilter.setMaintenanceMode(false);
+        }
+    }
+
+    private void runDbOptimize() throws RuntimeException
+    {
+        try
+        {
+            GlobalLogger.logApplicationLog("Table Optimize Started", ScheduledTasks.class);
 
             //start time
             long starttime = System.currentTimeMillis();
@@ -95,6 +85,60 @@ public class ScheduledTasks
             e.printStackTrace();
             GlobalLogger.logApplicationLog("dbOptimize failed", ScheduledTasks.class);
             throw new RuntimeException("Optimize failed");
+        }
+    }
+
+    private String getDbBackupScript()
+    {
+        try
+        {
+            return DALHelper.getInstance().ExecuteScalar("SELECT sValue from sysvariables where VariableName='DbBackupScript'", new DALHelper.StringResultTransformer());
+        }
+        catch(SQLException e)
+        {
+            return "";
+        }
+    }
+
+    public void runDbBackup() throws RuntimeException
+    {
+        GlobalLogger.logApplicationLog("Database Backup Started", ScheduledTasks.class);
+
+        //start time
+        long starttime = System.currentTimeMillis();
+
+        try
+        {
+            ProcessBuilder pb;
+
+            String dbScript = getDbBackupScript();
+            if(Helpers.isNullOrBlank(dbScript))
+            {
+                GlobalLogger.logApplicationLog("Database Backup Script Missing!", ScheduledTasks.class);
+                return;
+            }
+
+            pb = new ProcessBuilder(dbScript);
+
+            //pb.redirectErrorStream(true);
+            Process process = pb.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null)
+                System.out.println("backup-databases output: " + line);
+
+            process.waitFor();
+
+            //start time
+            long elapsed = System.currentTimeMillis() - starttime;
+
+            GlobalLogger.logApplicationLog("Database Backup Completed: elapsed time = " + elapsed + "ms", ScheduledTasks.class);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            GlobalLogger.logApplicationLog("Database Backup failed", ScheduledTasks.class);
+            throw new RuntimeException("Database Backup failed");
         }
     }
 
@@ -149,20 +193,29 @@ public class ScheduledTasks
         new Thread(watchdog).start();
     }
 
-    private void startDbOptimize()
+    private void startDbTasks()
     {
-        long delay = minutesToNextOptimize();
-        GlobalLogger.logApplicationLog("Scheduled DbOptimize - next optimize in [" + delay + "] minutes", ScheduledTasks.class);
 
-        futureDbOptimize = executorOptimize.scheduleAtFixedRate(
+        long delay = minutesToNextOptimize();
+        long stdInterval = 24*60;
+
+        if(Boolean.getBoolean("Debug"))
+        {
+            stdInterval = 5;
+            delay = 0;
+        }
+
+        GlobalLogger.logApplicationLog("Scheduled DbTasks - next run in [" + delay + "] minutes", ScheduledTasks.class);
+
+        futureDbTasks = executorDbTasks.scheduleAtFixedRate(
                 new Runnable()
                 {
                     @Override
                     public void run()
                     {
-                        dbOptimize();
+                        runDbTasks();
                     }
-                }, delay, 24*60, TimeUnit.MINUTES);
+                }, delay, stdInterval, TimeUnit.MINUTES);
 
         Runnable watchdog = new Runnable()
         {
@@ -173,12 +226,12 @@ public class ScheduledTasks
                 {
                     try
                     {
-                        futureDbOptimize.get();
+                        futureDbTasks.get();
                     }
                     catch (ExecutionException e)
                     {
                         //handle it
-                        startDbOptimize();
+                        startDbTasks();
                         return;
                     }
                     catch (InterruptedException e)
@@ -217,22 +270,22 @@ public class ScheduledTasks
         //int millis = calendar.get(Calendar.MILLISECOND);
         int delayHours = 0;
         int delayMinutes = 0;
-        if(hour24 > 6)
+        if(hour24 > 12)
         {
-            delayHours = 24 - hour24 + 6;
+            delayHours = 24 - hour24 + 12;
         }
         else
         {
-            delayHours = 6 - hour24;
+            delayHours = 12 - hour24;
         }
-        if(minutes > 15)
+        if(minutes > 10)
         {
-            delayMinutes = (60 - minutes) + 15;
+            delayMinutes = (60 - minutes) + 10;
             delayHours--;
         }
         else
         {
-            delayMinutes = 15 - minutes;
+            delayMinutes = 10 - minutes;
         }
 
         int total = delayHours*60 + minutes;
