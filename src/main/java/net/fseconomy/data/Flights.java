@@ -222,7 +222,7 @@ public class Flights
                 //Start Computing Flight Costs
                 /////////////////////////////////////////////////
 
-                float income = 0, fuelCost = 0, rentalCost = 0, bonus = 0, rentalTime;
+                float income = 0, fuelCost = 0, rentalCost = 0, bonus = 0, rentalTime = 0;
                 float price = 0, crewCost = 0, fboAssignmentFee = 0, mpttax = 0;
                 int totalPilotFee = 0;
 
@@ -347,7 +347,7 @@ public class Flights
                                         .append(", FuelCost: ").append(fuelCost)
                                         .append(", Bonus: ").append(bonus)
                                         .append(", TotalToOwner: ").append(flightCost).toString(),
-                                Flights.class);
+                                        Flights.class);
 
                     // Crew Cost added  - deducts $100 per hour per additional crew member from payout
                     crewCost = m.getCrew() * 100 * (float)(engineTime/3600.0);
@@ -444,6 +444,34 @@ public class Flights
 
                 if( balanceKick )
                 {
+
+                    GlobalLogger.logFlightLog(
+                            new StringBuilder()
+                                    .append("****> Insufficeint funds: ")
+                                    .append(", AircraftId: ").append(aircraft.getId())
+                                    .append(", Date: ").append(new Timestamp(System.currentTimeMillis()))
+                                    .append(", By: ").append(user.getName())
+                                    .append(", From: ").append(aircraft.getDepartedFrom())
+                                    .append(", To: ").append(location.icao)
+                                    .append(", EngineTimeType: ").append(aircraft.getAccounting() == AircraftBean.ACC_HOUR ? "Hourly" : "Tach")
+                                    .append(", EngineTime: ").append(engineTime)
+                                    .append(", RentalTime: ").append(rentalTime)
+                                    .append(", RentalType: ").append(aircraft.wasWetRent() ? "Wet" : "Dry")
+                                    .append(", InvalidFuel: ").append(invalidFuel)
+                                    .append(", pricePerHour: ").append(price)
+                                    .append(", Rental Cost: ").append(rentalCost)
+                                    .append(", FuelCost: ").append(fuelCost)
+                                    .append(", groupToPay: ").append(groupToPay)
+                                    .append(", income: ").append(income)
+                                    .append(", totalPilotFee: ").append(totalPilotFee)
+                                    .append(", crewCost: ").append(crewCost)
+                                    .append(", fboAssignmentFee: ").append(fboAssignmentFee)
+                                    .append(", mpttax: ").append(mpttax)
+                                    .append(", Bonus: ").append(bonus)
+                                    .append(", flightCost: ").append(flightCost)
+                                    .append(", balance: ").append(balance).toString(),
+                                    Flights.class);
+
                     String errmsg;
                     if( groupToPay != null)
                         errmsg = "VALIDATIONERROR: Insufficient funds in the group \' " + groupToPay.getName() + "\' cash account to pay for the flight costs -- flight aborted!";
