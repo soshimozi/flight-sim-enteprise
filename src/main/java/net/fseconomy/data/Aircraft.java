@@ -1033,39 +1033,44 @@ public class Aircraft implements Serializable
     public static void buyAircraft(int aircraftId, int account, UserBean user) throws DataError
     {
         if (user.getId() != account && user.groupMemberLevel(account) < UserBean.GROUP_STAFF)
-        {
             throw new DataError("Permission denied");
-        }
 
         try
         {
-            String qry = "SELECT * from aircraft WHERE sellPrice > 0 AND id = ?";
-            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, aircraftId);
-            if (rs.next())
+            AircraftBean aircraft = getAircraftById(aircraftId);
+            if (aircraft.getSellPrice() > 0)
             {
-                int sellPrice = rs.getInt("sellPrice");
-                int oldOwner = rs.getInt("owner");
-                String location = rs.getString("location");
-                int sellToId = rs.getInt("selltoid");
-
-                if(oldOwner == account)
-                {
+                if(aircraft.getOwner() == account)
                     throw new DataError("Buyer already owns this aircraft.");
-                }
 
-                if (!Banking.checkFunds(account, sellPrice))
+                if(aircraft.isPrivateSale())
                 {
-                    throw new DataError("Not enough money to buy aircraft");
+                    //check that logged user is able to buy this aircraft
+                    boolean found = false;
+                    List<AircraftBean> list = getAircraftForPrivateSaleById(user.getId());
+                    for (AircraftBean ac : list)
+                    {
+                        if (ac.getId() == aircraftId)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                        throw new DataError("You are not allowed to buy this aircraft.");
                 }
 
-                qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = null where id = ?";
+                if (!Banking.checkFunds(account, aircraft.getSellPrice()))
+                    throw new DataError("Not enough money to buy aircraft");
+
+                String qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = null where id = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, account, aircraftId);
 
                 String comment = "";
-                if(sellToId != 0)
-                    comment = "Private Sale: " + Accounts.getAccountNameById(sellToId);
+                if(aircraft.getSellToId() != 0)
+                    comment = "Private Sale: " + Accounts.getAccountNameById(aircraft.getSellToId());
 
-                Banking.doPayment(account, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraftId, comment, false);
+                Banking.doPayment(account, aircraft.getOwner(), aircraft.getSellPrice(), PaymentBean.AIRCRAFT_SALE, 0, -1, aircraft.getLocation(), aircraftId, comment, false);
             }
             else
             {
