@@ -1,11 +1,13 @@
 package net.fseconomy.data;
 
+import net.fseconomy.util.Formatters;
 import net.fseconomy.util.GlobalLogger;
 import net.fseconomy.util.Helpers;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.concurrent.*;
 
@@ -96,6 +98,7 @@ public class ScheduledTasks
         }
         catch(SQLException e)
         {
+            e.printStackTrace();
             return "";
         }
     }
@@ -118,9 +121,21 @@ public class ScheduledTasks
                 return;
             }
 
-            pb = new ProcessBuilder(dbScript);
+            // Find OS running on VM
+            String operatingSystem = System.getProperty("os.name");
 
-            //pb.redirectErrorStream(true);
+            // In case of windows run command
+            // In case of Linux/Ubuntu run command using /bin/bash
+            if (operatingSystem.toLowerCase().contains("window"))
+            {
+                pb = new ProcessBuilder("cmd", "/c", dbScript);
+            }
+            else
+            {
+                pb = new ProcessBuilder("/bin/bash", "-c", dbScript);
+                pb.redirectErrorStream(true);
+            }
+
             Process process = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -196,7 +211,13 @@ public class ScheduledTasks
     private void startDbTasks()
     {
 
-        long delay = minutesToNextOptimize();
+        int delay = (int)minutesToNextOptimize();
+
+        Calendar clock = Calendar.getInstance();
+        clock.add(Calendar.MINUTE, delay);
+
+        GlobalLogger.logApplicationLog("Scheduled DbTasks - next run at [" + Formatters.dateyyyymmddhhmmzzz.format(clock.getTimeInMillis()) + "] in [" + delay + "] minutes", ScheduledTasks.class);
+
         long stdInterval = 24*60;
 
         if(Boolean.getBoolean("Debug"))
@@ -204,8 +225,6 @@ public class ScheduledTasks
             stdInterval = 5;
             delay = 0;
         }
-
-        GlobalLogger.logApplicationLog("Scheduled DbTasks - next run in [" + delay + "] minutes", ScheduledTasks.class);
 
         futureDbTasks = executorDbTasks.scheduleAtFixedRate(
                 new Runnable()
@@ -262,35 +281,15 @@ public class ScheduledTasks
 
     private static long minutesToNextOptimize()
     {
-        Calendar calendar = Calendar.getInstance();
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.DAY_OF_MONTH, 1);
+        c.set(Calendar.HOUR_OF_DAY, 12);
+        c.set(Calendar.MINUTE, 10);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        long secs = (c.getTimeInMillis()-System.currentTimeMillis()) / 1000;
 
-        int hour24 = calendar.get(Calendar.HOUR_OF_DAY);
-        int minutes = calendar.get(Calendar.MINUTE);
-        //int seconds = calendar.get(Calendar.SECOND);
-        //int millis = calendar.get(Calendar.MILLISECOND);
-        int delayHours = 0;
-        int delayMinutes = 0;
-        if(hour24 > 12)
-        {
-            delayHours = 24 - hour24 + 12;
-        }
-        else
-        {
-            delayHours = 12 - hour24;
-        }
-        if(minutes > 10)
-        {
-            delayMinutes = (60 - minutes) + 10;
-            delayHours--;
-        }
-        else
-        {
-            delayMinutes = 10 - minutes;
-        }
-
-        int total = delayHours*60 + minutes;
-
-        return total;
+        return secs / 60;
     }
 
 }

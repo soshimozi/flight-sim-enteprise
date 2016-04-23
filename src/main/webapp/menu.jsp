@@ -22,7 +22,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
         for (Object o : memberships.values())
         {
             Groups.groupMemberData memberData = (Groups.groupMemberData) o;
-            if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
+            if ((!staffOnly && memberData.memberLevel >= UserBean.GROUP_MEMBER) || memberData.memberLevel >= UserBean.GROUP_STAFF)
             {
                 int len = memberData.groupName.length();
                 if (len > stringLen)
@@ -43,7 +43,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
     for (Object o : memberships.values())
     {
         Groups.groupMemberData memberData = (Groups.groupMemberData) o;
-        if (!staffOnly || memberData.memberLevel >= UserBean.GROUP_STAFF)
+        if ((!staffOnly && memberData.memberLevel >= UserBean.GROUP_MEMBER) || memberData.memberLevel >= UserBean.GROUP_STAFF)
         {
             returnValue.append("oM.makeMenu('").append(menu).append("_").append(count++).append("','").append(menu).append("','").append(memberData.groupName.replaceAll("\'", "\\\\'")).append("','").append(response.encodeURL(link + arg + memberData.groupId)).append("', '', ").append(length).append(");\n");
         }
@@ -110,7 +110,7 @@ String groupMenu(UserBean user, String parent, int id, String name, boolean staf
 
 		oM.makeMenu('m8','','Groups','<%= response.encodeURL("groups.jsp") %>', "", 80);
 		oM.makeMenu('sub8_0','m8','My groups','<%= response.encodeURL("groups.jsp")%>');
-		oM.makeMenu('sub8_1','m8','All groups','<%= response.encodeURL("groups.jsp?all=1")%>');
+		oM.makeMenu('sub8_1','m8','All groups','<%= response.encodeURL("grouplist.jsp")%>');
 	<%= groupMenu(user, "m8", 1, "Assignments", false, false, "groupassignments.jsp", "?groupid=", response) %>
 	<%= groupMenu(user, "m8", 2, "Pay group", false, false, "pay.jsp", "?groupid=", response) %>
 	<%= groupMenu(user, "m8", 3, "Memberships", true, false, "memberships.jsp", "?groupid=", response) %>

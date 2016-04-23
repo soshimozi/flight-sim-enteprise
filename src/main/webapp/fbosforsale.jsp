@@ -53,7 +53,7 @@
 
         function loadPrivateSales()
         {
-            document.location.href = "fbosforsale.jsp?action=privatesale";
+            document.location.href = "fbosforsale.jsp?action=privatesale&randomizer="+Math.random().toFixed(20);
         }
 
         function loadOpenSales()

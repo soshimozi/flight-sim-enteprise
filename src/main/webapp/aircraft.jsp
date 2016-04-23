@@ -52,11 +52,17 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
-	<link rel="stylesheet" type="text/css" href="css/Master.css" />
-	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css" />
+	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
+	<link rel='stylesheet prefetch' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css'>
+	<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="css/tablesorter-style.css"/>
+	<link rel="stylesheet" type="text/css" href="css/Master.css"/>
 
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
+
 	<script type='text/javascript' src='scripts/jquery.tablesorter.js'></script>
 	<script type='text/javascript' src="scripts/jquery.tablesorter.widgets.js"></script>
 	<script type='text/javascript' src='scripts/parser-checkbox.js'></script>
@@ -87,7 +93,11 @@
 				var id = s[0];
 				var type = s[1];
 				doRental(id, type);
-			}	
+			}
+			else if (selItemText.indexOf("Transfer") >= 0)
+			{
+				selectAircraft(selItemVal);
+			}
 			else if(selItemText.indexOf("Return Lease") >= 0)
 			{
 				if(window.confirm("Are you sure you want to return this Lease?"))
@@ -106,6 +116,27 @@
                 location.href = selItemVal;
 			}		
 		}
+
+		function transferAircraft()
+		{
+			var form = document.getElementById("formAircraftModal");
+			var ebuyer = document.getElementById("groupSelect");
+
+			form.accountid.value = ebuyer.options[ebuyer.selectedIndex].value;
+			form.submit();
+		}
+
+		function selectAircraft(aircraftId)
+		{
+			var form = document.getElementById("formAircraftModal");
+			form.aircraftid.value = aircraftId;
+
+			$("#aircraftData").load( "aircraftdata.jsp?aircraftid=" + aircraftId );
+
+			$("#myModal").modal('show');
+		}
+
+
 	</script>
 
 	<script type="text/javascript">
@@ -275,7 +306,17 @@
 %>
 						<option value="<%= response.encodeURL("shipaircraft.jsp?id=" + aircraft.getId()) %>">Ship</option>
 <% 		
-					} 
+					}
+					int realowner = aircraft.getOwner();
+					if(Accounts.isGroup(aircraft.getOwner()))
+						realowner = Accounts.accountUltimateOwner(aircraft.getOwner());
+
+					if (realowner == user.getId())
+					{
+%>
+					<option value="<%=aircraft.getId()%>">Transfer</option>
+<%
+					}
 				}
 				else
 				{
@@ -376,5 +417,53 @@
 	</form>
 </div>
 </div>
+
+<!-- Modal HTML -->
+<div id="myModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">Transfer Aircraft</h4>
+			</div>
+			<div class="modal-body">
+				<form id="formAircraftModal" method="post" action="userctl" class="ui-front">
+					<input type="hidden" name="event" value="transferAircraft"/>
+					<input type="hidden" name="accountid" value=""/>
+					<input type="hidden" name="aircraftid" value=""/>
+					<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+					<div id="aircraftData">
+					</div>
+					<div>
+						Transfer  to:
+						<select id="groupSelect">
+							<option value=""></option>
+							<option value="<%=user.getId()%>"><%= user.getName()%></option>
+							<%
+								List<UserBean> groups = Accounts.getGroupsOwnedByUser(user.getId());
+
+								for (UserBean group : groups)
+								{
+									if (user.groupMemberLevel(group.getId()) >= UserBean.GROUP_STAFF)
+									{
+							%>
+							<option value="<%=group.getId()%>"><%= group.getName()%></option>
+							<%
+									}
+								}
+							%>
+						</select>
+
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" onclick="transferAircraft();">Transfer Aircraft</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 </body>
 </html>

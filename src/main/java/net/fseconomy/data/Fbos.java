@@ -17,6 +17,84 @@ public class Fbos implements Serializable
     public static final int FBO_ORDER_FUEL = 3;
     public static final int FBO_ORDER_SUPPLIES = 4;
 
+    private static void transferSupplies(Connection conn, Statement stmt, int owner, int toId, String icao) throws SQLException, DataError
+    {
+        // Move goods
+        ResultSet rs = stmt.executeQuery("SELECT type, amount FROM goods where owner = " + owner + " and location = '" + icao + "' and amount <> 0");
+        while (rs.next())
+        {
+            int type = rs.getInt("type");
+            int amount = rs.getInt("amount");
+            Goods.changeGoodsRecord(icao, type, owner, -amount, true);
+            Goods.changeGoodsRecord(icao, type, toId, amount, true);
+        }
+        rs.close();
+
+        //verify record for fbo supplies exists
+        boolean supplies = false;
+        boolean fuel100LL = false;
+        boolean fuelJetA = false;
+
+        rs = stmt.executeQuery("SELECT type, amount FROM goods where owner = " + toId + " and location = '" + icao + "'");
+        while (rs.next())
+        {
+            int type = rs.getInt("type");
+            switch(type)
+            {
+                case GoodsBean.GOODS_SUPPLIES: supplies = true; break;
+                case GoodsBean.GOODS_FUEL100LL: fuel100LL = true; break;
+                case GoodsBean.GOODS_FUELJETA: fuelJetA = true; break;
+            }
+        }
+        rs.close();
+
+        //create fbo goods records if missing
+        if(!supplies)
+            Goods.changeGoodsRecord(icao, GoodsBean.GOODS_SUPPLIES, toId, 0, true);
+        if(!fuel100LL)
+            Goods.changeGoodsRecord(icao, GoodsBean.GOODS_FUEL100LL, toId, 0, true);
+        if(!fuelJetA)
+            Goods.changeGoodsRecord(icao, GoodsBean.GOODS_FUELJETA, toId, 0, true);
+    }
+
+    //note: transfers only allowed between owner and owner owned groups
+    public static void transferFbo(FboBean fbo, int id) throws DataError
+    {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        String sUpdate;
+
+        int owner = fbo.getOwner();
+        int toId = id;
+        String icao = fbo.getLocation();
+
+        try
+        {
+            conn = DALHelper.getInstance().getConnection();
+            stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+            transferSupplies(conn, stmt, owner, toId, icao);
+
+            // Transfer ownership.
+            sUpdate = "UPDATE fbo SET fbo.owner = " + toId + ", fbo.saleprice = 0, fbo.selltoid = 0, fbo.privatesale = null WHERE fbo.owner = " + owner + " AND fbo.location ='" + icao + "'";
+            stmt.executeUpdate(sUpdate);
+            sUpdate = "UPDATE fbofacilities set occupant = " + toId + " WHERE occupant = " + owner + " and fboId = " + fbo.getId();
+            stmt.executeUpdate(sUpdate);
+
+            Banking.doPayment(owner, toId, 0, PaymentBean.FBO_SALE, 0, fbo.getId(), icao, 0, "FBO Transfer", false);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            DALHelper.getInstance().tryClose(rs);
+            DALHelper.getInstance().tryClose(stmt);
+            DALHelper.getInstance().tryClose(conn);
+        }
+    }
 
     public static void doTransferFbo(FboBean fbo, int buyer, int owner, String icao, boolean goods) throws DataError
     {
@@ -48,40 +126,7 @@ public class Fbos implements Serializable
 
             if (goods)
             {
-                rs = stmt.executeQuery("SELECT type, amount FROM goods where owner = " + owner + " and location = '" + icao + "' and amount <> 0");
-                while (rs.next())
-                {
-                    int type = rs.getInt("type");
-                    int amount = rs.getInt("amount");
-                    Goods.changeGoodsRecord(icao, type, owner, -amount, true);
-                    Goods.changeGoodsRecord(icao, type, buyer, amount, true);
-                }
-                rs.close();
-
-                //verify record for fbo supplies exists
-                boolean supplies = false;
-                boolean fuel100LL = false;
-                boolean fuelJetA = false;
-                rs = stmt.executeQuery("SELECT type, amount FROM goods where owner = " + buyer + " and location = '" + icao + "'");
-                while (rs.next())
-                {
-                    int type = rs.getInt("type");
-                    switch(type)
-                    {
-                        case GoodsBean.GOODS_SUPPLIES: supplies = true; break;
-                        case GoodsBean.GOODS_FUEL100LL: fuel100LL = true; break;
-                        case GoodsBean.GOODS_FUELJETA: fuelJetA = true; break;
-                    }
-                }
-                rs.close();
-
-                //create fbo goods records if missing
-                if(!supplies)
-                    Goods.changeGoodsRecord(icao, GoodsBean.GOODS_SUPPLIES, buyer, 0, true);
-                if(!fuel100LL)
-                    Goods.changeGoodsRecord(icao, GoodsBean.GOODS_FUEL100LL, buyer, 0, true);
-                if(!fuelJetA)
-                    Goods.changeGoodsRecord(icao, GoodsBean.GOODS_FUELJETA, buyer, 0, true);
+                transferSupplies(conn, stmt, owner, buyer, icao);
             }
             else // Keeping goods remove for sell/buy flags
             {

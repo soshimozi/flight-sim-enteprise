@@ -461,7 +461,7 @@ public class Flights
                                     .append(", pricePerHour: ").append(price)
                                     .append(", Rental Cost: ").append(rentalCost)
                                     .append(", FuelCost: ").append(fuelCost)
-                                    .append(", groupToPay: ").append(groupToPay)
+                                    .append(", groupToPay: ").append(groupToPay.getId())
                                     .append(", income: ").append(income)
                                     .append(", totalPilotFee: ").append(totalPilotFee)
                                     .append(", crewCost: ").append(crewCost)

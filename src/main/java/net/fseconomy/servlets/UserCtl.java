@@ -185,6 +185,9 @@ public class UserCtl extends HttpServlet
                     case "leavegroup":
                         doLeaveGroup(req);
                         break;
+                    case "groupreject":
+                        doGroupRejectUser(req);
+                        break;
                     case "kickgroup":
                         doKickGroup(req);
                         break;
@@ -223,6 +226,9 @@ public class UserCtl extends HttpServlet
                         break;
                     case "purchaseFbo":
                         doPurchaseFbo(req);
+                        break;
+                    case "transferFbo":
+                        doTransferFbo(req);
                         break;
                     case "deleteFbo":
                         doDeleteFbo(req);
@@ -503,19 +509,29 @@ public class UserCtl extends HttpServlet
 	
 	void doTransferAircraft(HttpServletRequest req) throws DataError
 	{
-		UserBean user = (UserBean) req.getSession().getAttribute("user");
-		
-		int ibuyer = Integer.parseInt(req.getParameter("buyer"));
-        int id = Integer.parseInt(req.getParameter("id"));
-        AircraftBean aircraft = Aircraft.getAircraftById(id);
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        String sAccountId = req.getParameter("accountid");
+        String sAircraftId = req.getParameter("aircraftid");
 
-        if (aircraft == null)
-            throw new DataError("Aircraft not found.");
+        if (sAircraftId == null || !Helpers.isInteger(sAircraftId) || sAccountId == null || !Helpers.isInteger(sAccountId))
+            throw new DataError("Missing parameters");
 
-        if (!aircraft.changeAllowed(user)) 
-			throw new DataError("Permission Denied.");
+        AircraftBean aircraft = Aircraft.getAircraftById(Integer.parseInt(sAircraftId));
+        if(aircraft == null)
+            throw new DataError("Invalid aircraft!");
 
-		Aircraft.transferac(aircraft.getId(), ibuyer, aircraft.getOwner(), aircraft.getLocation());
+        UserBean account = Accounts.getAccountById(Integer.parseInt(sAccountId));
+        if(account == null)
+            throw new DataError("Invalid account to transfer to!");
+
+        int owner = aircraft.getOwner();
+        if(Accounts.isGroup(owner))
+            owner = Accounts.accountUltimateOwner(owner);
+
+        if(owner != user.getId())
+            throw new DataError("Permission error, you are not the owner!");
+
+		Aircraft.transferAircraft(aircraft.getId(), account.getId());
 	}
 	
 	void doEditAircraft(HttpServletRequest req) throws DataError
@@ -741,7 +757,7 @@ public class UserCtl extends HttpServlet
 		if (sEquipmentInstallMargin != null)
 			fbo.setEquipmentInstallMargin(Integer.parseInt(sEquipmentInstallMargin));
 		
-		if (!Helpers.isNullOrBlank(sPrice))
+		if (!Helpers.isNullOrBlank(sPrice) && Helpers.isInteger(sPrice))
         {
             String sSaleType = req.getParameter("saletype");
             String sSellToId = req.getParameter("selltoid");
@@ -757,6 +773,10 @@ public class UserCtl extends HttpServlet
             }
 
             fbo.setPrice("".equals(sPrice) ? 0 : Integer.parseInt(sPrice));
+        }
+        else
+        {
+            fbo.setPrice(0);
         }
 
 		Fbos.updateFbo(fbo, user);
@@ -1904,7 +1924,7 @@ public class UserCtl extends HttpServlet
 		
 		int groupId = Integer.parseInt(id);
 
-        Groups.joinGroup(user, groupId, "member");
+        Groups.joinGroupRequest(user, groupId);
 	}
 	
 	void doLeaveGroup(HttpServletRequest req) throws DataError
@@ -1920,8 +1940,29 @@ public class UserCtl extends HttpServlet
 		
 		Groups.leaveGroup(user, groupId);
 	}
-	
-	void doKickGroup(HttpServletRequest req) throws DataError
+
+    void doGroupRejectUser(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        String sId = req.getParameter("id");
+        String sGroupId = req.getParameter("groupid");
+        String msg = req.getParameter("msg");
+
+        if (user == null || !Helpers.isInteger(sId) || !Helpers.isInteger(sGroupId) || Helpers.isNullOrBlank(msg))
+            throw new DataError("Missing parameters!");
+
+        int id = Integer.parseInt(sId);
+        int groupId = Integer.parseInt(sGroupId);
+
+        if (user.groupMemberLevel(groupId) != UserBean.GROUP_STAFF && user.groupMemberLevel(groupId) != UserBean.GROUP_OWNER)
+            throw new DataError("You must be staff level or above to reject members");
+
+        UserBean member = Accounts.getAccountById(id);
+
+        Groups.GroupRejectUser(user, groupId, member, msg);
+    }
+
+    void doKickGroup(HttpServletRequest req) throws DataError
 	{
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String id = req.getParameter("id");
@@ -2029,7 +2070,7 @@ public class UserCtl extends HttpServlet
 			if (toWho == null || toWho.length < 1)
 				throw new DataError("No members selected!");
 
-            Groups.mailMembers(user, groupId, toWho, message);
+            Groups.mailMembers(user, groupId, toWho, message, false);
 			return;
 		}
 		
@@ -2057,11 +2098,12 @@ public class UserCtl extends HttpServlet
 		if (!level.equals("staff") && !level.equals("member"))
 			throw new DataError("Invalid level.");
 
-        String name = Accounts.getAccountNameById(userId);
+        UserBean member = Accounts.getAccountById(userId);
         String groupName = Accounts.getAccountNameById(groupId);
 
-        GlobalLogger.logGroupAuditLog("doMemberLevel() for Group [" + groupName + "] User: " + user.getName() + " changed " + name + " to " + level, UserCtl.class);
+        GlobalLogger.logGroupAuditLog("doMemberLevel() for Group [" + groupName + "] User: " + user.getName() + " changed " + member.getName() + " to " + level, UserCtl.class);
         Groups.changeMembership(userId, groupId, level);
+        Groups.mailMember(groupId, member, groupName + " has changed your access level to: " + level);
 	}
 	
 	void doMaintenance(HttpServletRequest req) throws DataError
@@ -2208,6 +2250,33 @@ public class UserCtl extends HttpServlet
             throw new DataError("Missing parameters");
 
         Fbos.buyFbo(Integer.parseInt(sFboId), Integer.parseInt(sAccountId), user);
+    }
+
+    void doTransferFbo(HttpServletRequest req) throws DataError
+    {
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+        String sAccountId = req.getParameter("accountid");
+        String sFboId = req.getParameter("fboid");
+
+        if (sFboId == null || !Helpers.isInteger(sFboId) || sAccountId == null || !Helpers.isInteger(sAccountId))
+            throw new DataError("Missing parameters");
+
+        FboBean fbo = Fbos.getFbo(Integer.parseInt(sFboId));
+        if(fbo == null)
+            throw new DataError("Invalid FBO!");
+
+        UserBean account = Accounts.getAccountById(Integer.parseInt(sAccountId));
+        if(account == null)
+            throw new DataError("Invalid FBO!");
+
+        int owner = fbo.getOwner();
+        if(Accounts.isGroup(owner))
+            owner = Accounts.accountUltimateOwner(owner);
+
+        if(owner != user.getId())
+            throw new DataError("Permission error, you are not the owner!");
+
+        Fbos.transferFbo(fbo, account.getId());
     }
 
     void doDeleteFbo(HttpServletRequest req) throws DataError

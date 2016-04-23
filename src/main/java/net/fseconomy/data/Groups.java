@@ -124,6 +124,33 @@ public class Groups implements Serializable
         }
     }
 
+    public static void joinGroupRequest(UserBean user, int group)  throws DataError
+    {
+        Accounts.mustBeLoggedIn(user);
+
+        try
+        {
+            String qry = "SELECT (count(userId) > 0) as found FROM groupmembership WHERE userId = ? AND groupId = ?";
+            boolean found = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), user.getId(), group);
+            if (!found)
+            {
+                qry = "INSERT INTO groupmembership (userId, groupId, level) VALUES (?, ?, ?)";
+                DALHelper.getInstance().ExecuteUpdate(qry, user.getId(), group, "request");
+
+                String groupName = Accounts.getAccountNameById(group);
+                Accounts.addAccountNote(user.getId(), user.getId(), "Join group request: " + groupName + "[" + group + "]");
+
+                mailStaff(user, group, "The FSE user [" + user.getName() + "] has requested permission to join your group, [" + groupName + "].\n\n To accept or reject this member's application, go to the Group Membership page for [" + groupName + "]");
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        reloadMemberships(user);
+    }
+
     public static void joinGroup(UserBean user, int group, String level) throws DataError
     {
         Accounts.mustBeLoggedIn(user);
@@ -192,7 +219,7 @@ public class Groups implements Serializable
             }
             else
             {
-                qry = "DELETE from groupmembership WHERE level = 'invited' AND userId = ? AND groupId = ?";
+                qry = "DELETE from groupmembership WHERE level in ('invited', 'request') AND userId = ? AND groupId = ?";
             }
 
             DALHelper.getInstance().ExecuteUpdate(qry, user.getId(), group);
@@ -216,6 +243,28 @@ public class Groups implements Serializable
         {
             e.printStackTrace();
         }
+    }
+
+    public static void GroupRejectUser(UserBean staff, int groupId, UserBean member, String msg) throws DataError
+    {
+        try
+        {
+            String qry = "DELETE FROM groupmembership WHERE userId = ? AND groupId = ?";
+            DALHelper.getInstance().ExecuteUpdate(qry, member.getId(), groupId);
+
+            String groupName = Accounts.getAccountNameById(groupId);
+            Accounts.addAccountNote(member.getId(), staff.getId(), "Rejected by group: " + groupName + "[" + groupId + "] with comment: [" + msg + "]");
+            mailStaff(staff, groupId, "Group join request for: [" + member.getName() + "] rejected by " + staff.getName() + " with comment: [" + msg + "]");
+
+            String message = "You have received a response from [" + groupName + "].\n\nYour request to join has been rejected with the following message:\n" + msg;
+            mailMember(groupId, member, message);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        reloadMemberships(staff);
     }
 
     public static void leaveGroup(UserBean user, int group) throws DataError
@@ -397,7 +446,24 @@ public class Groups implements Serializable
         }
     }
 
-    public static void mailMembers(UserBean user, int groupId, String[] members, String text) throws DataError
+    public static void mailStaff(UserBean user, int groupId, String text) throws DataError
+    {
+        List<UserBean> members = Accounts.getUsersForGroup(groupId);
+        List<String> staff = new ArrayList<>();
+        for(UserBean ub: members)
+        {
+            reloadMemberships(ub);
+            if(ub.groupMemberLevel(groupId) == UserBean.GROUP_STAFF || ub.groupMemberLevel(groupId) == UserBean.GROUP_OWNER)
+                staff.add("" + ub.getId());
+        }
+        if(staff.size() > 0)
+        {
+            String[] staffArray = staff.toArray(new String[0]);
+            mailMembers(user, groupId, staffArray, text, true );
+        }
+    }
+
+    public static void mailMembers(UserBean user, int groupId, String[] members, String text, boolean allowNonOwner) throws DataError
     {
         UserBean group = Accounts.getGroupById(groupId);
 
@@ -406,7 +472,7 @@ public class Groups implements Serializable
             throw new DataError("Group not found.");
         }
 
-        if (user.groupMemberLevel(groupId) < UserBean.GROUP_OWNER)
+        if (!allowNonOwner && user.groupMemberLevel(groupId) < UserBean.GROUP_OWNER)
         {
             throw new DataError("Permission denied.");
         }
@@ -433,6 +499,28 @@ public class Groups implements Serializable
             }
 
             String messageText = "This message is sent to you by the administrator of the FSEconomy flight group \"" + group.getName() + "\".\n----------\n" + text;
+
+            Emailer emailer = Emailer.getInstance();
+            emailer.sendEmail("no-reply@fseconomy.net", "FS Economy flight group " + group.getName(), "FSEconomy Group Message", messageText, toList, Emailer.ADDRESS_BCC);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public static void mailMember(int groupId, UserBean member, String text) throws DataError
+    {
+        UserBean group = Accounts.getGroupById(groupId);
+
+        if (group == null)
+            throw new DataError("Group not found.");
+
+        try
+        {
+            List<String> toList = new ArrayList<>();
+            toList.add(member.getEmail());
+            String messageText = "This message is sent to you by an administrator of the FSEconomy flight group \"" + group.getName() + "\".\n----------\n" + text;
 
             Emailer emailer = Emailer.getInstance();
             emailer.sendEmail("no-reply@fseconomy.net", "FS Economy flight group " + group.getName(), "FSEconomy Group Message", messageText, toList, Emailer.ADDRESS_BCC);

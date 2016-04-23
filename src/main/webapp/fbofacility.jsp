@@ -73,7 +73,7 @@
 		
 		function doSubmit2(id) 
 		{
-			if (window.confirm("Close this facility? (no refunds)")) 
+			if (window.confirm("Close this facility? (no refunds)\n\nNote: This will delete all PAX jobs associated with this facility, including those inflight."))
 			{
 				document.facilityForm.facilityId.value = id;
 				document.facilityForm.submit();

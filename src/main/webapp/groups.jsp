@@ -39,30 +39,25 @@
     <script type="text/javaScript">
         function doSubmit(id, event, groupname)
         {
+            var form = document.getElementById('groupForm');
+
             if (event == "deletegroup" && !confirm("Do you want to delete Flight Group " + groupname + "?"))
                 return;
 
             if (event == "cancelgroup" && !confirm("Do you want to leave Flight Group " + groupname + "?"))
                 return;
 
-            groupForm.id.value = id;
-            groupForm.event.value = event;
-            groupForm.action = "userctl";
-            groupForm.submit();
+            form.id.value = id;
+            form.event.value = event;
+            form.action = "userctl";
+            form.submit();
         }
 
-        function doSubmit2(id)
+        function doSubmit3(id, action, form)
         {
-            groupForm.id.value = id;
-            groupForm.action = "editgroup.jsp";
-            groupForm.submit();
-        }
-
-        function doSubmit3(id, action)
-        {
-            inviteForm.id.value = id;
-            inviteForm.action.value = action;
-            inviteForm.submit();
+            form.id.value = id;
+            form.action.value = action;
+            form.submit();
         }
 
         function doTransferSelect(id)
@@ -97,128 +92,162 @@
 
 <div id="wrapper">
 <div class="content">
+    <%
+        List<UserBean> gRequest = Accounts.getGroupsUserRequested(user.getId());
+        if (gRequest.size() > 0)
+        {
+    %>
+    <div class="dataTable">
+        <form method="post" action="userctl" id="requestForm">
+            <input type="hidden" name="event" value="invitation" />
+            <input type="hidden" name="action" />
+            <input type="hidden" name="id" />
+            <input type="hidden" name="returnpage" value="groups.jsp" />
+
+            <table>
+                <caption>Outstanding Group Join Requests</caption>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <%
+                    for (UserBean group : gRequest)
+                    {
+                        int id = group.getId();
+                %>
+                <tr>
+                    <td><%= group.getName() %></td>
+                    <td><%= group.getComment() %></td>
+                    <td>
+                        <a class="link" href="javascript:doSubmit3(<%= id %>, 'delete', document.getElementById('requestForm'))">Delete Request</a>
+                    </td>
+                </tr>
+                <%
+                    }
+                %>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <%
+        }
+    %>
 <%
 	List<UserBean> invitations = Accounts.getGroupsThatInviteUser(user.getId());
 	if (invitations.size() > 0)
 	{
 %>
-<div class="dataTable">
-	<form method="post" action="userctl" name="inviteForm">
-	<input type="hidden" name="event" value="invitation" />
-	<input type="hidden" name="action" />
-	<input type="hidden" name="id"/>
-	<input type="hidden" name="returnpage" value="groups.jsp" />
-	
-	<table>
-	<caption>Invitations</caption>
-	<thead>
-	<tr>
-		<th>Name</th>
-		<th>Description</th>
-		<th>Action</th>
-	</tr>
-	</thead>
-	<tbody>
+    <div class="dataTable">
+        <form method="post" action="userctl" id="inviteForm">
+        <input type="hidden" name="event" value="invitation" />
+        <input type="hidden" name="action" />
+        <input type="hidden" name="id" value=""  />
+        <input type="hidden" name="returnpage" value="groups.jsp" />
+
+            <table>
+            <caption>Invitations</caption>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
 <%
 		for (UserBean group : invitations)
 		{
 			int id = group.getId();
 %>
-	<tr>
-	<td><%= group.getName() %></td>
-	<td><%= group.getComment() %></td>
-	<td>
-		<a class="link" href="javascript:doSubmit3(<%= id %>, 'accept')">Accept</a>
-		<a class="link" href="javascript:doSubmit3(<%= id %>, 'delete')">Delete</a>
-	</td>
-	</tr>
+                <tr>
+                    <td><%= group.getName() %></td>
+                    <td><%= group.getComment() %></td>
+                    <td>
+                        <a class="link" href="javascript:doSubmit3(<%= id %>, 'accept', document.getElementById('inviteForm'))">Accept</a>
+                        <a class="link" href="javascript:doSubmit3(<%= id %>, 'delete', document.getElementById('inviteForm'))">Delete</a>
+                    </td>
+                </tr>
 <%
 		}
 %>
-	</tbody>
-	</table>	
-	</form>
-</div>
+    	    </tbody>
+	        </table>
+	    </form>
+    </div>
 <% 
 	}
 %>
-<div class="dataTable">	
+    <div class="dataTable">
+        <form method="post" id="groupForm">
+            <input type="hidden" name="event" />
+            <input type="hidden" name="id" value=""/>
+            <input type="hidden" name="returnpage" value="groups.jsp" />
+
+            <table>
+                <caption>Groups</caption>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
 <%
-	boolean allGroups = request.getParameter("all") != null;
-	
-	List<UserBean> groups = allGroups ? Accounts.getAllExposedGroups() : Accounts.getGroupsForUser(user.getId());
-%>
-	<form method="post" name="groupForm">
-	<input type="hidden" name="event" />
-	<input type="hidden" name="id"/>
-	<input type="hidden" name="returnpage" value="groups.jsp" />
-	
-	<table>
-	<caption>Groups</caption>
-	<thead>
-	<tr>
-		<th>Name</th>
-		<th>Description</th>
-		<th>Action</th>
-	</tr>
-	</thead>
-	<tbody>
-<%
+    List<UserBean> groups = Accounts.getGroupsForUser(user.getId());
     Groups.reloadMemberships(user);
 
-	for (UserBean group : groups)
-	{
-		int id = group.getId();
-		String name = group.getName();
-		String url = group.getUrl();
-		if (url != null)
-			url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
-		else
-			url = name;
-				
+    for (UserBean group : groups)
+    {
+        int id = group.getId();
+        String name = group.getName();
+        String url = group.getUrl();
+        if (url != null)
+            url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
+        else
+            url = name;
 %>
-	<tr>
-	<td><%= url %></td>
-	<td><%= group.getComment() %></td>
-	<td>
+                <tr>
+                    <td><%= url %></td>
+                    <td><%= group.getComment() %></td>
+                    <td>
 <%
-		int memberLevel = user.groupMemberLevel(id);
-		if (memberLevel == -1) 
-		{
-			if (!group.isExposedJoin())
-			{
+        int memberLevel = user.groupMemberLevel(id);
+        if (memberLevel == UserBean.GROUP_OWNER )
+        {
 %>
-				<a class="link" href="javascript:doSubmit(<%= id %>, 'joingroup')">Join</a>
-<% 			} 
-		} 
-		else 
-		{ 
-			if (memberLevel == UserBean.GROUP_OWNER ) 
-			{
+                        <a class="link" href="editgroup.jsp?id=<%= id %>">Edit</a>
+                        <a class="link" onclick="doTransferSelect(<%= id %>, '<%=name%>');">Transfer</a>
+                        <a class="link" href="javascript:doSubmit(<%= id %>, 'deletegroup', <%= "'" + Converters.escapeJavaScript(name.replaceAll("\"" , "''")) + "'" %>)">Delete</a>
+<%
+        }
+        else
+        {
 %>
-                <a class="link" href="editgroup.jsp?id=<%= id %>">Edit</a>
-                <a class="link" onclick="doTransferSelect(<%= id %>, '<%=name%>');">Transfer</a>
-				<a class="link" href="javascript:doSubmit(<%= id %>, 'deletegroup', <%= "'" + Converters.escapeJavaScript(name.replaceAll("\"" , "''")) + "'" %>)">Delete</a>
-<%  		} 
-			else 
-			{ 
-%>				<a class="link" href="javascript:doSubmit(<%= id %>, 'leavegroup', <%= "'" + Converters.escapeJavaScript(name.replaceAll("\"" , "''")) + "'" %>)">Leave</a>
-<%  		} 
-		}
+                        <a class="link" href="javascript:doSubmit(<%= id %>, 'leavegroup', <%= "'" + Converters.escapeJavaScript(name.replaceAll("\"" , "''")) + "'" %>)">Leave</a>
+<%
+        }
 %>
-	</td>
-	</tr>
-<%	}
+                    </td>
+                </tr>
+<%
+    }
 %>
-	</tbody>
-	</table>	
-	</form>
-	<form method="post" action="creategroup.jsp" name="newgroupForm">
+            </tbody>
+            </table>
+        </form>
+    </div>
+
+    <form method="post" action="creategroup.jsp" name="newgroupForm">
 		<div class="formgroup">
 		<input name="newgroup" type="submit" class="button" value="New group"/>
 		</div>
 	</form>
-</div>
+
 </div>
 </div>
 

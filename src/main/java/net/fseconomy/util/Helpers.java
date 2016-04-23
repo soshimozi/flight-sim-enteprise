@@ -33,11 +33,13 @@ public class Helpers
 
     //ok performance, if you need this A LOT find something else.
     public static boolean isInteger( String input ) {
-        try {
+        try
+        {
             Integer.parseInt( input );
             return true;
         }
-        catch( Exception e ) {
+        catch( Exception e )
+        {
             return false;
         }
     }

@@ -56,12 +56,29 @@
             document.memberForm.submit();
         }
 
-        function doSubmit2(id, name)
+        function doSubmitDelete(id, name)
         {
             if (!confirm('Delete ' + name + ' from the group?'))
                 return;
             document.memberForm.id.value = id;
             document.memberForm.event.value = "kickgroup";
+            document.memberForm.submit();
+        }
+
+        function doSubmitReject(id, name)
+        {
+            if (!confirm('Reject ' + name + ' from the group?'))
+                return;
+
+            var msg = prompt("You must enter a short comment for rejection (TOS rules apply!):");
+            if(msg == undefined || msg === "") {
+                alert("Invalid message!");
+                return;
+            }
+
+            document.memberForm.msg.value = msg;
+            document.memberForm.id.value = id;
+            document.memberForm.event.value = "groupreject";
             document.memberForm.submit();
         }
 
@@ -87,6 +104,7 @@
 	<input type="hidden" name="event" value="memberlevel" />
 	<input type="hidden" name="level" />
 	<input type="hidden" name="id"/>
+    <input type="hidden" name="msg"/>
 	<input type="hidden" name="groupid" value="<%= groupId %>"/>
 	<input type="hidden" name="returnpage" value="memberships.jsp?groupid=<%= groupId %>" />
 <div class="dataTable">		
@@ -94,10 +112,10 @@
 	<caption>Group memberships</caption>
 	<thead>
 	<tr>
+        <th>Select</th>
 		<th>Name</th>
 		<th>Level</th>
 		<th>Action</th>
-		<th>Select</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -110,18 +128,26 @@
 		int memberLevel = member.groupMemberLevel(groupId);
 %>
 	<tr>
-	<td><%= member.getName() %></td>
-	<td><%= UserBean.getGroupLevelName(memberLevel) %></td>
-	<td>
+        <td><input type="checkbox" name="selected" value="<%= id %>"/></td>
+    	<td><%= member.getName() %></td>
+	    <td><%= UserBean.getGroupLevelName(memberLevel) %></td>
+	    <td>
 <%
-	    if (memberLevel == UserBean.GROUP_INVITED)
+        if (memberLevel == UserBean.GROUP_REQUEST)
         {
 %>
-	    <a class="link" href="javascript:doSubmit2(<%= id %>, '<%= name %>')">Delete Invitation</a>
+            <a class="link" href="javascript:doSubmitReject(<%= id %>, '<%= name %>')">Reject as member</a>
+            <a class="link" href="javascript:doSubmit(<%= id %>, 'member')">Accept as member</a>
+<%
+        }
+        if (memberLevel == UserBean.GROUP_INVITED)
+        {
+%>
+	    <a class="link" href="javascript:doSubmitDelete(<%= id %>, '<%= name %>')">Delete Invitation</a>
 <%
         }
 
-	    if (memberLevel != UserBean.GROUP_INVITED)
+	    if (memberLevel != UserBean.GROUP_REQUEST && memberLevel != UserBean.GROUP_INVITED)
         {
 	        if (memberLevel != UserBean.GROUP_OWNER)
             {
@@ -138,13 +164,12 @@
 <%
                 }
 %>
-        	<a class="link" href="javascript:doSubmit2(<%= id %>, '<%= name %>')">Delete member</a>
+        	<a class="link" href="javascript:doSubmitDelete(<%= id %>, '<%= name %>')">Delete member</a>
 	    </td>
 <%
 	        }
         }
 %>
-	    <td><input type="checkbox" name="selected" value="<%= id %>"/></td>
 	</tr>
 <%
     }

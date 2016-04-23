@@ -10,6 +10,7 @@ import javax.sql.rowset.CachedRowSet;
 
 import net.fseconomy.beans.*;
 import net.fseconomy.dto.CloseAirport;
+import net.fseconomy.dto.DistanceBearing;
 import net.fseconomy.dto.Statistics;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
@@ -566,7 +567,9 @@ public class MaintenanceCycle implements Runnable
             item = item1.trim();
 
             if (allowMacros && item.startsWith("$"))
-                M.add(item);
+			{
+				M.add(item);
+			}
             else
 			{
 				if(Airports.isValidIcao(item))
@@ -602,9 +605,7 @@ public class MaintenanceCycle implements Runnable
                     {
                         ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(sql);
                         while (rs.next())
-                        {
                             airports.add(rs.getString(1));
-                        }
                     }
                 }
 			} 
@@ -695,8 +696,8 @@ public class MaintenanceCycle implements Runnable
 
 				String commodity = rsTemplate.getString("commodity");
 				String units = rsTemplate.getString("units");
-				String icaos1 = rsTemplate.getString("icaoSet1");
-				String icaos2 = rsTemplate.getString("icaoSet2");
+				String icaos1 = rsTemplate.getString("icaoSet1") != null ? rsTemplate.getString("icaoSet1").toUpperCase() : null;
+				String icaos2 = rsTemplate.getString("icaoSet2") != null ? rsTemplate.getString("icaoSet2").toUpperCase() : null;
 
 				int seatsFrom = rsTemplate.getInt("seatsFrom");
 				int seatsTo = rsTemplate.getInt("seatsTo");
@@ -710,6 +711,37 @@ public class MaintenanceCycle implements Runnable
 				StringBuffer where = new StringBuffer();
 				Set<String> icaoSet1 = null;
 				Set<String> icaoSet2 = null;
+
+				boolean noReversal = false;
+				boolean singleIcao = false;
+
+				//make sure that From icaos do not contain these tags
+				if(icaos1 != null)
+				{
+					if (icaos1.contains("$NOREVERSE"))
+					{
+						icaos1 = icaos1.replace("$NOREVERSE", "").trim();
+					}
+					if (icaos1.contains("$SINGLE"))
+					{
+						icaos1 = icaos1.replace("$SINGLE", "").trim();
+					}
+				}
+
+				//if Dest icaos contain these tags, set the flags
+				if(icaos2 != null)
+				{
+					if (icaos2.contains("$NOREVERSE"))
+					{
+						noReversal = true;
+						icaos2 = icaos2.replace("$NOREVERSE", "").trim();
+					}
+					if (icaos2.contains("$SINGLE"))
+					{
+						singleIcao = true;
+						icaos2 = icaos2.replace("$SINGLE", "").trim();
+					}
+				}
 
 				if (isAllIn)
 				{
@@ -907,7 +939,38 @@ public class MaintenanceCycle implements Runnable
 						
 						double pay = targetPay * (1 + (Math.random() * 2*payDev) - payDev);
 
-						CloseAirport to = Airports.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk, surfType);
+						CloseAirport to;
+						if(singleIcao)
+						{
+							String target = icaoSet2.iterator().next().toString();
+							String airports[] = icaoSet1.toArray(new String[icaoSet1.size()]);
+
+							//the min/max distance criteria
+							List<CloseAirport> inRange = new ArrayList<>();
+							for (String airport : airports)
+							{
+								DistanceBearing distanceBearing = Airports.getDistanceBearing(airport, target);
+								if (distanceBearing != null &&
+										distanceBearing.distance != 0 &&
+										(distanceBearing.distance >= (maxDistance - Deviation) && distanceBearing.distance <= maxDistance))
+								{
+									inRange.add(new CloseAirport(airport, distanceBearing.distance, distanceBearing.bearing));
+								}
+							}
+							//System.out.println("singleIcao found: " + inRange.size() + ", out of: " + airports.length);
+
+							Optional<CloseAirport> opt = inRange.stream().filter(p -> p.icao.contains(icao) ).findFirst();
+							if(opt.isPresent())
+							{
+								to = opt.get();
+								to.icao = target;
+							}
+							else
+								to = null;
+						}
+						else
+							to = Airports.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk, surfType);
+
 						if (to == null)
 							continue;
 	
@@ -943,7 +1006,7 @@ public class MaintenanceCycle implements Runnable
 						String fromIcao;
 						String toIcao;
 
-						if (isAllIn || Math.random() < 0.5) // never reverse an AllIn flight
+						if (isAllIn || noReversal || Math.random() < 0.5) // never reverse an AllIn flight
 						{
 							fromIcao = icao;
 							toIcao = to.icao;

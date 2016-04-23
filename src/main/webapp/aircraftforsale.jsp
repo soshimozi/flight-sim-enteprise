@@ -55,7 +55,7 @@
         function loadPrivateSales()
         {
             $("#aircraftTable").html("<div>Loading... <img src='img/ajax-loader.gif'></div>");
-            $("#aircraftTable").load( "aircraftforsaledata.jsp?action=privatesale" );
+            $("#aircraftTable").load( "aircraftforsaledata.jsp?action=privatesale&randomizer="+Math.random().toFixed(20));
         }
 
         function loadSearch()

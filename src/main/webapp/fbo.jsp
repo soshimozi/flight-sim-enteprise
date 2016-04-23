@@ -243,7 +243,26 @@
 				form.submit();
 			}
 		}
-		
+
+		function selectFbo(fboid)
+		{
+			var form = document.getElementById("formTransferFboModal");
+			form.fboid.value = fboid;
+
+			$("#fboData").load( "fbodata.jsp?fboid=" + fboid );
+
+			$("#transferFboModal").modal('show');
+		}
+
+		function transferFbo()
+		{
+			var form = document.getElementById("formTransferFboModal");
+			var tselect = document.getElementById("transferSelect");
+
+			form.accountid.value = tselect.options[tselect.selectedIndex].value;
+			form.submit();
+		}
+
 	</script>
 	
 	<script type="text/javascript">
@@ -273,7 +292,6 @@
 			});
 
 			makeChart();
-
 		});
 	
 	</script>
@@ -359,7 +377,19 @@
 %>
                     | <a class="link" href="<%= response.encodeURL(paymentUrl) %>">Payments</a>
                     | <a class="link" href="<%= response.encodeURL("fbolog.jsp?id=" + fbo.getId()) %>">Log</a>
-<%		if (fbo.deleteAllowed(user))
+<%
+	int realowner = fbo.getOwner();
+	if(Accounts.isGroup(fbo.getOwner()))
+		realowner = Accounts.accountUltimateOwner(fbo.getOwner());
+
+		if (realowner == user.getId())
+		{
+%>
+					| <a class="link" href="javascript:selectFbo(<%=fbo.getId()%>)">Transfer </a>
+<%
+		}
+
+		if (fbo.deleteAllowed(user))
 		{
 %>
 				    | <a class="link" href="javascript:doSubmit<%= fbo.getFboSize() > 1 ? "3" : "2" %>('<%= "(" + fbo.getLocation() + ") " + Converters.escapeJavaScript(fbo.getName()) %>', '<%= fbo.getId() %>', '<%= fbo.recoverableBuildingMaterials() %>')">Tear Down</a>
@@ -438,6 +468,53 @@
 			</div>
 			<div class="modal-footer">
 				<button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal HTML -->
+<div id="transferFboModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">FBO Transfer</h4>
+			</div>
+			<div class="modal-body">
+				<form id="formTransferFboModal" method="post" action="userctl" class="ui-front">
+					<input type="hidden" name="event" value="transferFbo"/>
+					<input type="hidden" name="accountid" value=""/>
+					<input type="hidden" name="fboid" value=""/>
+					<input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+					<div id="fboData">
+					</div>
+					<div>
+						Transfer to:
+						<select id="transferSelect">
+							<option value=""></option>
+							<option value="<%=user.getId()%>"><%= user.getName()%></option>
+<%
+	List<UserBean> groups = Accounts.getGroupsOwnedByUser(user.getId());
+
+	for (UserBean group : groups)
+	{
+		if (user.groupMemberLevel(group.getId()) == UserBean.GROUP_OWNER)
+		{
+%>
+							<option value="<%=group.getId()%>"><%= group.getName()%></option>
+<%
+		}
+	}
+%>
+						</select>
+
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" onclick="transferFbo();">Transfer FBO</button>
 			</div>
 		</div>
 	</div>

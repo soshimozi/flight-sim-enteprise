@@ -13,12 +13,12 @@ import java.util.Date;
 
 public class Aircraft implements Serializable
 {
-    public static void transferac(int aircraftId, int buyer, int owner, String location) throws DataError
+    public static void transferAircraft(int aircraftId, int toId) throws DataError
     {
         try
         {
             String qry = "{call AircraftTransfer(?,?,?,?)}";
-            DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, buyer, "Aircraft Transfer");
+            DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, toId, "Aircraft Transfer");
         }
         catch (SQLException e)
         {
@@ -88,7 +88,7 @@ public class Aircraft implements Serializable
 
     public static List<AircraftBean> getAircraftForSale()
     {
-        return getAircraftSQL("SELECT * FROM (SELECT id FROM aircraft WHERE sellPrice is not null ) a left join aircraft on a.id=aircraft.id left join models on aircraft.model=models.id ORDER BY models.make, models.model, sellPrice");
+        return getAircraftSQL("SELECT * FROM (SELECT id FROM aircraft WHERE sellPrice is not null AND (selltoid is null OR selltoid = 0)) a left join aircraft on a.id=aircraft.id left join models on aircraft.model=models.id ORDER BY models.make, models.model, sellPrice");
     }
 
     public static List<AircraftBean> getAircraftForPrivateSaleById(int userId)

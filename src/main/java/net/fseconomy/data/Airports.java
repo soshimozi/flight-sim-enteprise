@@ -384,8 +384,8 @@ public class Airports implements Serializable
             {
                 DistanceBearing distanceBearing = getDistanceBearing(icao, airport);
                 if (distanceBearing != null &&
-                        distanceBearing.distance != 0 &&
-                        (distanceBearing.distance >= minDistance && distanceBearing.distance <= maxDistance))
+                    distanceBearing.distance != 0 &&
+                   (distanceBearing.distance >= minDistance && distanceBearing.distance <= maxDistance))
                 {
                     inRange.add(airport);
                 }

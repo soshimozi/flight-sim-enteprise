@@ -780,6 +780,11 @@ public class Accounts implements Serializable
         return getAccountSQL("SELECT * FROM accounts WHERE (type = 'person' OR type = 'group') AND name = '" + name + "'");
     }
 
+    public static List<UserBean> getGroupsUserRequested(int userId)
+    {
+        return getAccountsSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND level = 'request') ORDER BY name");
+    }
+
     public static List<UserBean> getGroupsThatInviteUser(int userId)
     {
         return getAccountsSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND level = 'invited') ORDER BY name");
@@ -787,7 +792,12 @@ public class Accounts implements Serializable
 
     public static List<UserBean> getGroupsForUser(int userId)
     {
-        return getAccountsSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND level <> 'invited' ) ORDER BY name");
+        return getAccountsSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND (level <> 'invited' AND level <> 'request') ) ORDER BY name");
+    }
+
+    public static List<UserBean> getGroupsOwnedByUser(int userId)
+    {
+        return getAccountsSQL("SELECT * FROM accounts WHERE type = 'group' AND EXISTS (SELECT * FROM groupmembership WHERE groupId = accounts.id AND userId = " + userId + " AND level = 'owner') ORDER BY name");
     }
 
     public static List<UserBean> getAllExposedGroups()

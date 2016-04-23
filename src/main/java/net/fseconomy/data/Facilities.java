@@ -178,6 +178,9 @@ public class Facilities implements Serializable
             String qry = "UPDATE fbofacilities SET size = size - 1 WHERE id = ?";
             DALHelper.getInstance().ExecuteUpdate(qry, facilityId);
 
+            qry = "DELETE FROM assignments WHERE fromfbotemplate="+facilityId;
+            DALHelper.getInstance().ExecuteUpdate(qry);
+
             qry = "DELETE FROM fbofacilities WHERE reservedspace < 0 and size < 1";
             DALHelper.getInstance().ExecuteUpdate(qry);
         }

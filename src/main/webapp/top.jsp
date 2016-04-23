@@ -6,7 +6,15 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    boolean isTestServer = request.getRequestURL().toString().contains("8080");
+	boolean isTestServer;
+	if(System.getProperty("isTestServer") == null)
+	{
+		isTestServer = request.getRequestURL().toString().contains("8080");
+		System.setProperty("isTestServer", isTestServer ? "true" : "false");
+	}
+	else
+		isTestServer = 	"true".equals(System.getProperty("isTestServer"));
+
 %>
 
 <div class="header">

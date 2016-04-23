@@ -58,8 +58,8 @@
                 group.setName(grpName);
                 group.setComment(request.getParameter("comment"));
                 group.setUrl(request.getParameter("url"));
-                group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
-                group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
+                group.setExposedJoin("on".equals(request.getParameter("exposedJoin")));
+                group.setExposedGrouplist("on".equals(request.getParameter("exposedGrouplist")));
                 group.setBanList(request.getParameter("banList"));
                 int pilotFee = 0;
                 if(request.getParameter("defaultPilotFee") != null && !request.getParameter("defaultPilotFee").equals(""))
@@ -137,10 +137,10 @@
 		<td colspan="5"><input name="banList" type="text" class="textarea" value="<%= group.getBanList() %>" maxlength="255" size="80"> <br>* names separated by a space</td>
 	</tr>
 				
-	<tr><td colspan="2"><input type="checkbox" name="exposedJoin" value="true" <%= group.isExposedJoin()?"checked" : "" %>>Group is private</td></tr>
-	<tr><td colspan="2"><input type="checkbox" name="exposedGrouplist" value="true" <%= group.isExposedGrouplist()?"checked" : "" %>>Show group in group overview</td></tr>
-	<tr><td><input type="submit" class="button" value="Update"/></td></tr>
-	
+	<tr><td colspan="2"><input type="checkbox" name="exposedJoin" <%= group.isExposedJoin() ? "checked" : "" %>>Allow public to request membership**</td></tr>
+	<tr><td colspan="2"><input type="checkbox" name="exposedGrouplist" <%= group.isExposedGrouplist() ? "checked" : "" %>>Show group in "All Groups" listing</td></tr>
+    <tr><td colspan="2">** Unchecking this box means the group owner/staff must invite new members</td></tr>
+	<tr><td><input style="margin-top: 10px;" type="submit" class="button" value="Update"/></td></tr>
 	</table>
 	</form>
 	</div>

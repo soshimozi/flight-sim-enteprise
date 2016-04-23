@@ -45,7 +45,8 @@ public class UserBean implements Serializable
 	public static final int LEV_ADMIN = 3;
 	public static final int LEV_CSR = 4;
 	public static final int LEV_ACA = 5;
-	
+
+	public static final int GROUP_REQUEST = 0;
 	public static final int GROUP_INVITED = 1;
 	public static final int GROUP_MEMBER = 2;
 	public static final int GROUP_STAFF = 5;
@@ -342,7 +343,8 @@ public class UserBean implements Serializable
 	{
 		this.bank = bank;
 	}
-	
+
+	///Todo This group stuff needs to move to groups.java
 	public int groupMemberLevel(int group)
 	{
 		if (memberships == null)
@@ -403,6 +405,8 @@ public class UserBean implements Serializable
                 return GROUP_OWNER;
             case "invited":
                 return GROUP_INVITED;
+			case "request":
+				return GROUP_REQUEST;
             default:
                 return -1;
         }
@@ -416,6 +420,7 @@ public class UserBean implements Serializable
 			case GROUP_OWNER  : return "owner";
 			case GROUP_STAFF  : return "staff";
 			case GROUP_INVITED: return "invited";
+			case GROUP_REQUEST: return "request";
 		}
 		
 		return null;

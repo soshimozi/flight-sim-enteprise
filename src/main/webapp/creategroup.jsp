@@ -35,8 +35,8 @@
     {
         try
         {
-            group.setExposedJoin("true".equals(request.getParameter("exposedJoin")));
-            group.setExposedGrouplist("true".equals(request.getParameter("exposedGrouplist")));
+            group.setExposedJoin("on".equals(request.getParameter("exposedJoin")));
+            group.setExposedGrouplist("on".equals(request.getParameter("exposedGrouplist")));
             group.setBanList(request.getParameter("banList"));
             Groups.CreateGroup(group, user);
 %>
@@ -113,10 +113,10 @@
 		<td colspan="5"><input name="banList" type="text" class="textarea" value="<%= group.getBanList() %>" maxlength="255" size="80" /> <br>* names separated by a space</td>
 	</tr>				
 	<tr>
-		<td colspan="2"><input type="checkbox" name="exposedJoin" value="true" <%= group.isExposedJoin()?"checked" : "" %>>Group is private</td>
+		<td colspan="2"><input type="checkbox" name="exposedJoin" <%= group.isExposedJoin() ? "checked" : "" %>>Make joining group public</td>
 	</tr>
 	<tr>
-		<td colspan="2"><input type="checkbox" name="exposedGrouplist" value="true" <%= group.isExposedGrouplist()?"checked" : "" %>>Show group in group overview</td>
+		<td colspan="2"><input type="checkbox" name="exposedGrouplist" <%= group.isExposedGrouplist() ? "checked" : "" %>>Show group in group overview</td>
 	</tr>	
 	<tr>
 		<td><input type="submit" class="button" value="Update"/></td>

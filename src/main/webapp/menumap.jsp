@@ -105,9 +105,6 @@ if (user.isLoggedIn())
 	Group Assignments<br/><br/>
 	<%= groupMenu(user, "Group Assignments", false, false, "groupassignments.jsp", "?groupid=", response) %>
 	<br/>
-	Pay Group<br/><br/>
-	<%= groupMenu(user, "Pay Group", true, false, "pay.jsp", "?groupid=", response) %>
-	<br/>
 	Group Membership<br/><br/>
 	<%= groupMenu(user, "Group Membership", true, false, "memberships.jsp", "?groupid=", response) %>
 	<br/><br/>
@@ -120,7 +117,7 @@ if (user.isLoggedIn())
 	<%= groupMenu(user, "FBO Mgt", true, true, "fbomgt.jsp", "?id=", response) %>
 	<%= groupMenu(user, "Facilities", true, true, "fbofacility.jsp", "?id=", response) %>
 	<a href="fbomap.jsp">FBO Maps</a><br/><br/>
-	<a href="marketfbo.jsp">FBO Purchase</a><br/><br/>
+	<a href="fbosforsale.jsp">FBO Purchase</a><br/><br/>
 <%
 	if (user.getLevel() == UserBean.LEV_MODERATOR || user.getLevel() == UserBean.LEV_ADMIN)
 	{
