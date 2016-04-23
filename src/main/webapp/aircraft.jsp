@@ -190,6 +190,7 @@
 		<th >Type</th>
 		<th style="width: 35px">Location</th>
 		<th style="width: 35px">Home</th>
+		<th class="numeric" style="width: 45px">Fuel Loaded</th>
 		<th class="numeric" style="width: 75px">Price</th>
 		<th class="sorter-timeHrMin numeric" style="width: 45px">Engine Total</th>
 		<th class="sorter-timeHrMin numeric" style="width: 45px">Since check</th>
@@ -247,6 +248,7 @@
 %>	
 	</td>
 	<td><a href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getHome()) %>"><%= aircraft.getHome() %></a></td>
+	<td class="numeric"><%= Math.round((aircraft.getTotalFuel() / aircraft.getTotalCapacity()) * 100.0) %>%</td>
 <%
 		if(aircraft.getLessor() == 0)
 		{
@@ -283,7 +285,7 @@
 	<td class="numeric" <%= hours >= 90 ? " style=\"color: red;\"" : "" %>><%= lastCheck %></td>
 	<td class="numeric"><%= price %></td>
 	<td class="numeric"><%= Formatters.currency.format(aircraft.getBonus()) %></td>
-<%		
+<%
 		if(aircraft.getShippingState() == 0 && aircraft.getLessor() != account.getId())
 		{
 			if (showActions)  
