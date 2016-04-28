@@ -62,7 +62,9 @@ public class PaymentBean implements Serializable
     public static final short TRANSFER_GROUP = 30;
 	public static final short BULK_SUPPLIES = 31;
 
-	public static final short MAX_REASON = 31;
+	public static final short OWNERSHIP_FEE = 32;
+
+	public static final short MAX_REASON = 32;
 	
 	long id;
 	Timestamp time;
@@ -150,6 +152,7 @@ public class PaymentBean implements Serializable
 			case BULK_FUEL: return "Fuel Delivered";
             case TRANSFER_GROUP: return "Group Transfer";
 			case BULK_SUPPLIES: return "Supplies Delivered";
+			case OWNERSHIP_FEE: return "Ownership Fee";
 			default: return "Unknown";
 		}
 	}

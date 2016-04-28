@@ -5,6 +5,7 @@ import java.sql.*;
 import java.util.Date;
 
 import com.sun.corba.se.impl.orbutil.closure.Constant;
+import net.fseconomy.data.Models;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
@@ -49,6 +50,7 @@ public class AircraftBean implements Serializable
 	float fuel[];
 	int capacity[];
 	double initialFuel;
+	int feeOwed;
 	int sellPrice;
 	boolean privateSale;
 	int sellToId;
@@ -106,6 +108,7 @@ public class AircraftBean implements Serializable
 		setRentalPriceDry(rs.getInt("aircraft.rentalDry"));
 		setRentalPriceWet(rs.getInt("aircraft.rentalWet"));
 		setInitialFuel(rs.getFloat("aircraft.initialFuel"));
+		setFeeOwed(rs.getInt("feeowed"));
 		setSellPrice(rs.getInt("sellPrice"));
 		setPrivateSale(rs.getBoolean("privatesale"));
 		setSellToId(rs.getInt("selltoid"));
@@ -185,6 +188,8 @@ public class AircraftBean implements Serializable
 			rs.updateInt("bearingToHome", getBearing());
 			rs.updateInt("distanceFromHome", getDistance());
 		}
+
+		rs.updateInt("feeowed", getFeeOwed());
 
 		if (getSellPrice() != 0)
 			rs.updateInt("sellPrice", getSellPrice());
@@ -1074,6 +1079,15 @@ public class AircraftBean implements Serializable
 		this.sellPrice = sellPrice;
 	}
 
+	public void setFeeOwed(int fee)
+	{
+		feeOwed = fee;
+	}
+
+	public int getFeeOwed()
+	{
+		return feeOwed;
+	}
 
 	public boolean isPrivateSale()
 	{
@@ -1435,6 +1449,13 @@ public class AircraftBean implements Serializable
 		returnValue = returnValue >= salvagevaluemin ? returnValue : salvagevaluemin;
 		
 		return returnValue;
+	}
+
+	public int getOwnershipFee()
+	{
+		//return (int) Math.round(((double)getMinimumPrice() *.36) / 36.0);
+		ModelBean model = Models.getModelById(modelId);
+		return (int) Math.round((double)model.getPrice()*.006);
 	}
 	
 	public boolean isBroken()

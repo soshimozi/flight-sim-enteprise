@@ -1154,6 +1154,7 @@
 							price = price + ((priceDry > 0) ? "/" : "") + "$" + priceWet + " Wet";
 
 						price = price + (aircraft.getAccounting() == AircraftBean.ACC_TACHO ? " [Tacho]" : " [Hour]");
+						boolean isInDebt = aircraft.getFeeOwed() > 0;
 				%>
 				<tr>
 					<td>
@@ -1219,18 +1220,18 @@
 					%>
 					<td>
 						<%
-							if (priceDry > 0)
+							if (!isInDebt && priceDry > 0)
 							{
 						%>
 						<a class="link" href="javascript:doSubmit2('<%= aircraft.getId() %>', 'dry')">Rent dry</a>
 						<%					}
-							if (priceWet > 0)
+							if (!isInDebt && priceWet > 0)
 							{
 						%>
 						<%= priceDry > 0 ? " | " : "" %><a class="link" href="javascript:doSubmit2('<%= aircraft.getId() %>', 'wet')">Rent wet</a>
 						<%
 							}
-							if (priceDry + priceWet == 0 && aircraft.canAlwaysRent(user))
+							if (!isInDebt && (priceDry + priceWet == 0) && aircraft.canAlwaysRent(user))
 							{
 						%>
 						<a class="link" href="javascript:doSubmit2('<%= aircraft.getId() %>', 'wet')">Rent</a>

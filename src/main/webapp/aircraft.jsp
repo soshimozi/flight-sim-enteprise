@@ -191,11 +191,12 @@
 		<th style="width: 35px">Location</th>
 		<th style="width: 35px">Home</th>
 		<th class="numeric" style="width: 45px">Fuel Loaded</th>
-		<th class="numeric" style="width: 75px">Price</th>
+		<th class="numeric" style="width: 100px">Price</th>
 		<th class="sorter-timeHrMin numeric" style="width: 45px">Engine Total</th>
 		<th class="sorter-timeHrMin numeric" style="width: 45px">Since check</th>
-		<th class="numeric" style="width: 75px">Rental Price</th>
+		<th class="numeric" style="width: 150px">Rental Price</th>
 		<th class="numeric" style="width: 45px">Bonus</th>
+		<th class="numeric" style="width: 75px">Monthly Fee</th>
 		<th class="sorter-false" style="width: 75px">Action</th>
 	</tr>
 	</thead>
@@ -215,6 +216,7 @@
 			price = price + ((priceDry > 0) ? "/" : "") + "$" + priceWet + " Wet";
 			
 		price = price + (aircraft.getAccounting() == AircraftBean.ACC_TACHO ? " [Tacho]" : " [Hour]");
+		boolean isInDebt = aircraft.getFeeOwed() > 0;
 		int minutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck())/60;
 		int hours = minutes / 60;
 		String lastCheck = (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
@@ -258,7 +260,7 @@
 			else if(aircraft.getSellPrice() > 0)
 				priceField = Formatters.currency.format(aircraft.getSellPrice());
 			else
-				priceField = "Not for sale";
+				priceField = "NFS";
 %>			
 			<td class="numeric"><%= priceField %></td>
 <%
@@ -285,6 +287,7 @@
 	<td class="numeric" <%= hours >= 90 ? " style=\"color: red;\"" : "" %>><%= lastCheck %></td>
 	<td class="numeric"><%= price %></td>
 	<td class="numeric"><%= Formatters.currency.format(aircraft.getBonus()) %></td>
+	<td class="numeric"><%= Formatters.currency.format(aircraft.getOwnershipFee()) %></td>
 <%
 		if(aircraft.getShippingState() == 0 && aircraft.getLessor() != account.getId())
 		{
@@ -327,7 +330,7 @@
 <%
 				}
 
-				if (priceDry > 0) 
+				if (!isInDebt && priceDry > 0)
 				{ 
 %>
 					<option value="<%= aircraft.getId() %>,dry">Rent Dry</option>
@@ -335,7 +338,7 @@
 				} 
 %>
 <% 		
-				if (priceWet > 0) 
+				if (!isInDebt && priceWet > 0)
 				{ 
 %>
 					<option value="<%= aircraft.getId() %>,wet">Rent Wet</option>
@@ -343,7 +346,7 @@
 				} 
 %>
 <% 	
-				if (priceDry + priceWet == 0 && aircraft.canAlwaysRent(user)) 
+				if (!isInDebt && priceDry + priceWet == 0 && aircraft.canAlwaysRent(user))
 				{ 
 %>
 					<option value="<%= aircraft.getId() %>,wet">Rent</option>

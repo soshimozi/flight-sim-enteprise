@@ -660,6 +660,8 @@ public class Aircraft implements Serializable
                         "You may use the forum PM (Private Message) system at <a href='http://www.fseconomy.net/inbox'> http://www.fseconomy.net/inbox</a> if you have no other contact means. " +
                         "<b>DO NOT</b> post any public message about this issue in the forums.");
             }
+            if(aircraft.getFeeOwed() >  0)
+                throw new DataError("Unable to rent. Aircraft being held for debt due!");
 
             //The following check allows ALLIN only aircraft to be rented, bypassing the exploit canceling code
             if ((aircraft.getRentalPriceDry() + aircraft.getRentalPriceWet() == 0) && !(aircraft.canAlwaysRent(user)))
@@ -1030,6 +1032,37 @@ public class Aircraft implements Serializable
         }
     }
 
+    public static void payFeeDebt(int aircraftId, UserBean user) throws DataError
+    {
+        try
+        {
+            AircraftBean aircraft = getAircraftById(aircraftId);
+            int owner = aircraft.getOwner();
+
+            if (user.getId() != owner && user.groupMemberLevel(owner) < UserBean.GROUP_STAFF)
+                throw new DataError("Permission denied");
+
+            if (aircraft.getFeeOwed() > 0)
+            {
+                if (!Banking.checkFunds(owner, aircraft.getFeeOwed()))
+                    throw new DataError("Not enough money to pay fee debt!");
+
+                String qry = "UPDATE aircraft SET owner = ?, feeowed = null where id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, owner, aircraftId);
+
+                Banking.doPayment(owner, 0, aircraft.getFeeOwed(), PaymentBean.OWNERSHIP_FEE, 0, -1, aircraft.getLocation(), aircraftId, "Aircraft Debt cleared", false);
+            }
+            else
+            {
+                throw new DataError("No debt to pay!");
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public static void buyAircraft(int aircraftId, int account, UserBean user) throws DataError
     {
         if (user.getId() != account && user.groupMemberLevel(account) < UserBean.GROUP_STAFF)
@@ -1060,7 +1093,8 @@ public class Aircraft implements Serializable
                         throw new DataError("You are not allowed to buy this aircraft.");
                 }
 
-                if (!Banking.checkFunds(account, aircraft.getSellPrice()))
+                int sellPrice = aircraft.getSellPrice() + aircraft.getFeeOwed();
+                if (!Banking.checkFunds(account, sellPrice))
                     throw new DataError("Not enough money to buy aircraft");
 
                 String qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = null where id = ?";
@@ -1070,6 +1104,11 @@ public class Aircraft implements Serializable
                 if(aircraft.getSellToId() != 0)
                     comment = "Private Sale: " + Accounts.getAccountNameById(aircraft.getSellToId());
 
+                if(aircraft.getFeeOwed() > 0)
+                {
+                    String debtcomment = "Debt payment for: " + Formatters.currency.format(aircraft.getFeeOwed());
+                    Banking.doPayment(account, 0, aircraft.getFeeOwed(), PaymentBean.AIRCRAFT_SALE, 0, -1, aircraft.getLocation(), aircraftId, debtcomment, false);
+                }
                 Banking.doPayment(account, aircraft.getOwner(), aircraft.getSellPrice(), PaymentBean.AIRCRAFT_SALE, 0, -1, aircraft.getLocation(), aircraftId, comment, false);
             }
             else
@@ -1084,6 +1123,11 @@ public class Aircraft implements Serializable
     }
 
     public static void sellAircraft(int aircraftId, UserBean user) throws DataError
+    {
+        sellAircraft(aircraftId, user, false);
+    }
+
+    public static void sellAircraft(int aircraftId, UserBean user, boolean isRepo) throws DataError
     {
         Connection conn = null;
         Statement stmt = null;
@@ -1113,7 +1157,7 @@ public class Aircraft implements Serializable
                     throw new DataError("The Bank of FSE does not buy broken aircraft.");
                 }
 
-                int sellPrice = aircraft.getMinimumPrice();
+                int sellPrice = aircraft.getMinimumPrice() - aircraft.getFeeOwed();
                 int oldOwner = rs.getInt("owner");
                 String location = rs.getString("location");
                 rs.updateInt("owner", 0);
@@ -1137,7 +1181,8 @@ public class Aircraft implements Serializable
                 rs.close();
                 rs = null;
 
-                Banking.doPayment(0, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraft.getId(), "", false);
+                String comment = isRepo ? "Aircraft Repo, Debt was " + Formatters.currency.format(aircraft.getFeeOwed()) : "";
+                Banking.doPayment(0, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraft.getId(), comment, false);
             }
             else
             {

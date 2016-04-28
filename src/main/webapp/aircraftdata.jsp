@@ -36,6 +36,7 @@
     String homeUrl = Airports.airportLink(aircraft.getHome(), aircraft.getHome(), response);
 
     String price = Formatters.currency.format(aircraft.getSellPrice());
+    String debt = aircraft.getFeeOwed() > 0 ? Formatters.currency.format(aircraft.getFeeOwed()) : "";
 
     //find how many planes of this type for sale in the FSE world
     int acForSale = Aircraft.FindAircraftForSaleByModelCount(aircraft.getModelId());
@@ -55,7 +56,7 @@
     <div class="col-sm-12 column">
         <div class="panel panel-primary">
             <h3 class="text-center"><%=aircraft.getMakeModel()%></h3>
-            <h3 class="text-center"><%=price%></h3>
+            <h3 class="text-center"><%=price%> <%=debt == "" ? "" : "<span style=\"color: red;\">+ " + debt + "</span>"%></h3>
             <h4 class="text-center"><%= airportTitle %></h4>
             <div class="row clearfix">
                 <div class="col-xs-4 col-sm-4 col-md-4 column">
@@ -65,6 +66,8 @@
                     <div class="text-right">Home</div>
                     <div class="text-right">Current Location</div>
                     <div class="text-right">Equipment</div>
+                    <div class="text-right">Ownership Fee (monthly)</div>
+                    <div class="text-right">Fee Amount in Debt</div>
                     <div class="text-right">Seats</div>
                     <div class="text-right">Addtional Crew</div>
                     <div class="text-right">Cruise (TAS)</div>
@@ -97,6 +100,8 @@
                     <div class="text-left"><%=homeUrl%></div>
                     <div class="text-left"><%=location%></div>
                     <div class="text-left"><%=aircraft.getSEquipment()%></div>
+                    <div class="text-left"><%=Formatters.currency.format(aircraft.getOwnershipFee())%></div>
+                    <div class="text-left" style="<%=aircraft.getFeeOwed() > 0 ? "color: red;" : ""%>"><%=Formatters.currency.format(aircraft.getFeeOwed())%></div>
                     <div class="text-left"><%=aircraft.getSeats()%></div>
                     <div class="text-left"><%=aircraft.getCrew()%></div>
                     <div class="text-left"><%=aircraft.getCruise()%></div>

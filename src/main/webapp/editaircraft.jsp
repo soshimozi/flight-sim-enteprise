@@ -19,7 +19,6 @@
 	String error = null;
 
 	int id = Integer.parseInt(request.getParameter("id"));
-	String mPrice;
 	String iPrice;
 	
 	AircraftBean aircraft = Aircraft.getAircraftById(id);
@@ -28,7 +27,6 @@
 	if(aircraft.getSellToId() != 0)
 		sellToName = Accounts.getAccountNameById(aircraft.getSellToId());
 
-	mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
 	iPrice = Integer.toString(aircraft.getMinimumPrice());
 	
 	int userlock = aircraft.getUserLock();
@@ -82,12 +80,22 @@
 			return sign + (j ? i.substr(0, j) + t : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : '');
 		}
 
+		function payDebt(price)
+		{
+			if (window.confirm("Do you want to pay the debt for " + price + "?"))
+			{
+				document.aircraftform.action="userctl";
+				document.aircraftform.event.value = "payfeedebt";
+				document.aircraftform.submit();
+			}
+		}
+
 		function sellNow(price)
 		{
 			var p = Number(price);
 			if (window.confirm("Do you want to sell this aircraft for " + p.toMoney(2) + "?"))
 			{
-				document.aircraftform.action="<%= response.encodeURL("userctl") %>";
+				document.aircraftform.action="userctl";
 				document.aircraftform.event.value = "sell";
 				document.aircraftform.submit();
 			}
@@ -102,7 +110,7 @@
 			if( document.aircraftform.sellPrice.value != "" && (parseInt(document.aircraftform.sellPrice.value) < <%=iPrice%>))
 			{
 				var price = Number(document.aircraftform.sellPrice.value);
-				if (!window.confirm("You have set the sell price of: $" + price.toMoney(2) + " to less then System Buyback Price of: <%=mPrice%>, are you sure?"))
+				if (!window.confirm("You have set the sell price of: $" + price.toMoney(2) + " to less then System Buyback Price of: <%=Formatters.currency.format(aircraft.getMinimumPrice())%>, are you sure?"))
 					return;
 			}
 
@@ -266,12 +274,37 @@
 <%
 		if(aircraft.getLessor() == 0)
 		{
-%>	
+			if(aircraft.getFeeOwed() > 0)
+			{
+				String sellback = Formatters.currency.format(aircraft.getMinimumPrice());
+				String sellMinusfeePrice = Formatters.currency.format(aircraft.getMinimumPrice() - aircraft.getFeeOwed());
+				String feeOwed = Formatters.currency.format(aircraft.getFeeOwed());
+
+%>
+							<br />
+							<br />
+							<br />
+							<div style="color: red; font-size: 14pt;"><%=feeOwed%> in restoral fees are required to make this aircraft airworthy.</div>
+							<input type="button" class="button" onclick="payDebt('<%= feeOwed %>')" value="Restore aircraft now for <%= feeOwed %>"/>
+							<br />
+							<br />
+							<br />
+							<div style="color: red; font-size: 14pt;">Sellback value is <%= sellback%>.</div>
+							<div style="color: red; font-size: 14pt;">You can sellback to the BANK now and have the restoral fees automatically deducted.</div>
+							<input type="button" class="button" onclick="sellNow('<%= sellMinusfeePrice %>')" value="Sell to BANK now for <%= sellMinusfeePrice %>"/>
+<%
+			}
+
+			else
+			{
+				String mPrice = Formatters.currency.format(aircraft.getMinimumPrice());
+%>
 							<br />
 							<br />
 							<br />
 							<input type="button" class="button" onclick="sellNow('<%= mPrice %>')" value="Sell to BANK now for <%= mPrice %>"/>
 <%
+			}
 		}
 %>		
 						</td>

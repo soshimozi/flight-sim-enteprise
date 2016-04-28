@@ -46,7 +46,8 @@ public class AircraftMaintenanceBean implements Serializable
 	public static final int MAINT_FIXAIRCRAFT = 3;
 	public static final int MAINT_SHIPMENTDISASSEMBLY = 4; //added Airboss 1/22/11
 	public static final int MAINT_SHIPMENTREASSEMBLY = 5; //added Airboss 1/22/11
-	
+	public static final int MAINT_OWNERSHIP_FEE = 6;
+
 	public static final int REPAIR_AVAILABLE_AIRPORT_SIZE  = 2000; // TODO: Find suitable value
 	
 	AircraftBean aircraft;
@@ -364,6 +365,9 @@ public class AircraftMaintenanceBean implements Serializable
 
 			case AircraftMaintenanceBean.MAINT_SHIPMENTREASSEMBLY:
 				return "Shipment reassembly";
+
+			case AircraftMaintenanceBean.MAINT_OWNERSHIP_FEE:
+				return "Ownership Fee processed";
 
 			default:
 				return null;

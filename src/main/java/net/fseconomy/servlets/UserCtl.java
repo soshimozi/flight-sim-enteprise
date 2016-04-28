@@ -167,6 +167,9 @@ public class UserCtl extends HttpServlet
                     case "sell":
                         doAircraftSell(req);
                         break;
+                    case "payfeedebt":
+                        doAircraftPayFeeDebt(req);
+                        break;
                     case "bank":
                         doBank(req);
                         break;
@@ -1512,9 +1515,19 @@ public class UserCtl extends HttpServlet
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 
         Aircraft.sellAircraft(id, user);
-	}	
-	
-	void newUser(HttpServletRequest req) throws DataError
+	}
+
+    void doAircraftPayFeeDebt(HttpServletRequest req) throws DataError
+    {
+        if (!Helpers.isInteger(req.getParameter("id")))
+            throw new DataError("Missing parameter");
+        int id = Integer.parseInt(req.getParameter("id"));
+        UserBean user = (UserBean) req.getSession().getAttribute("user");
+
+        Aircraft.payFeeDebt(id, user);
+    }
+
+    void newUser(HttpServletRequest req) throws DataError
 	{
         UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String newusername = req.getParameter("user");

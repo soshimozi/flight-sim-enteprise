@@ -182,6 +182,37 @@
                 <td align="center"><%= aircraft.getCruise() %> kts</td>
             </tr>
         </table><br>
+        <table>
+            <caption style="width:350px;">Monthly Ownership Fee</caption>
+        </table>
+        <table>
+            <tr>
+                <td>
+                    <table border="1">
+                        <thead>
+                        <tr>
+                            <th>Fee Amount</th>
+                        </tr>
+                        </thead>
+                        <tr>
+                            <td align="center"><%= Formatters.currency.format(aircraft.getOwnershipFee()) %></td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <table border="1">
+                        <thead>
+                        <tr>
+                            <th>Debt Amount</th>
+                        </tr>
+                        </thead>
+                        <tr>
+                            <td align="center"><%= Formatters.currency.format(aircraft.getFeeOwed()) %></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table><br>
         <table border="1">
             <caption>Fuel</caption>
             <thead>

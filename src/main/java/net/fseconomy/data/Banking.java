@@ -336,7 +336,8 @@ public class Banking implements Serializable
                 reason != PaymentBean.TRANSFER_GOODS_JETA &&
                 reason != PaymentBean.TRANSFER_GOODS_SUPPLIES &&
                 reason != PaymentBean.BULK_FUEL&&
-                reason != PaymentBean.BULK_SUPPLIES)
+                reason != PaymentBean.BULK_SUPPLIES &&
+                reason != PaymentBean.OWNERSHIP_FEE)
         {
             return true;
         }

@@ -177,11 +177,15 @@ public class MaintenanceCycle implements Runnable
 		processSupplyOrders();
 		
 		//TODO: comment out for test server for faster cycle times
-		processFboAssignments(); //green assignments
-		processTemplateAssignments(); //template assignments
+//		processFboAssignments(); //green assignments
+//		processTemplateAssignments(); //template assignments
 		
 		//TODO examine to see if we need to randomize release times on this a bit more
 		freeExpiredFBOs();
+
+		//TODO move this inside of once per day after testing!!
+		processAircraftOwnershipFees();
+		processAircraftRepos();
 
 		if(isOncePerDay())
 		{
@@ -192,7 +196,7 @@ public class MaintenanceCycle implements Runnable
 			processFboSupplyUsage();
 
 			checkRegistrations();
-		}		
+		}
 
 		//For Data Feeds
 		assignmentsLastUpdate = new Date();
@@ -490,8 +494,133 @@ public class MaintenanceCycle implements Runnable
 	    {
 	    	e.printStackTrace();
 	    }
-	}	  
-	
+	}
+
+	void processAircraftOwnershipFees()
+	{
+		updateStatus("Processing Aircraft Ownership Fees");
+		try
+		{
+			//start time
+			long starttime = System.currentTimeMillis();
+
+			int counter = 0;
+			int totalPaid = 0;
+			int totalDebt = 0;
+			int total = 0;
+
+			GregorianCalendar today = new GregorianCalendar();
+			int day = today.get(Calendar.DAY_OF_MONTH);
+
+			//TODO uncomment this for live!
+			//if (1 == day)
+			{
+				//TODO change query to include all user aircraft and not just those marked TEST!
+				//String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 order by aircraft.owner, aircraft.model";
+				String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 AND registration like 'TEST%' order by aircraft.owner, aircraft.model";
+				List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
+				for(AircraftBean aircraft: list)
+				{
+					counter++;
+					updateStatus("Working Aircraft Fee for " + counter + " out of " + list.size());
+
+					boolean feeDue = true;
+					int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
+					if(aircraft.getFeeOwed()  == 0)
+					{
+						boolean fundsAvail = Banking.checkFunds(ownerId, aircraft.getOwnershipFee());
+						if(fundsAvail)
+						{
+							Banking.doPayment(ownerId, 0, (double) aircraft.getOwnershipFee(), PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "", true);
+							feeDue = false;
+							totalPaid += aircraft.getOwnershipFee();
+						}
+					}
+
+					if(feeDue)
+					{
+						qry = "Update aircraft SET feeowed = feeowed + ? where id = ?";
+						DALHelper.getInstance().ExecuteNonQuery(qry, aircraft.getOwnershipFee(), aircraft.getId());
+						Banking.doPayment(ownerId, 0, 0, PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "Aircraft Ownership Fee Added to Current Debt", false);
+						totalDebt += aircraft.getOwnershipFee();
+					}
+
+					total += aircraft.getOwnershipFee();
+				}
+				GlobalLogger.logApplicationLog("Aircraft Ownership Payments: Total Payout - " + Formatters.currency.format(totalPaid) + " from " + counter + " aircraft", MaintenanceCycle.class);
+			}
+
+			long elapsed = System.currentTimeMillis()-starttime;
+			GlobalLogger.logApplicationLog("Process Aircraft Fees Completed: elapsed time = " + elapsed
+					+ "ms, Total Aircraft: " + counter
+					+ ", Total Fees: " + Formatters.currency.format(total)
+					+ ", Total Debt: " + Formatters.currency.format(totalDebt)
+					+ ", Total Paid: " + Formatters.currency.format(totalPaid)
+					, MaintenanceCycle.class);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	void processAircraftRepos()
+	{
+		updateStatus("Processing Aircraft Repos");
+
+		//start time
+		long starttime = System.currentTimeMillis();
+
+		int counter = 0;
+		int totalPaid = 0;
+
+		GregorianCalendar today = new GregorianCalendar();
+		int day = today.get(Calendar.DAY_OF_MONTH);
+
+		//TODO uncomment this for live!
+		//if (1 == day)
+		{
+			//TODO change query to include all user aircraft and not just those marked TEST!
+			//String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 order by aircraft.owner, aircraft.model";
+			String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 AND feeowed > 0 AND registration like 'TEST%' order by aircraft.owner, aircraft.model";
+			List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
+			for(AircraftBean aircraft: list)
+			{
+				updateStatus("Checking Repo Aircraft Fee for " + counter + " out of " + list.size());
+				if(aircraft.getFeeOwed() > aircraft.getOwnershipFee()*36)
+				{
+					counter++;
+					int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
+					UserBean owner = Accounts.getAccountById(ownerId);
+					if(aircraft.getLessor() != 0)
+					{
+						try
+						{
+							Aircraft.leasereturnac(aircraft.getId());
+						}
+						catch(DataError e)
+						{
+							GlobalLogger.logDebugLog("Error returning lease for aircraft [" + aircraft.getId() + "] in processAircraftRepos(): " + e.getMessage(), MaintenanceCycle.class);
+						}
+					}
+
+					try
+					{
+						Aircraft.sellAircraft( aircraft.getId(), owner, true);
+					}
+					catch(DataError e)
+					{
+						GlobalLogger.logDebugLog("Error selling aircraft [" + aircraft.getId() + "] in processAircraftRepos(): " + e.getMessage(), MaintenanceCycle.class);
+					}
+				}
+			}
+			GlobalLogger.logApplicationLog("Aircraft Repos Check: Total Repo'd - " + counter + " of " + list.size() + " aircraft in debt", MaintenanceCycle.class);
+		}
+
+		long elapsed = System.currentTimeMillis()-starttime;
+		GlobalLogger.logApplicationLog("Process Aircraft Fees Completed: elapsed time = " + elapsed + "ms, Total Aircraft: " + counter + ", Total Fees: " + Formatters.currency.format(totalPaid), MaintenanceCycle.class);
+	}
+
 	/**
 	 * Calculate Supply usage
 	 * 
