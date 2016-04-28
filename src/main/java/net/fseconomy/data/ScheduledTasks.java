@@ -57,6 +57,7 @@ public class ScheduledTasks
         try
         {
             net.fseconomy.servlets.FullFilter.setMaintenanceMode(true);
+            runLogCleanup();
             runDbOptimize();
             runDbBackup();
         }
@@ -66,7 +67,31 @@ public class ScheduledTasks
         }
     }
 
-    private void runDbOptimize() throws RuntimeException
+    private void runLogCleanup() //throws RuntimeException
+    {
+        try
+        {
+            GlobalLogger.logApplicationLog("Log Cleanup Started", ScheduledTasks.class);
+
+            //start time
+            long starttime = System.currentTimeMillis();
+
+            DALHelper.getInstance().ExecuteNonQuery("{call LogCleanup()}");
+
+            //start time
+            long elapsed = System.currentTimeMillis() - starttime;
+
+            GlobalLogger.logApplicationLog("Log Cleanup Completed: elapsed time = " + elapsed + "ms", ScheduledTasks.class);
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            GlobalLogger.logApplicationLog("Log Cleanup failed", ScheduledTasks.class);
+            //throw new RuntimeException("Log Cleanup failed");
+        }
+    }
+
+    private void runDbOptimize() //throws RuntimeException
     {
         try
         {
@@ -86,7 +111,7 @@ public class ScheduledTasks
         {
             e.printStackTrace();
             GlobalLogger.logApplicationLog("dbOptimize failed", ScheduledTasks.class);
-            throw new RuntimeException("Optimize failed");
+            //throw new RuntimeException("Optimize failed");
         }
     }
 
@@ -103,7 +128,7 @@ public class ScheduledTasks
         }
     }
 
-    public void runDbBackup() throws RuntimeException
+    public void runDbBackup() //throws RuntimeException
     {
         GlobalLogger.logApplicationLog("Database Backup Started", ScheduledTasks.class);
 
@@ -153,7 +178,7 @@ public class ScheduledTasks
         {
             e.printStackTrace();
             GlobalLogger.logApplicationLog("Database Backup failed", ScheduledTasks.class);
-            throw new RuntimeException("Database Backup failed");
+            //throw new RuntimeException("Database Backup failed");
         }
     }
 
@@ -222,8 +247,8 @@ public class ScheduledTasks
 
         if(Boolean.getBoolean("Debug"))
         {
-            stdInterval = 5;
-            delay = 0;
+            stdInterval = 15;
+            delay = 15;
         }
 
         futureDbTasks = executorDbTasks.scheduleAtFixedRate(
