@@ -114,7 +114,7 @@
         if (lockedBy == null)
         {
 %>
-                    <input type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= assignment.getId() %>">
+                    <input class="chkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= assignment.getId() %>">
                     <small class="text-muted">Open</small>
 <%
         }
