@@ -186,16 +186,16 @@
 	</caption>
 	<thead>
 	<tr>
-		<th style="width: 85px">Registration</th>
+		<th style="width: 115px">Registration</th>
 		<th >Type</th>
 		<th style="width: 35px">Location</th>
 		<th style="width: 35px">Home</th>
 		<th class="numeric" style="width: 45px">Fuel Loaded</th>
-		<th class="numeric" style="width: 75px">Price</th>
+		<th class="numeric" style="width: 95px">Price</th>
 		<th class="sorter-timeHrMin numeric" style="width: 45px">Engine Total</th>
 		<th class="sorter-timeHrMin numeric" style="width: 45px">Since check</th>
-		<th class="numeric" style="width: 75px">Rental Price</th>
-		<th class="numeric" style="width: 45px">Bonus</th>
+		<th class="numeric" style="width: 150px">Rental (Hr)</th>
+		<th class="numeric" style="width: 55px">Bonus</th>
 		<th class="sorter-false" style="width: 75px">Action</th>
 	</tr>
 	</thead>
@@ -214,7 +214,7 @@
 		if (priceWet > 0)
 			price = price + ((priceDry > 0) ? "/" : "") + "$" + priceWet + " Wet";
 			
-		price = price + (aircraft.getAccounting() == AircraftBean.ACC_TACHO ? " [Tacho]" : " [Hour]");
+		//price = price + (aircraft.getAccounting() == AircraftBean.ACC_TACHO ? " [Tacho]" : " [Hour]");
 		int minutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck())/60;
 		int hours = minutes / 60;
 		String lastCheck = (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
@@ -258,7 +258,7 @@
 			else if(aircraft.getSellPrice() > 0)
 				priceField = Formatters.currency.format(aircraft.getSellPrice());
 			else
-				priceField = "Not for sale";
+				priceField = "NFS";
 %>			
 			<td class="numeric"><%= priceField %></td>
 <%
