@@ -122,7 +122,7 @@
         {
 %>
                     <div class="bg-danger" title="<%=lockedBy.getName()%>">
-                        <input type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= assignment.getId() %>">
+                        <input class="chkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= assignment.getId() %>">
                         <%=lockedBy.getName().length() > 12 ? lockedBy.getName().substring(0, 12) + "..." : lockedBy.getName()%>
                     </div>
 <%
