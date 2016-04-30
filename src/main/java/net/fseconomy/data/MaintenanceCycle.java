@@ -1886,7 +1886,7 @@ public class MaintenanceCycle implements Runnable
 		updateStatus("Moving aircraft to new home");
 		try
 		{
-			String qry = "SELECT aircraft.id, models.minairportsize, lat, lon FROM aircraft, airports, models where home = icao AND models.id = aircraft.model and models.minairportsize > size AND aircraft.owner = 0 AND aircraft.userlock is NULL;";
+			String qry = "SELECT aircraft.id, models.minairportsize, lat, lon FROM aircraft, airports, models where home = icao AND models.id = aircraft.model and models.minairportsize > longestRwy AND aircraft.owner = 0 AND aircraft.userlock is NULL;";
 			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{
@@ -1932,7 +1932,7 @@ public class MaintenanceCycle implements Runnable
 				if (amountToCreate > 0)
 				{
 					updateSet = updater.executeQuery("SELECT * FROM aircraft where 1=2");
-					airportSet = airports.executeQuery("SELECT airports.icao, size, prefix, registration FROM airports, registrations WHERE type='civil' AND airports.country = registrations.country AND airports.size > " + model.getMinAirportSize() + " ORDER BY rand() LIMIT " + amountToCreate);
+					airportSet = airports.executeQuery("SELECT airports.icao, size, prefix, registration FROM airports, registrations WHERE type='civil' AND airports.country = registrations.country AND airports.longestRwy > " + model.getMinAirportSize() + " ORDER BY rand() LIMIT " + amountToCreate);
 
 					while (airportSet.next())
 					{

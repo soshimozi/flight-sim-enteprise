@@ -141,7 +141,7 @@
 		<td>Amount For Sale</td><td><input name="numSell" type="text" class="textarea" value="<%= model.getNumSell()%>" size="7"/> </td>
 	</tr>
 	<tr>
-		<td>Appear at airports larger than</td><td><input name="minAirportSize" type="text" class="textarea" value="<%= model.getMinAirportSize()%>" size="7"/> </td>
+		<td>Appear at airports with Rwy Length (ft) or greater</td><td><input name="minAirportSize" type="text" class="textarea" value="<%= model.getMinAirportSize()%>" size="7"/> </td>
 	</tr>
 	
 	<tr>
