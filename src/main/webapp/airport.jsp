@@ -330,6 +330,31 @@
 	</script>
 
 	<script type="text/javascript">
+		var lastChecked = null;
+
+		$(document).ready(function() {
+			var $chkboxes = $('.chkbox');
+			$chkboxes.click(function(e) {
+				$chkboxes = $('.chkbox');
+				if(!lastChecked) {
+					lastChecked = this;
+					return;
+				}
+
+				if(e.shiftKey) {
+					var start = $chkboxes.index(this);
+					var end = $chkboxes.index(lastChecked);
+
+					$chkboxes.slice(Math.min(start,end), Math.max(start,end)+ 1).prop('checked', lastChecked.checked);
+
+				}
+
+				lastChecked = this;
+			});
+		});
+	</script>
+
+	<script type="text/javascript">
 		$(function()
 		{
 			$.extend($.tablesorter.defaults,
@@ -845,7 +870,7 @@
 				%>
 				<tr>
 					<td>
-						<input type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= id %>"/>
+						<input class="chkbox" type="checkbox" id="mycheckbox<%=counter%>" name="select" value="<%= id %>"/>
 					</td>
 					<td class="numeric"><%= Formatters.currency.format(assignment.calcPay()) %></td>
 					<% 				if (ap.equals(locap))
