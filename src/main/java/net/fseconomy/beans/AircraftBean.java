@@ -54,6 +54,7 @@ public class AircraftBean implements Serializable
 	int sellPrice;
 	boolean privateSale;
 	int sellToId;
+	int monthlyFee;
 	int equipment;
 	int modelPrice;
 	int bearing, distance;
@@ -112,6 +113,7 @@ public class AircraftBean implements Serializable
 		setSellPrice(rs.getInt("sellPrice"));
 		setPrivateSale(rs.getBoolean("privatesale"));
 		setSellToId(rs.getInt("selltoid"));
+		setMonthlyFee(rs.getInt("monthlyfee"));
 		setMaxRentTime(rs.getString("aircraft.maxRentTime") == null ? rs.getInt("models.maxRentTime") : rs.getInt("aircraft.maxRentTime"));
 		setAccounting();
 		setDepartedFrom(rs.getString("departedFrom"));
@@ -1109,6 +1111,16 @@ public class AircraftBean implements Serializable
 		sellToId = id;
 	}
 
+	public int getMonthlyFee()
+	{
+		return monthlyFee;
+	}
+
+	public void setMonthlyFee(int fee)
+	{
+		monthlyFee = fee;
+	}
+
 	public String getSLocation()
 	{
 		return location == null ? "Airborne" : location;
@@ -1453,16 +1465,15 @@ public class AircraftBean implements Serializable
 
 	public int getOwnershipFee()
 	{
-		//return (int) Math.round(((double)getMinimumPrice() *.36) / 36.0);
-		ModelBean model = Models.getModelById(modelId);
-		return (int) Math.round((double)model.getPrice()*.006);
+		return (int) Math.round(((double)getMinimumPrice() *.36) / 36.0);
 	}
 	
 	public boolean isBroken()
 	{
 		boolean broken = false;
-		if (condition > AircraftBean.REPAIR_RANGE_LOW-1 && condition < AircraftBean.REPAIR_RANGE_HIGH+1 && owner > 0 && airframe >= lastFix + 3600)
+		if (condition > (AircraftBean.REPAIR_RANGE_LOW - 1) && condition < (AircraftBean.REPAIR_RANGE_HIGH + 1) && owner > 0 && airframe >= (lastFix + 3600))
 			broken = true;
+
 		return broken;
 	}
 

@@ -4,8 +4,10 @@ import net.fseconomy.beans.*;
 import net.fseconomy.dto.*;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.GlobalLogger;
 import net.fseconomy.util.Helpers;
 
+import javax.sql.rowset.CachedRowSet;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.*;
@@ -13,6 +15,10 @@ import java.util.Date;
 
 public class Aircraft implements Serializable
 {
+    static final int REG_ICAO = 0;
+    static final int REG_PREFIX = 1;
+    static final int REG_POSTFIX = 2;
+
     public static void transferAircraft(int aircraftId, int toId) throws DataError
     {
         try
@@ -1097,8 +1103,10 @@ public class Aircraft implements Serializable
                 if (!Banking.checkFunds(account, sellPrice))
                     throw new DataError("Not enough money to buy aircraft");
 
-                String qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = null where id = ?";
-                DALHelper.getInstance().ExecuteUpdate(qry, account, aircraftId);
+                int monthlyFee = aircraft.getOwnershipFee();
+
+                String qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = 0, monthlyfee = ? where id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, account, monthlyFee, aircraftId);
 
                 String comment = "";
                 if(aircraft.getSellToId() != 0)
@@ -1167,8 +1175,11 @@ public class Aircraft implements Serializable
                 rs.updateNull("bonus");
                 rs.updateNull("maxRentTime");
                 rs.updateNull("accounting");
+                rs.updateInt("privatesale", 0);
+                rs.updateInt("monthlyfee", 0);
 
-                // Randomize rent
+                // Randomize
+                setNewAircraftRegistration(aircraft.getHome(), aircraft.getRegistration());
                 ModelBean model = Models.getModelById(rs.getInt("model"));
                 int equipment = rs.getInt("equipment");
                 int rent = model.getTotalRentalTarget(equipment);
@@ -2136,6 +2147,322 @@ public class Aircraft implements Serializable
         return result;
     }
 
+
+    public static Set<String> getAircraftRegistrationSet() throws SQLException
+    {
+        Set<String> usedRegistrations = new HashSet<>();
+
+        String qry = "SELECT registration from aircraft";
+        ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+
+        while (rs.next())
+            usedRegistrations.add(rs.getString(1));
+
+        return usedRegistrations;
+    }
+
+    public static void setNewAircraftRegistration(String home, String reg)
+    {
+        Map<String, List<String[]>> countryRegistrationCodes = getCountryRegistrationCodes();
+        Set<String> regs = getCurrentRegistrations();
+        String icaocountry = getICAORegistrationCountry(home);
+        List<String[]> coding = countryRegistrationCodes.get(icaocountry);
+
+        resetRegistration(home, reg, coding, regs);
+    }
+
+    public static String createAircraftRegistration(Set<String> usedRegistrations, String prefix, String postfix)
+    {
+        StringBuffer registration;
+        int loopCounter = 0;
+
+        do
+        {
+            registration = new StringBuffer(prefix);
+            registration.append('-');
+
+            for (int loop = 0; loop < postfix.length(); loop++)
+            {
+                char thisChar = postfix.charAt(loop);
+
+                if (Character.isDigit(thisChar))
+                {
+                    registration.append((int)Math.round(Math.random()*9));
+                }
+                else if (Character.isLowerCase(thisChar))
+                {
+                    registration.append((char)('A'+(int)Math.round(Math.random()*25)));
+                }
+                else if (Character.isUpperCase(thisChar))
+                {
+                    registration.append(thisChar);
+                }
+                else
+                {
+                    int ran = (int)Math.round(Math.random()*35);
+
+                    if (ran < 10)
+                        registration.append(ran);
+                    else
+                        registration.append((char)('A'+ran-10));
+                }
+            }
+
+            loopCounter++;
+            if(loopCounter > 1000)
+            {
+                //Apparently we have ran out of registration codes, add a extended postfix
+                GlobalLogger.logDebugLog("New Registration generator excessive looping: prefix [" + prefix + "], postfix [" + postfix + "]", MaintenanceCycle.class);
+
+                registration.append('-');
+                int ran = (int)Math.round(Math.random()*100);
+                registration.append(ran);
+            }
+        } while(usedRegistrations.contains(registration.toString()));
+
+        return registration.toString();
+    }
+
+    public static int createNewAircraftBaseEquipment(int modelequipment)
+    {
+        int mask = 0;
+        switch (modelequipment)
+        {
+            case ModelBean.EQUIPMENT_VFR_ONLY :
+                break;
+
+            case ModelBean.EQUIPMENT_IFR_ONLY:
+                mask = ModelBean.EQUIPMENT_GPS_MASK|ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
+                break;
+
+            case ModelBean.EQUIPMENT_VFR_IFR:
+                switch ((int)(Math.random()*6))
+                {
+                    case 0:
+                    case 1:
+                    case 2:
+                        break;
+
+                    case 3:
+                        mask = ModelBean.EQUIPMENT_AP_MASK;
+                        break;
+
+                    case 4:
+                        mask = ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
+                        break;
+
+                    case 5:
+                        mask = ModelBean.EQUIPMENT_GPS_MASK|ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
+                        break;
+                }
+                break;
+
+            default:
+                GlobalLogger.logApplicationLog("createNewAircraftBaseEquipment(): model equipment not defined for: " + modelequipment +
+                        ", Default VFR used.", MaintenanceCycle.class);
+        }
+
+        return mask;
+    }
+
+    public static  Set<String> getCurrentRegistrations()
+    {
+        HashSet<String> regSet = new HashSet<>();
+
+        try
+        {
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery("SELECT registration from aircraft");
+            while (rs.next())
+            {
+                regSet.add(rs.getString(1));
+            }
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return regSet;
+    }
+
+    public static  Map<String, List<String[]>> getCountryRegistrationCodes()
+    {
+        Map<String, List<String[]>> map = new HashMap<>();
+        try
+        {
+            String qry = "SELECT country, icao, prefix, registration FROM registrations";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+
+            while (rs.next())
+            {
+                List<String[]> list = map.get(rs.getString(1));
+                if(list != null)
+                {
+                    list.add(new String[]{rs.getString(2),rs.getString(3),rs.getString(4)});
+                }
+                else
+                {
+                    list = new ArrayList<>();
+                    list.add(new String[]{rs.getString(2),rs.getString(3),rs.getString(4)});
+                    map.put(rs.getString(1), list);
+                }
+            }
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return map;
+    }
+
+    public static String getICAORegistrationCountry(String icao)
+    {
+        String qry = "";
+        try
+        {
+            qry = "SELECT r.country FROM airports a, registrations r WHERE a.country = r.country AND a.ICAO = ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, icao);
+            if(rs.next())
+            {
+                return rs.getString(1);
+            }
+            else
+            {
+                GlobalLogger.logDebugLog("Error in isValidRegistration(), did not find country for ICAO: " + icao, MaintenanceCycle.class);
+
+                return "Default";
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static boolean isValidPrefix(String reg, String prefix)
+    {
+        return reg.startsWith(prefix);
+
+    }
+
+    public static boolean isValidRegistrationFormat(String postfix, String reg)
+    {
+        for(int i=0;i<postfix.length();i++)
+        {
+            char c = postfix.charAt(i);
+            if(Character.isDigit(c))
+            {
+                if(!Character.isDigit(reg.charAt(i)))
+                    return false;
+            }
+            else if(Character.isLetter(c))
+            {
+                //Literal
+                if(Character.isUpperCase(c))
+                {
+                    if(reg.charAt(i) != c)
+                        return false;
+                }
+                else
+                {
+                    if(!Character.isLetter(reg.charAt(i)))
+                        return false;
+                }
+            }
+            else if(c == '#') // letter or digit
+            {
+                if(!Character.isLetterOrDigit(reg.charAt(i)))
+                    return false;
+            }
+            else //should never reach, force new registration
+            {
+                GlobalLogger.logDebugLog("Error in isValidRegistrationFormat(), registration postfix not a valid format symbol!: [" + c + "] of [" + postfix + "]", MaintenanceCycle.class);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean isValidRegistrationPostfix(String reg, String prefix, String postfix)
+    {
+        String body = reg.substring(prefix.length());
+
+        return body.length() == postfix.length() && isValidRegistrationFormat(postfix, body);
+    }
+
+    public static boolean isValidRegistration(String reg, List<String[]> coding) // String homeIcao, Map<String, String[]> countryRegistrationCodes)
+    {
+        int index = 0;
+        boolean found = false;
+
+        do
+        {
+            String prefix = (coding.get(index))[REG_PREFIX];
+            String postfix = (coding.get(index))[REG_POSTFIX];
+
+            //checks use the separator -
+            prefix = prefix.concat("-");
+
+            if( isValidPrefix(reg, prefix) && isValidRegistrationPostfix(reg, prefix, postfix))
+                found = true;
+
+            index++;
+        } while(index < coding.size());
+
+        return found;
+    }
+
+    static private void updateAircraftToNewRegistration(String reg, String newreg)
+    {
+        try
+        {
+            String qry ="UPDATE aircraft SET registration = ? WHERE registration = ?;";
+            DALHelper.getInstance().ExecuteUpdate(qry, newreg, reg);
+        }
+        catch (SQLException e)
+        {
+            GlobalLogger.logDebugLog("ERROR: Changing aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]", MaintenanceCycle.class);
+            e.printStackTrace();
+        }
+    }
+
+    public static void resetRegistration(String home, String reg, List<String[]> coding, Set<String> currRegs)
+    {
+        int index = 0;
+        int foundCount = 0;
+        List<Integer> list = new ArrayList<>();
+
+        do
+        {
+            String icaoprefix = coding.get(index)[REG_ICAO];
+            if( home.startsWith(icaoprefix))
+            {
+                foundCount++;
+                list.add(index);
+            }
+            index++;
+        } while(index < coding.size());
+
+        //assumption - there will always be at least 1 coding
+        index = 0;
+
+        if(foundCount > 1)
+            index = list.get((int)Math.round(Math.random()*foundCount));
+
+        String prefix = coding.get(index)[REG_PREFIX];
+        String postfix = coding.get(index)[REG_POSTFIX];
+        String newreg = createAircraftRegistration(currRegs, prefix, postfix);
+
+        currRegs.add(newreg);
+        updateAircraftToNewRegistration(reg, newreg);
+
+        GlobalLogger.logApplicationLog("Changed aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]", MaintenanceCycle.class);
+    }
+
     //	/*
     //	 * Gets the aircraft shipping size from the shipping config table using the aircraft empty weight
     //	 * param emptyweight
@@ -2158,4 +2485,5 @@ public class Aircraft implements Serializable
     //
     //		return shippingSize;
     //	}
+
 }

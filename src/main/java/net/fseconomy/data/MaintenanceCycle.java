@@ -19,10 +19,6 @@ import net.fseconomy.util.GlobalLogger;
 
 public class MaintenanceCycle implements Runnable
 {
-	static final int REG_ICAO = 0;
-	static final int REG_PREFIX = 1;
-	static final int REG_POSTFIX = 2;
-
 	public static final int CycleType30Min = 0;
 	public static final int CycleTypeDaily = 1;
 
@@ -528,10 +524,10 @@ public class MaintenanceCycle implements Runnable
 					int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
 					if(aircraft.getFeeOwed()  == 0)
 					{
-						boolean fundsAvail = Banking.checkFunds(ownerId, aircraft.getOwnershipFee());
+						boolean fundsAvail = Banking.checkFunds(ownerId, aircraft.getMonthlyFee());
 						if(fundsAvail)
 						{
-							Banking.doPayment(ownerId, 0, (double) aircraft.getOwnershipFee(), PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "", true);
+							Banking.doPayment(ownerId, 0, (double) aircraft.getMonthlyFee(), PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "", true);
 							feeDue = false;
 							totalPaid += aircraft.getOwnershipFee();
 						}
@@ -540,12 +536,12 @@ public class MaintenanceCycle implements Runnable
 					if(feeDue)
 					{
 						qry = "Update aircraft SET feeowed = feeowed + ? where id = ?";
-						DALHelper.getInstance().ExecuteNonQuery(qry, aircraft.getOwnershipFee(), aircraft.getId());
+						DALHelper.getInstance().ExecuteNonQuery(qry, aircraft.getMonthlyFee(), aircraft.getId());
 						Banking.doPayment(ownerId, 0, 0, PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "Aircraft Ownership Fee Added to Current Debt", false);
 						totalDebt += aircraft.getOwnershipFee();
 					}
 
-					total += aircraft.getOwnershipFee();
+					total += aircraft.getMonthlyFee();
 				}
 				GlobalLogger.logApplicationLog("Aircraft Ownership Payments: Total Payout - " + Formatters.currency.format(totalPaid) + " from " + counter + " aircraft", MaintenanceCycle.class);
 			}
@@ -587,7 +583,7 @@ public class MaintenanceCycle implements Runnable
 			for(AircraftBean aircraft: list)
 			{
 				updateStatus("Checking Repo Aircraft Fee for " + counter + " out of " + list.size());
-				if(aircraft.getFeeOwed() > aircraft.getOwnershipFee()*36)
+				if(aircraft.getFeeOwed() > aircraft.getMonthlyFee()*36)
 				{
 					counter++;
 					int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
@@ -2032,7 +2028,7 @@ public class MaintenanceCycle implements Runnable
 			e.printStackTrace();
 		} 
 	}
-	
+
 	void createAircraft()
 	{
 		Statement stmt = null, updater = null, airports = null;
@@ -2044,20 +2040,20 @@ public class MaintenanceCycle implements Runnable
 			conn = DALHelper.getInstance().getConnection();
 			stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet. CONCUR_READ_ONLY);
 			rs = stmt.executeQuery("SELECT models.amount, count(aircraft.model), models.*  FROM models LEFT JOIN aircraft ON aircraft.model = models.id GROUP BY models.id");
-			updater = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet. CONCUR_UPDATABLE);					
+			updater = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet. CONCUR_UPDATABLE);
 			airports = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet. CONCUR_READ_ONLY);
 
-			Set<String> usedRegistrations = getAircraftRegistrationSet();
-			
+			Set<String> usedRegistrations = Aircraft.getAircraftRegistrationSet();
+
 			while(rs.next())
 			{
 				int amountToCreate = rs.getInt(1) - rs.getInt(2);
 				if (amountToCreate == 0)
 					continue;
-				
-				ModelBean model = new ModelBean(rs);												
+
+				ModelBean model = new ModelBean(rs);
 				int[] capacity = model.getCapacity();
-				
+
 				if (amountToCreate > 0)
 				{
 					updateSet = updater.executeQuery("SELECT * FROM aircraft where 1=2");
@@ -2066,15 +2062,15 @@ public class MaintenanceCycle implements Runnable
 					while (airportSet.next())
 					{
 						String home = airportSet.getString(1);
-						String registration = getNewAircraftRegistration(usedRegistrations, airportSet.getString(3), airportSet.getString(4));									
+						String registration = Aircraft.createAircraftRegistration(usedRegistrations, airportSet.getString(3), airportSet.getString(4));
 						usedRegistrations.add(registration);
-						
-						updateSet.moveToInsertRow();						
+
+						updateSet.moveToInsertRow();
 						updateSet.updateString("registration", registration);
 						updateSet.updateString("home", home);
 						updateSet.updateString("location", home);
 						updateSet.updateInt("model", model.getId());
-						int mask = createNewAircraftBaseEquipment(model.getEquipment());
+						int mask = Aircraft.createNewAircraftBaseEquipment(model.getEquipment());
 						updateSet.updateInt("equipment", mask);
 						int rent = model.getTotalRentalTarget(mask);
 						rent *= 1+(Math.random()*0.40) - 0.2;
@@ -2087,32 +2083,32 @@ public class MaintenanceCycle implements Runnable
 
 						if (capacity[0] > 0)
 							updateSet.updateDouble("fuelCenter", 0.5);
-						
+
 						if (capacity[1] > 0)
 							updateSet.updateDouble("fuelLeftMain", 0.5);
-						
+
 						if (capacity[2] > 0)
 							updateSet.updateDouble("fuelLeftAux", 0.5);
-						
+
 						if (capacity[3] > 0)
 							updateSet.updateDouble("fuelLeftTip", 0.5);
-						
+
 						if (capacity[4] > 0)
 							updateSet.updateDouble("fuelRightMain", 0.5);
-						
+
 						if (capacity[5] > 0)
 							updateSet.updateDouble("fuelRightAux", 0.5);
-						
+
 						if (capacity[6] > 0)
 							updateSet.updateDouble("fuelRightTip", 0.5);
-						
+
 						updateSet.insertRow();
 						GlobalLogger.logApplicationLog("CreateAircraft creating unit - Model:" + model.getId(), MaintenanceCycle.class);
 					}
-					
+
 					airportSet.close();
 					updateSet.close();
-				} 
+				}
 				else
 				{
 					double probability = (double)rs.getInt(2) / (double)-amountToCreate;
@@ -2122,13 +2118,13 @@ public class MaintenanceCycle implements Runnable
 						GlobalLogger.logApplicationLog("CreateAircraft deleting unit - Model:" + updateSet.getInt("model"), MaintenanceCycle.class);
 						updateSet.deleteRow();
 					}
-				}						
+				}
 			}
-		} 
+		}
 		catch (SQLException e)
 		{
-			e.printStackTrace();				
-		} 
+			e.printStackTrace();
+		}
 		finally
 		{
 			DALHelper.getInstance().tryClose(updateSet);
@@ -2140,340 +2136,36 @@ public class MaintenanceCycle implements Runnable
 			DALHelper.getInstance().tryClose(conn);
 		}
 	}
-	
-	Set<String> getAircraftRegistrationSet() throws SQLException
-	{
-		Set<String> usedRegistrations = new HashSet<>();
-	
-		String qry = "SELECT registration from aircraft";
-		ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 
-		while (rs.next())
-			usedRegistrations.add(rs.getString(1));
+	void checkRegistrations()
+	{
+		updateStatus("Checking registrations");
 
-		return usedRegistrations;
-	}
-	
-	String getNewAircraftRegistration(Set<String> usedRegistrations, String prefix, String postfix)
-	{
-		StringBuffer registration;
-		int loopCounter = 0;
-		
-		do
-		{
-			registration = new StringBuffer(prefix);
-			registration.append('-');
-			
-			for (int loop = 0; loop < postfix.length(); loop++)
-			{
-				char thisChar = postfix.charAt(loop);
-				
-				if (Character.isDigit(thisChar))
-				{
-					registration.append((int)Math.round(Math.random()*9));
-				}
-				else if (Character.isLowerCase(thisChar))
-				{
-					registration.append((char)('A'+(int)Math.round(Math.random()*25)));
-				}
-				else if (Character.isUpperCase(thisChar))
-				{
-					registration.append(thisChar);
-				}
-				else
-				{
-					int ran = (int)Math.round(Math.random()*35);
-					
-					if (ran < 10)
-						registration.append(ran);
-					else
-						registration.append((char)('A'+ran-10));
-				}
-			}
-			
-			loopCounter++;
-			if(loopCounter > 1000)
-			{
-				//Apparently we have ran out of registration codes, add a extended postfix
-				GlobalLogger.logDebugLog("New Registration generator excessive looping: prefix [" + prefix + "], postfix [" + postfix + "]", MaintenanceCycle.class);
-				
-				registration.append('-');
-				int ran = (int)Math.round(Math.random()*100);
-				registration.append(ran);
-			}	
-		} while(usedRegistrations.contains(registration.toString()));
-		
-		return registration.toString();
-	}
-	
-	int createNewAircraftBaseEquipment(int modelequipment)
-	{
-		int mask = 0;
-		switch (modelequipment)
-		{
-			case ModelBean.EQUIPMENT_VFR_ONLY :
-				break;
-				
-			case ModelBean.EQUIPMENT_IFR_ONLY:
-				mask = ModelBean.EQUIPMENT_GPS_MASK|ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
-				break;
-				
-			case ModelBean.EQUIPMENT_VFR_IFR:
-				switch ((int)(Math.random()*6))
-				{
-					case 0:
-					case 1:
-					case 2:
-						break;
-						
-					case 3:												
-						mask = ModelBean.EQUIPMENT_AP_MASK;
-						break;	
-						
-					case 4: 
-						mask = ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
-						break;
-						
-					case 5: 
-						mask = ModelBean.EQUIPMENT_GPS_MASK|ModelBean.EQUIPMENT_IFR_MASK|ModelBean.EQUIPMENT_AP_MASK;
-						break;											
-				}
-				break;
-				
-			default:
-				GlobalLogger.logApplicationLog("createNewAircraftBaseEquipment(): model equipment not defined for: " + modelequipment +
-						", Default VFR used.", MaintenanceCycle.class);
-		}
-		
-		return mask;
-	}
-
-	private Set<String> getCurrentRegistrations()
-	{
-		HashSet<String> regSet = new HashSet<>();
-		
 		try
 		{
-			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery("SELECT registration from aircraft");
-			while (rs.next())
-			{
-				regSet.add(rs.getString(1));
-			}
-		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();				
-		}
-		
-		return regSet;
-	}
-	
-	private Map<String, List<String[]>> getCountryRegistrationCodes()
-	{
-		Map<String, List<String[]>> map = new HashMap<>();
-		try
-		{
-			String qry = "SELECT country, icao, prefix, registration FROM registrations";
-			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
-			
-			while (rs.next())
-			{
-				List<String[]> list = map.get(rs.getString(1));
-				if(list != null)
-				{
-					list.add(new String[]{rs.getString(2),rs.getString(3),rs.getString(4)});
-				}
-				else
-				{
-					list = new ArrayList<>();
-					list.add(new String[]{rs.getString(2),rs.getString(3),rs.getString(4)});
-					map.put(rs.getString(1), list);
-				}
-			}
-		}
-		catch(SQLException e)
-		{
-			e.printStackTrace();				
-		}
-		
-		return map;
-	}
-	
-	String getICAORegistrationCountry(String icao)
-	{
-		String qry = "";
-		try 
-		{
-			qry = "SELECT r.country FROM airports a, registrations r WHERE a.country = r.country AND a.ICAO = ?";
-			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, icao);
-			if(rs.next())
-			{
-				return rs.getString(1);
-			}
-			else
-			{
-				GlobalLogger.logDebugLog("Error in isValidRegistration(), did not find country for ICAO: " + icao, MaintenanceCycle.class);
+			//do these once here for optimization
+			Map<String, List<String[]>> countryRegistrationCodes = Aircraft.getCountryRegistrationCodes();
+			Set<String> regs = Aircraft.getCurrentRegistrations();
 
-				return "Default";
+			String qry = "SELECT * from aircraft WHERE owner = 0 and userlock is null";
+			CachedRowSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+			while (rs.next())
+			{
+				String reg = rs.getString("registration");
+				String home = rs.getString("home");
+				String icaocountry = Aircraft.getICAORegistrationCountry(home);
+				List<String[]> coding = countryRegistrationCodes.get(icaocountry);
+
+				if(!Aircraft.isValidRegistration(reg, coding))
+				{
+					Aircraft.resetRegistration(home, reg, coding, regs);
+				}
 			}
 		}
 		catch (SQLException e)
 		{
 			e.printStackTrace();
-		} 
-		
-		return null;
-	}
-	
-	boolean isValidPrefix(String reg, String prefix)
-	{
-        return reg.startsWith(prefix);
-
-    }
-	
-	boolean isValidRegistrationFormat(String postfix, String reg)
-	{
-		for(int i=0;i<postfix.length();i++)
-		{
-			char c = postfix.charAt(i);
-			if(Character.isDigit(c))
-			{
-				if(!Character.isDigit(reg.charAt(i)))
-					return false;				
-			}
-			else if(Character.isLetter(c))
-			{
-				//Literal
-				if(Character.isUpperCase(c))
-				{
-					if(reg.charAt(i) != c)
-						return false;
-				}
-				else
-				{
-					if(!Character.isLetter(reg.charAt(i)))
-						return false;
-				}
-			}
-			else if(c == '#') // letter or digit
-			{
-				if(!Character.isLetterOrDigit(reg.charAt(i)))
-					return false;
-			}
-			else //should never reach, force new registration
-			{
-				GlobalLogger.logDebugLog("Error in isValidRegistrationFormat(), registration postfix not a valid format symbol!: [" + c + "] of [" + postfix + "]", MaintenanceCycle.class);
-				return false;
-			}
 		}
-		
-		return true;
 	}
-	
-	boolean isValidRegistrationPostfix(String reg, String prefix, String postfix)
-	{
-		String body = reg.substring(prefix.length());
 
-        return body.length() == postfix.length() && isValidRegistrationFormat(postfix, body);
-    }
-	
-	boolean isValidRegistration(String reg, List<String[]> coding) // String homeIcao, Map<String, String[]> countryRegistrationCodes)
-	{
-		int index = 0;
-		boolean found = false;
-		
-		do
-		{
-			String prefix = (coding.get(index))[REG_PREFIX];
-			String postfix = (coding.get(index))[REG_POSTFIX];				
-	
-			//checks use the separator -
-			prefix = prefix.concat("-");
-			
-			if( isValidPrefix(reg, prefix) && isValidRegistrationPostfix(reg, prefix, postfix))
-				found = true;
-
-			index++;
-		} while(index < coding.size());
-			
-		return found;
-	}
-	
-	private void updateAircraftToNewRegistration(String reg, String newreg)
-	{
-		try
-		{
-            String qry ="UPDATE aircraft SET registration = ? WHERE registration = ?;";
-            DALHelper.getInstance().ExecuteUpdate(qry, newreg, reg);
-		}
-		catch (SQLException e)
-		{
-			GlobalLogger.logDebugLog("ERROR: Changing aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]", MaintenanceCycle.class);
-			e.printStackTrace();				
-		} 
-	}
-	
-	void resetRegistration(String home, String reg, List<String[]> coding, Set<String> currRegs)
-	{
-		int index = 0;
-		int foundCount = 0;
-		List<Integer> list = new ArrayList<>();
-
-		do
-		{
-			String icaoprefix = coding.get(index)[REG_ICAO];
-			if( home.startsWith(icaoprefix))
-			{
-				foundCount++;
-				list.add(index);
-			}
-			index++;
-		} while(index < coding.size());
-		
-		//assumption - there will always be at least 1 coding
-		index = 0;
-
-		if(foundCount > 1)
-			index = list.get((int)Math.round(Math.random()*foundCount));
-
-		String prefix = coding.get(index)[REG_PREFIX];
-		String postfix = coding.get(index)[REG_POSTFIX];
-		String newreg = getNewAircraftRegistration(currRegs, prefix, postfix);
-		
-		currRegs.add(newreg);		
-		updateAircraftToNewRegistration(reg, newreg);
-
-		GlobalLogger.logApplicationLog("Changed aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]", MaintenanceCycle.class);
-	}	
-	
-	void checkRegistrations()
-	{
-		updateStatus("Checking registrations");
-		
-		try 
-		{
-			//do these once here for optimization
-			Map<String, List<String[]>> countryRegistrationCodes = getCountryRegistrationCodes();
-			Set<String> regs = getCurrentRegistrations();
-
-            String qry = "SELECT * from aircraft WHERE owner = 0 and userlock is null";
-			CachedRowSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
-			while (rs.next()) 
-			{
-				String reg = rs.getString("registration");
-				String home = rs.getString("home");
-				String icaocountry = getICAORegistrationCountry(home);				
-				List<String[]> coding = countryRegistrationCodes.get(icaocountry);
-
-				if(!isValidRegistration(reg, coding))
-				{
-                    resetRegistration(home, reg, coding, regs);
-				}				
-			}
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();				
-		} 
-	}	
 }

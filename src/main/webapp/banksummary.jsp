@@ -200,12 +200,12 @@
             <jsp:getProperty name="user" property="name"/><br>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <button class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=user.getName()%>');">
+            <button class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=Converters.escapeJavaScript(user.getName())%>');">
                 <%= Formatters.currency.format(user.getMoney()) %>
             </button>
         </div>
         <div class="col-sm-2 col-md-2 column text-right" >
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=user.getName()%>');">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=Converters.escapeJavaScript(user.getName())%>');">
                 <%= Formatters.currency.format(user.getBank()) %>
             </div>
         </div>
@@ -270,12 +270,12 @@
             <%=url%>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=id%>, '<%=name%>');">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=id%>, '<%=Converters.escapeJavaScript(name)%>');">
                 <%= grpmoney %>
             </div>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=id%>, '<%=name%>');">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=id%>, '<%=Converters.escapeJavaScript(name)%>');">
                 <%= grpbank %>
             </div>
         </div>
