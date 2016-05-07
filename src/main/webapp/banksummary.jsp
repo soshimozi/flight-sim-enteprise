@@ -251,15 +251,15 @@
     for (UserBean group : groups)
     {
         int id = group.getId();
-        String name = group.getName();
+        String name = Converters.escapeJavaScript(group.getName());
         String url = group.getUrl();
         String grpmoney = Formatters.currency.format(group.getMoney());
         String grpbank = Formatters.currency.format(group.getBank());
 
         if (url != null)
-            url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
+            url = "<a href=\"" + url + "\" target=\"_blank\">" + group.getName() + "</a>";
         else
-            url = name;
+            url = group.getName();
 
         int memberLevel = user.groupMemberLevel(id);
         if (memberLevel >= UserBean.GROUP_STAFF )

@@ -77,6 +77,7 @@
     <script type="text/javaScript">
 
         function checkAll() {
+            lastChecked = null;
             var field = document.getElementById("assignmentForm").select;
             for (i = 0; i < field.length; i++) {
                 if (!field[i].disabled)
@@ -86,6 +87,7 @@
         }
 
         function uncheckAll() {
+            lastChecked = null;
             var field = document.getElementById("assignmentForm").select;
             for (i = 0; i < field.length; i++)
                 field[i].checked = false;
@@ -207,7 +209,7 @@
         $(document).ready(function() {
             var $chkboxes = $('.chkbox');
             $chkboxes.click(function(e) {
-                var $chkboxes = $('.chkbox');
+                $chkboxes = $('.chkbox');
                 if(!lastChecked) {
                     lastChecked = this;
                     return;
@@ -217,7 +219,7 @@
                     var start = $chkboxes.index(this);
                     var end = $chkboxes.index(lastChecked);
 
-                    $chkboxes.slice(Math.min(start,end), Math.max(start,end)+ 1).attr('checked', lastChecked.checked);
+                    $chkboxes.slice(Math.min(start,end), Math.max(start,end)+ 1).prop('checked', lastChecked.checked);
 
                 }
 
@@ -240,7 +242,7 @@
 
             $('.tdClick').click(function (event) {
                 if (event.target.type !== 'checkbox') {
-                    $(':checkbox', this).trigger('click');
+                    $('input.chkbox', this).trigger('click');
                 }
             });
 
