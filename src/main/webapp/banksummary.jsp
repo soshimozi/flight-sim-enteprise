@@ -200,12 +200,12 @@
             <jsp:getProperty name="user" property="name"/><br>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <button class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=Converters.escapeJavaScript(user.getName())%>');">
+            <button class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=user.getName()%>');">
                 <%= Formatters.currency.format(user.getMoney()) %>
             </button>
         </div>
         <div class="col-sm-2 col-md-2 column text-right" >
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=Converters.escapeJavaScript(user.getName())%>');">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=user.getName()%>');">
                 <%= Formatters.currency.format(user.getBank()) %>
             </div>
         </div>
@@ -251,15 +251,15 @@
     for (UserBean group : groups)
     {
         int id = group.getId();
-        String name = Converters.escapeJavaScript(group.getName());
+        String name = group.getName();
         String url = group.getUrl();
         String grpmoney = Formatters.currency.format(group.getMoney());
         String grpbank = Formatters.currency.format(group.getBank());
 
         if (url != null)
-            url = "<a href=\"" + url + "\" target=\"_blank\">" + group.getName() + "</a>";
+            url = "<a href=\"" + url + "\" target=\"_blank\">" + name + "</a>";
         else
-            url = group.getName();
+            url = name;
 
         int memberLevel = user.groupMemberLevel(id);
         if (memberLevel >= UserBean.GROUP_STAFF )
@@ -270,12 +270,12 @@
             <%=url%>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=id%>, '<%=Converters.escapeJavaScript(name)%>');">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=id%>, '<%=name%>');">
                 <%= grpmoney %>
             </div>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=id%>, '<%=Converters.escapeJavaScript(name)%>');">
+            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=id%>, '<%=name%>');">
                 <%= grpbank %>
             </div>
         </div>
