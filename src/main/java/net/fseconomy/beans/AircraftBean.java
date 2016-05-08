@@ -1116,7 +1116,7 @@ public class AircraftBean implements Serializable
 		return monthlyFee;
 	}
 
-	public void setMonthlyFee(int fee)
+	private void setMonthlyFee(int fee)
 	{
 		monthlyFee = fee;
 	}

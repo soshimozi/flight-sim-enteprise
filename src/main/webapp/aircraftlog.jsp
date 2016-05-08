@@ -195,7 +195,7 @@
                         </tr>
                         </thead>
                         <tr>
-                            <td align="center"><%= Formatters.currency.format(aircraft.getOwnershipFee()) %></td>
+                            <td align="center"><%= Formatters.currency.format(aircraft.getMonthlyFee()) %></td>
                         </tr>
                     </table>
                 </td>
@@ -207,7 +207,7 @@
                         </tr>
                         </thead>
                         <tr>
-                            <td align="center"><%= Formatters.currency.format(aircraft.getFeeOwed()) %></td>
+                            <td align="center" <%= aircraft.getFeeOwed() > 0 ? " style=\"color: red;\"" : "" %>><%= Formatters.currency.format(aircraft.getFeeOwed()) %></td>
                         </tr>
                     </table>
                 </td>

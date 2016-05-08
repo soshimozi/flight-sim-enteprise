@@ -180,6 +180,7 @@ public class MaintenanceCycle implements Runnable
 		freeExpiredFBOs();
 
 		//TODO move this inside of once per day after testing!!
+		oneTimeSetMonthlyFees();
 		processAircraftOwnershipFees();
 		processAircraftRepos();
 
@@ -515,6 +516,7 @@ public class MaintenanceCycle implements Runnable
 				//String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 order by aircraft.owner, aircraft.model";
 				String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 AND registration like 'TEST%' order by aircraft.owner, aircraft.model";
 				List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
+
 				for(AircraftBean aircraft: list)
 				{
 					counter++;
@@ -529,7 +531,7 @@ public class MaintenanceCycle implements Runnable
 						{
 							Banking.doPayment(ownerId, 0, (double) aircraft.getMonthlyFee(), PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "", true);
 							feeDue = false;
-							totalPaid += aircraft.getOwnershipFee();
+							totalPaid += aircraft.getMonthlyFee();
 						}
 					}
 
@@ -537,13 +539,17 @@ public class MaintenanceCycle implements Runnable
 					{
 						qry = "Update aircraft SET feeowed = feeowed + ? where id = ?";
 						DALHelper.getInstance().ExecuteNonQuery(qry, aircraft.getMonthlyFee(), aircraft.getId());
-						Banking.doPayment(ownerId, 0, 0, PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "Aircraft Ownership Fee Added to Current Debt", false);
-						totalDebt += aircraft.getOwnershipFee();
+						Banking.doPayment(ownerId, 0, 0, PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "Ownership Fee of (" + aircraft.getMonthlyFee() + ") added to Current Debt", false);
+						totalDebt += aircraft.getMonthlyFee();
 					}
 
 					total += aircraft.getMonthlyFee();
 				}
+
+
 				GlobalLogger.logApplicationLog("Aircraft Ownership Payments: Total Payout - " + Formatters.currency.format(totalPaid) + " from " + counter + " aircraft", MaintenanceCycle.class);
+
+				resetAircraftMonthlyFees();
 			}
 
 			long elapsed = System.currentTimeMillis()-starttime;
@@ -553,6 +559,32 @@ public class MaintenanceCycle implements Runnable
 					+ ", Total Debt: " + Formatters.currency.format(totalDebt)
 					+ ", Total Paid: " + Formatters.currency.format(totalPaid)
 					, MaintenanceCycle.class);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	void oneTimeSetMonthlyFees()
+	{
+		String qry = "SELECT * FROM aircraft join models on aircraft.model = models.id WHERE owner=0 order by aircraft.owner, aircraft.model LIMIT 1";
+		List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
+		if(list.size() == 1 && list.get(0).getMonthlyFee() == 0)
+			resetAircraftMonthlyFees();
+	}
+
+	void resetAircraftMonthlyFees()
+	{
+		try
+		{
+			String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id order by aircraft.owner, aircraft.model";
+			List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
+			for(AircraftBean aircraft: list)
+			{
+				qry = "Update aircraft SET monthlyfee = ? where id = ?";
+				DALHelper.getInstance().ExecuteNonQuery(qry, aircraft.getOwnershipFee(), aircraft.getId());
+			}
 		}
 		catch (SQLException e)
 		{
@@ -583,7 +615,7 @@ public class MaintenanceCycle implements Runnable
 			for(AircraftBean aircraft: list)
 			{
 				updateStatus("Checking Repo Aircraft Fee for " + counter + " out of " + list.size());
-				if(aircraft.getFeeOwed() > aircraft.getMonthlyFee()*36)
+				if(aircraft.getFeeOwed() > (aircraft.getMonthlyFee()*36))
 				{
 					counter++;
 					int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
@@ -2147,7 +2179,7 @@ public class MaintenanceCycle implements Runnable
 			Map<String, List<String[]>> countryRegistrationCodes = Aircraft.getCountryRegistrationCodes();
 			Set<String> regs = Aircraft.getCurrentRegistrations();
 
-			String qry = "SELECT * from aircraft WHERE owner = 0 and userlock is null";
+			String qry = "SELECT registration, home from aircraft WHERE owner = 0 and userlock is null";
 			CachedRowSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rs.next())
 			{
@@ -2157,9 +2189,7 @@ public class MaintenanceCycle implements Runnable
 				List<String[]> coding = countryRegistrationCodes.get(icaocountry);
 
 				if(!Aircraft.isValidRegistration(reg, coding))
-				{
 					Aircraft.resetRegistration(home, reg, coding, regs);
-				}
 			}
 		}
 		catch (SQLException e)

@@ -1103,10 +1103,8 @@ public class Aircraft implements Serializable
                 if (!Banking.checkFunds(account, sellPrice))
                     throw new DataError("Not enough money to buy aircraft");
 
-                int monthlyFee = aircraft.getOwnershipFee();
-
-                String qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = 0, monthlyfee = ? where id = ?";
-                DALHelper.getInstance().ExecuteUpdate(qry, account, monthlyFee, aircraftId);
+                String qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = 0, feeowed = 0 where id = ?";
+                DALHelper.getInstance().ExecuteUpdate(qry, account, aircraftId);
 
                 String comment = "";
                 if(aircraft.getSellToId() != 0)
@@ -1176,10 +1174,11 @@ public class Aircraft implements Serializable
                 rs.updateNull("maxRentTime");
                 rs.updateNull("accounting");
                 rs.updateInt("privatesale", 0);
-                rs.updateInt("monthlyfee", 0);
+                rs.updateInt("selltoid", 0);
+                rs.updateInt("feeowed", 0);
 
                 // Randomize
-                setNewAircraftRegistration(aircraft.getHome(), aircraft.getRegistration());
+                resetRegistration(aircraft.getHome(), aircraft.getRegistration());
                 ModelBean model = Models.getModelById(rs.getInt("model"));
                 int equipment = rs.getInt("equipment");
                 int rent = model.getTotalRentalTarget(equipment);
@@ -2161,16 +2160,6 @@ public class Aircraft implements Serializable
         return usedRegistrations;
     }
 
-    public static void setNewAircraftRegistration(String home, String reg)
-    {
-        Map<String, List<String[]>> countryRegistrationCodes = getCountryRegistrationCodes();
-        Set<String> regs = getCurrentRegistrations();
-        String icaocountry = getICAORegistrationCountry(home);
-        List<String[]> coding = countryRegistrationCodes.get(icaocountry);
-
-        resetRegistration(home, reg, coding, regs);
-    }
-
     public static String createAircraftRegistration(Set<String> usedRegistrations, String prefix, String postfix)
     {
         StringBuffer registration;
@@ -2428,6 +2417,16 @@ public class Aircraft implements Serializable
             GlobalLogger.logDebugLog("ERROR: Changing aircraft Reg: [" + reg + "] To new reg: [" + newreg + "]", MaintenanceCycle.class);
             e.printStackTrace();
         }
+    }
+
+    private static void resetRegistration(String home, String reg)
+    {
+        Map<String, List<String[]>> countryRegistrationCodes = getCountryRegistrationCodes();
+        Set<String> currRegs = getCurrentRegistrations();
+        String icaocountry = getICAORegistrationCountry(home);
+        List<String[]> coding = countryRegistrationCodes.get(icaocountry);
+
+        resetRegistration(home, reg, coding, currRegs);
     }
 
     public static void resetRegistration(String home, String reg, List<String[]> coding, Set<String> currRegs)

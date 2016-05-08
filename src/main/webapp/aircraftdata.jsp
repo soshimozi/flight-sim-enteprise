@@ -100,7 +100,7 @@
                     <div class="text-left"><%=homeUrl%></div>
                     <div class="text-left"><%=location%></div>
                     <div class="text-left"><%=aircraft.getSEquipment()%></div>
-                    <div class="text-left"><%=Formatters.currency.format(aircraft.getOwnershipFee())%></div>
+                    <div class="text-left"><%=Formatters.currency.format(aircraft.getMonthlyFee())%></div>
                     <div class="text-left" style="<%=aircraft.getFeeOwed() > 0 ? "color: red;" : ""%>"><%=Formatters.currency.format(aircraft.getFeeOwed())%></div>
                     <div class="text-left"><%=aircraft.getSeats()%></div>
                     <div class="text-left"><%=aircraft.getCrew()%></div>

@@ -92,8 +92,7 @@
 
 		function sellNow(price)
 		{
-			var p = Number(price);
-			if (window.confirm("Do you want to sell this aircraft for " + p.toMoney(2) + "?"))
+			if (window.confirm("Do you want to sell this aircraft for " + price + "?"))
 			{
 				document.aircraftform.action="userctl";
 				document.aircraftform.event.value = "sell";

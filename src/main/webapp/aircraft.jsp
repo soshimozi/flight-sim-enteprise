@@ -191,20 +191,12 @@
 		<th style="width: 35px">Location</th>
 		<th style="width: 35px">Home</th>
 		<th class="numeric" style="width: 45px">Fuel Loaded</th>
-<<<<<<< HEAD
 		<th class="numeric" style="width: 100px">Price</th>
 		<th class="sorter-timeHrMin numeric" style="width: 45px">Engine Total</th>
 		<th class="sorter-timeHrMin numeric" style="width: 45px">Since check</th>
 		<th class="numeric" style="width: 150px">Rental Price</th>
 		<th class="numeric" style="width: 45px">Bonus</th>
 		<th class="numeric" style="width: 75px">Monthly Fee</th>
-=======
-		<th class="numeric" style="width: 95px">Price</th>
-		<th class="sorter-timeHrMin numeric" style="width: 45px">Engine Total</th>
-		<th class="sorter-timeHrMin numeric" style="width: 45px">Since check</th>
-		<th class="numeric" style="width: 150px">Rental (Hr)</th>
-		<th class="numeric" style="width: 55px">Bonus</th>
->>>>>>> master
 		<th class="sorter-false" style="width: 75px">Action</th>
 	</tr>
 	</thead>
@@ -294,7 +286,7 @@
 	<td class="numeric" <%= hours >= 90 ? " style=\"color: red;\"" : "" %>><%= lastCheck %></td>
 	<td class="numeric"><%= price %></td>
 	<td class="numeric"><%= Formatters.currency.format(aircraft.getBonus()) %></td>
-	<td class="numeric"><%= Formatters.currency.format(aircraft.getOwnershipFee()) %></td>
+	<td class="numeric" <%= isInDebt ? " style=\"color: red;\"" : "" %>><%= Formatters.currency.format(aircraft.getMonthlyFee()) %></td>
 <%
 		if(aircraft.getShippingState() == 0 && aircraft.getLessor() != account.getId())
 		{
