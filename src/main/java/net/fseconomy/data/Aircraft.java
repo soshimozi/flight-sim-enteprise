@@ -1158,7 +1158,7 @@ public class Aircraft implements Serializable
                     throw new DataError("Not your aircraft.");
                 }
 
-                if (aircraft.isBroken())
+                if (!isRepo && aircraft.isBroken())
                 {
                     throw new DataError("The Bank of FSE does not buy broken aircraft.");
                 }
