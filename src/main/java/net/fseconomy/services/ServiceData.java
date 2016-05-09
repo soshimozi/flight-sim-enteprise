@@ -24,6 +24,7 @@ import static net.fseconomy.services.common.*;
 import net.fseconomy.beans.AircraftBean;
 import net.fseconomy.data.*;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.Helpers;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
@@ -304,6 +305,132 @@ public class ServiceData
             e.printStackTrace();
             return createErrorResponse(500, 200, "System Error",  "An error has occurred.");
         }
+    }
+
+    public static Response isValidRegistration(String reg)
+    {
+        boolean success;
+
+        try
+        {
+            if(!Aircraft.isValidAircraftRegistrationCharacters(reg))
+                return createErrorResponse(200, 200, "Bad Request", "You can only use [0-9][A-Z] and [-] in Registration Number");
+
+            if(!Aircraft.isValidAircraftRegistrationLength(reg))
+                return createErrorResponse(200, 200, "Bad Request", "Aircraft Registration max length is 20 characters!");;
+
+            if(!Aircraft.isUniqueAircraftRegistration(reg))
+                return createErrorResponse(200, 200, "Bad Request", "Registration not unique!");
+
+            return createSuccessResponse(200, 200, null, null, "All checks pass!");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
+        }
+    }
+
+    public static Response changeRegistration(String serviceKey, int aircraftId, String reg, String note)
+    {
+        boolean success;
+
+        try
+        {
+            String msg = "";
+
+            if(!Aircraft.isValidAircraftRegistrationCharacters(reg))
+                msg += "You can only use [0-9][A-Z] and [-] in Registration Number. ";
+
+            if(!Aircraft.isValidAircraftRegistrationLength(reg))
+                msg += "Aircraft Registration max length is 20 characters! ";
+
+            if(!Aircraft.isUniqueAircraftRegistration(reg))
+                msg += "Registration not unique!";
+
+            if(!Helpers.isNullOrBlank(msg))
+                return createErrorResponse(200, 200, "Bad Request", msg);
+
+            int serviceId = getServiceId(serviceKey);
+
+            String qry = "{call AircraftRegChange(?,?,?,?)}";
+            success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, reg, "Service(" + serviceId + "): " + note);
+
+            if (success)
+                return createSuccessResponse(200, 200, null, null, "Aircraft registration change successful.");
+            else
+                return createErrorResponse(500, 500, "System Error", "Unable to process");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            return createErrorResponse(500, 200, "System Error",  "An error has occurred.");
+        }
+    }
+
+    public static Response updateAircraft(String servicekey, int account, int serialNumber, String home, int bonus, int rentalWet, int rentalDry, int maxrenthrs, boolean advertise, boolean allowFix)
+    {
+        boolean success = false;
+
+        String fldsToUpdate = "";
+        AircraftBean aircraft = Aircraft.getAircraftById(serialNumber);
+
+        if(!Helpers.isNullOrBlank(home) && !aircraft.getHome().contentEquals(home))
+        {
+            if(Airports.cachedAirports.containsKey(home))
+                fldsToUpdate += " home = '" + home + "', ";
+            else
+                return createErrorResponse(200, 200, "Bad Request", "Invalid home ICAO.");
+        }
+
+        if(aircraft.getBonus() != bonus)
+            fldsToUpdate += " bonus = " + bonus + ", ";
+
+        if(aircraft.getRentalPriceWet() != rentalWet)
+            fldsToUpdate += " rentalWet = " + rentalWet + ", ";
+
+        if(aircraft.getRentalPriceDry() != rentalDry)
+            fldsToUpdate += " rentalDry = " + rentalDry + ", ";
+
+        if(maxrenthrs > 0 && aircraft.getMaxRentTime() != (maxrenthrs*3600))
+        {
+            if(maxrenthrs > 10) maxrenthrs = 10;    // 10 hrs max
+            if(maxrenthrs < 1) maxrenthrs = 1;      // 1 hr min
+            fldsToUpdate += " maxRentTime = " + (maxrenthrs*3600) + ", ";
+        }
+
+        if(aircraft.isAllowRepair() != allowFix)
+            fldsToUpdate += " allowFix = " + allowFix + ", ";
+
+        if(aircraft.isAdvertiseFerry() != advertise)
+            fldsToUpdate += " advertise = " + advertise + ", ";
+
+        if(!Helpers.isNullOrBlank(fldsToUpdate))
+        {
+            fldsToUpdate = fldsToUpdate.substring(0, fldsToUpdate.length() - 2);
+            String qry = "UPDATE aircraft set " + fldsToUpdate + " where id  = ?";
+            try
+            {
+                DALHelper.getInstance().ExecuteUpdate(qry, serialNumber);
+                success = true;
+            }
+            catch(SQLException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            return createSuccessResponse(200, 200, null, null, "Aircraft no change.");
+        }
+
+        if (success)
+            return createSuccessResponse(200, 200, null, null, "Aircraft update successful.");
+        else
+            return createErrorResponse(500, 500, "System Error", "Unable to process");
     }
 
     public static Response getAccountId(String name)
