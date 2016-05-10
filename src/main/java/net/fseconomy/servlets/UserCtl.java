@@ -404,6 +404,7 @@ public class UserCtl extends HttpServlet
         String aircraft = req.getParameter("aircraft-purchase") != null ? "PURCHASE " : "";
         aircraft += req.getParameter("aircraft-transfer") != null ? "TRANSFER " : "";
         aircraft += req.getParameter("aircraft-lease") != null ? "LEASE" : "";
+        aircraft += req.getParameter("aircraft-edit") != null ? "EDIT" : "";
 
         HashMap<String, String> map = new HashMap<>();
         map.put("cash", cash);
@@ -569,7 +570,7 @@ public class UserCtl extends HttpServlet
                 if (!newReg.matches("^[A-Z,0-9,-]*$"))
                     throw new DataError("You can only use [0-9][A-Z] and [-] in Registration Number");
 
-                if (!Aircraft.isAircraftRegistrationUnique(newReg))
+                if (!Aircraft.isUniqueAircraftRegistration(newReg))
                     throw new DataError("Registration already in use!");
 
                 if (newReg.length() > 20)

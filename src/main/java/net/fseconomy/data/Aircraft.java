@@ -121,7 +121,29 @@ public class Aircraft implements Serializable
         return result;
     }
 
-    public static Boolean isAircraftRegistrationUnique(String reg)
+    public static boolean isValidAircraftRegistrationCharacters(String reg)
+    {
+        boolean result = false;
+        String newReg = reg.toUpperCase();
+
+        if (newReg.matches("^[A-Z,0-9,-]*$"))
+            result = true;
+
+        return result;
+
+    }
+
+    public static Boolean isValidAircraftRegistrationLength(String reg)
+    {
+        boolean result = false;
+
+        if (reg.length() <= 20)
+            result = true;
+
+        return result;
+    }
+
+    public static Boolean isUniqueAircraftRegistration(String reg)
     {
         Boolean exists = true; //default is not to allow the change on error
 

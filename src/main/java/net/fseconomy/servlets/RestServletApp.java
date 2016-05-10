@@ -15,6 +15,7 @@ public class RestServletApp extends Application
     public RestServletApp()
     {
         singletons.add(new RestServlet());
+        singletons.add(new RestServletV2());
         singletons.add(new FSERestServlet());
     }
 
