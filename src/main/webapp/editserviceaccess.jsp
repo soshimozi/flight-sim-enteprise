@@ -74,6 +74,7 @@
             $("[name='aircraft-transfer']").bootstrapSwitch();
             $("[name='aircraft-lease']").bootstrapSwitch();
             $("[name='aircraft-edit']").bootstrapSwitch();
+            $("[name='aircraft-sale']").bootstrapSwitch();
         });
     </script>
 
@@ -128,6 +129,7 @@
                             TRANSFER <input id="aircraft-transfer" name="aircraft-transfer" type="checkbox" <%=bean.getAircraftaccess().contains("TRANSFER") ? "checked" : ""%> data-size="mini" data-inverse="true" data-off-text="Deny" data-on-text="Allow" data-on-color="success" data-off-color="danger"><br>
                             LEASE <input id="aircraft-lease" name="aircraft-lease" type="checkbox" <%=bean.getAircraftaccess().contains("LEASE") ? "checked" : ""%> data-size="mini" data-inverse="true" data-off-text="Deny" data-on-text="Allow" data-on-color="success" data-off-color="danger"><br>
                             EDIT <input id="aircraft-edit" name="aircraft-edit" type="checkbox" <%=bean.getAircraftaccess().contains("EDIT") ? "checked" : ""%> data-size="mini" data-inverse="true" data-off-text="Deny" data-on-text="Allow" data-on-color="success" data-off-color="danger"><br>
+                            SALE <input id="aircraft-sale" name="aircraft-sale" type="checkbox" <%=bean.getAircraftaccess().contains("SALE") ? "checked" : ""%> data-size="mini" data-inverse="true" data-off-text="Deny" data-on-text="Allow" data-on-color="success" data-off-color="danger"><br>
                         </td>
                     </tr>
                     </tbody>
