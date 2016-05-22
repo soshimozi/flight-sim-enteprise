@@ -191,8 +191,33 @@
 <% 	} 
 %>
 	<!-- END NEW ITEM -->
-	
-	
+
+
+	<!-- NEWS ITEM Logged In Only -->
+<%
+	if (user.isLoggedIn())
+	{
+%>
+	<div>
+		<h3>Update - Aircraft Ownership Fees</h3>
+		<p>
+			FSE is implementing a monthly "Aircraft Ownership Expenses Fee" for all privately-owned aircraft. We are also implementing a process to repossess aircraft from dormant accounts.<br><br>
+
+			Ownership Expenses Fee - 1% of Aircraft's current buyback-value. The Ownership Expenses Fees will simulate the fixed costs of commercial aircraft ownership such as insurance, tie-down/hangar space, AIRAC subscriptions, registration fees, routine maintenance not included in the 100-hr, such as oil, tires, etc., and other costs associated with operating an aircraft in a commercial service manner. Individual line items for each of those expenses (insurance, registration, etc.) will not be broken out. Instead, a single fee will be charged each month to simulate the total fixed-cost of ownership.<br><br>
+
+			Aircraft Repossession: FSE is also implementing an aircraft repossession process to remove aircraft from dormant accounts and return them to the available pool of aircraft. Aircraft will be removed from player and group accounts after 36 consecutive months of non-payment of the Ownership Expenses Fee. The dormant account will receive a cash compensation at the current buyback value of the aircraft, minus recovered debt.<br><br>
+
+			For more information, see the forums announcement and/or the FSE User Manual:<br><br>
+
+			<a href="http://www.fseconomy.net/forum/fse-anouncements/37712-fse-major-update-aircraft-ownership-expenses-fee-repossession">Announcement</a><br>
+
+			<a href="https://sites.google.com/site/fseoperationsguide/aircraft-details/aircraft-cost-of-ownership#TOC-Aircraft-Ownership-Expenses-Fee">FSE User Manual</a>
+		</p>
+	</div>
+<% 	}
+%>
+	<!-- END NEW ITEM -->
+
 	<!-- NEWS ITEM Logged In Only -->
 <%
 	if (user.isLoggedIn()) 
@@ -225,7 +250,7 @@
 %>
 	<div>
 	<h3>Player/Group Name Entry Fields</h3>
-	<p>In an effort to both speed up page loading times and provide some new effiencies to our users, FSEconomy has adjusted how players interact with various entry forms. Developers have spent time modifying how you enter the name of who you wish to transfer funds, FBO's, airplanes, and goods to.</p>
+	<p>In an effort to both speed up page loading times and provide some new efficiencies to our users, FSEconomy has adjusted how players interact with various entry forms. Developers have spent time modifying how you enter the name of who you wish to transfer funds, FBO's, airplanes, and goods to.</p>
 	<p>Instead of providing a drop-down selection box with ALL users and groups listed, you are now presented with a text box where you will simply type the user or group name. After several characters are entered, you will be presented with the first ten autocompletion options to choose from - you can a) select one from the list, b) continue typing to refine the autocomplete options, or c) type all the way to completion. You can also copy/paste names into the field if you wish.</p>
 	<p>Very important: you MUST click on a name in the list, even if you type the entire name or paste it in.</p>
 	</div>
