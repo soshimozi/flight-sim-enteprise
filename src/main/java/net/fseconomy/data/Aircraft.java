@@ -2472,7 +2472,7 @@ public class Aircraft implements Serializable
         index = 0;
 
         if(foundCount > 1)
-            index = list.get((int)Math.round(Math.random()*foundCount));
+            index = list.get((int)(Math.random()*foundCount));
 
         String prefix = coding.get(index)[REG_PREFIX];
         String postfix = coding.get(index)[REG_POSTFIX];
