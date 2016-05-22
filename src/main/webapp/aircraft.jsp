@@ -173,8 +173,19 @@
 	<table class="aircraftTable tablesorter-default tablesorter">
 	<caption>
 	Aircraft owned by <%= account.getName() %> 
-<% 
-	if(aircraftList.size() > 0) 
+<%
+	int totalFees = 0;
+	boolean isInDebt = false;
+	for (AircraftBean aircraft : aircraftList)
+	{
+		if(aircraft.getLessor() == 0 || aircraft.getLessor() == account.getId())
+		{
+			totalFees += aircraft.getMonthlyFee();
+			if (aircraft.getFeeOwed() > 0)
+				isInDebt = true;
+		}
+	}
+	if(aircraftList.size() > 0)
 	{
 %>
 		<a href="#" onclick="gmapac.setSize(620,520);gmapac.setUrl('<%= response.encodeURL("gmapac.jsp?Id=" + account.getId()) %>');gmapac.showPopup('gmapac');return false;" id="gmapac">
@@ -183,6 +194,8 @@
 <%
 	}
 %>
+		<br>
+		<h5 <%= isInDebt ? " style=\"color: red;\"" : "" %>>Total monthly aircraft fees: <%=Formatters.currency.format(totalFees)%></h5>
 	</caption>
 	<thead>
 	<tr>
@@ -202,20 +215,30 @@
 	</thead>
 	<tbody>
 <%
+	isInDebt = false;
+
 	for (AircraftBean aircraft : aircraftList)
 	{
 		int priceDry= aircraft.getRentalPriceDry();
 		int priceWet= aircraft.getRentalPriceWet();
         int tbo = aircraft.getFuelType()==0 ? AircraftBean.TBO_RECIP/3600 : AircraftBean.TBO_JET/3600;
 		String price = "";
-		
+		String monthlyFee = "NA";
+
 		if (priceDry > 0)
 			price = "$" + priceDry + " Dry";
 			
 		if (priceWet > 0)
 			price = price + ((priceDry > 0) ? "/" : "") + "$" + priceWet + " Wet";
-			
-		boolean isInDebt = aircraft.getFeeOwed() > 0;
+
+
+		if(aircraft.getLessor() == 0 || aircraft.getLessor() == account.getId())
+			monthlyFee = Formatters.currency.format(aircraft.getMonthlyFee());
+
+		isInDebt = aircraft.getFeeOwed() > 0;
+		if(isInDebt && monthlyFee.contentEquals("NA"))
+			monthlyFee = "Fee Owed";
+
 		int minutes = (aircraft.getTotalEngineTime() - aircraft.getLastCheck())/60;
 		int hours = minutes / 60;
 		String lastCheck = (Formatters.twoDigits.format(minutes/60) + ":" + Formatters.twoDigits.format(minutes%60));
@@ -286,7 +309,7 @@
 	<td class="numeric" <%= hours >= 90 ? " style=\"color: red;\"" : "" %>><%= lastCheck %></td>
 	<td class="numeric"><%= price %></td>
 	<td class="numeric"><%= Formatters.currency.format(aircraft.getBonus()) %></td>
-	<td class="numeric" <%= isInDebt ? " style=\"color: red;\"" : "" %>><%= Formatters.currency.format(aircraft.getMonthlyFee()) %></td>
+	<td class="numeric" <%= isInDebt ? " style=\"color: red;\"" : "" %>><%= monthlyFee %></td>
 <%
 		if(aircraft.getShippingState() == 0 && aircraft.getLessor() != account.getId())
 		{

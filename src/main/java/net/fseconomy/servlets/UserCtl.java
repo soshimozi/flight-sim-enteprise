@@ -405,6 +405,7 @@ public class UserCtl extends HttpServlet
         aircraft += req.getParameter("aircraft-transfer") != null ? "TRANSFER " : "";
         aircraft += req.getParameter("aircraft-lease") != null ? "LEASE" : "";
         aircraft += req.getParameter("aircraft-edit") != null ? "EDIT" : "";
+        aircraft += req.getParameter("aircraft-sale") != null ? "SALE" : "";
 
         HashMap<String, String> map = new HashMap<>();
         map.put("cash", cash);

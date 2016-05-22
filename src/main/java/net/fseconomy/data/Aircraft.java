@@ -1075,7 +1075,7 @@ public class Aircraft implements Serializable
                 if (!Banking.checkFunds(owner, aircraft.getFeeOwed()))
                     throw new DataError("Not enough money to pay fee debt!");
 
-                String qry = "UPDATE aircraft SET owner = ?, feeowed = null where id = ?";
+                String qry = "UPDATE aircraft SET owner = ?, feeowed = 0 where id = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, owner, aircraftId);
 
                 Banking.doPayment(owner, 0, aircraft.getFeeOwed(), PaymentBean.OWNERSHIP_FEE, 0, -1, aircraft.getLocation(), aircraftId, "Aircraft Debt cleared", false);

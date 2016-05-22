@@ -2,6 +2,8 @@ package net.fseconomy.data;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -144,7 +146,8 @@ public class MaintenanceCycle implements Runnable
 			oneTimeStats = false;
 			doStatsAndLoanLimitChecks();
 			Stats.FlightSummaryList = Stats.getInstance().getFlightSummary();
-			return;
+
+            return;
 		}
 		
 		//start time 
@@ -163,6 +166,7 @@ public class MaintenanceCycle implements Runnable
 		
 		doStatsAndLoanLimitChecks();
 		doAircraftMaintenance();
+
 		
 		//TODO: comment out for test server for faster cycle times
 		//Goods cleanup, opens and closes fbo's
@@ -173,23 +177,19 @@ public class MaintenanceCycle implements Runnable
 		processSupplyOrders();
 		
 		//TODO: comment out for test server for faster cycle times
-//		processFboAssignments(); //green assignments
-//		processTemplateAssignments(); //template assignments
+		processFboAssignments(); //green assignments
+		processTemplateAssignments(); //template assignments
 		
 		//TODO examine to see if we need to randomize release times on this a bit more
 		freeExpiredFBOs();
-
-		//TODO move this inside of once per day after testing!!
-		oneTimeSetMonthlyFees();
-		processAircraftOwnershipFees();
-		processAircraftRepos();
 
 		if(isOncePerDay())
 		{
 			cycletype = CycleTypeDaily;
 			
 			processBankInterest();
-			processAircraftCondition();				
+			processAircraftCondition();
+			processAircraftFees();
 			processFboSupplyUsage();
 
 			checkRegistrations();
@@ -224,7 +224,8 @@ public class MaintenanceCycle implements Runnable
 		checkAircraftHomes();
 		checkAircraftMaintenance();		
 		checkAircraftShipping();		
-		checkStalledAircraft();		
+		checkStalledAircraft();
+        checkAircraftMonthlyFees();
 	}
 
 	void getLastInterestRun()
@@ -493,6 +494,93 @@ public class MaintenanceCycle implements Runnable
 	    }
 	}
 
+	void processAircraftFees()
+	{
+		GregorianCalendar today = new GregorianCalendar();
+		int day = today.get(Calendar.DAY_OF_MONTH);
+
+		if (1 == day)
+		{
+			//remove code after June 1, 2016
+			//only start processing after June 1, 2016
+			try
+			{
+				SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+				if (sdf.parse("06/30/2016").after(new Date()))
+					return;
+			}
+			catch (ParseException e)
+			{
+				//should never hit!
+				e.printStackTrace();
+				GlobalLogger.logApplicationLog("Aircraft Ownership Payments: ERROR on Date Check!! ", MaintenanceCycle.class);
+				return;
+			}
+
+			processAircraftOwnershipFees();
+			updateAircraftMonthlyFees(false);
+			processAircraftRepos();
+		}
+	}
+
+	//TODO should be able to be removed after first run of aircraft fees!
+	void checkAircraftMonthlyFees()
+	{
+		updateStatus("Processing Aircraft One Time Set Monthly Fees");
+		try
+		{
+			//check if any bank owned plane missing monthly fee, if so first run so reset all
+			String qry = "SELECT (count(id) > 0) as found FROM aircraft WHERE monthlyfee = 0 or monthlyfee is null ORDER BY aircraft.owner";
+			boolean exists = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer());
+
+			if(exists)
+				updateAircraftMonthlyFees(true);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	void updateAircraftMonthlyFees(boolean isUnsetAircraft)
+	{
+		updateStatus("Updating Aircraft Monthly Fees");
+		try
+		{
+            //start time
+            long starttime = System.currentTimeMillis();
+
+			String qry;
+
+            if(isUnsetAircraft)
+                qry = "SELECT * FROM aircraft join models on aircraft.model = models.id where monthlyfee = 0 or monthlyfee is null order by aircraft.owner, aircraft.model";
+            else
+                qry = "SELECT * FROM aircraft join models on aircraft.model = models.id order by aircraft.owner, aircraft.model";
+
+			List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
+			for(AircraftBean aircraft: list)
+			{
+                updateStatus("Updating Aircraft Monthly Fees for id: " + aircraft.getId());
+				qry = "Update aircraft SET monthlyfee = " + aircraft.getOwnershipFee() + " where id = " + aircraft.getId();
+                DALHelper.getInstance().ExecuteUpdate(qry);
+			}
+			//DALHelper.getInstance().ExecuteBatchUpdate(sb.toString());
+
+            long elapsed = System.currentTimeMillis()-starttime;
+            GlobalLogger.logApplicationLog(
+                    "Process Updating Aircraft Fees Completed: elapsed time = "
+                    + elapsed
+                    + "ms, Total Aircraft: "
+                    + list.size(),
+                    MaintenanceCycle.class);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+        updateStatus("Done Updating Aircraft Monthly Fees");
+	}
+
 	void processAircraftOwnershipFees()
 	{
 		updateStatus("Processing Aircraft Ownership Fees");
@@ -506,50 +594,45 @@ public class MaintenanceCycle implements Runnable
 			int totalDebt = 0;
 			int total = 0;
 
-			GregorianCalendar today = new GregorianCalendar();
-			int day = today.get(Calendar.DAY_OF_MONTH);
+			String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 order by aircraft.owner, aircraft.model";
+			List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
 
-			//TODO uncomment this for live!
-			//if (1 == day)
+			//Just to be safe, set all feeowed that are null to 0, if feeowed is null breaks adding debt
+			qry = "UPDATE aircraft SET feeowed = 0 WHERE feeowed is null;";
+			DALHelper.getInstance().ExecuteNonQuery(qry);
+
+			for(AircraftBean aircraft: list)
 			{
-				//TODO change query to include all user aircraft and not just those marked TEST!
-				//String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 order by aircraft.owner, aircraft.model";
-				String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 AND registration like 'TEST%' order by aircraft.owner, aircraft.model";
-				List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
+				counter++;
+				updateStatus("Working Aircraft Fee for " + counter + " out of " + list.size());
 
-				for(AircraftBean aircraft: list)
+				boolean feeDue = true;
+				int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
+				if(aircraft.getFeeOwed()  == 0)
 				{
-					counter++;
-					updateStatus("Working Aircraft Fee for " + counter + " out of " + list.size());
-
-					boolean feeDue = true;
-					int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
-					if(aircraft.getFeeOwed()  == 0)
+					boolean fundsAvail = Banking.checkFunds(ownerId, aircraft.getMonthlyFee());
+					if(fundsAvail)
 					{
-						boolean fundsAvail = Banking.checkFunds(ownerId, aircraft.getMonthlyFee());
-						if(fundsAvail)
-						{
-							Banking.doPayment(ownerId, 0, (double) aircraft.getMonthlyFee(), PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "", true);
-							feeDue = false;
-							totalPaid += aircraft.getMonthlyFee();
-						}
+						Banking.doPayment(ownerId, 0, (double) aircraft.getMonthlyFee(), PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "", true);
+						feeDue = false;
+						totalPaid += aircraft.getMonthlyFee();
 					}
-
-					if(feeDue)
-					{
-						qry = "Update aircraft SET feeowed = feeowed + ? where id = ?";
-						DALHelper.getInstance().ExecuteNonQuery(qry, aircraft.getMonthlyFee(), aircraft.getId());
-						Banking.doPayment(ownerId, 0, 0, PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "Ownership Fee of (" + aircraft.getMonthlyFee() + ") added to Current Debt", false);
-						totalDebt += aircraft.getMonthlyFee();
-					}
-
-					total += aircraft.getMonthlyFee();
 				}
+
+				if(feeDue)
+				{
+					qry = "Update aircraft SET feeowed = feeowed + ? where id = ?";
+					DALHelper.getInstance().ExecuteNonQuery(qry, aircraft.getMonthlyFee(), aircraft.getId());
+					Banking.doPayment(ownerId, 0, 0, PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "Ownership Fee of (" + Formatters.currency.format(aircraft.getMonthlyFee()) + ") added to Current Debt", false);
+					totalDebt += aircraft.getMonthlyFee();
+				}
+
+				total += aircraft.getMonthlyFee();
 
 
 				GlobalLogger.logApplicationLog("Aircraft Ownership Payments: Total Payout - " + Formatters.currency.format(totalPaid) + " from " + counter + " aircraft", MaintenanceCycle.class);
 
-				resetAircraftMonthlyFees();
+				updateAircraftMonthlyFees(false);
 			}
 
 			long elapsed = System.currentTimeMillis()-starttime;
@@ -559,32 +642,6 @@ public class MaintenanceCycle implements Runnable
 					+ ", Total Debt: " + Formatters.currency.format(totalDebt)
 					+ ", Total Paid: " + Formatters.currency.format(totalPaid)
 					, MaintenanceCycle.class);
-		}
-		catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	void oneTimeSetMonthlyFees()
-	{
-		String qry = "SELECT * FROM aircraft join models on aircraft.model = models.id WHERE owner=0 order by aircraft.owner, aircraft.model LIMIT 1";
-		List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
-		if(list.size() == 1 && list.get(0).getMonthlyFee() == 0)
-			resetAircraftMonthlyFees();
-	}
-
-	void resetAircraftMonthlyFees()
-	{
-		try
-		{
-			String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id order by aircraft.owner, aircraft.model";
-			List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
-			for(AircraftBean aircraft: list)
-			{
-				qry = "Update aircraft SET monthlyfee = ? where id = ?";
-				DALHelper.getInstance().ExecuteNonQuery(qry, aircraft.getOwnershipFee(), aircraft.getId());
-			}
 		}
 		catch (SQLException e)
 		{
@@ -602,51 +659,42 @@ public class MaintenanceCycle implements Runnable
 		int counter = 0;
 		int totalPaid = 0;
 
-		GregorianCalendar today = new GregorianCalendar();
-		int day = today.get(Calendar.DAY_OF_MONTH);
-
-		//TODO uncomment this for live!
-		//if (1 == day)
+		String qry = "SELECT * FROM aircraft join models on aircraft.model = models.id WHERE aircraft.owner != 0 AND feeowed > 0 order by aircraft.owner, aircraft.model";
+		List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
+		for(AircraftBean aircraft: list)
 		{
-			//TODO change query to include all user aircraft and not just those marked TEST!
-			//String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 order by aircraft.owner, aircraft.model";
-			String qry = "SELECT * FROM aircraft join models on  aircraft.model = models.id WHERE aircraft.owner != 0 AND feeowed > 0 AND registration like 'TEST%' order by aircraft.owner, aircraft.model";
-			List<AircraftBean> list = Aircraft.getAircraftSQL(qry);
-			for(AircraftBean aircraft: list)
+			updateStatus("Checking Repo Aircraft Fee for " + counter + " out of " + list.size());
+			if(aircraft.getFeeOwed() > (aircraft.getMonthlyFee()*36))
 			{
-				updateStatus("Checking Repo Aircraft Fee for " + counter + " out of " + list.size());
-				if(aircraft.getFeeOwed() > (aircraft.getMonthlyFee()*36))
+				counter++;
+				int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
+				UserBean owner = Accounts.getAccountById(ownerId);
+				if(aircraft.getLessor() != 0)
 				{
-					counter++;
-					int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
-					UserBean owner = Accounts.getAccountById(ownerId);
-					if(aircraft.getLessor() != 0)
-					{
-						try
-						{
-							Aircraft.leasereturnac(aircraft.getId());
-						}
-						catch(DataError e)
-						{
-							GlobalLogger.logDebugLog("Error returning lease for aircraft [" + aircraft.getId() + "] in processAircraftRepos(): " + e.getMessage(), MaintenanceCycle.class);
-						}
-					}
-
 					try
 					{
-						Aircraft.sellAircraft( aircraft.getId(), owner, true);
+						Aircraft.leasereturnac(aircraft.getId());
 					}
 					catch(DataError e)
 					{
-						GlobalLogger.logDebugLog("Error selling aircraft [" + aircraft.getId() + "] in processAircraftRepos(): " + e.getMessage(), MaintenanceCycle.class);
+						GlobalLogger.logDebugLog("Error returning lease for aircraft [" + aircraft.getId() + "] in processAircraftRepos(): " + e.getMessage(), MaintenanceCycle.class);
 					}
 				}
+
+				try
+				{
+					Aircraft.sellAircraft( aircraft.getId(), owner, true);
+					GlobalLogger.logApplicationLog("Aircraft Repo'd: Owner - " + owner + ", aircraft - " + aircraft.getId(), MaintenanceCycle.class);
+				}
+				catch(DataError e)
+				{
+					GlobalLogger.logDebugLog("Error selling aircraft [" + aircraft.getId() + "] in processAircraftRepos(): " + e.getMessage(), MaintenanceCycle.class);
+				}
 			}
-			GlobalLogger.logApplicationLog("Aircraft Repos Check: Total Repo'd - " + counter + " of " + list.size() + " aircraft in debt", MaintenanceCycle.class);
 		}
 
 		long elapsed = System.currentTimeMillis()-starttime;
-		GlobalLogger.logApplicationLog("Process Aircraft Fees Completed: elapsed time = " + elapsed + "ms, Total Aircraft: " + counter + ", Total Fees: " + Formatters.currency.format(totalPaid), MaintenanceCycle.class);
+		GlobalLogger.logApplicationLog("Aircraft Repo Check: elapsed time = " + elapsed + "ms, Total Repo'd - " + counter + " of " + list.size() + " aircraft in debt", MaintenanceCycle.class);
 	}
 
 	/**
@@ -871,6 +919,7 @@ public class MaintenanceCycle implements Runnable
 
 				boolean noReversal = false;
 				boolean singleIcao = false;
+                int modelCount = 0;
 
 				//make sure that From icaos do not contain these tags
 				if(icaos1 != null)
@@ -909,6 +958,7 @@ public class MaintenanceCycle implements Runnable
 					// this will ensure a 172 is not chosen to take a 10 pax job
 					// if filter values are set those are used instead in the where clause
 
+                    boolean checkWeight = false;
 					if(isFilterByModel) //use specified models
 					{
 						whatModels = filterModels;
@@ -921,6 +971,7 @@ public class MaintenanceCycle implements Runnable
 					else if (seatsFrom != 0 && seatsTo != 0 && speedFrom !=  0 && speedTo != 0) //use to/from values
 					{	//filters set
 						whatModels = "select t.id from (select id from models where  seats between " + seatsFrom + " and " + seatsTo + " and cruisespeed  between " + speedFrom + " and " + speedTo + ") as t";
+                        checkWeight = true;
 					}
 					else //no filters set, log template error
 					{
@@ -934,12 +985,23 @@ public class MaintenanceCycle implements Runnable
 
 					icaoSet1 = new HashSet<>();
 
-					qry = "SELECT * FROM aircraft, models WHERE  owner=0 AND location is not null AND userlock is null"
-					+ " AND aircraft.model=models.id"
-					+ " AND aircraft.model in (" + whatModels + ")"
-					+ " AND (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + (targetAmount * multipler) + " < maxWeight"
-					+ " AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)";
+                    if(!checkWeight)
+                    {
+                        qry = "SELECT count(id) as count from aircraft where model in (?)";
+                        modelCount = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), whatModels);
+                    }
 
+					qry = "SELECT * FROM aircraft, models WHERE  owner=0 AND location is not null AND userlock is null"
+					+ " AND aircraft.model=models.id";
+
+                    if(!checkWeight)
+					    qry += " AND aircraft.model in (" + whatModels + ")";
+
+
+                    if(checkWeight)
+                        qry += " AND (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + (targetAmount * multipler) + " < maxWeight";
+
+                    qry += " AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)";
 					allInAircraft = Aircraft.getAircraftSQL(qry);
 
 					for(AircraftBean a: allInAircraft)
@@ -1026,7 +1088,12 @@ public class MaintenanceCycle implements Runnable
 						whereString = whereString + "WHERE icao in (" + where.toString() + ")";
 					
 					if(isAllIn)
-						needed = icaoSet1.size() * frequency + " as needed";
+                    {
+                        if(modelCount > 0)
+                            needed = modelCount * frequency + " as needed";
+                        else
+                            needed = icaoSet1.size() * frequency + " as needed";
+                    }
 					else
 						needed = frequency + " as needed";
 
@@ -1037,12 +1104,13 @@ public class MaintenanceCycle implements Runnable
 				while (bucketRs.next())
 				{
 					int bucket = bucketRs.getInt(1);
-					double dTogo = bucketRs.getDouble(4) - bucketRs.getInt(5); 
 					double latitude = bucketRs.getDouble(6);
+                    double dTogo = bucketRs.getDouble(4) - bucketRs.getInt(5);
+                    int togo;
+                    List<String> airportFromList;
 
-					int togo;
-					List<String> airportFromList;
-					
+
+
 					if (dTogo <= 0 || (dTogo < 1 && Math.random() > dTogo))
 						continue;
 					
@@ -1088,7 +1156,12 @@ public class MaintenanceCycle implements Runnable
 					
 					while (togo-- > 0)
 					{
+						if(airportFromList.size() == 0)
+							break;
+
 						String icao = airportFromList.get((int)(Math.random() * airportFromList.size()));
+                        if(isAllIn)
+                            airportFromList.remove(icao);
 							
 						int cargoAmount = (int)(targetAmount * (1 + (Math.random() * 2*amountDev) - amountDev));
 						if (cargoAmount == 0)
@@ -1129,8 +1202,11 @@ public class MaintenanceCycle implements Runnable
 							to = Airports.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk, surfType);
 
 						if (to == null)
-							continue;
-	
+                        {
+                            if(templateId == 41)
+                                System.err.println("Unable to find TO airport for icao: " + icao);
+                            continue;
+                        }
 						int aircraftId = 0;
 						if (isAllIn) 
 						{
@@ -1139,7 +1215,11 @@ public class MaintenanceCycle implements Runnable
 
 							//if no aircraft skip this one
 							if(acList.size() == 0)
-								continue;
+                            {
+                                if(templateId == 41)
+                                    System.err.println("Unable to find airplane for icao: " + icao);
+                                continue;
+                            }
 
 							int index = 0; //default aircraft selection is the first one
 

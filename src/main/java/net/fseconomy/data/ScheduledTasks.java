@@ -218,6 +218,8 @@ public class ScheduledTasks
                     }
                     catch (ExecutionException e)
                     {
+                        e.printStackTrace();
+
                         //handle it
                         startMaintenanceCycle();
                         return;
@@ -274,6 +276,8 @@ public class ScheduledTasks
                     }
                     catch (ExecutionException e)
                     {
+                        e.printStackTrace();
+
                         //handle it
                         startDbTasks();
                         return;

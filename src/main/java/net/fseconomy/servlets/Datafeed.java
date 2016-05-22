@@ -2766,6 +2766,7 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("EngineTime");
 			buffer.appendHeaderItem("TimeLast100hr");
 			buffer.appendHeaderItem("LeasedFrom");
+			buffer.appendHeaderItem("MonthlyFee");
 		}
 
         for (AircraftBean aircraft : aircraftlist)
@@ -2825,6 +2826,7 @@ public class Datafeed extends HttpServlet
             buffer.append(aircraft.getEngineHoursString());
             buffer.append(aircraft.getHoursSinceLastCheckString());
 			buffer.append(Converters.XMLHelper.protectSpecialCharacters(leasedFrom));
+			buffer.appendMoney(aircraft.getMonthlyFee());
             buffer.newrow();
         }
 	}
@@ -2888,6 +2890,7 @@ public class Datafeed extends HttpServlet
             buffer.append("EngineTime", aircraft.getEngineHoursString());
             buffer.append("TimeLast100hr", aircraft.getHoursSinceLastCheckString());
 			buffer.append("LeasedFrom", Converters.XMLHelper.protectSpecialCharacters(leasedFrom));
+			buffer.appendMoney("MonthlyFee", aircraft.getMonthlyFee());
             buffer.append("</Aircraft>\n");
         }
 	}	
