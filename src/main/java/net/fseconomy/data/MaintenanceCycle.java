@@ -912,7 +912,6 @@ public class MaintenanceCycle implements Runnable
 				boolean isFilterByModel = rsTemplate.getBoolean("modelfilter");
 				String filterModels = rsTemplate.getString("modelset");
 
-
 				StringBuffer where = new StringBuffer();
 				Set<String> icaoSet1 = null;
 				Set<String> icaoSet2 = null;
@@ -925,13 +924,10 @@ public class MaintenanceCycle implements Runnable
 				if(icaos1 != null)
 				{
 					if (icaos1.contains("$NOREVERSE"))
-					{
 						icaos1 = icaos1.replace("$NOREVERSE", "").trim();
-					}
+
 					if (icaos1.contains("$SINGLE"))
-					{
 						icaos1 = icaos1.replace("$SINGLE", "").trim();
-					}
 				}
 
 				//if Dest icaos contain these tags, set the flags
@@ -942,6 +938,7 @@ public class MaintenanceCycle implements Runnable
 						noReversal = true;
 						icaos2 = icaos2.replace("$NOREVERSE", "").trim();
 					}
+
 					if (icaos2.contains("$SINGLE"))
 					{
 						singleIcao = true;
@@ -951,57 +948,48 @@ public class MaintenanceCycle implements Runnable
 
 				if (isAllIn)
 				{
-					String whatModels = "";
+					//check for seats and cruise speed filters on aircraft assignment for template
+					StringBuilder aircraftFilterWhereClause = new StringBuilder();
 
-					// check for seats and cruise speed filters on aircraft assignment for template
-					// if no filters are set for seats size filter, just add a condition to be bigger then the units specified in the job
-					// this will ensure a 172 is not chosen to take a 10 pax job
-					// if filter values are set those are used instead in the where clause
-
-                    boolean checkWeight = false;
-					if(isFilterByModel) //use specified models
+					if(isFilterByModel)
 					{
-						whatModels = filterModels;
-						if(whatModels == "")
-						{
-							GlobalLogger.logApplicationLog("Error: Template " + templateId + ", missing aircraft models!", MaintenanceCycle.class);
-							continue;
-						}
+						aircraftFilterWhereClause.append(" and aircraft.model in (").append(filterModels).append(")");
 					}
-					else if (seatsFrom != 0 && seatsTo != 0 && speedFrom !=  0 && speedTo != 0) //use to/from values
-					{	//filters set
-						whatModels = "select t.id from (select id from models where  seats between " + seatsFrom + " and " + seatsTo + " and cruisespeed  between " + speedFrom + " and " + speedTo + ") as t";
-                        checkWeight = true;
-					}
-					else //no filters set, log template error
+					else if (seatsFrom == 0 || seatsTo == 0 || speedFrom == 0 || speedTo == 0)
 					{
-						GlobalLogger.logApplicationLog("Error: Template " + templateId + ", missing To/From values!", MaintenanceCycle.class);
+						//if no filters are set for seats size or speed filter toss an error and exit the template
+						GlobalLogger.logDebugLog("Template Error, missing seat/speed min/max for: " + templateId, MaintenanceCycle.class);
 						continue;
 					}
+					else
+					{
+						if (seatsFrom > 0)
+							aircraftFilterWhereClause.append(" and seats >= ").append(seatsFrom);
 
-					double multipler = 0;
-					if (units.equals("passengers"))
-						multipler = 77;
+						if (seatsFrom == 0 && seatsTo > 0)
+							aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
+
+						if (seatsTo > 0)
+							aircraftFilterWhereClause.append(" and seats <= ").append(seatsTo);
+
+						if (speedFrom > 0)
+							aircraftFilterWhereClause.append(" and cruisespeed >= ").append(speedFrom);
+
+						if (speedTo > 0)
+							aircraftFilterWhereClause.append(" and cruisespeed <= ").append(speedTo);
+
+						if (units.equals("passengers"))
+							aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount * 77).append(" < maxWeight");
+						else
+							aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount).append(" < maxWeight");
+					}
 
 					icaoSet1 = new HashSet<>();
 
-                    if(!checkWeight)
-                    {
-                        qry = "SELECT count(id) as count from aircraft where model in (?)";
-                        modelCount = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer(), whatModels);
-                    }
+					qry = "Select count(*) as count from aircraft, models where aircraft.model=models.id AND owner = 0 " + aircraftFilterWhereClause.toString();
+					modelCount = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer());
 
-					qry = "SELECT * FROM aircraft, models WHERE  owner=0 AND location is not null AND userlock is null"
-					+ " AND aircraft.model=models.id";
-
-                    if(!checkWeight)
-					    qry += " AND aircraft.model in (" + whatModels + ")";
-
-
-                    if(checkWeight)
-                        qry += " AND (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + " + (targetAmount * multipler) + " < maxWeight";
-
-                    qry += " AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)";
+					qry = "Select * from aircraft, models where aircraft.model=models.id AND owner=0 AND location is not null and userlock is null AND aircraft.id not in( select * from (select aircraftid from assignments where aircraftid is not null) as t)" + aircraftFilterWhereClause.toString();
 					allInAircraft = Aircraft.getAircraftSQL(qry);
 
 					for(AircraftBean a: allInAircraft)
