@@ -24,7 +24,7 @@ public class common
 
     public enum PermissionSet
     {
-        READ(1), WITHDRAW(2), DEPOSIT(4), TRANSFER(8), SELL(16), PURCHASE(32), LEASE(64), EDIT(128);
+        READ(1), WITHDRAW(2), DEPOSIT(4), TRANSFER(8), SELL(16), PURCHASE(32), LEASE(64), EDIT(128), SALE(256);
 
         //public static final EnumSet<PermissionSet> ALL_OPTS = EnumSet.allOf(PermissionSet.class);
 

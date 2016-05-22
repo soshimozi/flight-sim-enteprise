@@ -2,7 +2,6 @@ package net.fseconomy.servlets;
 
 import net.fseconomy.beans.GoodsBean;
 import net.fseconomy.data.Data;
-import net.fseconomy.data.Fbos;
 import net.fseconomy.data.Goods;
 import net.fseconomy.data.Stats;
 import net.fseconomy.dto.LatLonCount;
@@ -185,11 +184,11 @@ public class RestServletV2
     public Response updateAircraft(@HeaderParam("servicekey") String servicekey,
                                    @PathParam("account") final int account,
                                    @PathParam("serialnumber")int serialnumber,
-                                   @FormParam("home") final String home,            //optional defaults to: null
+                                   @FormParam("home") final String home,            //optional defaults to: null and will not change current
                                    @FormParam("bonus") final int bonus,             //optional defaults to: 0
                                    @FormParam("rentalwet") final int rentalwet,     //optional defaults to: 0
                                    @FormParam("rentaldry") final int rentaldry,     //optional defaults to: 0
-                                   @FormParam("maxrenthrs") final int maxrenthrs,   //optional defaults to: 1 range: 1-10
+                                   @FormParam("maxrenthrs") final int maxrenthrs,   //optional defaults to: 1 range: 1-10 step 1
                                    @FormParam("ferry") final boolean ferry,         //optional defaults to: false
                                    @FormParam("repair") final boolean repair)       //optional defaults to: false
     {
@@ -201,6 +200,27 @@ public class RestServletV2
 
         return ServiceData.updateAircraft(servicekey, account, serialnumber, home.toUpperCase(), bonus, rentalwet, rentaldry, maxrenthrs, ferry, repair);
     }
+
+
+    @POST
+    @Path("/aircraft/sale/{account}/{serialnumber}")
+    public Response saleAircraft(@HeaderParam("servicekey") String servicekey,
+                                 @PathParam("account") final int account,
+                                 @PathParam("serialnumber")int serialnumber,
+                                 @FormParam("privatesale") final boolean privatesale,
+                                 @FormParam("buyer") final int buyerid,
+                                 @FormParam("price") final int price,
+                                 @FormParam("note") final String note)
+    {
+        PermissionCategory category = PermissionCategory.AIRCRAFT;
+
+        if(!hasPermission(servicekey, account, category, PermissionSet.SALE))
+            return ResponseAccessDenied();
+
+
+        return ServiceData.updateAircraftSalePrice(servicekey, account, serialnumber, privatesale, buyerid, price, note);
+    }
+
 
     @POST
     @Path("/account/search/name")

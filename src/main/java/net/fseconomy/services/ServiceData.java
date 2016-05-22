@@ -433,6 +433,48 @@ public class ServiceData
             return createErrorResponse(500, 500, "System Error", "Unable to process");
     }
 
+    public static Response updateAircraftSalePrice(String serviceKey, int account, int aircraftId, boolean privateSale, int buyerId, int price, String note)
+    {
+        try
+        {
+            AircraftBean aircraft = Aircraft.getAircraftById(aircraftId);
+            if(aircraft.getOwner() != account)
+                return createErrorResponse(200, 200, "Access Denied", "Not the aircraft owner!");
+
+            if(privateSale && buyerId <= 0)
+                return createErrorResponse(200, 200, "Bad Request", "Invalid buyer Id.");
+
+            if(price <= 0)
+                return createErrorResponse(200, 200, "Bad Request", "Invalid sale price. (>0)");
+
+            int serviceId = getServiceId(serviceKey);
+
+            String msg = "Service(" + serviceId + "): ";
+
+            if(privateSale)
+                msg += "[Private Sale to " + buyerId + "] - ";
+
+            msg += note;
+
+            String qry = "{call AircraftSalePrice(?,?,?,?,?,?)}";
+            boolean success = DALHelper.getInstance().ExecuteStoredProcedureWithStatus(qry, aircraftId, privateSale, buyerId, price, msg);
+
+            if (success)
+                return createSuccessResponse(200, 200, null, null, "Aircraft sale price change successful.");
+            else
+                return createErrorResponse(500, 500, "System Error", "Unable to process");
+        }
+        catch(BadRequestException e)
+        {
+            return createErrorResponse(200, 200, "Bad Request", "No records found.");
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+            return createErrorResponse(500, 200, "System Error",  "An error has occurred.");
+        }
+    }
+
     public static Response getAccountId(String name)
     {
         try
