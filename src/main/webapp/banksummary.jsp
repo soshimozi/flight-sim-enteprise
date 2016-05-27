@@ -309,6 +309,8 @@
                             <option value="70">Set cash to $70,000</option>
                             <option value="80">Set cash to $80,000</option>
                             <option value="100">Set cash to $100,000</option>
+                            <option value="250">Set cash to $250,000</option>
+                            <option value="500">Set cash to $500,000</option>
                             <option value="999">Transfer all in bank to cash.</option>
                         </select>
                     </div>
