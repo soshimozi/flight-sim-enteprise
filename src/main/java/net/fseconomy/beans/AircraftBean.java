@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.sql.*;
 import java.util.Date;
 
-import com.sun.corba.se.impl.orbutil.closure.Constant;
-import net.fseconomy.data.Models;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Converters;
 import net.fseconomy.util.Formatters;
@@ -511,18 +509,44 @@ public class AircraftBean implements Serializable
 		return AircraftBean.getRawEquipmentPrice(mask);
 	}
 	
-	public static int getEquipmentCost(int mask)
+	public static int getEquipmentCostSystemFbo(int mask)
 	{
-		float DefaultMargin = (1 + (float)FboBean.FBO_DEFAULT_EQUIPMENTMARGIN / 100);
+		float DefaultMargin = 1 + FboBean.FBO_DEFAULT_EQUIPMENTMARGIN / 100f;
 		return Math.round(AircraftBean.getRawEquipmentPrice(mask) / DefaultMargin);
 	}
 	
-	public int getEquipmentPriceFBO(int mask, FboBean fbo)
+	public int getEquipmentSalePriceFBO(int mask, FboBean fbo)
 	{
-		int fboEquipmentCost = AircraftBean.getEquipmentCost(mask);
-		return Math.round((fboEquipmentCost * (1 + (float)fbo.getEquipmentInstallMargin() / 100)));
+		float margin = 1 + fbo.getEquipmentInstallMargin() / 100f;
+		return Math.round(AircraftBean.getRawEquipmentPrice(mask) * margin);
 	}
-	
+
+	public int getEquipmentSellPriceFboCost(int mask, FboBean fbo)
+	{
+		float margin = fbo.getEquipmentInstallMargin() / 100f;
+		return Math.round(getRawEquipmentPrice(mask) * margin);
+	}
+
+
+	public int getEquipmentBuybackPrice(int mask)
+	{
+		return (int) Math.round((double)AircraftBean.getRawEquipmentPrice(mask) * .2);
+	}
+
+	public int getEquipmentBuybackPriceFboCost(int mask, FboBean fbo)
+	{
+		float margin = fbo.getEquipmentInstallMargin() / 100f;
+		return Math.round(getEquipmentBuybackPrice(mask) * margin);
+	}
+
+	public String getEquipmentBuybackPriceFBOFormatted(int mask, FboBean fbo)
+	{
+		int fboEquipmentBuyBack = getEquipmentBuybackPrice(mask);
+		int fboCost = getEquipmentBuybackPriceFboCost(mask, fbo);
+
+		return Formatters.currency.format(fboEquipmentBuyBack-fboCost);
+	}
+
 	public int performMaintenance(int type, int logId, FboBean fbo, ResultSet aircraft, ResultSet damage, ResultSet maintenance) throws SQLException
 	{
 		// Third call for price (while performing maintenance)
@@ -919,6 +943,11 @@ public class AircraftBean implements Serializable
 	public void setLessor(int lessor) //added Airboss 5/6/11
 	{
 		this.lessor = lessor;
+	}
+
+	public boolean isLeased()
+	{
+		return lessor != 0;
 	}
 
 	/**
@@ -1444,7 +1473,7 @@ public class AircraftBean implements Serializable
 		if(retail)
 			returnValue += AircraftBean.getRawEquipmentPrice(equipment); // includes default FBO margin 
 		else
-			returnValue += AircraftBean.getEquipmentCost(equipment); // Wholesale cost - no FBO margin
+			returnValue += AircraftBean.getEquipmentCostSystemFbo(equipment); // Wholesale cost - no FBO margin
 		
 		//reduce sell back price by the time on the engines, the closer to TBO the bigger the reduction
 		if(fueltype==0) // 100LL

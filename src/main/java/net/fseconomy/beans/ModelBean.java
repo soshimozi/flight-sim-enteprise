@@ -45,9 +45,9 @@ public class ModelBean implements Serializable
 	public static final int AP_COST_HOUR = 15;	
 	public static final int GPS_COST_HOUR = 20;	
 	
-	public static final int IFR_COST= 20000;
-	public static final int AP_COST = 30000;
-	public static final int GPS_COST = 60000;	
+	public static final int IFR_COST= 13000;
+	public static final int AP_COST = 20000;
+	public static final int GPS_COST = 40000;
 	
 	public static class fuelTank 
 	{

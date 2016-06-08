@@ -201,8 +201,10 @@
 	<tr><td class="type indent">Ground crew fees</td><td class="cost"><%= lineitem(statement[PaymentBean.FBO_ASSIGNMENT_FEE][0]) %></td></tr>
 	<tr><td class="type indent">Repairshop income</td><td class="cost"><%= lineitem(statement[PaymentBean.MAINTENANCE][0]) %></td></tr>
 	<tr><td class="type indent">Repairshop expenses</td><td class="cost"><%= lineitem(statement[PaymentBean.MAINTENANCE_FBO_COST][0] + statement[PaymentBean.MAINTENANCE_FBO_COST][1]) %></td></tr>
-	<tr><td class="type indent">Equipment installation</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT][0]) %></td></tr>
-	<tr><td class="type indent">Equipment expenses</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT_FBO_COST][0] + statement[PaymentBean.EQUIPMENT_FBO_COST][1]) %></td></tr>
+	<tr><td class="type indent">Equipment installs</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT][0]) %></td></tr>
+	<tr><td class="type indent">Equipment install expenses</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT_FBO_COST][0] + statement[PaymentBean.EQUIPMENT_FBO_COST][1]) %></td></tr>
+    <tr><td class="type indent">Equipment removals</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT_REMOVAL][0]) %></td></tr>
+    <tr><td class="type indent">Equipment removal expenses</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT_FBO_REMOVAL_COST][0] + statement[PaymentBean.EQUIPMENT_FBO_COST][1]) %></td></tr>
 	<tr class="total"><td class="space"></td><td class="cost"><b><%= doSubTotal() %></b></td></tr>
 	
 	<tr><td class="type">Facilities</td><td></td></tr>

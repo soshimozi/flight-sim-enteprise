@@ -63,8 +63,10 @@ public class PaymentBean implements Serializable
 	public static final short BULK_SUPPLIES = 31;
 
 	public static final short OWNERSHIP_FEE = 32;
+	public static final short EQUIPMENT_REMOVAL = 33;
+	public static final short EQUIPMENT_FBO_REMOVAL_COST = 34;
 
-	public static final short MAX_REASON = 32;
+	public static final short MAX_REASON = 34;
 	
 	long id;
 	Timestamp time;
@@ -129,8 +131,8 @@ public class PaymentBean implements Serializable
 			case GROUP_DELETION: return "Recovery of group money after deletion";
 			case MAINTENANCE: return "Aircraft maintenance";
 			case MAINTENANCE_FBO_COST: return "Cost of repairshop for doing aircraft maintenance";
-			case EQUIPMENT: return "Installation of equipment in aircraft";
-			case EQUIPMENT_FBO_COST: return "Cost of repairshop for doing equipment installation";
+			case EQUIPMENT: return "Install of equipment in aircraft";
+			case EQUIPMENT_FBO_COST: return "Cost of repairshop for doing equipment install";
 			case SALE_GOODS_FUEL: return "Sale of wholesale 100LL";
 			case SALE_GOODS_JETA: return "Sale of wholesale JetA";
 			case SALE_GOODS_BUILDING_MATERIALS: return "Sale of building materials";
@@ -153,6 +155,8 @@ public class PaymentBean implements Serializable
             case TRANSFER_GROUP: return "Group Transfer";
 			case BULK_SUPPLIES: return "Supplies Delivered";
 			case OWNERSHIP_FEE: return "Ownership Fee";
+			case EQUIPMENT_REMOVAL: return "Removal of equipment in aircraft";
+			case EQUIPMENT_FBO_REMOVAL_COST: return "Cost of repairshop for doing equipment removal";
 			default: return "Unknown";
 		}
 	}

@@ -20,6 +20,8 @@
 	String returnPage = "maintenance.jsp?id=" + id;
 
  	AircraftBean aircraft = Aircraft.getAircraftById(id);
+	ModelBean modelBean = Models.getModelById(aircraft.getModelId());
+
  	List<LogBean> logs = Logging.getLogForMaintenanceAircraft(aircraft.getId());
 
 	String lastCheck = Formatters.getHourMin(aircraft.getTotalEngineTime() - aircraft.getLastCheck());
@@ -56,15 +58,33 @@
 			}
 		}
 		
-		function doSubmit2(id, price, fbo)
+		function doSubmit2(id, price, fbo, action)
 		{
-			if (window.confirm("Do you want to install this equipment for " + price + "?"))
+<%
+			if(aircraft.isForSale())
+			{
+%>
+				window.alert("Aircraft cannot add/remove equipment when on the market!");
+<%
+			}
+			else
+			{
+%>
+			var msg = "Do you want to install this equipment for " + price + "?";
+			if (action === "remove")
+				msg = "Do you want to remove this equipment for " + price + "?";
+
+			if (window.confirm(msg))
 			{
 				var form = document.getElementById("equipmentForm");
 				form.equipmentType.value = id;
+				form.action.value = action;
 				form.fbo.value = fbo;
 				form.submit();
 			}
+<%
+			}
+%>
 		}
 	</script>
 
@@ -144,15 +164,22 @@
 			</table>
 		</div>
 		<div class="dataTable">
-<%	
-	if (equipment == ModelBean.EQUIPMENT_MASK_ALL) 
+<%
+	if (aircraft.isLeased())
 	{
 %>
 			<h2>Equipment available</h2>
-			All equipment installed. 
-<%	
-	} 
-	else 
+			Only the owner can install or remove equipment.
+<%
+	}
+	else if (modelBean.getEquipment() == ModelBean.EQUIPMENT_IFR_ONLY)
+	{
+%>
+			<h2>Equipment available</h2>
+			All equipment installed.
+<%
+	}
+	else
 	{
 %>
 			<form method="post" action="userctl" id="equipmentForm">
@@ -160,6 +187,7 @@
 					<input type="hidden" name="event" value="equipment" />
 					<input type="hidden" name="reg" value="<%=aircraft.getRegistration()%>" />
 					<input type="hidden" name="equipmentType" />
+					<input type="hidden" name="action" />
 					<input type="hidden" name="fbo" />
 					<input type="hidden" name="returnpage" value="<%=returnPage%>" />
 					
@@ -169,64 +197,71 @@
 					    <tr>
 					      <th>Equipment</th>
 					      <th>Facility</th>
-					      <th>Price</th>
+					      <th>Install price/*Sell price</th>
 					      <th>Action</th>
 					    </tr>
 					  </thead>
 					  <tbody>
 <%
-		if ((equipment & ModelBean.EQUIPMENT_IFR_MASK) == 0) 
+		boolean ifr = (equipment & ModelBean.EQUIPMENT_IFR_MASK) != 0;
+		for (FboBean fbo : fbos)
 		{
-			for (FboBean fbo : fbos) 
-			{
-				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_IFR_MASK, fbo));
+			String price;
+
+			if(!ifr)
+				price = Formatters.currency.format(aircraft.getEquipmentSalePriceFBO(ModelBean.EQUIPMENT_IFR_MASK, fbo));
+			else
+				price = aircraft.getEquipmentBuybackPriceFBOFormatted(ModelBean.EQUIPMENT_IFR_MASK, fbo);
 %>
 					    <tr>
 					      	<td>IFR package</td>
 					      	<td><%=fbo.getName()%></td>
-					      	<td><%=price%></td>
+					      	<td><%=price%><%=ifr ? "*" : ""%></td>
 					      	<td>
-					      		<input type="button" class="button" onclick="doSubmit2(<%=ModelBean.EQUIPMENT_IFR_MASK%>, '<%=price%>', <%=fbo.getId()%>) "	value="Install" />
+					      		<input type="button" class="button" onclick="doSubmit2(<%=ModelBean.EQUIPMENT_IFR_MASK%>, '<%=price%>', <%=fbo.getId()%>, <%=!ifr ? "'install'" : "'remove'" %>) "	value="<%=!ifr ? "Install" : "Remove & Sell" %>" />
 					       	</td>
 					    </tr>
 <%
-			}
 		}
-	
-		if ((equipment & ModelBean.EQUIPMENT_AP_MASK) == 0) 
+
+		boolean ap = (equipment & ModelBean.EQUIPMENT_AP_MASK) != 0;
+		for (FboBean fbo : fbos)
 		{
-			for (FboBean fbo : fbos) 
-			{
-				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_AP_MASK, fbo));
+			String price;
+			if(!ap)
+				price = Formatters.currency.format(aircraft.getEquipmentSalePriceFBO(ModelBean.EQUIPMENT_AP_MASK, fbo));
+			else
+				price = aircraft.getEquipmentBuybackPriceFBOFormatted(ModelBean.EQUIPMENT_AP_MASK, fbo);
 %>
 					    <tr>
 					      	<td>Autopilot</td>
 					      	<td><%=fbo.getName()%></td>
-					      	<td><%=price%></td>
+					      	<td><%=price%><%=ap ? "*" : ""%></td>
 					      	<td>
-					      		<input type="button" class="button"	onclick="doSubmit2(<%=ModelBean.EQUIPMENT_AP_MASK%>, '<%=price%>', <%=fbo.getId()%>) " value="Install" />
+					      		<input type="button" class="button"	onclick="doSubmit2(<%=ModelBean.EQUIPMENT_AP_MASK%>, '<%=price%>', <%=fbo.getId()%>, <%=!ap ? "'install'" : "'remove'" %>) " value="<%=!ap ? "Install" : "Remove & Sell" %>" />
 					        </td>
 					    </tr>
 <%
 		}
-	}
 
-		if ((equipment & ModelBean.EQUIPMENT_GPS_MASK) == 0) 
+		boolean gps = (equipment & ModelBean.EQUIPMENT_GPS_MASK) != 0;
+		for (FboBean fbo : fbos)
 		{
-			for (FboBean fbo : fbos) 
-			{
-				String price = Formatters.currency.format(aircraft.getEquipmentPriceFBO(ModelBean.EQUIPMENT_GPS_MASK, fbo));
+			String price;
+			if(!gps)
+				price = Formatters.currency.format(aircraft.getEquipmentSalePriceFBO(ModelBean.EQUIPMENT_GPS_MASK, fbo));
+			else
+				price = aircraft.getEquipmentBuybackPriceFBOFormatted(ModelBean.EQUIPMENT_GPS_MASK, fbo);
 %>
 					    <tr>
 					      	<td>GPS</td>
 					      	<td><%=fbo.getName()%></td>
-					      	<td><%=price%></td>
+					      	<td><%=price%><%=gps ? "*" : ""%></td>
 					      	<td>
-					      		<input type="button" class="button"	onclick="doSubmit2(<%=ModelBean.EQUIPMENT_GPS_MASK%>, '<%=price%>', <%=fbo.getId()%>) "	value="Install" />
+					      		<input type="button" class="button"	onclick="doSubmit2(<%=ModelBean.EQUIPMENT_GPS_MASK%>, '<%=price%>', <%=fbo.getId()%>, <%=!gps ? "'install'" : "'remove'" %>) "	value="<%=!gps ? "Install" : "Remove & Sell" %>" />
 					        </td>
 					    </tr>
 <%
-			}
 		}
 %>
 					  </tbody>
@@ -236,7 +271,7 @@
 <%
 	}
 %>
-		</div>		
+		</div>
 		
 		<div class="dataTable">
 <%

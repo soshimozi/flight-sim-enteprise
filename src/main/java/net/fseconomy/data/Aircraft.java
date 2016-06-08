@@ -7,7 +7,6 @@ import net.fseconomy.util.Formatters;
 import net.fseconomy.util.GlobalLogger;
 import net.fseconomy.util.Helpers;
 
-import javax.sql.rowset.CachedRowSet;
 import java.io.Serializable;
 import java.sql.*;
 import java.util.*;
@@ -1396,7 +1395,7 @@ public class Aircraft implements Serializable
         }
     }
 
-    public static void doEquipment(AircraftBean aircraft, int equipmentType, FboBean fbo) throws DataError
+    public static void doEquipment(AircraftBean aircraft, int equipmentType, String action, FboBean fbo) throws DataError
     {
         // Get a default FBO if none is specified.
         if (fbo == null)
@@ -1419,34 +1418,66 @@ public class Aircraft implements Serializable
 
         try
         {
-            int price = aircraft.getEquipmentPriceFBO(equipmentType, fbo);
+            int price;
+            int fee;
             UserBean owner = Accounts.getAccountById(aircraft.getOwner());
 
             if (owner == null)
-            {
                 throw new DataError("Owner not found.");
-            }
 
-            if (owner.getMoney() < price)
+            if(aircraft.isForSale())
+                throw new DataError("Cannot add/remove equipment while aircraft is for sale!");
+
+            if(action.equals("install"))
             {
-                throw new DataError("Not enough money.");
-            }
+                price = aircraft.getEquipmentSalePriceFBO(equipmentType, fbo);
+                fee = aircraft.getEquipmentSellPriceFboCost(equipmentType, fbo);
 
-            String qry = "update aircraft set equipment = equipment|? where id = ?";
-            if (DALHelper.getInstance().ExecuteUpdate(qry, equipmentType, aircraft.getId()) != 1)
+                if (owner.getMoney() < (price))
+                    throw new DataError("Not enough money.");
+
+                installEquipment(equipmentType, aircraft.getId());
+
+                Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), price, PaymentBean.EQUIPMENT, 0, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
+                Banking.doPayment(fbo.getOwner(), 0, price-fee, PaymentBean.EQUIPMENT_FBO_COST, 0, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
+            }
+            else if(action.equals("remove"))
             {
-                throw new DataError("Aircraft not found.");
+                price = aircraft.getEquipmentBuybackPrice(equipmentType);
+                fee =  aircraft.getEquipmentBuybackPriceFboCost(equipmentType, fbo);
+
+                removeEquipment(equipmentType, aircraft.getId());
+
+                Banking.doPayment(0, aircraft.getOwner(), price, PaymentBean.EQUIPMENT_REMOVAL, 0, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
+                Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), fee, PaymentBean.EQUIPMENT_FBO_REMOVAL_COST, 0, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
+            }
+            else
+            {
+                throw new DataError("Error, missing parameter.");
             }
 
-            double factor = 1 + fbo.getEquipmentInstallMargin() / 100.0;
 
-            Banking.doPayment(aircraft.getOwner(), fbo.getOwner(), price, PaymentBean.EQUIPMENT, 0, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
-            Banking.doPayment(fbo.getOwner(), 0, (float) (price / factor), PaymentBean.EQUIPMENT_FBO_COST, 0, fbo.getId(), aircraft.getLocation(), aircraft.getId(), "", false);
         }
         catch (SQLException e)
         {
             e.printStackTrace();
         }
+    }
+
+    private static void installEquipment(int equipmentType, int aircraftId ) throws SQLException, DataError
+    {
+        String qry = "update aircraft set equipment = equipment|? where id = ?";
+        if (DALHelper.getInstance().ExecuteUpdate(qry, equipmentType, aircraftId) != 1)
+            throw new DataError("Aircraft not found.");
+
+    }
+
+    private static void removeEquipment(int equipmentType, int aircraftId ) throws SQLException, DataError
+    {
+        String qry = "update aircraft set equipment = equipment^? where id = ?";
+        if (DALHelper.getInstance().ExecuteUpdate(qry, equipmentType, aircraftId) != 1)
+            throw new DataError("Aircraft not found.");
+
     }
 
     public static List<AircraftAlias> getAircraftAliases()

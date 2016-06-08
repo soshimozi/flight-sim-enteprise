@@ -2162,9 +2162,10 @@ public class UserCtl extends HttpServlet
 		UserBean user = (UserBean) req.getSession().getAttribute("user");
 		String reg = req.getParameter("reg");
 		String equipmentType = req.getParameter("equipmentType");
+        String action = req.getParameter("action");
 		String sFbo = req.getParameter("fbo");
 		
-		if (reg == null || equipmentType == null || sFbo == null)
+		if (reg == null || equipmentType == null || action == null || sFbo == null)
 			return;
 		
 		int type = Integer.parseInt(equipmentType);
@@ -2188,7 +2189,7 @@ public class UserCtl extends HttpServlet
 				throw new DataError("Fbo not found");
 		}
 		
-		Aircraft.doEquipment(aircraft, type, selectedFbo);
+		Aircraft.doEquipment(aircraft, type, action, selectedFbo);
 	}
 	
 	void doFlyForGroup(HttpServletRequest req) throws DataError

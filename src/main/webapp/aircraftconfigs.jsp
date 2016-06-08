@@ -2,6 +2,7 @@
         contentType="text/html; charset=ISO-8859-1"
         import="net.fseconomy.dto.*, net.fseconomy.data.*, java.util.List, net.fseconomy.util.Formatters"
 %>
+<%@ page import="net.fseconomy.beans.ModelBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -61,6 +62,7 @@
 		<li>Cruise Speed is in Knots</li>
 		<li>Base Price is the FSE Suggested Price for VFR-equipped Aircraft</li>
 		<li>(*) on makemodel name indicates aircraft is not shipable! All other aircraft can be crated and shipped</li>
+		<li>(**) on makemodel name indicates aircraft requires complete avionics suite, and avionics cannot be removed</li>
 	</ul>
 <%
 	if (view == 1)
@@ -70,7 +72,7 @@
 	<caption>Aircraft Configurations (<a href="aircraftconfigs.jsp">detailed...</a>)</caption>
 	<thead>
 	<tr>
-		<th>Make &amp; Model</th>
+		<th>Make &amp; Model (Notes)</th>
 		<th>Addtl Crew</th>
 		<th>Seats</th>
 		<th>Cruise</th>
@@ -85,6 +87,7 @@
 <%
         for (AircraftConfig aircraft : aircraftList)
         {
+			boolean ifrOnly = Models.getModelById(aircraft.modelId).getEquipment() == ModelBean.EQUIPMENT_IFR_ONLY ? true : false;
         String price = Formatters.currency.format(aircraft.price);
         int totalFuel = aircraft.fcapExt1 + aircraft.fcapLeftTip + aircraft.fcapLeftAux + aircraft.fcapLeftMain +
                 aircraft.fcapCenter + aircraft.fcapCenter2 + aircraft.fcapCenter3 +
@@ -100,7 +103,10 @@
 	<tr>
 <%
         if (!aircraft.canShip) //add * to denote that model can be shipped to listing
-		    aircraft.makemodel += "*";
+		    aircraft.makemodel += " *";
+
+		if(ifrOnly)
+			aircraft.makemodel += " **";
 %>
 	<td><%= aircraft.makemodel %></td>
 	<td><%= aircraft.crew %></td>
@@ -126,7 +132,7 @@
 	<caption>Aircraft Configurations (<a href="aircraftconfigs.jsp?view=1">simpler...</a>)</caption>
 	<thead>
 	<tr>
-		<th>Make &amp; Model</th>
+		<th>Make &amp; Model (Notes)</th>
 		<th>Addtl Crew</th>
 		<th>Seats</th>
 		<th>Cruise</th>
@@ -152,7 +158,8 @@
 <%
         for (AircraftConfig aircraft : aircraftList)
         {
-            String price = Formatters.currency.format(aircraft.price);
+			boolean ifrOnly = Models.getModelById(aircraft.modelId).getEquipment() == ModelBean.EQUIPMENT_IFR_ONLY ? true : false;
+			String price = Formatters.currency.format(aircraft.price);
             double fType = aircraft.fueltype;
             String fuelType = "100LL";
             if (fType > 0)
@@ -163,7 +170,9 @@
 	<tr>
 <%
             if (!aircraft.canShip) //add * to denote that model can be shipped to listing
-                aircraft.makemodel += "*";
+                aircraft.makemodel += " *";
+	if(ifrOnly)
+		aircraft.makemodel += " **";
 %>
 	<td><%= aircraft.makemodel %></td>
 	<td><%= aircraft.crew %></td>
