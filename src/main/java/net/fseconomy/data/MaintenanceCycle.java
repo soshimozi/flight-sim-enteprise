@@ -501,22 +501,6 @@ public class MaintenanceCycle implements Runnable
 
 		if (1 == day)
 		{
-			//remove code after June 1, 2016
-			//only start processing after June 1, 2016
-			try
-			{
-				SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-				if (sdf.parse("06/30/2016").after(new Date()))
-					return;
-			}
-			catch (ParseException e)
-			{
-				//should never hit!
-				e.printStackTrace();
-				GlobalLogger.logApplicationLog("Aircraft Ownership Payments: ERROR on Date Check!! ", MaintenanceCycle.class);
-				return;
-			}
-
 			processAircraftOwnershipFees();
 			updateAircraftMonthlyFees(false);
 			processAircraftRepos();
