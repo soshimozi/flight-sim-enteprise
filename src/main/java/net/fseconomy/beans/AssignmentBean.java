@@ -338,6 +338,28 @@ public class AssignmentBean implements Serializable
 	}
 
 	/**
+	 * Returns the type as string.
+	 * @return String
+	 */
+	public String getTypeAsString()
+	{
+		String value;
+		switch( type)
+		{
+			case 1:
+				value = "All-In";
+				break;
+			case 2:
+				value = "Trip-Only";
+				break;
+			default:
+				value = "Unknown";
+				break;
+		}
+		return value;
+	}
+
+	/**
 	 * Returns the creation.
 	 * @return Timestamp
 	 */

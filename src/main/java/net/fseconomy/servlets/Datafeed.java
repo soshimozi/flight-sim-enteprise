@@ -2321,6 +2321,7 @@ public class Datafeed extends HttpServlet
 			buffer.appendHeaderItem("PilotFee");		
 			buffer.appendHeaderItem("Expires");		
 			buffer.appendHeaderItem("ExpireDateTime");
+			buffer.appendHeaderItem("Type");
 			buffer.appendHeaderItem("Express");
 			buffer.appendHeaderItem("Locked");
 			buffer.appendHeaderItem("Comment");			
@@ -2379,6 +2380,7 @@ public class Datafeed extends HttpServlet
             buffer.appendMoney(assignment.getPilotFee());
             buffer.append(expires);
             buffer.append(assignment.getExpires() == null ? "9999/1/1 00:00:00" : assignment.getExpiresGMTDate());
+			buffer.append(assignment.getTypeAsString());
 			buffer.append(assignment.isNoExt() ? "True" : "False");
             buffer.append(locked);
             buffer.append(Converters.XMLHelper.protectSpecialCharacters(assignment.getComment()));
@@ -2444,6 +2446,7 @@ public class Datafeed extends HttpServlet
             buffer.appendMoney("PilotFee", assignment.getPilotFee());
             buffer.append("Expires", expires);
             buffer.append("ExpireDateTime", assignment.getExpires() == null ? "9999/1/1 00:00:00" : assignment.getExpiresGMTDate());
+			buffer.append("Type", assignment.getTypeAsString());
 			buffer.append("Express", assignment.isNoExt() ? "True" : "False");
             buffer.append("Locked", locked);
             buffer.append("Comment", Converters.XMLHelper.protectSpecialCharacters(assignment.getComment()));
