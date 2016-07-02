@@ -188,6 +188,7 @@
 	<tr><td class="type indent">Landing fees</td><td class="cost"><%= lineitem(statement[PaymentBean.LANDING_FEE][0] + statement[PaymentBean.LANDING_FEE][1]) %></td></tr>
 	<tr><td class="type indent">Expenses for maintenance</td><td class="cost"><%= lineitem(statement[PaymentBean.MAINTENANCE][1]) %></td></tr>
 	<tr><td class="type indent">Equipment installation</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT][1]) %></td></tr>
+    <tr><td class="type indent">Aircraft Ownership fees</td><td class="cost"><%= lineitem(statement[PaymentBean.OWNERSHIP_FEE][1]) %></td></tr>
 	<tr class="total"><td class="space"></td><td class="cost"><b><%= doSubTotal() %></b></td></tr>
 	
 	<tr><td class="type">Aircraft sales</td><td></td></tr>
@@ -204,7 +205,7 @@
 	<tr><td class="type indent">Equipment installs</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT][0]) %></td></tr>
 	<tr><td class="type indent">Equipment install expenses</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT_FBO_COST][0] + statement[PaymentBean.EQUIPMENT_FBO_COST][1]) %></td></tr>
     <tr><td class="type indent">Equipment removals</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT_REMOVAL][0]) %></td></tr>
-    <tr><td class="type indent">Equipment removal expenses</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT_FBO_REMOVAL_COST][0] + statement[PaymentBean.EQUIPMENT_FBO_COST][1]) %></td></tr>
+    <tr><td class="type indent">Equipment removal expenses</td><td class="cost"><%= lineitem(statement[PaymentBean.EQUIPMENT_FBO_REMOVAL_COST][0] + statement[PaymentBean.EQUIPMENT_FBO_REMOVAL_COST][1]) %></td></tr>
 	<tr class="total"><td class="space"></td><td class="cost"><b><%= doSubTotal() %></b></td></tr>
 	
 	<tr><td class="type">Facilities</td><td></td></tr>
