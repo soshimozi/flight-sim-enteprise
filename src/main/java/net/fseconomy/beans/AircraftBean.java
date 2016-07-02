@@ -512,7 +512,7 @@ public class AircraftBean implements Serializable
 	public static int getEquipmentCostSystemFbo(int mask)
 	{
 		float DefaultMargin = 1 + FboBean.FBO_DEFAULT_EQUIPMENTMARGIN / 100f;
-		return Math.round(AircraftBean.getRawEquipmentPrice(mask) / DefaultMargin);
+		return Math.round(AircraftBean.getRawEquipmentPrice(mask) * DefaultMargin);
 	}
 	
 	public int getEquipmentSalePriceFBO(int mask, FboBean fbo)
@@ -1470,10 +1470,10 @@ public class AircraftBean implements Serializable
 		int returnValue = (int)(getModelPrice() * depreciatedAmount);
 		
 		//Add in installed equipment
-		if(retail)
+		//if(retail)
 			returnValue += AircraftBean.getRawEquipmentPrice(equipment); // includes default FBO margin 
-		else
-			returnValue += AircraftBean.getEquipmentCostSystemFbo(equipment); // Wholesale cost - no FBO margin
+		//else
+		//	returnValue += AircraftBean.getEquipmentCostSystemFbo(equipment); // Wholesale cost - no FBO margin
 		
 		//reduce sell back price by the time on the engines, the closer to TBO the bigger the reduction
 		if(fueltype==0) // 100LL
