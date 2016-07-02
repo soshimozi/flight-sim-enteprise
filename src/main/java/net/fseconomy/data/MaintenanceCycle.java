@@ -592,6 +592,7 @@ public class MaintenanceCycle implements Runnable
 
 				boolean feeDue = true;
 				int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
+
 				if(aircraft.getFeeOwed()  == 0)
 				{
 					boolean fundsAvail = Banking.checkFunds(ownerId, aircraft.getMonthlyFee());
@@ -612,12 +613,9 @@ public class MaintenanceCycle implements Runnable
 				}
 
 				total += aircraft.getMonthlyFee();
-
-
-				GlobalLogger.logApplicationLog("Aircraft Ownership Payments: Total Payout - " + Formatters.currency.format(totalPaid) + " from " + counter + " aircraft", MaintenanceCycle.class);
-
-				updateAircraftMonthlyFees(false);
 			}
+
+			updateAircraftMonthlyFees(false);
 
 			long elapsed = System.currentTimeMillis()-starttime;
 			GlobalLogger.logApplicationLog("Process Aircraft Fees Completed: elapsed time = " + elapsed
@@ -631,6 +629,12 @@ public class MaintenanceCycle implements Runnable
 		{
 			e.printStackTrace();
 		}
+	}
+
+	boolean hasFeeBeenPaid(int owner, int aircraftId) throws SQLException
+	{
+		String qry = "select (id is not null) as found from payments where id in (select id from payments where otherparty=?)  and reason=32 and aircraftid=? limit 1";
+		return DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), owner, aircraftId);
 	}
 
 	void processAircraftRepos()
