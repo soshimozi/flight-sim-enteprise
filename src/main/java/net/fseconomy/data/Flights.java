@@ -25,6 +25,9 @@ public class Flights
 
         try
         {
+            if(bean.isFeeOwed())
+                throw new DataError("Unable to use Aircraft: In debt for Ownership Fee");
+
             ModelBean model = Models.getModelById(bean.getModelId());
 
             int seats = bean.getAvailableSeats();

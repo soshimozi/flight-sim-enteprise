@@ -1120,6 +1120,11 @@ public class AircraftBean implements Serializable
 		return feeOwed;
 	}
 
+	public boolean isFeeOwed()
+	{
+		return feeOwed > 0;
+	}
+
 	public boolean isPrivateSale()
 	{
 		return privateSale;
