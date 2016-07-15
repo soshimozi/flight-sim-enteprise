@@ -158,7 +158,7 @@ public class ServiceData
             if(!aircraft.isForSale())
                 return createErrorResponse(200, 200, "Bad Request", "Aircraft not for sale.");
 
-            if (!hasFundsRequired(account, aircraft.getSellPrice()))
+            if (!hasFundsRequired(account, aircraft.getSellPrice()+aircraft.getFeeOwed()))
                 return createErrorResponse(200, 200, "Bad Request", "Exceeds available funds.");
 
             int serviceid = getServiceId(serviceKey);

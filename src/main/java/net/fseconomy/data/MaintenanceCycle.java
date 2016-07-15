@@ -141,6 +141,7 @@ public class MaintenanceCycle implements Runnable
 	
 	public void run()
 	{
+
 		if(oneTimeStats)
 		{
 			oneTimeStats = false;
