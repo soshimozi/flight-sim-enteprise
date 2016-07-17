@@ -160,13 +160,14 @@
             </tr>
             </thead>
             <tr>
-                <td align="center"><%= aircraft.getRegistration() %></td>
+                <td align="center"><%= aircraft.getRegistration() + (aircraft.getLessor() > 0 ? " (L)" : "") %></td>
                 <td align="center"><%= owner %></td>
                 <td align="center"><%= aircraft.getMakeModel() %></td>
                 <td align="center"><%= aircraft.getHome() %><%= aircraft.isAdvertiseFerry() ? " (Aircraft is advertised for a ferry flight home)" : "" %></td>
                 <td align="center"><%= aircraft.getSLocation() %></td>
             </tr>
-        </table><br>
+        </table>
+        (L) indicates leased<br><br>
         <table border="1">
             <caption>Specifications</caption>
             <thead>

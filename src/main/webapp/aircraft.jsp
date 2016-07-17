@@ -199,7 +199,7 @@
 	</caption>
 	<thead>
 	<tr>
-		<th style="width: 115px">Registration</th>
+		<th style="width: 125px">Registration</th>
 		<th >Type</th>
 		<th style="width: 35px">Location</th>
 		<th style="width: 35px">Home</th>
@@ -248,11 +248,14 @@
 %>
 	<tr>
 
-	<td><a href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><span title="Serial #: <%= aircraft.getId() %>"><%= aircraft.getRegistration() %></span></a>
-        <% if (aircraft.isBroken())
-              {%>              
+	<td><a href="<%= response.encodeURL("aircraftlog.jsp?id=" + aircraft.getId()) %>"><span title="Serial #: <%= aircraft.getId() %>"><%= aircraft.getRegistration() + (aircraft.getLessor() > 0 ? " (L)" : "")%></span></a>
+<%
+	if (aircraft.isBroken())
+    {
+%>
               <img src='img/repair.gif' style="border-style: none; vertical-align:middle;" />
-            <%} %>    
+<%
+	} %>
     </td>
 	<td><%= aircraft.getMakeModel() %></td>
 	<td>
@@ -441,6 +444,7 @@
 %>
 	</tbody>
 	</table>
+	<h5>(L) indicates Leased Aircraft</h5>
 	</form>
 </div>
 </div>
