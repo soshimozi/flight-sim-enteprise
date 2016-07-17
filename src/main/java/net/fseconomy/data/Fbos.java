@@ -58,42 +58,48 @@ public class Fbos implements Serializable
     }
 
     //note: transfers only allowed between owner and owner owned groups
+//    public static void transferFboX(FboBean fbo, int id) throws DataError
+//    {
+//        Connection conn = null;
+//        Statement stmt = null;
+//        ResultSet rs = null;
+//        String sUpdate;
+//
+//        int owner = fbo.getOwner();
+//        int toId = id;
+//        String icao = fbo.getLocation();
+//
+//        try
+//        {
+//            conn = DALHelper.getInstance().getConnection();
+//            stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+//
+//            transferSupplies(conn, stmt, owner, toId, icao);
+//
+//            // Transfer ownership.
+//            sUpdate = "UPDATE fbo SET fbo.owner = " + toId + ", fbo.saleprice = 0, fbo.selltoid = 0, fbo.privatesale = null WHERE fbo.owner = " + owner + " AND fbo.location ='" + icao + "'";
+//            stmt.executeUpdate(sUpdate);
+//            sUpdate = "UPDATE fbofacilities set occupant = " + toId + " WHERE occupant = " + owner + " and fboId = " + fbo.getId();
+//            stmt.executeUpdate(sUpdate);
+//
+//            Banking.doPayment(owner, toId, 0, PaymentBean.FBO_SALE, 0, fbo.getId(), icao, 0, "FBO Transfer", false);
+//        }
+//        catch (SQLException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        finally
+//        {
+//            DALHelper.getInstance().tryClose(rs);
+//            DALHelper.getInstance().tryClose(stmt);
+//            DALHelper.getInstance().tryClose(conn);
+//        }
+//    }
+
+    //note: transfers only allowed between owner and owner owned groups
     public static void transferFbo(FboBean fbo, int id) throws DataError
     {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        String sUpdate;
-
-        int owner = fbo.getOwner();
-        int toId = id;
-        String icao = fbo.getLocation();
-
-        try
-        {
-            conn = DALHelper.getInstance().getConnection();
-            stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-
-            transferSupplies(conn, stmt, owner, toId, icao);
-
-            // Transfer ownership.
-            sUpdate = "UPDATE fbo SET fbo.owner = " + toId + ", fbo.saleprice = 0, fbo.selltoid = 0, fbo.privatesale = null WHERE fbo.owner = " + owner + " AND fbo.location ='" + icao + "'";
-            stmt.executeUpdate(sUpdate);
-            sUpdate = "UPDATE fbofacilities set occupant = " + toId + " WHERE occupant = " + owner + " and fboId = " + fbo.getId();
-            stmt.executeUpdate(sUpdate);
-
-            Banking.doPayment(owner, toId, 0, PaymentBean.FBO_SALE, 0, fbo.getId(), icao, 0, "FBO Transfer", false);
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            DALHelper.getInstance().tryClose(rs);
-            DALHelper.getInstance().tryClose(stmt);
-            DALHelper.getInstance().tryClose(conn);
-        }
+        doTransferFbo(fbo, id, fbo.getOwner(), fbo.getLocation(), true);
     }
 
     public static void doTransferFbo(FboBean fbo, int buyer, int owner, String icao, boolean goods) throws DataError
@@ -137,7 +143,7 @@ public class Fbos implements Serializable
             if (mergeWithId == 0)
             {
                 // Buyer does not have an existing FBO. Just transfer ownership.
-                sUpdate = "UPDATE fbo SET fbo.owner = " + buyer + ", fbo.saleprice = 0, fbo.selltoid = 0, fbo.privatesale = null WHERE fbo.owner = " + owner + " AND fbo.location ='" + icao + "'";
+                sUpdate = "UPDATE fbo SET fbo.owner = " + buyer + ", fbo.saleprice = 0, fbo.selltoid = 0, fbo.privatesale = null WHERE fbo.id = " + fbo.getId();
                 stmt.executeUpdate(sUpdate);
                 sUpdate = "UPDATE fbofacilities set occupant = " + buyer + " WHERE occupant = " + owner + " and fboId = " + fbo.getId();
                 stmt.executeUpdate(sUpdate);
