@@ -136,8 +136,7 @@
 %>		
 			<li>Read the <a onclick="this.target='_blank'" href="https://sites.google.com/site/fseoperationsguide/">Manual</a></li>
 			<li>Go to the <a onclick="this.target='_blank'" href="http://www.fseconomy.net">FSE Community</a>.</li>
-			<li><a href="<%= "/static/client/FSeconomy.zip"%>">Download</a> the FSUIPC Client</li>
-			<li> <a href="/static/fsxclient/publish.htm" onclick="this.target='_blank'">Install</a> the SimConnect Client </li>
+			<li> <a href="https://sites.google.com/site/fseoperationsguide/getting-started/using-the-fse-client" onclick="this.target='_blank'">Installing the Client's</a></li>
 			<li>Join us on <a href="http://www.fseconomy.net/forum/teamspeak/41-teamspeak-instructions-read-this-first" onclick="this.target='_blank'">FSE TeamSpeak</a></li>
 			<li style="margin-top: 10px;">Follow us on your favorite<br/> social media:<br/>
 				<div style=" display: table; margin: 0 auto;">
