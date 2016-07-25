@@ -397,20 +397,19 @@ public class Goods implements Serializable
             // Step 2: In case of sale, check if other party wants to receive
             if (to != initiator && to != 0)
             {
-                rs = stmt.executeQuery("SELECT saleFlag, max FROM goods WHERE " + toWhere);
+                rs = stmt.executeQuery("SELECT saleFlag, max, amount FROM goods WHERE " + toWhere);
                 boolean saleOk = false;
                 if (rs.next())
                 {
                     saleOk = (rs.getInt(1) & GoodsBean.SALEFLAG_BUY) > 0;
-                    if (saleOk && rs.getInt(2) > 0 && amount > (rs.getInt(2) - amount)) // Airboss 8/22/13 - moved subtract amount here to prevent unsigned bigint error in db
-                    {
-                        throw new DataError("Other party does not want to accept this quantity.");
-                    }
+
+                    if (saleOk && rs.getInt(2) > 0 && ((rs.getInt(2) - rs.getInt(3)) - amount) < 0)
+                        throw new DataError("Buyer only allows a max of " + rs.getInt(2) +" and currently only has room for " +(rs.getInt(2) - rs.getInt(3)) + " kg.");
                 }
+
+                //Must outside if in case result set is empty
                 if (!saleOk)
-                {
                     throw new DataError("Other party does not accept the goods.");
-                }
 
                 rs.close();
             }

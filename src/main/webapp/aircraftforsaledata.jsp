@@ -117,7 +117,7 @@
 
                 <thead>
                 <tr>
-                    <th colspan="7" class="sorter-false disabledtext" style="background-color: lightsalmon">Click row to view information and purchase</th>
+                    <th colspan="7" class="sorter-false disabledtext" style="background-color: lightsalmon">Click Aircraft Registration to view information and purchase</th>
                 </tr>
                 <tr>
                     <th>Registration</th>
@@ -160,11 +160,11 @@
         int afminutes = aircraft.getAirframe()/60;
         String afTime = aircraft.getAirframeHoursString();
 %>
-                <tr onclick="selectAircraft(<%=aircraft.getId()%>)">
+                <tr onclick="selectAircraft(<%=aircraft.getId()%>)" style="cursor: pointer;">
                     <td><%= reg2 %></td>
                     <td><%= aircraft.getMakeModel() %></td>
                     <td><%= aircraft.getSEquipment() %></td>
-                    <td><a title="<%=acLocation%>" class="normal" href="<%= response.encodeURL("airport.jsp?icao=" + aircraft.getLocation()) %>"><%= acICAO %></a></td>
+                    <td><a title="<%=acLocation%>" class="normal"><%= acICAO %></a></td>
                     <td><%= price %></td>
                     <td><%= aircraft.getEngineHoursString() %></td>
                     <td><%= afTime %></td>

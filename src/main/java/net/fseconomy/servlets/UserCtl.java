@@ -2242,9 +2242,11 @@ public class UserCtl extends HttpServlet
         {
             if (good.getOwner() == checkid && good.getType() == type)
             {
-                boolean checkamount = isBuy ? good.getAmountForSale() == -1 || good.getAmountForSale() > amount : good.getAmountAccepted() == -1 || good.getAmountAccepted() > amount;
-                if (!checkamount)
+                boolean checkamount = isBuy ? good.getAmountForSale() == -1 || good.getAmountForSale() > amount : good.getAmountAccepted() == -1 || good.getAmountAccepted() >= amount;
+                if (isBuy && !checkamount)
                     throw new DataError("Error, not enough goods.");
+                else if (!isBuy && !checkamount)
+                    throw new DataError("Error, Amount is greater then the max goods the FBO will purchase.");
 
                 found = true;
                 break;
