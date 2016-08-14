@@ -1246,7 +1246,8 @@ public class UserCtl extends HttpServlet
         if(!Helpers.isNullOrBlank(sOwnerId))
             ownerId = Integer.parseInt(sOwnerId);
 
-        if ( ownerId > 0 && Groups.getRole(ownerId, user.getId()) < UserBean.GROUP_STAFF)
+
+        if ( groupId == 0 && ownerId != 0 && ownerId != Assignments.getAssignmentById(assignmentId).getOwner())
             throw new DataError("You do not have permission to do that.");
 
         Assignments.updateGoodsAssignment(assignmentId, amount, pilotFee, comment);

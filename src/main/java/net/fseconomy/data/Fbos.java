@@ -3,6 +3,7 @@ package net.fseconomy.data;
 import net.fseconomy.beans.*;
 import net.fseconomy.util.Constants;
 import net.fseconomy.util.Formatters;
+import net.fseconomy.util.GlobalLogger;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -701,7 +702,9 @@ public class Fbos implements Serializable
             {
                 throw new DataError("Could not find FBO!");
             }
-
+            FboBean oldFbo = new FboBean(rs);
+            if(oldFbo.getPrice() != fbo.getPrice())
+                GlobalLogger.logExploitAuditLog("FBO Price change from ["+ oldFbo.getPrice() +"] to ["+ fbo.getPrice()+"] by ["+ user.getId()+"]", Fbos.class);
             fbo.writeBean(rs);
             rs.updateRow();
         }
