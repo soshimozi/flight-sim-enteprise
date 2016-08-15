@@ -1214,6 +1214,8 @@ public class Aircraft implements Serializable
 
                 String comment = isRepo ? "Aircraft Repo, Debt was " + Formatters.currency.format(aircraft.getFeeOwed()) : "";
                 Banking.doPayment(0, oldOwner, sellPrice, PaymentBean.AIRCRAFT_SALE, 0, -1, location, aircraft.getId(), comment, false);
+
+                GlobalLogger.logExploitAuditLog("Aircraft Sellback  - User: [" + user.getName() + "] Aircraft: " + aircraftId + ", Price: [" + sellPrice + "]", Aircraft.class);
             }
             else
             {
