@@ -91,7 +91,8 @@
         </ul>
 
         <ul><b>Reports</b>
-            <li><a href="/admin/databaselog.jsp">Database Log (last 100 entries)</a></li>
+            <li><a href="/admin/databaselog.jsp?offset=0&length=100">Database Log (last 100 entries)</a></li>
+            <li><a href="/admin/exploitauditlog.jsp?offset=0&length=200">Exploit/Audit Log (last 200 entries)</a></li>
             <li><a href="/admin/maintenancecyclestats.jsp">Maintenance Cycle Stats</a></li>
             <li><a href="/admin/datafeedstats.jsp">Data Feed Stats</a></li>
             <li><a href="/admin/datafeedrequests.jsp">Data Feed Requests</a></li>

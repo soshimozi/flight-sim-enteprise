@@ -537,7 +537,9 @@ public class UserCtl extends HttpServlet
             throw new DataError("Permission error, you are not the owner!");
 
 		Aircraft.transferAircraft(aircraft.getId(), account.getId());
-	}
+
+        GlobalLogger.logExploitAuditLog("Aircraft Transfer  - User: [" + user.getName() + "] Aircraft: " + sAircraftId + ", To: [" + account.getName() + "]", UserCtl.class);
+    }
 	
 	void doEditAircraft(HttpServletRequest req) throws DataError
 	{		
@@ -632,6 +634,7 @@ public class UserCtl extends HttpServlet
             }
 
             aircraft.setSellPrice(Integer.parseInt(sSellPrice));
+            GlobalLogger.logExploitAuditLog("Aircraft sellprice  - User: [" + user.getName() + "] Aircraft: " + id + ", Private: [" + Accounts.getAccountNameById(Integer.parseInt(sSellToId)) + "], Price: [" + sSellPrice + "]", UserCtl.class);
         }
 
         boolean advertiseFerry = Boolean.parseBoolean(req.getParameter("advertiseFerry"));
@@ -778,6 +781,7 @@ public class UserCtl extends HttpServlet
             }
 
             fbo.setPrice("".equals(sPrice) ? 0 : Integer.parseInt(sPrice));
+            GlobalLogger.logExploitAuditLog("FBO sellprice  - User: [" + user.getName() + "] FBO: " + id + ", Private: [" + Integer.parseInt(sSellToId) + "], Price: [" + sPrice + "]", UserCtl.class);
         }
         else
         {

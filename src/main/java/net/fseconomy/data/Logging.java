@@ -41,6 +41,32 @@ public class Logging implements Serializable
         return result;
     }
 
+    public static List<DbLog> getDbExploitAuditLog(int offset, int size)
+    {
+        List<DbLog> result = new ArrayList<>();
+
+        try
+        {
+            String qry = "SELECT timestmp, level_string, caller_class, formatted_message FROM logging_event where formatted_message like '[Exploit-Audit]%' order by timestmp desc limit ?, ?";
+            ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, offset, size);
+            while (rs.next())
+            {
+                DbLog log = new DbLog();
+                log.timestamp = new Timestamp(rs.getLong(1));
+                log.level = rs.getString(2);
+                log.callerClass = rs.getString(3);
+                log.message = rs.getString(4);
+                result.add(log);
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public static void logTemplateAssignment(AssignmentBean assignment, int payee)
     {
         try
