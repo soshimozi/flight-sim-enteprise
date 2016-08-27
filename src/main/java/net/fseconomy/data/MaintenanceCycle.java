@@ -913,10 +913,10 @@ public class MaintenanceCycle implements Runnable
 				if(icaos1 != null)
 				{
 					if (icaos1.contains("$NOREVERSE"))
-						icaos1 = icaos1.replace("$NOREVERSE", "").trim();
+						icaos1 = icaos1.replace(", $NOREVERSE", "").replace(",$NOREVERSE", "").replace("$NOREVERSE,", "").replace("$NOREVERSE", "").trim();
 
 					if (icaos1.contains("$SINGLE"))
-						icaos1 = icaos1.replace("$SINGLE", "").trim();
+						icaos1 = icaos1.replace(", $SINGLE", "").replace(",$SINGLE", "").replace("$SINGLE,", "").replace("$SINGLE", "").trim();
 				}
 
 				//if Dest icaos contain these tags, set the flags
@@ -925,13 +925,13 @@ public class MaintenanceCycle implements Runnable
 					if (icaos2.contains("$NOREVERSE"))
 					{
 						noReversal = true;
-						icaos2 = icaos2.replace("$NOREVERSE", "").trim();
+						icaos2 = icaos2.replace(", $NOREVERSE", "").replace(",$NOREVERSE", "").replace("$NOREVERSE,", "").replace("$NOREVERSE", "").trim();
 					}
 
 					if (icaos2.contains("$SINGLE"))
 					{
 						singleIcao = true;
-						icaos2 = icaos2.replace("$SINGLE", "").trim();
+						icaos2 = icaos2.replace(", $SINGLE", "").replace(",$SINGLE", "").replace("$SINGLE,", "").replace("$SINGLE", "").trim();
 					}
 				}
 
@@ -1137,6 +1137,7 @@ public class MaintenanceCycle implements Runnable
 							break;
 
 						String icao = airportFromList.get((int)(Math.random() * airportFromList.size()));
+						String icaoSingle = icao;
                         if(isAllIn)
                             airportFromList.remove(icao);
 							
@@ -1166,37 +1167,40 @@ public class MaintenanceCycle implements Runnable
 							}
 							//System.out.println("singleIcao found: " + inRange.size() + ", out of: " + airports.length);
 
-							Optional<CloseAirport> opt = inRange.stream().filter(p -> p.icao.contains(icao) ).findFirst();
-							if(opt.isPresent())
+							if(inRange.size() > 0)
 							{
-								to = opt.get();
+								Random rnd = new Random();
+								int index = rnd.nextInt(inRange.size());
+								to = inRange.get(index);
+								inRange.remove(index);
+
+								icao = to.icao;
 								to.icao = target;
 							}
-							else
+							else {
 								to = null;
+							}
 						}
 						else
 							to = Airports.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk, surfType);
 
 						if (to == null)
-                        {
-                            if(templateId == 41)
-                                System.err.println("Unable to find TO airport for icao: " + icao);
                             continue;
-                        }
+
 						int aircraftId = 0;
 						if (isAllIn) 
 						{
 							//All-In change - find available aircraft at airport that have not already been assigned to an All-In job
-							List<AircraftBean> acList = allInAircraft.stream().filter(p -> p.getLocation().contains(icao) ).collect(Collectors.toList());
+							List<AircraftBean> acList = new ArrayList<>();
+							for(AircraftBean bean: allInAircraft)
+							{
+								if(bean.getLocation().contains(icao))
+									acList.add(bean);
+							}
 
 							//if no aircraft skip this one
 							if(acList.size() == 0)
-                            {
-                                if(templateId == 41)
-                                    System.err.println("Unable to find airplane for icao: " + icao);
                                 continue;
-                            }
 
 							int index = 0; //default aircraft selection is the first one
 
