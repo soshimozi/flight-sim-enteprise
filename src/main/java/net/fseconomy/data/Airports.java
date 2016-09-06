@@ -78,7 +78,7 @@ public class Airports implements Serializable
     public static boolean isValidIcao(String icao)
     {
         if(icao.contains("$SINGLE")
-            || icao.contains("$REVERSE")
+            || icao.contains("$NOREVERSE")
             || icao.contains("$FBO")
             || icao.contains("$MILITARY")
             || icao.contains("$WATER"))
