@@ -4,6 +4,7 @@
 %>
 <%@ page import="net.fseconomy.beans.AircraftBean" %>
 <%@ page import="net.fseconomy.beans.UserBean" %>
+<%@ page import="net.fseconomy.beans.ModelBean" %>
 
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
@@ -119,7 +120,7 @@
 		                <tr>
 			                <td>New registration</td><td><input name="newreg" type="text" class="textarea" size="8" /></td>
 		                </tr>
-		                <tr>
+                    <tr>
 			                <td>Home base</td><td><input name="home" type="text" class="textarea" value="<%= aircraft.getHome()%>" size="4"/></td>
 		                </tr>
 		                <tr>
@@ -160,6 +161,14 @@
                             </select>
                         </td>
 
+                    </tr>
+                    <tr>
+                        <td>Equipment Installed</td>
+                        <td>
+                            <input name="equip-ifr" type="checkbox" class="formselect" value="1" <%= (aircraft.getEquipment() & ModelBean.EQUIPMENT_IFR_MASK) > 0 ? "checked" : "" %>>IFR</input>
+                            <input name="equip-gps" type="checkbox" class="formselect" value="2" <%= (aircraft.getEquipment() & ModelBean.EQUIPMENT_GPS_MASK) > 0 ? "checked" : "" %>>GPS</input>
+                            <input name="equip-ap" type="checkbox" class="formselect" value="4" <%= (aircraft.getEquipment() & ModelBean.EQUIPMENT_AP_MASK) > 0 ? "checked" : "" %>>AP</input>
+                        </td>
                     </tr>
                     <tr>
                         <td>On sale for</td><td>$ <input name="sellPrice" type="text" class="textarea" value="<%= aircraft.getSellPrice() == 0 ? "" : (""+aircraft.getSellPrice()) %>" size="6"/></td>

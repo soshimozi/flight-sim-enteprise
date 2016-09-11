@@ -2391,6 +2391,19 @@ public class UserCtl extends HttpServlet
 		if (newreg != null)
 			newreg = newreg.toUpperCase();
 
+        String sEquip = req.getParameter("equip-ifr");
+        int equip = 0;
+        if (sEquip != null)
+            equip |= ModelBean.EQUIPMENT_IFR_MASK;
+
+        sEquip = req.getParameter("equip-gps");
+        if (sEquip != null)
+            equip |= ModelBean.EQUIPMENT_GPS_MASK;
+
+        sEquip = req.getParameter("equip-ap");
+        if (sEquip != null)
+            equip |= ModelBean.EQUIPMENT_AP_MASK;
+
         AircraftBean aircraft = Aircraft.getAircraftById(id);
 
         if (aircraft == null)
@@ -2405,6 +2418,7 @@ public class UserCtl extends HttpServlet
 		aircraft.setRentalPriceDry(rentalDry);
 		aircraft.setRentalPriceWet(rentalWet);
 		aircraft.setMaxRentTime(maxRentTime);
+        aircraft.setEquipment(equip);
 		aircraft.setSellPrice(sellPrice);
 		
 		if (advertise == 0)

@@ -1693,7 +1693,7 @@ public class Aircraft implements Serializable
                 throw new DataError("Registration already in use.");
             }
 
-            aircraft.setEquipment(rs.getInt("equipment"));
+            //aircraft.setEquipment(rs.getInt("equipment"));
 
             DistanceBearing distanceFromHome = Airports.getDistanceBearing(aircraft.getLocation(), aircraft.getHome());
             aircraft.setDistance((int) Math.round(distanceFromHome.distance));
