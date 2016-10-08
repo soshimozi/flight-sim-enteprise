@@ -7,7 +7,7 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-    if (!Accounts.needLevel(user, UserBean.LEV_CSR) && !Accounts.needLevel(user, UserBean.LEV_MODERATOR))
+    if (!Accounts.needLevel(user, UserBean.LEV_MODERATOR))
     {
 %>
         <script type="text/javascript">document.location.href="index.jsp"</script>
@@ -71,10 +71,6 @@
                         </select>
                     </td>
                 </tr>
-<%
-    if(Accounts.needLevel(user, UserBean.LEV_MODERATOR))
-    {
-%>
                 <tr>
                     <td>Level: </td>
                     <td>
@@ -87,9 +83,6 @@
                         </select>
                     </td>
                 </tr>
-<%
-    }
-%>
                 <tr>
                     <td>New Password: </td>
                     <td><input name="password" type="text" class="textarea" size="40" value = "" /></td>

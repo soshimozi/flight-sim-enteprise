@@ -76,6 +76,18 @@
             form.submit();
         }
 
+        function doSubmitUpdateEmail()
+        {
+            var email = prompt("Enter new email address, <%=account != null ? account.getEmail() : ""%>")
+            if(email == '<%=account != null ? account.getEmail() : ""%>')
+                return;
+
+            var form = document.getElementById("formUpdateEmail");
+            form.newemail.value = email;
+
+            form.submit();
+        }
+
         $(function()
         {
             initAutoComplete("#username", "#userid", <%= Accounts.ACCT_TYPE_PERSON %>);
@@ -122,18 +134,29 @@
         <div class="row clearfix" style="margin: 10px">
             <div class="col-md-4 column">
                 <div class="datatable" style="border: 1px solid">
-                    <b>User Information</b> <a href="accountedit.jsp?userid=<%= accountId %>">Edit Account</a>
+                    <b>User Information</b><br>
+<%
+    if(Accounts.needLevel(user, UserBean.LEV_MODERATOR))
+    {
+%>
+
+                    <a href="accountedit.jsp?userid=<%= accountId %>">Edit Account</a>
+<%
+    }
+%>
+                    <input type="button" onclick="doSubmitResetPw()" value="Reset Password"/>
+                    <input type="button" onclick="doSubmitUpdateEmail()" value="Update Email"/>
                     <table>
                         <tr>
                             <td>User: </td>
                             <td>
                                 <%=account.getName()%>
-                                <input type="button" onclick="doSubmitResetPw()" value="Reset Password"/>
+
                             </td>
                         </tr>
                         <tr>
                             <td>Email: </td>
-                            <td><%=account.getEmail()%></td>
+                            <td><%=account.getEmail()%> </td>
                         </tr>
                         <tr>
                             <td>Status: </td>
@@ -152,17 +175,10 @@
                             <td>Exposure: </td>
                             <td><%=account.getExposure() == 0 ? "Hidden" : "Visible"%></td>
                         </tr>
-<%
-    if(Accounts.needLevel(user, UserBean.LEV_MODERATOR))
-    {
-%>
                         <tr>
                             <td>Level: </td>
                             <td><%=account.getLevelString(account.getLevel())%></td>
                         </tr>
-<%
-    }
-%>
                     </table>
                 </div>
             </div>
@@ -402,8 +418,15 @@
 </div>
 <form id="formResetPw" name="formResetPw" method="post" action="/userctl">
     <input type="hidden" name="user" value="<%=account.getName()%>"/>
-    <input type="hidden" name="email" value="<%=account.getEmail()%>"/><br><br>
+    <input type="hidden" name="email" value="<%=account.getEmail()%>"/>
     <input type="hidden" name="event" value="password"/>
+    <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
+</form>
+<form id="formUpdateEmail" name="formUpdateEmail" method="post" action="/userctl">
+    <input type="hidden" name="user" value="<%=account.getName()%>"/>
+    <input type="hidden" name="oldemail" value="<%=account.getEmail()%>"/>
+    <input type="hidden" name="newemail" value=""/>
+    <input type="hidden" name="event" value="email"/>
     <input type="hidden" name="returnpage" value="<%=returnPage%>"/>
 </form>
 </body>

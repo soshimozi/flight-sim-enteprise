@@ -113,6 +113,9 @@ public class UserCtl extends HttpServlet
                     case "addAccountNote":
                         addAccountNote(req);
                         break;
+                    case "email":
+                        newEmail(req);
+                        break;
                     case "password":
                         newPassword(req);
                         break;
@@ -769,10 +772,17 @@ public class UserCtl extends HttpServlet
         {
             String sSaleType = req.getParameter("saletype");
             String sSellToId = req.getParameter("selltoid");
+
+
+
             if("1".equals(sSaleType))
             {
+                int sellTo = Integer.parseInt(sSellToId);
+                if(sellTo == 0)
+                    throw new DataError("Error - private sale to Bank not allowed. Click on or hit tab to select account!");
+
                 fbo.setPrivateSale(true);
-                fbo.setSellToId(Integer.parseInt(sSellToId));
+                fbo.setSellToId(sellTo);
             }
             else
             {
@@ -786,6 +796,8 @@ public class UserCtl extends HttpServlet
         else
         {
             fbo.setPrice(0);
+            fbo.setPrivateSale(false);
+            fbo.setSellToId(0);
         }
 
 		Fbos.updateFbo(fbo, user);
@@ -1602,6 +1614,9 @@ public class UserCtl extends HttpServlet
         String password = req.getParameter("password");
         String linkedid = req.getParameter("linkedid");
 
+        if (sLevel == null || sLevel.contentEquals(""))
+            throw new DataError("Error: Invalid Level. Unable to update");
+
         int exposure = Integer.parseInt(sExposure);
         if (user == null || email == null)
             return;
@@ -1620,7 +1635,31 @@ public class UserCtl extends HttpServlet
         req.getSession().setAttribute("message", "Account (" + suser + ") updated successfully");
     }
 
-	//This is used for both new accounts and resetting passwords!
+    void newEmail(HttpServletRequest req) throws DataError
+    {
+        String user = req.getParameter("user");
+        String oldemail = req.getParameter("oldemail");
+        String newemail = req.getParameter("newemail");
+
+        // Make sure we have our required parameters
+        if (user != null && oldemail != null && newemail != null)
+        {
+            //See if the current name and email exists
+            boolean flgExists = Accounts.userEmailExists(user, oldemail);
+
+            // if not throw an error
+            if (!flgExists)
+                throw new DataError("There is no account with that name and email address. [" + user + ", " + oldemail + "]");
+
+            //Reset the password, and email it the users email
+            int status = Accounts.updateUserEmail(user, newemail);
+
+            //Set the page message
+            req.getSession().setAttribute("message", Accounts.userEmailStatusString(status));
+        }
+    }
+
+    //This is used for both new accounts and resetting passwords!
 	void newPassword(HttpServletRequest req) throws DataError
 	{
 		String user = req.getParameter("user");

@@ -1127,6 +1127,13 @@ public class Aircraft implements Serializable
                 String qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = 0, feeowed = 0 where id = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, account, aircraftId);
 
+                //delete any all-in assignments
+                if(aircraft.getOwner() == 0)
+                {
+                    qry = "DELETE assignments where aircraftid = ?";
+                    DALHelper.getInstance().ExecuteUpdate(qry, aircraftId);
+                }
+
                 String comment = "";
                 if(aircraft.getSellToId() != 0)
                     comment = "Private Sale: " + Accounts.getAccountNameById(aircraft.getSellToId());

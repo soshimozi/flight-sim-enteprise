@@ -20,6 +20,11 @@ public class Accounts implements Serializable
     public static final int ACCT_TYPE_PERSON = 2;
     public static final int ACCT_TYPE_GROUP = 3;
 
+    public static final int ACCT_EMAIL_FAILED = 0;
+    public static final int ACCT_EMAIL_SUCCESS = 1;
+    public static final int ACCT_EMAIL_NONUNIQUE = 2;
+    public static final int ACCT_EMAIL_INVALID = 3;
+
     public static final int LINK_INACTIVE = 0;
     public static final int LINK_ACTIVE = 1;
 
@@ -86,6 +91,45 @@ public class Accounts implements Serializable
     {
         if (user == null || user.getId() == -1)
             throw new DataError("Not logged in.");
+    }
+
+    public static int updateUserEmail(String user, String email) throws DataError
+    {
+        int retval = 1;
+
+        if(!Emailer.isValidEmailAddress(email))
+            return ACCT_EMAIL_INVALID;
+
+        if(!Accounts.accountEmailIsUnique(email))
+            retval = ACCT_EMAIL_NONUNIQUE;
+
+        UserBean userbean = Accounts.getAccountByName(user);
+        userbean.setEmail(email);
+        updateUser(userbean);
+
+        return retval;
+    }
+
+    public static String userEmailStatusString(int status)
+    {
+        String retval = "";
+        switch(status)
+        {
+            case ACCT_EMAIL_FAILED:
+                retval = "Error: Email update failed!";
+                break;
+            case ACCT_EMAIL_SUCCESS:
+                retval = "Email updated successfully";
+                break;
+            case ACCT_EMAIL_NONUNIQUE:
+                retval = "Warning! Email not unique";
+                break;
+            case ACCT_EMAIL_INVALID:
+                retval = "Error: Invalid email format!";
+                break;
+        }
+
+        return retval;
     }
 
     public static boolean updateUser(UserBean user) throws DataError
