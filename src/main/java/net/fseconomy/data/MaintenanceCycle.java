@@ -1740,7 +1740,7 @@ public class MaintenanceCycle implements Runnable
 					
 					qry = "UPDATE aircraft SET sellPrice = ?, markettimeOut = ? where id = ?";
 					DALHelper.getInstance().ExecuteUpdate(qry, sellPrice,  new Timestamp(expires.getTime().getTime()), aircraft.getId());
-					GlobalLogger.logApplicationLog("Selling aircraft: " + aircraft.getMakeModel() + ", " + aircraft.getRegistration() + ", Price = " + sellPrice + ", expires = " + expires.getTime().toString(), MaintenanceCycle.class);
+					GlobalLogger.logApplicationLog("Selling aircraft: " + aircraft.getMakeModel() + ", " + aircraft.getRegistration() + ", Id:" + aircraft.getId()+ ", Price = " + sellPrice + ", expires = " + expires.getTime().toString(), MaintenanceCycle.class);
 					
 					//remove any AllIn assignments that might be attached to this aircraft
 					qry = "DELETE FROM assignments WHERE aircraftid = ?";

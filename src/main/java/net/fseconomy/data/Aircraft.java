@@ -1127,13 +1127,6 @@ public class Aircraft implements Serializable
                 String qry = "UPDATE aircraft SET owner = ?, sellPrice = null, marketTimeout = null, selltoid = 0, privatesale = 0, feeowed = 0 where id = ?";
                 DALHelper.getInstance().ExecuteUpdate(qry, account, aircraftId);
 
-                //delete any all-in assignments
-                if(aircraft.getOwner() == 0)
-                {
-                    qry = "DELETE assignments where aircraftid = ?";
-                    DALHelper.getInstance().ExecuteUpdate(qry, aircraftId);
-                }
-
                 String comment = "";
                 if(aircraft.getSellToId() != 0)
                     comment = "Private Sale: " + Accounts.getAccountNameById(aircraft.getSellToId());
@@ -1144,6 +1137,13 @@ public class Aircraft implements Serializable
                     Banking.doPayment(account, 0, aircraft.getFeeOwed(), PaymentBean.AIRCRAFT_SALE, 0, -1, aircraft.getLocation(), aircraftId, debtcomment, false);
                 }
                 Banking.doPayment(account, aircraft.getOwner(), aircraft.getSellPrice(), PaymentBean.AIRCRAFT_SALE, 0, -1, aircraft.getLocation(), aircraftId, comment, false);
+
+                //delete any all-in assignments
+                if(aircraft.getOwner() == 0)
+                {
+                    qry = "DELETE FROM assignments where aircraftid = ?";
+                    DALHelper.getInstance().ExecuteUpdate(qry, aircraftId);
+                }
             }
             else
             {
