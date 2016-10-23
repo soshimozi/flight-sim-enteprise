@@ -402,6 +402,11 @@ public class AssignmentBean implements Serializable
 				//return the expired date time + 24 hours
 				cal.setTimeInMillis(expires.getTime() + 86400000l);
 			}
+			else
+			{
+				//default return date time
+				cal.setTimeInMillis(expires.getTime());
+			}
 		}
 		else
 		{
