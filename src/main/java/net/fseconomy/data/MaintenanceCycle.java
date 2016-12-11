@@ -594,12 +594,12 @@ public class MaintenanceCycle implements Runnable
 				boolean feeDue = true;
 				int ownerId = aircraft.getLessor() != 0 ? aircraft.getLessor() : aircraft.getOwner();
 
-				if(aircraft.getFeeOwed()  == 0)
+				if(aircraft.getFeeOwed() == 0)
 				{
 					boolean fundsAvail = Banking.checkFunds(ownerId, aircraft.getMonthlyFee());
 					if(fundsAvail)
 					{
-						Banking.doPayment(ownerId, 0, (double) aircraft.getMonthlyFee(), PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "", true);
+						Banking.doPayment(ownerId, 0, (double) aircraft.getMonthlyFee(), PaymentBean.OWNERSHIP_FEE, 0, 0, aircraft.getLocation(), aircraft.getId(), "", false);
 						feeDue = false;
 						totalPaid += aircraft.getMonthlyFee();
 					}
