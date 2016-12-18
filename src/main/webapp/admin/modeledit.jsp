@@ -186,16 +186,18 @@
 		<td>
 		<select name="maxRentTime" class="formselect">
 <%
-	int intervals = 1800;
+	int intervals = 3600;
 	int seconds = 3600;
 
-	for (int c=0; c< 19; c++, seconds+=intervals)
+	for (int c=0; c< 18; c++, seconds+=intervals)
 	{
 		int minutes = seconds/60;
 		int hours = minutes/60;
 		String time = Formatters.twoDigits.format(hours) + ":" + Formatters.twoDigits.format(minutes%60);
+		//added model.getMaxRentTime() == seconds-1800 to select nearest greater hour when we changed from 30min to 1 hour intervals
+		String selected = model.getMaxRentTime() == seconds || model.getMaxRentTime() == seconds-1800 ? "selected" : "";
 %>
-			<option class="formselect" value="<%= seconds %>" <%= model.getMaxRentTime() == seconds ? "selected" : "" %>><%= time %> Hours</option>
+			<option class="formselect" value="<%= seconds %>" <%= selected %>><%= time %> Hours</option>
 <%	}	
 %>
 		</select>
