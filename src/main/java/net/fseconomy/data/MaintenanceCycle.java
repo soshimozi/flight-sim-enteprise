@@ -855,7 +855,7 @@ public class MaintenanceCycle implements Runnable
                 }
 			}
 			
-			String qry = "SELECT * from templates";
+			String qry = "SELECT * from templates where active=1";
 			ResultSet rsTemplate = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 			while (rsTemplate.next())
 			{
@@ -1320,6 +1320,481 @@ public class MaintenanceCycle implements Runnable
 			+ "	OR (fromFboTemplate is null and active <> 1 AND location = fromicao AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires)"
 			+ "	OR (fromFboTemplate is null and active <> 1 AND noext=1 AND expires is not null AND DATE_SUB(now(), INTERVAL 1 DAY) > expires)"
 			+ "	OR (fromFboTemplate is null and active <> 1 AND expires is not null AND DATE_SUB(now(), INTERVAL " + ASSGN_EXT_DAYS + " DAY) > expires);";
+
+		DALHelper.getInstance().ExecuteBatchUpdate(qry);
+	}
+
+	public void processTemplateTest(int templateId)
+	{
+		try
+		{
+			deleteTestAssignments();
+
+			//We are caching here several of the bigger ICAO lists created by the template
+			//macros $FBO, and $MILITARY so that its called only once per cycle, instead of
+			//for each template that uses them
+
+			//Get the $FBO ICAOs and save them
+			Set<String> icaosetFBO = parseIcaoSet("$FBO", true, 0);
+			StringBuffer whereSetFBO = new StringBuffer();
+			if (icaosetFBO != null)
+			{
+				String tempicaos[] = icaosetFBO.toArray(new String[icaosetFBO.size()]);
+				for (String tempicao : tempicaos)
+				{
+					if (whereSetFBO.length() > 0)
+						whereSetFBO.append(", ");
+
+					whereSetFBO.append("'").append(tempicao).append("'");
+				}
+			}
+
+			//get the $MILITARY ICAOs and save them
+			Set<String> icaosetMilitary = parseIcaoSet("$MILITARY", true, 0);
+			StringBuffer whereSetMILITARY = new StringBuffer();
+			if (icaosetMilitary != null)
+			{
+				String tempicaos[] = icaosetMilitary.toArray(new String[icaosetMilitary.size()]);
+				for (String tempicao : tempicaos)
+				{
+					if (whereSetMILITARY.length() > 0)
+						whereSetMILITARY.append(", ");
+
+					whereSetMILITARY.append("'").append(tempicao).append("'");
+				}
+			}
+
+			String qry = "SELECT * from templates where id = ?";
+			ResultSet rsTemplate = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, templateId);
+			while (rsTemplate.next())
+			{
+				TemplateBean template = new TemplateBean(rsTemplate);
+				//int templateId = rsTemplate.getInt("id");
+
+				//updateStatus("Working on assignments for template " + templateId);
+
+				double frequency = rsTemplate.getDouble("frequency");
+				int maxDistance = rsTemplate.getInt("targetDistance");
+
+				//if its a dead template, skip it
+				if (frequency == 0 || maxDistance == 0)
+					continue;
+
+				double targetPay = rsTemplate.getDouble("targetPay");
+				double Deviation = maxDistance * ((double) rsTemplate.getInt("distanceDev") / 100.0);
+				double amountDev = rsTemplate.getInt("amountDev") / 100.0;
+				double payDev = (double) rsTemplate.getInt("payDev") / 100.0;
+
+				int keepAlive = rsTemplate.getInt("targetKeepAlive");
+				boolean noExt = rsTemplate.getBoolean("noext");
+				int targetAmount = rsTemplate.getInt("targetAmount");
+				int maxSize = rsTemplate.getInt("matchMaxSize");
+				int minSize = rsTemplate.getInt("matchMinSize");
+				int surfType = rsTemplate.getInt("allowedSurfaceTypes");
+
+				List<AircraftBean> allInAircraft = null;
+				boolean isAllIn = rsTemplate.getString("typeOfPay").equals("allin");
+				boolean direct = rsTemplate.getBoolean("direct");
+				boolean waterOk = !isAllIn;
+
+				String commodity = rsTemplate.getString("commodity");
+				String units = rsTemplate.getString("units");
+				String icaos1 = rsTemplate.getString("icaoSet1") != null ? rsTemplate.getString("icaoSet1").toUpperCase() : null;
+				String icaos2 = rsTemplate.getString("icaoSet2") != null ? rsTemplate.getString("icaoSet2").toUpperCase() : null;
+
+				int seatsFrom = rsTemplate.getInt("seatsFrom");
+				int seatsTo = rsTemplate.getInt("seatsTo");
+				int speedFrom = rsTemplate.getInt("speedFrom");
+				int speedTo = rsTemplate.getInt("speedTo");
+
+				boolean isFilterByModel = rsTemplate.getBoolean("modelfilter");
+				String filterModels = rsTemplate.getString("modelset");
+
+				StringBuffer where = new StringBuffer();
+				Set<String> icaoSet1 = null;
+				Set<String> icaoSet2 = null;
+
+				boolean noReversal = false;
+				boolean singleIcao = false;
+				int modelCount = 0;
+
+				//make sure that From icaos do not contain these tags
+				if(icaos1 != null)
+				{
+					if (icaos1.contains("$NOREVERSE"))
+						icaos1 = icaos1.replace(", $NOREVERSE", "").replace(",$NOREVERSE", "").replace("$NOREVERSE,", "").replace("$NOREVERSE", "").trim();
+
+					if (icaos1.contains("$SINGLE"))
+						icaos1 = icaos1.replace(", $SINGLE", "").replace(",$SINGLE", "").replace("$SINGLE,", "").replace("$SINGLE", "").trim();
+				}
+
+				//if Dest icaos contain these tags, set the flags
+				if(icaos2 != null)
+				{
+					if (icaos2.contains("$NOREVERSE"))
+					{
+						noReversal = true;
+						icaos2 = icaos2.replace(", $NOREVERSE", "").replace(",$NOREVERSE", "").replace("$NOREVERSE,", "").replace("$NOREVERSE", "").trim();
+					}
+
+					if (icaos2.contains("$SINGLE"))
+					{
+						singleIcao = true;
+						icaos2 = icaos2.replace(", $SINGLE", "").replace(",$SINGLE", "").replace("$SINGLE,", "").replace("$SINGLE", "").trim();
+					}
+				}
+
+				if (isAllIn)
+				{
+					//check for seats and cruise speed filters on aircraft assignment for template
+					StringBuilder aircraftFilterWhereClause = new StringBuilder();
+
+					if(isFilterByModel)
+					{
+						aircraftFilterWhereClause.append(" and aircraft.model in (").append(filterModels).append(")");
+					}
+					else if (seatsFrom == 0 || seatsTo == 0 || speedFrom == 0 || speedTo == 0)
+					{
+						//if no filters are set for seats size or speed filter toss an error and exit the template
+						GlobalLogger.logDebugLog("Template Error, missing seat/speed min/max for: " + templateId, MaintenanceCycle.class);
+						continue;
+					}
+					else
+					{
+						if (seatsFrom > 0)
+							aircraftFilterWhereClause.append(" and seats >= ").append(seatsFrom);
+
+						if (seatsFrom == 0 && seatsTo > 0)
+							aircraftFilterWhereClause.append(" and seats >= ").append(targetAmount);
+
+						if (seatsTo > 0)
+							aircraftFilterWhereClause.append(" and seats <= ").append(seatsTo);
+
+						if (speedFrom > 0)
+							aircraftFilterWhereClause.append(" and cruisespeed >= ").append(speedFrom);
+
+						if (speedTo > 0)
+							aircraftFilterWhereClause.append(" and cruisespeed <= ").append(speedTo);
+
+						if (units.equals("passengers"))
+							aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount * 77).append(" < maxWeight");
+						else
+							aircraftFilterWhereClause.append(" and (emptyWeight + ((aircraft.fueltotal *  models.fcaptotal) * 2.68735) ) + (crew * 77) + ").append(targetAmount).append(" < maxWeight");
+					}
+
+					icaoSet1 = new HashSet<>();
+
+					qry = "Select count(*) as count from aircraft, models where aircraft.model=models.id AND owner = 0 " + aircraftFilterWhereClause.toString();
+					modelCount = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.IntegerResultTransformer());
+
+					qry = "Select * from aircraft, models where aircraft.model=models.id AND owner=0 AND location is not null and userlock is null AND aircraft.id not in( select * from (select aircraftid from testassignments where aircraftid is not null) as t)" + aircraftFilterWhereClause.toString();
+					allInAircraft = Aircraft.getAircraftSQL(qry);
+
+					for(AircraftBean a: allInAircraft)
+						icaoSet1.add(a.getLocation());
+				}
+				else if (icaos1 != null)
+				{
+					switch (icaos1)
+					{
+						case "$FBO":
+							icaoSet1 = icaosetFBO;
+							where = whereSetFBO;
+							frequency = frequency * icaoSet1.size();
+							break;
+						case "$MILITARY":
+							icaoSet1 = icaosetMilitary;
+							where = whereSetMILITARY;
+							frequency = frequency * icaoSet1.size();
+							break;
+						default:
+							icaoSet1 = parseIcaoSet(icaos1, true, templateId);
+
+							if (icaoSet1 != null)
+							{
+								String tempicaos[] = icaoSet1.toArray(new String[icaoSet1.size()]);
+								for (String tempicao : tempicaos)
+								{
+									if (where.length() > 0)
+										where.append(", ");
+
+									where.append("'").append(tempicao).append("'");
+								}
+								if (icaos1.contains("$"))
+									frequency = frequency * icaoSet1.size();
+							}
+							break;
+					}
+				}
+
+				if(icaos2 != null)
+				{
+					switch (icaos2)
+					{
+						case "$FBO":
+							icaoSet2 = icaosetFBO;
+							break;
+						case "$MILITARY":
+							icaoSet2 = icaosetMilitary;
+							break;
+						default:
+							icaoSet2 = parseIcaoSet(icaos2, true, templateId);
+							break;
+					}
+				}
+
+				String query;
+				String needed;
+				if (icaoSet1 == null && icaoSet2 == null)
+				{
+					String having = "needed > got";
+					if (maxSize > 0)
+						having = having + " AND smallest < " + maxSize;
+
+					if (minSize > 0)
+						having = having + " AND largest > " + minSize;
+
+					if(surfType != 0)
+					{
+						String sSurfaceTypes = BitSet.valueOf(new long[]{(long) surfType}).toString();
+						sSurfaceTypes = sSurfaceTypes.replace("{", "").replace("}", "");
+
+						having = having + " AND surfaceType in (" + sSurfaceTypes + ")";
+					}
+					needed = frequency + " * sqrt(sum(size)/6000) as needed";
+					query = "SELECT bucket, min(longestRwy) AS smallest, max(longestRwy) AS largest, " + needed +
+							", count(testassignments.id) AS got, avg(lat), surfaceType FROM airports LEFT join testassignments ON testassignments.fromicao = airports.icao AND fromtemplate = " +
+							templateId + " GROUP by bucket HAVING " + having;
+				}
+				else
+				{
+					String whereString = "";
+
+					if (where.length() > 0)
+						whereString = whereString + "WHERE icao in (" + where.toString() + ")";
+
+					if(isAllIn)
+					{
+						if(modelCount > 0)
+							needed = modelCount * frequency + " as needed";
+						else
+							needed = icaoSet1.size() * frequency + " as needed";
+					}
+					else
+						needed = frequency + " as needed";
+
+					query = "SELECT 0, 0, 0, " + needed + ", count(testassignments.id) AS got, avg(lat) FROM airports LEFT JOIN testassignments ON testassignments.fromicao = airports.icao AND fromtemplate = " + templateId + " " + whereString ;
+				}
+
+				ResultSet bucketRs = DALHelper.getInstance().ExecuteReadOnlyQuery(query);
+				while (bucketRs.next())
+				{
+					int bucket = bucketRs.getInt(1);
+					double latitude = bucketRs.getDouble(6);
+					double dTogo = bucketRs.getDouble(4) - bucketRs.getInt(5);
+					int togo;
+					List<String> airportFromList;
+
+
+
+					if (dTogo <= 0 || (dTogo < 1 && Math.random() > dTogo))
+						continue;
+
+					togo = (int) Math.max(1, dTogo);
+
+					if (icaoSet1 != null || icaoSet2 != null)
+					{
+						airportFromList = new ArrayList<>(icaoSet1);
+					}
+					else
+					{
+						where = new StringBuffer("bucket = " + bucket);
+
+						if (waterOk)
+							where.append(" AND type in ('civil','water')");
+						else
+							where.append(" AND type='civil'");
+
+						if (maxSize > 0)
+							where.append(" AND longestRwy < ").append(maxSize);
+
+						if (minSize > 0)
+							where.append(" AND longestRwy > ").append(minSize);
+
+						if(surfType != 0)
+						{
+							String sSurfaceTypes = BitSet.valueOf(new long[]{(long) surfType}).toString();
+							sSurfaceTypes = sSurfaceTypes.replace("{", "").replace("}", "");
+
+							where.append (" AND surfaceType in (" + sSurfaceTypes + ")");
+						}
+
+						airportFromList = new ArrayList<>();
+
+						qry = "SELECT icao FROM airports WHERE  " + where.toString();
+						ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
+						while (rs.next())
+							airportFromList.add(rs.getString(1));
+					}
+
+					if (airportFromList.isEmpty())
+						continue;
+
+					while (togo-- > 0)
+					{
+						if(airportFromList.size() == 0)
+							break;
+
+						String icao = airportFromList.get((int)(Math.random() * airportFromList.size()));
+						String icaoSingle = icao;
+						if(isAllIn)
+							airportFromList.remove(icao);
+
+						int cargoAmount = (int)(targetAmount * (1 + (Math.random() * 2*amountDev) - amountDev));
+						if (cargoAmount == 0)
+							cargoAmount = 1;
+
+						double pay = targetPay * (1 + (Math.random() * 2*payDev) - payDev);
+
+						CloseAirport to;
+						if(singleIcao)
+						{
+							String target = icaoSet2.iterator().next().toString();
+							String airports[] = icaoSet1.toArray(new String[icaoSet1.size()]);
+
+							//the min/max distance criteria
+							List<CloseAirport> inRange = new ArrayList<>();
+							for (String airport : airports)
+							{
+								DistanceBearing distanceBearing = Airports.getDistanceBearing(airport, target);
+								if (distanceBearing != null &&
+										distanceBearing.distance != 0 &&
+										(distanceBearing.distance >= (maxDistance - Deviation) && distanceBearing.distance <= maxDistance))
+								{
+									inRange.add(new CloseAirport(airport, distanceBearing.distance, distanceBearing.bearing));
+								}
+							}
+							//System.out.println("singleIcao found: " + inRange.size() + ", out of: " + airports.length);
+
+							if(inRange.size() > 0)
+							{
+								Random rnd = new Random();
+								int index = rnd.nextInt(inRange.size());
+								to = inRange.get(index);
+								inRange.remove(index);
+
+								icao = to.icao;
+								to.icao = target;
+							}
+							else {
+								to = null;
+							}
+						}
+						else
+							to = Airports.getRandomCloseAirport(icao, maxDistance - Deviation, maxDistance + Deviation, minSize, maxSize, latitude, icaoSet2, waterOk, surfType);
+
+						if (to == null)
+							continue;
+
+						int aircraftId = 0;
+						if (isAllIn)
+						{
+							//All-In change - find available aircraft at airport that have not already been assigned to an All-In job
+							List<AircraftBean> acList = new ArrayList<>();
+							for(AircraftBean bean: allInAircraft)
+							{
+								if(bean.getLocation().contains(icao))
+									acList.add(bean);
+							}
+
+							//if no aircraft skip this one
+							if(acList.size() == 0)
+								continue;
+
+							int index = 0; //default aircraft selection is the first one
+
+							//if more then 1 airplane available randomly select
+							if(acList.size() > 1)
+							{
+								Random rnd = new Random();
+								index = rnd.nextInt(acList.size());
+							}
+
+							AircraftBean selected = acList.get(index);
+							aircraftId = selected.getId();
+
+							//remove so not selected again
+							allInAircraft.remove(selected);
+						}
+
+						int distance = (int) Math.round(to.distance);
+						int bearing = (int) Math.round(to.bearing);
+
+						String fromIcao;
+						String toIcao;
+
+						if (isAllIn || noReversal || Math.random() < 0.5) // never reverse an AllIn flight
+						{
+							fromIcao = icao;
+							toIcao = to.icao;
+						}
+						else
+						{
+							// reverse the flight
+							fromIcao = to.icao;
+							toIcao = icao;
+							if (bearing < 180)
+								bearing += 180;
+							else
+								bearing -= 180;
+						}
+
+						Timestamp now = new Timestamp(System.currentTimeMillis());
+						Calendar expires = GregorianCalendar.getInstance();
+						expires.add(GregorianCalendar.DAY_OF_MONTH, keepAlive);
+						expires.add(GregorianCalendar.HOUR, (int)(Math.random() * 24 - 12));
+
+						StringBuilder fields = new StringBuilder();
+						StringBuilder values = new StringBuilder();
+
+						fields.append("bearing, creation, expires, commodity, units, amount, fromicao, location, toicao, distance, pay, fromTemplate, noext");
+						values.append("").append(bearing);
+						values.append(", '").append(now).append("'");
+						values.append(", '").append(new Timestamp(expires.getTime().getTime())).append("'");
+						values.append(", '").append(Converters.escapeSQL(template.getRandomCommodity(cargoAmount))).append("'");
+						values.append(", '").append(units).append("'");
+						values.append(", ").append(cargoAmount);
+						values.append(", '").append(fromIcao).append("'");
+						values.append(", '").append(fromIcao).append("'");
+						values.append(", '").append(toIcao).append("'");
+						values.append(", ").append(distance);
+						values.append(", ").append((float) pay);
+						values.append(", ").append(templateId);
+						values.append(", ").append(noExt ? "1" : "0");
+
+						if (isAllIn)
+						{
+							fields.append(", aircraftid");
+							fields.append(", direct");
+							values.append(", '").append(aircraftId).append("'");
+							values.append(", '").append(direct ? "1" : "0").append("'");
+						}
+
+						qry = "INSERT INTO testassignments (" + fields.toString() + ") VALUES(" + values.toString() + ")";
+						DALHelper.getInstance().ExecuteUpdate(qry);
+					}
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private void deleteTestAssignments() throws SQLException
+	{
+		String qry = "DELETE FROM testassignments;";
 
 		DALHelper.getInstance().ExecuteBatchUpdate(qry);
 	}
@@ -2169,6 +2644,7 @@ public class MaintenanceCycle implements Runnable
 						rent *= 1+(Math.random()*0.40) - 0.2;
 						updateSet.updateInt("RentalDry", rent);
 						int fuelCost = (int)Math.round(model.getGph() * Goods.getFuelPrice(home));
+						updateSet.updateInt("maxRentTime", model.getMaxRentTime());
 
 						//update so that models with 0 rental price cannot be rented
 						if(rent != 0)

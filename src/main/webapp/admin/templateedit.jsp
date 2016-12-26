@@ -232,6 +232,15 @@
 			<table>
 				<caption>Edit Template</caption>
 				<tr>
+					<td>Active</td>
+					<td>
+						<select name="active" class="formgroup">
+							<option class="formselect" value="false" <%= !template.getActive() ? "selected" : "" %>>No</option>
+							<option class="formselect" value="true" <%= template.getActive() ? "selected" : "" %>>Yes</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
 					<td>Comment</td><td><input name="comment" type="text" class="textarea" value="<%= template.getComment() %>" size="40"/></td>
 				</tr>
 				<tr>

@@ -18,6 +18,8 @@
     }
     String error = null;
     String sId = request.getParameter("id");
+    boolean generate = request.getParameter("generate") != null ? request.getParameter("generate").contains("1") : false;
+
     int id = 0;
     try
     {
@@ -30,19 +32,23 @@
 
     ResultSet rs = null;
 
+    if(id != 0 && generate)
+    {
+        MaintenanceCycle mc = MaintenanceCycle.getInstance();
+        mc.processTemplateTest(id);
+    }
+
     try
     {
-        String qry = "SELECT assignments.id, assignments.creation, assignments.expires, assignments.commodity, assignments.amount, assignments.units, assignments.fromicao, assignments.toicao, assignments.distance, CONCAT(models.make, ' ',  models.model) as makemodel, aircraft.id, aircraft.registration"
-        + " FROM assignments LEFT JOIN aircraft on aircraft.id=assignments.aircraftid LEFT JOIN models on models.id=aircraft.model"
-        + " WHERE fromTemplate = " + id + " ORDER BY makemodel, assignments.fromicao, assignments.distance;";
+        String qry = "SELECT testassignments.*, CONCAT(models.make, ' ',  models.model) as makemodel, models.cruisespeed as tas, aircraft.id, aircraft.registration"
+                + " FROM testassignments LEFT JOIN aircraft on aircraft.id=testassignments.aircraftid LEFT JOIN models on models.id=aircraft.model"
+                + " WHERE fromTemplate = " + id + " ORDER BY makemodel, testassignments.fromicao, testassignments.distance;";
         rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry);
 
-    }
-    catch (SQLException e)
+    } catch (SQLException e)
     {
         e.printStackTrace();
     }
-
 %>
 
 <!DOCTYPE html>
@@ -94,7 +100,11 @@
 %>
     </div>
     <div class="content">
-        <a href="/admin/templates.jsp">Return to Templates</a>
+        <a href="/admin/templates.jsp">Return to Templates</a><br>
+        <form method="post">
+            <input type="hidden" name="generate" value="1">
+            <input type="submit" value="Generate">
+        </form>
         <div class="dataTable">
             <table class="myTable tablesorter-default tablesorter">
                 <colgroup>
@@ -113,6 +123,9 @@
                     <th>Commodity</th>
                     <th>Amount</th>
                     <th>Units</th>
+                    <th>Pay</th>
+                    <th>Pay (Hr)</th>
+                    <th>Pay (Nm)</th>
                     <th>From</th>
                     <th>To</th>
                     <th>Distance</th>
@@ -128,6 +141,12 @@
                         while(rs.next())
                         {
                             count++;
+                            AssignmentBean assignment = new AssignmentBean(rs);
+
+                            float tas = (float)rs.getInt("tas");
+                            float pay = assignment.calcPay();
+                            float payHr = pay / (assignment.getDistance() / tas);
+                            float payNm = pay / assignment.getDistance();
                 %>
                     <tr>
                         <td><%= count %></td>
@@ -137,6 +156,9 @@
                         <td><%= rs.getString("commodity") %></td>
                         <td><%= rs.getInt("amount") %></td>
                         <td><%= rs.getString("units") %></td>
+                        <td><%= Formatters.currency.format(pay) %></td>
+                        <td><%= Formatters.currency.format(payHr) %></td>
+                        <td><%= Formatters.currency.format(payNm) %></td>
                         <td><%= rs.getString("fromicao") %></td>
                         <td><%= rs.getString("toicao") %></td>
                         <td><%= rs.getInt("distance") %></td>

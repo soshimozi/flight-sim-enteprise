@@ -52,7 +52,7 @@ public class TemplateBean implements Serializable
 	int units;
 	int surfaceTypes;
     boolean direct; //flight cannot have any stops between start and finish
-	boolean noExtension;
+	boolean noExtension, active;
 	boolean filterByModels;
 	int percentToUse;
 
@@ -69,6 +69,7 @@ public class TemplateBean implements Serializable
 	public TemplateBean(ResultSet rs) throws SQLException
 	{
 		setId(rs.getInt("id"));
+		setActive(rs.getBoolean("active"));
 		setFrequency(rs.getFloat("frequency"));
 		setTargetKeepAlive(rs.getInt("targetKeepAlive"));
 		setCommodity(rs.getString("commodity"));
@@ -101,6 +102,7 @@ public class TemplateBean implements Serializable
 
 	public void writeBean(ResultSet rs) throws SQLException
 	{
+		rs.updateBoolean("active", active);
 		rs.updateFloat("frequency", getFrequency());
 		rs.updateInt("targetKeepAlive", getTargetKeepAlive());
 		rs.updateString("commodity", getCommodity());
@@ -352,6 +354,13 @@ public class TemplateBean implements Serializable
         direct = b;
     }
 
+	public boolean getActive() {
+		return active;
+	}
+
+	public void setActive(boolean b) {
+		active = b;
+	}
 	public boolean getNoExt() {
 		return noExtension;
 	}
@@ -389,7 +398,7 @@ public class TemplateBean implements Serializable
 
 	public boolean isInFilterModelSet(int id)
 	{
-		return filterModelSet.contains(id);
+		return filterModelSet != null ? filterModelSet.contains(id) : false;
 	}
 
 	public String getFilterModelSet()

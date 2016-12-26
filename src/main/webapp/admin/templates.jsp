@@ -71,6 +71,7 @@
 			</tr>
 			<tr>
 				<th>Id</th>
+				<th>Active</th>
 				<th>Comment (Template Name)</th>
 				<th>Commodity (Job Name)</th>
 				<th>Freq</th>
@@ -100,6 +101,7 @@
 %>
 			<tr class='clickableRow' data-url="/admin/templateedit.jsp?id=<%= template.getId() %>">
 				<td><%= template.getId() %></td>
+				<td><%= template.getActive() %></td>
 				<td><%= template.getComment() %></td>
 				<td><%= template.getCommodity() %></td>
 				<td><%= template.getFrequency() %></td>
@@ -118,7 +120,7 @@
 				</td>
 				<td><span title="Max=<%= statArray[MaintenanceCycle.ASSGN_MAX] %>, Min=<%= statArray[MaintenanceCycle.ASSGN_MIN] %>, Avg=<%= statArray[MaintenanceCycle.ASSGN_AVG] %>"><%= statArray[MaintenanceCycle.ASSGN_COUNT] %></span></td>
                 <td><%= statArray[MaintenanceCycle.ASSGN_GLOCKED] %></td>
-				<td><a href="/admin/templateassignments.jsp?id=<%=template.getId()%>">View</a></td>
+				<td><a href="/admin/templateassignments.jsp?id=<%=template.getId()%>">View</a>&nbsp;&nbsp;<a href="/admin/templatetestassignments.jsp?id=<%=template.getId()%>">Test</a></td>
 			</tr>
 <%
 	}
