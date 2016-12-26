@@ -450,7 +450,7 @@ public class Flights
 
                     GlobalLogger.logFlightLog(
                             new StringBuilder()
-                                    .append("****> Insufficeint funds: ")
+                                    .append("****> Insufficient funds: ")
                                     .append(", AircraftId: ").append(aircraft.getId())
                                     .append(", Date: ").append(new Timestamp(System.currentTimeMillis()))
                                     .append(", By: ").append(user.getName())
@@ -464,7 +464,7 @@ public class Flights
                                     .append(", pricePerHour: ").append(price)
                                     .append(", Rental Cost: ").append(rentalCost)
                                     .append(", FuelCost: ").append(fuelCost)
-                                    .append(", groupToPay: ").append(groupToPay.getId())
+                                    .append(", groupToPay: ").append(groupToPay != null ? groupToPay.getId() : "NA")
                                     .append(", income: ").append(income)
                                     .append(", totalPilotFee: ").append(totalPilotFee)
                                     .append(", crewCost: ").append(crewCost)
@@ -472,7 +472,8 @@ public class Flights
                                     .append(", mpttax: ").append(mpttax)
                                     .append(", Bonus: ").append(bonus)
                                     .append(", flightCost: ").append(flightCost)
-                                    .append(", balance: ").append(balance).toString(),
+                                    .append(", balance: ").append(balance)
+                                    .append(", netIncome: ").append(netIncome).toString(),
                                     Flights.class);
 
                     String errmsg;
@@ -485,6 +486,34 @@ public class Flights
                     throw new DataError(errmsg);
                 }
                 //-- end exploit code
+
+                GlobalLogger.logFlightLog(
+                        new StringBuilder()
+                                .append("****> Completed: ")
+                                .append(", AircraftId: ").append(aircraft.getId())
+                                .append(", Date: ").append(new Timestamp(System.currentTimeMillis()))
+                                .append(", By: ").append(user.getName())
+                                .append(", From: ").append(aircraft.getDepartedFrom())
+                                .append(", To: ").append(location.icao)
+                                .append(", EngineTimeType: ").append(aircraft.getAccounting() == AircraftBean.ACC_HOUR ? "Hourly" : "Tach")
+                                .append(", EngineTime: ").append(engineTime)
+                                .append(", RentalTime: ").append(rentalTime)
+                                .append(", RentalType: ").append(aircraft.wasWetRent() ? "Wet" : "Dry")
+                                .append(", InvalidFuel: ").append(invalidFuel)
+                                .append(", pricePerHour: ").append(price)
+                                .append(", Rental Cost: ").append(rentalCost)
+                                .append(", FuelCost: ").append(fuelCost)
+                                .append(", groupToPay: ").append(groupToPay != null ? groupToPay.getId() : "NA")
+                                .append(", income: ").append(income)
+                                .append(", totalPilotFee: ").append(totalPilotFee)
+                                .append(", crewCost: ").append(crewCost)
+                                .append(", fboAssignmentFee: ").append(fboAssignmentFee)
+                                .append(", mpttax: ").append(mpttax)
+                                .append(", Bonus: ").append(bonus)
+                                .append(", flightCost: ").append(flightCost)
+                                .append(", balance: ").append(balance)
+                                .append(", netIncome: ").append(netIncome).toString(),
+                                Flights.class);
 
                 //rezero out the the variables for actual payment loop
                 income = 0;
