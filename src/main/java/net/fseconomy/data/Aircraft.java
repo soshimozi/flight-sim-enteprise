@@ -1798,6 +1798,11 @@ public class Aircraft implements Serializable
 
     public static void doMaintenance(AircraftBean aircraft, int maintenanceType, FboBean fbo) throws DataError
     {
+        doMaintenance(null, aircraft, maintenanceType, fbo);
+    }
+
+    public static void doMaintenance(UserBean user, AircraftBean aircraft, int maintenanceType, FboBean fbo) throws DataError
+    {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -1858,6 +1863,8 @@ public class Aircraft implements Serializable
             rs = stmt.executeQuery("SELECT * FROM log where 1=2");
             rs.moveToInsertRow();
             rs.updateTimestamp("time", new Timestamp(System.currentTimeMillis()));
+            if(user != null)
+                rs.updateInt("userid", user.getId());
             rs.updateString("type", "maintenance");
             rs.updateInt("aircraftid", aircraft.getId());
             rs.updateInt("totalEngineTime", aircraft.getTotalEngineTime());
