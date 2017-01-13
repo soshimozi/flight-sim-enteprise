@@ -21,7 +21,7 @@ public class Logging implements Serializable
 
         try
         {
-            String qry = "SELECT timestmp, level_string, caller_class, formatted_message FROM logging_event order by timestmp desc limit ?, ?";
+            String qry = "SELECT timestmp, level_string, caller_class, formatted_message FROM logging_event WHERE formatted_message not like '[FSE-Flight]****> Completed:%' order by timestmp desc limit ?, ?";
             ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry, offset, size);
             while (rs.next())
             {
