@@ -264,7 +264,7 @@ public class Assignments implements Serializable
                 return;
 
             //All-In check - can't add All-In flight to a group
-            qry = "SELECT (count(*) > 0) from assignments where id = ? and aircraft is not null";
+            qry = "SELECT (count(*) > 0) from assignments where id = ? and aircraftid is not null";
             boolean isAllIn = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), id);
             if (isAllIn)
                 throw new DataError("All-In assignments cannot be added to a group queue.");
