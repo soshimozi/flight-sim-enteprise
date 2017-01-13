@@ -200,14 +200,26 @@
             <jsp:getProperty name="user" property="name"/><br>
         </div>
         <div class="col-sm-2 col-md-2 column text-right">
-            <button class="btn btn-default btn-text-right" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=user.getName()%>');">
+<%
+    boolean negFlag = false;
+    String cashAmount = Formatters.currency.format(user.getMoney());
+    if(cashAmount.endsWith(")"))
+        negFlag = true;
+%>
+            <button class="btn btn-default btn-text-right<%=negFlag ? " btn-danger" : ""%>" style="width: 120px" onclick="doDeposit(<%=user.getId()%>, '<%=user.getName()%>');">
                 <%= Formatters.currency.format(user.getMoney()) %>
             </button>
         </div>
         <div class="col-sm-2 col-md-2 column text-right" >
-            <div class="btn btn-default btn-text-right" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=user.getName()%>');">
-                <%= Formatters.currency.format(user.getBank()) %>
-            </div>
+<%
+    negFlag = false;
+    String bankAmount = Formatters.currency.format(user.getBank());
+    if(bankAmount.endsWith(")"))
+        negFlag = true;
+%>
+            <button class="btn btn-default btn-text-right<%=negFlag ? " btn-danger" : ""%>" style="width: 120px" onclick="doWithdrawal(<%=user.getId()%>, '<%=user.getName()%>');">
+                <%= bankAmount %>
+            </button>
         </div>
         <div class="col-sm-4 col-md-4 column">
             <div style="padding-bottom: 3px">
