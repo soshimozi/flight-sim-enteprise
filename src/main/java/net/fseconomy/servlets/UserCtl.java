@@ -2189,6 +2189,12 @@ public class UserCtl extends HttpServlet
 			if (!aircraft.changeAllowed(user))
 				throw new DataError("Permission denied");
 		}
+        else if (type == AircraftMaintenanceBean.MAINT_FIXAIRCRAFT)
+        {
+            if (!aircraft.isAllowRepair() && !aircraft.changeAllowed(user))
+                throw new DataError("Permission denied");
+        }
+
 		FboBean selectedFbo = null;
 		
 		if (fbo > 0)
@@ -2198,7 +2204,7 @@ public class UserCtl extends HttpServlet
 				throw new DataError("Fbo not found");
 		}
 		
-		Aircraft.doMaintenance(aircraft, type, selectedFbo);
+		Aircraft.doMaintenance(user, aircraft, type, selectedFbo);
 	}
 	
 	void doEquipment(HttpServletRequest req) throws DataError
