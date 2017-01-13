@@ -217,6 +217,9 @@ public class SigServer extends HttpServlet
 		Statistics curr = Stats.statsmap.get(user);
 		Statistics prev = Stats.prevstatsmap.get(user);
 
+        if(curr == null || prev == null)
+            return false;
+
         return !(curr.flights == prev.flights && curr.totalFlightTime == prev.totalFlightTime);
 
     }
