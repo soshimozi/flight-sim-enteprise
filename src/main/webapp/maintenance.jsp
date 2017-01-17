@@ -6,7 +6,9 @@
 <jsp:useBean id="user" class="net.fseconomy.beans.UserBean" scope="session" />
 
 <%
-	if(!user.isLoggedIn())
+	String sId = request.getParameter("id");
+
+	if(!user.isLoggedIn() || sId == null || sId.contentEquals(""))
 	{
 %>
 <script type="text/javascript">document.location.href="/index.jsp"</script>
@@ -14,7 +16,7 @@
 		return;
 	}
 
-	int id = Integer.parseInt(request.getParameter("id"));
+	int id = Integer.parseInt(sId);
 
 	//setup return page if action used
 	String returnPage = "maintenance.jsp?id=" + id;
