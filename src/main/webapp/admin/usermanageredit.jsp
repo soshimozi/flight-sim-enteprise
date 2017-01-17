@@ -33,7 +33,7 @@
     String flights = "Not avail.";
     boolean accountLocked = false;
 
-    if(sId != null)
+    if(sId != null && !sId.contentEquals(""))
     {
         accountId = Integer.parseInt(sId);
         account = Accounts.getAccountById(accountId);
