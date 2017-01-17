@@ -2238,8 +2238,14 @@ public class MaintenanceCycle implements Runnable
 			ResultSet rs = DALHelper.getInstance().ExecuteReadOnlyQuery(qry); 
 			while (rs.next())
 			{
+				//Skip if not locked
 				Timestamp lockedSince = rs.getTimestamp("lockedSince");
 				if (lockedSince == null)
+					continue;
+
+				//Skip if all-in assigned aircraft
+				int aId = rs.getInt("id");
+				if(Assignments.isAllInAircraft(aId))
 					continue;
 
 				long maxRentTime = 10800;
