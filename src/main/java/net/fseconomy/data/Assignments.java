@@ -318,6 +318,9 @@ public class Assignments implements Serializable
 
     public static void newAssignment(int groupId, String fromIcao, String toIcao, double pilotFee, String comment) throws DataError
     {
+        if(!Airports.cachedAirports.containsKey(fromIcao) || !Airports.cachedAirports.containsKey(toIcao))
+            throw new DataError("Error: Invalid ICAO found!");
+
         try
         {
             DistanceBearing db = Airports.getDistanceBearing(fromIcao,toIcao);
@@ -666,7 +669,7 @@ public class Assignments implements Serializable
         return false;
     }
 
-    public static boolean checkAllInFlightWithAssignment(AircraftBean aircraft) throws DataError
+    public static boolean checkAllInFlightWithAssignment(AircraftBean aircraft)
     {
         try
         {
@@ -674,6 +677,23 @@ public class Assignments implements Serializable
             boolean isAllInAircraft = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraft.getRegistration(), aircraft.getLocation());
 
             if (isAllInAircraft && !hasAllInJobInQueue(aircraft.getUserLock()))
+                return true;
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean isAllInAircraft(int aircraftId)
+    {
+        try
+        {
+            String qry = "SELECT (id is not null) as found FROM assignments where aircraftId = ?";
+            boolean allInAircraft = DALHelper.getInstance().ExecuteScalar(qry, new DALHelper.BooleanResultTransformer(), aircraftId);
+
+            if (allInAircraft)
                 return true;
         }
         catch (SQLException e)
