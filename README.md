@@ -20,6 +20,9 @@ WIP
 * How to run tests
 * Deployment instructions
 
+Database backup for MySql with minimal data is available here:
+http://server.fseconomy.net/static/dev/FSEconomyDb.gz
+
 ### Contribution guidelines ###
 
 WIP
