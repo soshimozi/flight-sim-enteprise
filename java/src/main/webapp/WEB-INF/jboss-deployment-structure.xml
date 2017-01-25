@@ -1,0 +1,29 @@
+<jboss-deployment-structure>
+    <deployment>
+        <!-- exclude-subsystem prevents a subsystems deployment unit processors running on a deployment -->
+        <!-- which gives basically the same effect as removing the subsystem, but it only affects single deployment -->
+        <exclude-subsystems>
+            <subsystem name="logging" />
+        </exclude-subsystems>
+
+        <dependencies>
+            <module name="com.google.code.gson"/>
+            <module name="org.apache.commons.fileupload"/>
+            <module name="org.apache.commons.lang3"/>
+            <module name="nl.captcha.simplecaptcha"/>
+            <!--<module name="org.slf4j" slot="1.7.7"/>-->
+            <!--<module name="ch.qos.logback"/>-->
+
+            <module name="org.infinispan.commons" export="TRUE"/>
+            <module name="org.infinispan" export="TRUE"/>
+            <module name="org.bouncycastle" export="TRUE"/>
+
+            <system>
+                <paths>
+                    <path name="com/sun/rowset" />
+                    <path name="com/sun/rowset/providers" />
+                </paths>
+            </system>
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>

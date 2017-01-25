@@ -1,0 +1,84 @@
+.gold {
+	background-color : #fff3c6;
+    layer-background-color:#fff3c6;
+    color : black;
+}
+
+.menuclass {
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	background-color: #cccccc;
+	visibility: hidden;
+	padding-left: 0;
+	padding-right: 0;
+	layer-background-color: #cccccc;
+	margin-left: 10px;
+	margin-right: 10px;
+} 
+.cl0, .cl0over, .cl0gold, .cl0overgold {
+position : absolute; 
+padding : 1px; 
+font-family : Arial; 
+font-size : 14px; 
+font-weight : bold; 
+} 
+.cl0 {
+background-color : #cccccc; 
+layer-background-color:#cccccc;
+color : black; 
+} 
+.cl0over {
+background-color : #eeeeee;
+layer-background-color:#000000; 
+cursor : pointer; 
+} 
+.cl0gold {
+background-color : #fff3c6;
+layer-background-color:#fff3c6; 
+color : black; 
+} 
+.cl0overgold {
+background-color : #ffe888; 
+layer-background-color:#ffe888;
+cursor : pointer; 
+} 
+.cl0border {
+position : absolute; 
+visibility : hidden; 
+background-color : #cccccc;
+layer-background-color:#cccccc;
+} 
+.cl1, .cl1over, .cl1gold, .cl1overgold {
+position : absolute; 
+padding : 1px; 
+font-family : Arial; 
+font-size : 14px; 
+} 
+.cl1 {
+background-color : #cccccc;
+layer-background-color:#cccccc; 
+color : black; 
+} 
+.cl1over {
+background-color : #eeeeee;	
+layer-background-color:#000000; 
+cursor : pointer; 
+} 
+.cl1gold {
+background-color : #fff3c6;	
+layer-background-color:#fff3c6; 
+color : black; 
+} 
+.cl1overgold {
+background-color : #ffe888; 	
+layer-background-color:#ffe888;
+cursor : pointer; 
+} 
+.cl1border {
+position : absolute; 
+visibility : hidden; 
+background-color : #cccccc; 	
+layer-background-color:#cccccc;
+} 
+

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+    <display-name>fseconomy</display-name>
+
+    <filter>
+        <filter-name>FullFilter</filter-name>
+        <filter-class>
+            net.fseconomy.servlets.FullFilter
+        </filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>FullFilter</filter-name>
+        <url-pattern>*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>UserCtl</servlet-name>
+        <servlet-class>net.fseconomy.servlets.UserCtl</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <servlet-name>FSagent</servlet-name>
+        <servlet-class>net.fseconomy.servlets.FSagent</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>FSagentFSX</servlet-name>
+        <servlet-class>net.fseconomy.servlets.FSagentFSX</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>FSagentXPlane</servlet-name>
+        <servlet-class>net.fseconomy.servlets.FSagentXP</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Image</servlet-name>
+        <servlet-class>net.fseconomy.servlets.Image</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Datafeed</servlet-name>
+        <servlet-class>net.fseconomy.servlets.Datafeed</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AutoLogon</servlet-name>
+        <servlet-class>net.fseconomy.servlets.Autologon</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StickyCaptcha</servlet-name>
+        <servlet-class>nl.captcha.servlet.StickyCaptchaServlet</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>SigServer</servlet-name>
+        <servlet-class>net.fseconomy.servlets.SigServer</servlet-class>
+    </servlet>
+
+    <listener>
+        <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>net.fseconomy.servlets.CacheServletListener</listener-class>
+    </listener>
+
+
+    <servlet-mapping>
+        <servlet-name>SigServer</servlet-name>
+        <url-pattern>/sig/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>UserCtl</servlet-name>
+        <url-pattern>/userctl</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FSagent</servlet-name>
+        <url-pattern>/fsagent</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FSagentFSX</servlet-name>
+        <url-pattern>/fsagentFSX</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>FSagentXPlane</servlet-name>
+        <url-pattern>/fsagentx</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Image</servlet-name>
+        <url-pattern>/Image</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Datafeed</servlet-name>
+        <url-pattern>/data</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AutoLogon</servlet-name>
+        <url-pattern>/autologon</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StickyCaptcha</servlet-name>
+        <url-pattern>/stickyImg</url-pattern>
+    </servlet-mapping>
+
+    <session-config>
+        <session-timeout>600</session-timeout>
+    </session-config>
+
+    <mime-mapping>
+        <extension>js</extension>
+        <mime-type>text/javascript</mime-type>
+    </mime-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+</web-app>
